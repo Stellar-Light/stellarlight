@@ -45,6 +45,7 @@ import {
 } from "./hackathon-judging";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
 import { RESEARCH_MODES } from "./match-mode";
+import { SOURCE_CHECK_STATES } from "./note-pins";
 import { PARTNER_TYPES } from "./partner-match";
 import { DEPLOYMENT_NETWORKS } from "./project-deployment";
 import { PROJECT_MATCH_MODES } from "./project-search-match";
@@ -358,6 +359,74 @@ const SECURITY_HOLD_SCHEMA = {
 				"The warning to relay: what was found and what not to do, in Scout's words only (the files are in `indicators`).",
 		},
 	},
+};
+
+/** sls-115: a curated note's pinned value checked against the code scan the
+ * response serves. explainRepo's root and each of its knowledgeNotes. */
+const NOTE_SOURCE_CHECK_SCHEMA = {
+	type: "object",
+	nullable: true,
+	description:
+		"A curated note that pins its value to a commit, file and symbol, checked against StellarLight's own code scan of its repo at scannedRef (the repo's codeVerified.scannedRef, where the response serves one), where every scan re-reads each pinned symbol. verified: the value at scannedRef is the note's. conflict: it is scannedValue, not the note's notedValue, so the note is a dated record of its own commit and not the current value. missing: the scan read scannedRef and found the file gone or no declaration of the symbol in it, so the current value is unknown. unknown: no usable reading at scannedRef (none stored yet, one taken at another commit, a read that failed, no code scan, or a scan that does not find the note's own value at the note's own commit, so its reading is not comparable), never a match. null when the note pins no value, so there is nothing to check, and, on searchRepos rows (codeReferences too) and verifyClaim evidence, also while the stored note has not yet been stamped with its pin: the nightly knowledge-notes backfill stamps it.",
+	properties: {
+		state: { type: "string", enum: [...SOURCE_CHECK_STATES] },
+		symbol: {
+			type: "string",
+			description: "The declared name the note states a value for.",
+		},
+		path: {
+			type: "string",
+			description: "Repo-relative path of the file that declares it.",
+		},
+		notedValue: {
+			type: "string",
+			description: "The value the note states, as the source wrote it.",
+		},
+		notedRef: {
+			type: "string",
+			description: "Full commit SHA the note's value was verified at.",
+		},
+		notedAsOf: {
+			type: "string",
+			nullable: true,
+			description:
+				"YYYY-MM-DD the note was verified; null when the stored note carries no date.",
+		},
+		scannedValue: {
+			type: "string",
+			nullable: true,
+			description:
+				"The value at scannedRef; null unless state is verified or conflict.",
+		},
+		scannedRef: {
+			type: "string",
+			nullable: true,
+			description:
+				"The commit checked, codeVerified.scannedRef; null when the repo has no code scan.",
+		},
+		scannedAt: {
+			type: "string",
+			format: "date-time",
+			nullable: true,
+			description: "When that scan ran.",
+		},
+		reason: {
+			type: "string",
+			description: "One sentence on how the state was reached.",
+		},
+	},
+	required: [
+		"state",
+		"symbol",
+		"path",
+		"notedValue",
+		"notedRef",
+		"notedAsOf",
+		"scannedValue",
+		"scannedRef",
+		"scannedAt",
+		"reason",
+	],
 };
 
 const BUILD_PROJECT_SCHEMA = {
@@ -2474,7 +2543,7 @@ export const spec: OpenAPISpec = {
 										evidence: {
 											type: "array",
 											description:
-												"Typed evidence rows; discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source); status-check = a check of a Live label that hit (note, source, asOf), the same check searchProjects serves in statusChecks: the verdict stays supported, the statement carries the caveat and confidence is halved.",
+												"Typed evidence rows; discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source) with its repo and its sourceCheck, or a stablecoin registry row (neither); status-check = a check of a Live label that hit (note, source, asOf), the same check searchProjects serves in statusChecks: the verdict stays supported, the statement carries the caveat and confidence is halved.",
 											items: {
 												type: "object",
 												properties: {
@@ -2509,6 +2578,11 @@ export const spec: OpenAPISpec = {
 													note: { type: "string" },
 													source: { type: "string" },
 													asOf: { type: "string", nullable: true },
+													sourceCheck: {
+														...NOTE_SOURCE_CHECK_SCHEMA,
+														description:
+															"curated-note rows from a repo's knowledgeNotes only: the note's pinned value checked against StellarLight's own code scan of that repo at its scannedRef. Unless state is verified, the note is the value on its asOf date, not the current one. null when the note pins no value, or while the stored note has not yet been stamped with its pin (the nightly knowledge-notes backfill stamps it); absent on other kinds and on stablecoin registry rows.",
+													},
 												},
 											},
 										},
@@ -3575,7 +3649,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"THIS OPERATION ONLY: present on deepwiki-grounded answers, carrying the answer-dating disclaimer (answerAsOf is null; scannedAt/scannedRef/lastCommitAt date OUR SOURCE SCAN, not the answer). Unlike the shared Meta.warnings (ignored-query-param disclosure), it says nothing about your request parameters.",
+														"THIS OPERATION ONLY: how to read the answer. On a deepwiki-grounded answer, the answer-dating disclaimer (answerAsOf is null; scannedAt/scannedRef/lastCommitAt date OUR SOURCE SCAN, not the answer). On a knowledge-note answer, the note's precedence over the walkthrough; when sourceCheck.state is unknown or missing, instead that the note is the value on answerAsOf and says nothing about the current source, which the walkthrough cannot settle either. On an answer from the scan's reading after a sourceCheck conflict, why that reading answers instead of the note. Unlike the shared Meta.warnings (ignored-query-param disclosure), it says nothing about your request parameters.",
 												},
 											},
 										},
@@ -3700,28 +3774,33 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned).",
+												"The answer text: answerSource states its grounding and answerAsOf its date. null when no grounded answer was produced (the routed repo is still returned).",
 										},
 										answerSource: {
 											type: "string",
 											nullable: true,
 											description:
-												"Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced; cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it; where they disagree, the dated fact wins.",
+												"Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced; cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it; where they disagree, the dated fact wins. When sourceCheck.state is unknown or missing, the note answers only as the value on answerAsOf, and the answer says the current value is unknown. 'stellarlight-code-scan' also answers when such a note pins its value and the scan read a different value at codeVerified.scannedRef (sourceCheck.state conflict): the answer is the scanned value, and the note stays in knowledgeNotes as a dated record.",
 										},
 										answerAsOf: {
 											type: "string",
 											format: "date-time",
 											nullable: true,
 											description:
-												"When the answer was true. NULL WHENEVER answerSource is 'deepwiki'. DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf: day-granular, serialized as that day's 00:00:00Z; such notes now LEAD answers that name the exact identifier, precisely the reported class) and 'stellarlight-code-scan' (the answer IS the scan; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.",
+												"When the answer was true. NULL WHENEVER answerSource is 'deepwiki'. DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf: day-granular, serialized as that day's 00:00:00Z; such notes now LEAD answers that name the exact identifier, precisely the reported class, unless sourceCheck.state is conflict) and 'stellarlight-code-scan' (the answer IS the scan, a conflict's scanned value included; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.",
+										},
+										sourceCheck: {
+											...NOTE_SOURCE_CHECK_SCHEMA,
+											description:
+												"The curated note that names what was asked, when it pins its value to a commit, file and symbol, checked against StellarLight's own code scan at codeVerified.scannedRef. conflict: the answer is scannedValue (answerSource stellarlight-code-scan) and the note's notedValue is a dated record of notedRef, not the current value. unknown or missing: the note answers only as the value on notedAsOf, and the answer says the current value is unknown. verified: the note leads as the value at scannedRef too. null when no curated note names what was asked, or it pins no value.",
 										},
 										knowledgeNotes: {
 											type: "array",
 											description:
-												"Every public, curated, dated, source-cited fact StellarLight holds for the routed repo: deprecations, renames and moved paths, registry identity (npm / PyPI / crates / Maven names), release trains, security advisories, whether or not one of them led the answer. Empty when none are curated. Read these even when answerSource is 'deepwiki': a walkthrough describes mechanism; it never says the package is deprecated or the path moved. Each note cites its own source URL and carries its verification date.",
+												"Every public, curated, dated, source-cited fact StellarLight holds for the routed repo: deprecations, renames and moved paths, registry identity (npm / PyPI / crates / Maven names), release trains, security advisories, whether or not one of them led the answer. Empty when none are curated. Read these even when answerSource is 'deepwiki': a walkthrough describes mechanism; it never says the package is deprecated or the path moved. Each note cites its own source URL and carries its verification date. A note that pins its value carries sourceCheck; unless its state is verified, read the note as the value on its asOf date, not the current one.",
 											items: {
 												type: "object",
-												required: ["note", "source", "asOf"],
+												required: ["note", "source", "asOf", "sourceCheck"],
 												properties: {
 													note: { type: "string" },
 													source: {
@@ -3733,6 +3812,7 @@ export const spec: OpenAPISpec = {
 														type: "string",
 														description: "YYYY-MM-DD the fact was verified.",
 													},
+													sourceCheck: NOTE_SOURCE_CHECK_SCHEMA,
 												},
 											},
 										},
@@ -12407,13 +12487,15 @@ export const spec: OpenAPISpec = {
 					knowledgeNotes: {
 						type: "array",
 						description:
-							"Dated FACTS about this repo with named sources: curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record.",
+							"Dated FACTS about this repo with named sources: curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record. A note that pins its value carries sourceCheck, checked against this row's codeVerified.scannedRef, once the stored note holds its pin (until the nightly knowledge-notes backfill stamps it, sourceCheck is null); unless its state is verified, read the note as the value on its asOf date, not the current one.",
 						items: {
 							type: "object",
+							required: ["note", "source", "asOf", "sourceCheck"],
 							properties: {
 								note: { type: "string" },
 								source: { type: "string" },
 								asOf: { type: "string", nullable: true },
+								sourceCheck: NOTE_SOURCE_CHECK_SCHEMA,
 							},
 						},
 					},

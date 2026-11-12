@@ -21,7 +21,7 @@ import {
 	isStrongStatusBasis,
 	STRONG_STATUS_BASES,
 } from "../../src/lib/project-status";
-import { REPO_KNOWLEDGE_NOTES } from "../../src/lib/repo-knowledge";
+import { curatedNotesFor } from "../../src/lib/repo-knowledge";
 import { censusProjects, censusRepos, FRAME_METHOD } from "./sample-frame";
 
 const UA = { "User-Agent": "stellarlight-quality-artifact" };
@@ -381,7 +381,9 @@ const activityOf = (r: Repo): string | null => {
 
 /** Registry entry exists and carries ONLY internal notes (a triage verdict). */
 const triagedOnly = (r: { fullName: string }) => {
-	const notes = REPO_KNOWLEDGE_NOTES[r.fullName.toLowerCase()];
+	// Case-insensitive, as explain and the backfill read it: 274 registry
+	// keys are written in GitHub's own casing (2026-11-11).
+	const notes = curatedNotesFor(r.fullName);
 	return (
 		Array.isArray(notes) &&
 		notes.length > 0 &&

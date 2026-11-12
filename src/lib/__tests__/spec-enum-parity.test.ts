@@ -10,6 +10,7 @@ import {
 import { CODE_DOMAINS } from "../code-domains";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "../http-params";
 import { RESEARCH_MODES } from "../match-mode";
+import { SOURCE_CHECK_STATES } from "../note-pins";
 import { spec } from "../openapi-spec";
 import { PARTNER_TYPES } from "../partner-match";
 import { DEPLOYMENT_NETWORKS } from "../project-deployment";
@@ -351,6 +352,21 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 			),
 		).toEqual(sorted(PARTNER_TYPES as readonly string[]));
 		expect(spread("PARTNER_TYPES")).toBe(4);
+	});
+
+	it("SOURCE_CHECK_STATES: one spread, two sites that equal it (explainRepo sourceCheck.state and knowledgeNotes[].sourceCheck.state)", () => {
+		expect(spread("SOURCE_CHECK_STATES")).toBe(1);
+		const ok =
+			S.paths["/api/repos/explain"].get.responses["200"].content[
+				"application/json"
+			].schema.properties;
+		for (const states of [
+			ok.sourceCheck.properties.state.enum,
+			ok.knowledgeNotes.items.properties.sourceCheck.properties.state.enum,
+		])
+			expect(sorted(states)).toEqual(
+				sorted(SOURCE_CHECK_STATES as readonly string[]),
+			);
 	});
 
 	it("REPO_KINDS: one spread, one shared schema object, two sites that equal it (Repo.kind, explainRepo repoMeta.kind)", () => {

@@ -19,6 +19,7 @@ import { interfacePathsOf } from "@/lib/code-symbols";
 import { askDeepWiki } from "@/lib/deepwiki";
 import { isKnownInfraNotDeployable } from "@/lib/known-infra";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { noteSourceCheck } from "@/lib/note-pins";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
 	type RepoKind,
@@ -26,9 +27,9 @@ import {
 	repoKindOf,
 } from "@/lib/repo-grade";
 import {
+	curatedNotesFor,
 	findDirectAnswerNote,
 	findRepoByTrigger,
-	REPO_KNOWLEDGE_NOTES,
 } from "@/lib/repo-knowledge";
 import { renamedTo } from "@/lib/repo-relations";
 import {
@@ -148,6 +149,7 @@ export async function GET(req: NextRequest) {
 			// client's null-check would silently never fire on this envelope.
 			answerSource: null,
 			answerAsOf: null,
+			sourceCheck: null,
 			sources: {
 				repoUrl: null,
 				deepWikiUrl: null,
@@ -193,6 +195,9 @@ export async function GET(req: NextRequest) {
 	} | null = null;
 	// A malware hold, served with the repo it names (repo-security.ts).
 	let security: ReturnType<typeof securityOf> = null;
+	// The scan's reading of each symbol a curated note pins, taken at
+	// scannedRef (sls-115). Read only beside codeVerified, never served raw.
+	let pinnedValues: unknown = null;
 	try {
 		const payload = await getPayloadSafe();
 		if (payload) {
@@ -246,6 +251,7 @@ export async function GET(req: NextRequest) {
 					stellarDeps: true,
 					codeInUse: true,
 					scannedRef: true,
+					pinnedValues: true,
 					successorRepo: true,
 					securityHeld: true,
 					securityHold: true,
@@ -274,6 +280,7 @@ export async function GET(req: NextRequest) {
 			}
 			if (d) {
 				security = securityOf(d);
+				pinnedValues = d.pinnedValues ?? null;
 				if (d.codeScanState === "scanned" && d.stellarProof) {
 					codeVerified = {
 						stellarProof: d.stellarProof as string,
@@ -349,6 +356,35 @@ export async function GET(req: NextRequest) {
 		// best-effort — the answer is still valid without index freshness
 	}
 
+	// The curated note that names what was asked, if any (sls-080, below).
+	// Read case-insensitively, as the scan and the backfill read it. On
+	// 2026-11-11, 274 of the 1,233 registry keys were written in GitHub's own
+	// casing; the lowercase index found no notes for them, so explain served,
+	// checked and answered from none of the 253 among them with public notes.
+	const curatedNotes = curatedNotesFor(repo) ?? [];
+	const directNote = findDirectAnswerNote(q, curatedNotes);
+	// sls-115: a dated note led with MaxSupportedProtocolVersion = 29 while
+	// the source at this response's own scannedRef defined 30. A note that
+	// pins its value to a commit, file and symbol is checked against the
+	// scan's reading at codeVerified.scannedRef, stored at scan time, so no
+	// GitHub call happens here. A conflict answers with the scanned value and
+	// keeps the note as a dated record; an unchecked note leads only as the
+	// value on its own date.
+	const scan = codeVerified
+		? {
+				scannedRef: codeVerified.scannedRef,
+				scannedAt: codeVerified.scannedAt,
+				pinnedValues,
+			}
+		: null;
+	const sourceCheck = directNote ? noteSourceCheck(directNote, scan) : null;
+	const conflict = sourceCheck?.state === "conflict" ? sourceCheck : null;
+	const unchecked =
+		sourceCheck?.state === "unknown" || sourceCheck?.state === "missing"
+			? sourceCheck
+			: null;
+	const short = (sha: string | null) => (sha ?? "").slice(0, 7);
+
 	const dw = await askDeepWiki(repo, q);
 	// DeepWiki can return a RESPONSE whose answer is an empty string (the repo
 	// isn't indexed there yet) — `!!dw` then reports `answered: true` with
@@ -356,7 +392,9 @@ export async function GET(req: NextRequest) {
 	// failure, and it suppresses note2. Treat a blank answer as unanswered so
 	// `answered` stays honest and the caller gets the explanation; codeVerified
 	// below still carries real code-derived facts about the routed repo.
-	const dwAnswer = dw?.answer?.trim() ? dw.answer : null;
+	// On a conflict the scan's reading answers, so the walkthrough, an undated
+	// index, stays at sources.deepWikiUrl as it does under a note.
+	const dwAnswer = conflict ? null : dw?.answer?.trim() ? dw.answer : null;
 
 	// DeepWiki doesn't index every repo — but WE scanned these repos precisely so
 	// an uncovered one still gets a CODE-GROUNDED answer instead of a shrug. When
@@ -365,8 +403,10 @@ export async function GET(req: NextRequest) {
 	// `answerSource`, so a consumer can always tell a DeepWiki mechanism
 	// walkthrough from our scan-derived facts. Both are real; they answer
 	// different depths of the question.
-	let scanAnswer: string | null = null;
-	if (!dwAnswer && codeVerified) {
+	let scanAnswer: string | null = conflict
+		? `At codeVerified.scannedRef (${short(conflict.scannedRef)}${conflict.scannedAt ? `, scanned ${conflict.scannedAt.slice(0, 10)}` : ""}), ${conflict.path} declares ${conflict.symbol} = ${conflict.scannedValue}, as read by StellarLight's own code scan. Our dated note records ${conflict.notedValue} as of ${conflict.notedAsOf}, verified at commit ${short(conflict.notedRef)}; the two differ, so the note's value is not the value at the scanned commit. The note stays in knowledgeNotes as a dated record, and sourceCheck carries both readings.`
+		: null;
+	if (!scanAnswer && !dwAnswer && codeVerified) {
 		const cv = codeVerified;
 		const bits: string[] = [
 			`DeepWiki hasn't indexed \`${repo}\`, so this answer is grounded in StellarLight's own source scan${cv.scannedAt ? ` (${cv.scannedAt.slice(0, 10)})` : ""} rather than a DeepWiki walkthrough.`,
@@ -399,19 +439,26 @@ export async function GET(req: NextRequest) {
 	// carries the dating; the DeepWiki walkthrough stays underneath, labeled as
 	// possibly lagging. A dated fact we verified beats an undated index we
 	// didn't.
-	const curatedNotes = REPO_KNOWLEDGE_NOTES[repo.toLowerCase()] ?? [];
-	const directNote = findDirectAnswerNote(q, curatedNotes);
 	// Audit N2: the walkthrough is NOT concatenated into the dated answer —
 	// #1168 existed because a naive parser reads the wrong number out of
 	// mixed text, and gluing DeepWiki's lagging 22–25 under a note dated
 	// answerAsOf rebuilt exactly that trap inside one field. The dated answer
 	// carries only the dated fact; the walkthrough stays reachable at
 	// sources.deepWikiUrl and is named, not embedded.
-	const noteAnswer = directNote
-		? dwAnswer
-			? `${directNote.note}\n\n(A fuller mechanism walkthrough exists via sources.deepWikiUrl: an undated index that can LAG the dated fact above; where they disagree, the dated fact wins.)`
-			: directNote.note
-		: null;
+	// A note whose value was not confirmed at the scanned commit says so
+	// first: it answers as the value on its own date, never as current.
+	const noteText =
+		directNote && unchecked
+			? `The current value of ${unchecked.symbol} in ${unchecked.path} is unknown. ${unchecked.reason} The dated note below gives it as of ${unchecked.notedAsOf}, verified at commit ${short(unchecked.notedRef)}; read it as the value on that date, not as the current one.\n\n${directNote.note}`
+			: directNote?.note;
+	const noteAnswer =
+		directNote && !conflict
+			? dwAnswer
+				? unchecked
+					? `${noteText}\n\n(A mechanism walkthrough exists via sources.deepWikiUrl: an undated index, so it cannot settle the current value either.)`
+					: `${noteText}\n\n(A fuller mechanism walkthrough exists via sources.deepWikiUrl: an undated index that can LAG the dated fact above; where they disagree, the dated fact wins.)`
+				: (noteText ?? null)
+			: null;
 	const finalAnswer = noteAnswer ?? dwAnswer ?? scanAnswer;
 
 	return NextResponse.json(
@@ -423,20 +470,35 @@ export async function GET(req: NextRequest) {
 				// Say it in `warnings` too, not only in the field. An absent
 				// `answerAsOf` is easy to skim past; a warning naming the three
 				// fields that do NOT date the answer is not.
-				...(noteAnswer
+				...(noteAnswer && !unchecked
 					? {
 							warnings: [
 								"The answer IS a curated, dated, source-cited fact (answerSource: knowledge-note, dated by answerAsOf) because it directly names what was asked. The DeepWiki walkthrough is deliberately NOT embedded in this dated answer; it is an undated index that can lag or contradict the dated fact; reach it via sources.deepWikiUrl, and where they disagree, the dated fact wins.",
 							],
 						}
-					: dwAnswer
+					: noteAnswer
 						? {
+								// One line, not the line above plus a caveat: a note whose
+								// value was not confirmed at scannedRef does not win over
+								// anything for the current value.
 								warnings: [
-									"answerAsOf is null: DeepWiki exposes no index date, so the age of this answer is UNKNOWN. `codeVerified.scannedAt`, `codeVerified.scannedRef` and `repoMeta.lastCommitAt` date OUR SOURCE SCAN, not this answer; a DeepWiki answer can be older than the scanned ref and disagree with it. Verify any specific value (version numbers, constants, addresses) against repoUrl at scannedRef before relying on it.",
+									"The answer is a curated, dated, source-cited note (answerSource: knowledge-note, dated by answerAsOf) that names what was asked, but its pinned value was not confirmed at codeVerified.scannedRef (sourceCheck.state unknown or missing): read it as the value on answerAsOf; it says nothing about the current source. The DeepWiki walkthrough is not embedded and cannot settle the current value either, since it is an undated index; reach it via sources.deepWikiUrl.",
 								],
 							}
-						: {}),
-				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `knowledge-note` = a curated, dated, source-cited fact that directly names what was asked (leads over any walkthrough; answerAsOf dates it); `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo: narrower than a walkthrough, but code-grounded, never a guess. Cite repoUrl as the source of truth and verify against the code for anything safety-critical. `knowledgeNotes` lists every public dated fact we hold for the routed repo (deprecations, renames, registry identity, advisories) whether or not one of them led the answer; read them even when answerSource is 'deepwiki'.",
+						: conflict
+							? {
+									warnings: [
+										"The answer is the value StellarLight's own code scan read at codeVerified.scannedRef (answerSource: stellarlight-code-scan, dated by answerAsOf, the scan's time), not the curated note that names what was asked: the note's value was read at another commit and differs. sourceCheck carries both readings, and the note stays in knowledgeNotes as a dated record. The DeepWiki walkthrough is not embedded; reach it via sources.deepWikiUrl.",
+									],
+								}
+							: dwAnswer
+								? {
+										warnings: [
+											"answerAsOf is null: DeepWiki exposes no index date, so the age of this answer is UNKNOWN. `codeVerified.scannedAt`, `codeVerified.scannedRef` and `repoMeta.lastCommitAt` date OUR SOURCE SCAN, not this answer; a DeepWiki answer can be older than the scanned ref and disagree with it. Verify any specific value (version numbers, constants, addresses) against repoUrl at scannedRef before relying on it.",
+										],
+									}
+								: {}),
+				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `knowledge-note` = a curated, dated, source-cited fact that directly names what was asked (leads over any walkthrough; answerAsOf dates it); `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo, or the value of a symbol a curated note pins, as the scan read it at codeVerified.scannedRef, when it differs from the note's: narrower than a walkthrough, but code-grounded, never a guess. `sourceCheck` checks the note that names what was asked, when it pins its value to a commit, file and symbol, against that scan reading: verified, conflict, missing or unknown; each knowledgeNotes entry carries its own. Cite repoUrl as the source of truth and verify against the code for anything safety-critical. `knowledgeNotes` lists every public dated fact we hold for the routed repo (deprecations, renames, registry identity, advisories) whether or not one of them led the answer; read them even when answerSource is 'deepwiki'.",
 			},
 			q,
 			repo,
@@ -458,9 +520,20 @@ export async function GET(req: NextRequest) {
 			// of them led the answer — a DeepWiki walkthrough never says that a
 			// package is deprecated or a path was renamed. Internal notes never
 			// leave; triggers are routing hints, not content.
+			// Each note that pins its value carries its own check, so a dated
+			// value read beside a walkthrough is never mistaken for current.
 			knowledgeNotes: curatedNotes
 				.filter((n) => n.visibility !== "internal")
-				.map(({ note, source, asOf }) => ({ note, source, asOf })),
+				.map((n) => ({
+					note: n.note,
+					source: n.source,
+					asOf: n.asOf,
+					sourceCheck: noteSourceCheck(n, scan),
+				})),
+			// The note that names what was asked, checked against the scan's
+			// reading at codeVerified.scannedRef (sls-115); null when no note
+			// named it or the note pins no value.
+			sourceCheck,
 			answer: finalAnswer,
 			answered: !!finalAnswer,
 			// Provenance, always explicit: a DeepWiki mechanism walkthrough vs our

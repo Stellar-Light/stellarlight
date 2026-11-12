@@ -172,6 +172,8 @@ const C4_ALLOW: Record<string, string> = {
 		"set only where mainnetContractId survives, so exactly as sparse as it is; served on /api/contracts as contractBasis and read by the trust signal (2026-09-03)",
 	contractInterfacePaths:
 		"served beside contractInterface on search, explain and trust, and null until a repo is rescanned after 2026-11-04, so a population probe would read the backfill, not a defect; add one once scan waves have refreshed the corpus (2026-11-05)",
+	pinnedValues:
+		"never served raw: explainRepo serves it as sourceCheck, null by design on every repo whose notes pin no value (one repo on 2026-11-11), and read back by the scanner's own VERIFIED_FIELDS; the field-population probes read search rows, which do not carry it (2026-11-11)",
 };
 const writeShape = read("scripts/scan/write-shape.ts");
 const okStart = writeShape.indexOf(

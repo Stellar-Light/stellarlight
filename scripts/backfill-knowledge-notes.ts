@@ -18,6 +18,7 @@ import {
 	type AuditRecord,
 	buildKnowledgeNotes,
 	REPO_KNOWLEDGE_NOTES,
+	storedNoteShape,
 } from "../src/lib/repo-knowledge";
 import configPromise from "../src/payload.config";
 
@@ -93,21 +94,8 @@ async function main(): Promise<number> {
 				codeInUse: d.codeInUse ?? null,
 			},
 		);
-		// Compare every STORED subfield, not the text alone: a visibility flip
-		// or a re-dated curated fact (asOf) must reach the row too. `triggers`
-		// are not a stored subfield (Payload drops them) and derived notes carry
-		// a fresh asOf every run — comparing either would churn every row daily.
-		const shape = (n: {
-			note?: string;
-			source?: string;
-			asOf?: string | null;
-			visibility?: string | null;
-		}) => [
-			n.note,
-			n.source,
-			n.source === "curated" ? (n.asOf ?? null) : null,
-			n.visibility ?? "public",
-		];
+		// Every STORED subfield, the pin included (storedNoteShape).
+		const shape = storedNoteShape;
 		const cur = JSON.stringify((d.knowledgeNotes ?? []).map(shape));
 		const next = JSON.stringify(notes.map(shape));
 		if (cur === next) {
@@ -130,7 +118,9 @@ async function main(): Promise<number> {
 			context: { internal: true },
 			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 		})) as any;
-		if ((check?.knowledgeNotes ?? []).length !== notes.length) {
+		// Every stored subfield, the pin included, not the count alone: an
+		// update drops a subfield the schema lacks in silence (#615).
+		if (JSON.stringify((check?.knowledgeNotes ?? []).map(shape)) !== next) {
 			mismatches += 1;
 			console.error(`  ✗ read-back mismatch ${d.fullName}`);
 		}

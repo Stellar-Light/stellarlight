@@ -775,7 +775,7 @@ server.registerTool(
 	{
 		title: "Explain a Stellar repo's internals (deep code answer)",
 		description:
-			"Source-grounded ANSWER to a deep code question about a Stellar internal or any indexed ecosystem repo: 'how does X implement/calculate Y in its code'. Routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls) or the graded repo index, then DeepWiki answers from that repo's source files. Pass `repo` to pin one, or omit to auto-route. The answer carries `knowledgeNotes` (dated curated facts, present even when a DeepWiki walkthrough leads) and `repoMeta.kind` (what the repo IS). Not for discovering which repos/projects exist → use search_repos / search_projects.",
+			"Source-grounded ANSWER to a deep code question about a Stellar internal or any indexed ecosystem repo: 'how does X implement/calculate Y in its code'. Routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls) or the graded repo index, then DeepWiki answers from that repo's source files. Pass `repo` to pin one, or omit to auto-route. The answer carries `knowledgeNotes` (dated curated facts, present even when a DeepWiki walkthrough leads) and `repoMeta.kind` (what the repo IS). A note that pins its value to a commit, file and symbol carries `sourceCheck` against the scanned commit (`codeVerified.scannedRef`): on a conflict the answer is the scanned value (`answerSource` stellarlight-code-scan) and the note stays as a dated record; when unknown, the note is the value on its date only. Not for discovering which repos/projects exist → use search_repos / search_projects.",
 		inputSchema: {
 			q: z
 				.string()

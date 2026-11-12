@@ -9,6 +9,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import { logApiHit } from "@/lib/api-usage";
 import { unknownParamWarning } from "@/lib/http-params";
+import { noteScanOf, noteSourceCheck } from "@/lib/note-pins";
 import { type ResolvableProject, resolveProject } from "@/lib/resolve-project";
 import { getAppUrl } from "@/lib/utils/app-url";
 import {
@@ -250,6 +251,13 @@ export async function GET(req: NextRequest) {
 				stars: true,
 				repoScoreLabel: true,
 				knowledgeNotes: true,
+				// sls-115: what a pinned note is checked against, the same scan
+				// codeVerified serves on search and explain.
+				codeScanState: true,
+				stellarProof: true,
+				scannedRef: true,
+				codeScannedAt: true,
+				pinnedValues: true,
 			},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: raw Payload docs
@@ -271,6 +279,7 @@ export async function GET(req: NextRequest) {
 							note: String(n.note),
 							source: String(n.source ?? ""),
 							asOf: n.asOf ?? null,
+							sourceCheck: noteSourceCheck(n, noteScanOf(r)),
 						}))
 				: [],
 		}));

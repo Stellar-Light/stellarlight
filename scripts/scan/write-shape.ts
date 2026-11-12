@@ -16,6 +16,7 @@ import type {
 	ScanOutcome,
 	StellarProof,
 } from "../../src/lib/code-signals";
+import type { PinnedValues } from "../../src/lib/note-pins";
 
 export interface SignalsInput {
 	outcome: ScanOutcome;
@@ -41,6 +42,9 @@ export interface SignalsInput {
 	mainnetContractBasis?: "self-validated" | "published" | null;
 	/** Commit SHA the facts were computed at (provenance pin). */
 	scannedRef: string | null;
+	/** Each symbol a curated note pins, read at scannedRef (sls-115); null
+	 * when the repo's notes pin nothing or no commit was resolved. */
+	pinnedValues: PinnedValues | null;
 }
 
 /** Fields the scanner is FORBIDDEN to write — demotion/authority surfaces. */
@@ -93,6 +97,7 @@ export function signalsToWrite(
 		sdkCapabilities: s.sdkCapabilities,
 		codeDomains: s.codeDomains,
 		scannedRef: s.scannedRef,
+		pinnedValues: s.pinnedValues,
 		mainnetContractId: s.mainnetContractId,
 		mainnetContractBasis: s.mainnetContractBasis ?? null,
 		codeScanState: "scanned",
