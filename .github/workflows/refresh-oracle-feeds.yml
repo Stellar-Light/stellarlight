@@ -1,0 +1,44 @@
+name: Refresh oracle feeds
+
+# sls-029: reads every oracle contract in src/data/oracle-registry.ts from
+# the chain (public Stellar RPCs, simulated read-only calls; nothing signed or
+# sent) and stores what each showed in the oracle-readings collection: is the
+# contract there, which feeds it serves, and when each was last written. The
+# search route joins the latest reading onto the provider's `products`.
+#
+# A check that could not run writes nothing; more than half the registry
+# unchecked exits 2. Manual dispatch is a dry run unless execute=true.
+# Scheduled runs write only once the repository variable ORACLE_FEEDS_WRITE is
+# "on": until an owner has read a dry run and an executed run read back
+# cleanly, every scheduled run is a dry run that prints its plan.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+  schedule:
+    - cron: "47 */6 * * *" # :47, off the hour; crons at :00 get dropped under load
+
+concurrency:
+  group: refresh-oracle-feeds
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/refresh-oracle-feeds.ts ${{ ((github.event_name == 'schedule' && vars.ORACLE_FEEDS_WRITE == 'on') || inputs.execute) && '--execute' || '' }}

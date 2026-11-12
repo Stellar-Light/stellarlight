@@ -1302,7 +1302,7 @@ export interface components {
             scfAmountStatus?: "disclosed" | "undisclosed" | null;
             /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. EMPTY IS NOT 'NO SCF FUNDING': SCF grants awards outside the numbered rounds (a Liquidity Award carries no SCF #N), so a project can hold real award money with this array empty; check scfTotalAwardedUSD and read scfRoundAwards, where such awards appear with round null and their own awardName. Per-award official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round). */
             scfAwardedRounds?: number[];
-            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. A registry product whose issuer has said it no longer offers it (getRwaAssets `discontinued`) is served as retired, with that statement in note. */
+            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows, and by the oracle registry for oracle providers (Band, DIA, Lightecho, Reflector, RedStone, Chainlink, Pyth): one oracle-feed record per contract the provider published for each network, each address checked on chain on asOf. On an oracle record, status live means a contract existed at contractId on asOf and retired means the published address held none; status never says whether feeds update, which is `observation`: what the chain showed at its checkedAt. Evidence tiers (sls-029) read off two fields: addressTier (official-address or directory-only) and observation.tier (observed-updating, observed-stale, published-address-absent, or not-observable-pull-model); retired status is published-address-absent as of asOf. A provider that announced Stellar support without publishing an address has no record (provider-announced is not served as a tier). Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. A registry product whose issuer has said it no longer offers it (getRwaAssets `discontinued`) is served as retired, with that statement in note. */
             products?: {
                 name?: string;
                 kind?: string;
@@ -1330,6 +1330,62 @@ export interface components {
                     authRevocable?: boolean;
                     authImmutable?: boolean;
                     clawbackEnabled?: boolean;
+                } | null;
+                /**
+                 * @description Oracle registry records only: who publishes the contract address (evidenceUrl). official-address = the provider itself (its docs, repository, app or config); directory-only = only a third-party directory, Stellar's oracle-providers page, lists it, as for Band, which publishes no Stellar address. A statement about the address only: what the chain showed is observation.tier.
+                 * @enum {string}
+                 */
+                addressTier?: "official-address" | "directory-only";
+                /** @description Oracle registry records only: what the chain showed at checkedAt. Written only by the refresh-oracle-feeds lane, one reading per contract, replaced by each check that runs; a check that could not run keeps the previous reading. Null = no reading is stored for this contract, or the readings could not be loaded (meta.failedReads then names the read); never 'not updating'. Every freshness claim here is as of checkedAt, not later. */
+                observation?: {
+                    /** @description When the chain was read (ISO 8601). */
+                    checkedAt?: string;
+                    /**
+                     * @description present = a contract instance exists at contractId on this network; absent = getLedgerEntries found none.
+                     * @enum {string}
+                     */
+                    contract?: "present" | "absent";
+                    /**
+                     * @description How the feeds were read, each by simulating the provider's own getter: sep40-lastprice = assets(), then lastprice(asset) per asset; reflector-beam-last-timestamp = assets() and the contract's own last write, as Beam per-asset reads need prepaid access; chainlink-latest-round = latest_round(data_id, 18) per feed in Chainlink's published Stellar feed list; band-reference-data = get_reference_data against USD per seeded symbol; redstone-adapter-read = the adapter's checked read per feed id in RedStone's relayer manifest, plus its price history for a feed the check rejects; pull-verifier = existence only, as a pull-model verifier stores no prices and its freshness is not observable on chain; instance-only = existence only, no reader for this contract yet.
+                     * @enum {string}
+                     */
+                    method?: "sep40-lastprice" | "reflector-beam-last-timestamp" | "chainlink-latest-round" | "band-reference-data" | "redstone-adapter-read" | "pull-verifier" | "instance-only";
+                    /** @description The bound behind updating and stale: twice the longer of the contract's resolution() and a heartbeat the provider publishes for it (sep40-lastprice, reflector-beam-last-timestamp); for Chainlink, each feed is judged against twice its own heartbeat in Chainlink's feed list and this field is twice the longest; 108000 for RedStone (the 30 hours its adapter enforces); 86400 for Band, which publishes no update interval. Null when no feed is read. */
+                    maxAgeSeconds?: number | null;
+                    /** @description The newest price write observed on the contract: the newest feed timestamp, or the contract's own last write where it keeps one (Reflector, Lightecho). Null when none was observed. */
+                    lastUpdateAt?: string | null;
+                    /**
+                     * @description The evidence tier this reading supports, derived from its own fields only. observed-updating = at least one feed read this check had a value written within maxAgeSeconds before checkedAt; it says the contract is being written, not that every feed is (read feeds[].state). A contract that exists, or whose contract-wide timestamp is recent while no feed could be read, is never observed-updating. observed-stale = no feed read was updating, no feed was unreadable, and the newest write observed is older than maxAgeSeconds. published-address-absent = no contract at contractId. not-observable-pull-model = a pull-model verifier: prices are verified per call and nothing is stored on chain, so freshness is not observable on chain. Null = this check could not judge (a feed could not be read and none was updating), or the check is more than 24 hours old when served: a contract the lane stopped reading keeps its feeds and dates but loses its tier.
+                     * @enum {string|null}
+                     */
+                    tier?: "observed-updating" | "observed-stale" | "published-address-absent" | "not-observable-pull-model" | null;
+                    /** @description Where `feeds` came from and as of when. Null exactly when feeds is null. */
+                    feedList?: {
+                        /**
+                         * @description contract = the contract's own assets(), read at asOf (sourceUrl is its Stellar Lab page, where anyone can call it); provider-list = the provider's published machine-readable list, read at asOf (Chainlink's feed list, RedStone's relayer manifest); seeded = symbols copied into our registry from sourceUrl on asOf, which do not follow later changes (Band, which publishes no list).
+                         * @enum {string}
+                         */
+                        basis?: "contract" | "provider-list" | "seeded";
+                        sourceUrl?: string;
+                        /** @description When the list was read (ISO 8601) or, for seeded, the seeding date (YYYY-MM-DD). */
+                        asOf?: string;
+                    } | null;
+                    /** @description Every feed this check read, in the order of its list (feedList; not a rank). Null when the contract is absent, and for pull-verifier and instance-only (a check that could not read the list stores nothing). */
+                    feeds?: {
+                        /** @description The key a consumer passes to read the feed: an asset symbol or Stellar asset contract address (SEP-40), a Chainlink data_id in hex, a RedStone feed id, or BASE/USD for Band. */
+                        feed?: string;
+                        /** @description The asset code a Stellar asset contract states for itself, or Chainlink's feed name; null otherwise. */
+                        label?: string | null;
+                        /** @description The feed's own contract where it has one (RedStone MultiFeed price feed contracts); null when read through the record's contractId. */
+                        contractId?: string | null;
+                        /** @description The time the provider's own getter gives for this feed's latest value: the SEP-40 lastprice timestamp (for Reflector the round timestamp, the price period the value belongs to, not the write transaction), Chainlink's round timestamp, Band's resolve time (last_updated_base), or RedStone's write timestamp. Null when the getter returned no value or could not be read. */
+                        lastUpdateAt?: string | null;
+                        /**
+                         * @description updating = written within its bound before checkedAt (maxAgeSeconds; for Chainlink, twice that feed's own heartbeat); stale = older, or the contract's own check rejected the value as stale (RedStone), or the whole contract has not been written within maxAgeSeconds (Beam); no-value = the contract answered with no value: the SEP-40 getter returned None, or the contract's own no-data error (Chainlink #50, Band #1); could-not-check = the read failed or is not public (Beam per-asset reads), which says nothing about the feed.
+                         * @enum {string}
+                         */
+                        state?: "updating" | "stale" | "no-value" | "could-not-check";
+                    }[] | null;
                 } | null;
             }[] | null;
             /** @description Whether `products` is COMPLETE for the issuer accounts this project joins (sls-083). The comparison set is what those accounts' own stellar.toml declared on asOf (the RWA registry's issuer coverage table): declared = (code, issuer) pairs the tomls declare under the covered accounts; tracked = of those, registry rows in any state; complete = declared === tracked AND issuersUnreconciled === 0; a project with an issuer whose toml could not be read is never 'complete' (Circle: false). served = REGISTRY-fed product records on this row (minted states only, one per paired tranche; `products` may also carry hand-curated records); it is a different count from tracked: it can be smaller (a zero-supply asset is tracked but not a product) or larger (the registry tracks an issued asset the toml omits, verificationLevel on-chain-home-domain). NULL = completeness cannot be stated: no joined issuer has a toml to reconcile and no deployer entry exists (on-chain-only classic issuers, hand-curated products); null is never 'complete'. issuersUnreconciled counts the issuer accounts the statement does NOT cover: classic issuers whose toml could not be read, plus one for the project's Soroban tokens when it has any (they have no toml). */

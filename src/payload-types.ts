@@ -76,6 +76,7 @@ export interface Config {
 		stablecoins: Stablecoin;
 		"stablecoin-snapshots": StablecoinSnapshot;
 		"rwa-assets": RwaAsset;
+		"oracle-readings": OracleReading;
 		"hackathon-builds": HackathonBuild;
 		"hackathon-events": HackathonEvent;
 		"award-rounds": AwardRound;
@@ -126,6 +127,7 @@ export interface Config {
 			| StablecoinSnapshotsSelect<false>
 			| StablecoinSnapshotsSelect<true>;
 		"rwa-assets": RwaAssetsSelect<false> | RwaAssetsSelect<true>;
+		"oracle-readings": OracleReadingsSelect<false> | OracleReadingsSelect<true>;
 		"hackathon-builds":
 			| HackathonBuildsSelect<false>
 			| HackathonBuildsSelect<true>;
@@ -1541,6 +1543,69 @@ export interface RwaAsset {
 	 * Set when the row could not be measured; names why
 	 */
 	note?: string | null;
+	updatedAt: string;
+	createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "oracle-readings".
+ */
+export interface OracleReading {
+	id: string;
+	/**
+	 * <network>:<contract id>
+	 */
+	key: string;
+	network: "mainnet" | "testnet";
+	contractId: string;
+	/**
+	 * ISO time of the check
+	 */
+	checkedAt: string;
+	/**
+	 * present = a contract instance exists at this address; absent = none when checked
+	 */
+	contract: "present" | "absent";
+	method:
+		| "sep40-lastprice"
+		| "reflector-beam-last-timestamp"
+		| "chainlink-latest-round"
+		| "band-reference-data"
+		| "redstone-adapter-read"
+		| "pull-verifier"
+		| "instance-only";
+	/**
+	 * The age bound a feed was judged updating against
+	 */
+	maxAgeSeconds?: number | null;
+	/**
+	 * Newest price write observed on the contract
+	 */
+	lastUpdateAt?: string | null;
+	/**
+	 * { basis: contract | provider-list | seeded, sourceUrl, asOf }: where the feeds list came from and as of when; null when no feed was read
+	 */
+	feedList?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * [{ feed, label, contractId, lastUpdateAt, state }]; null = pull model, absent contract, or nothing read
+	 */
+	feeds?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
 	updatedAt: string;
 	createdAt: string;
 }
@@ -3332,6 +3397,10 @@ export interface PayloadLockedDocument {
 				value: string | RwaAsset;
 		  } | null)
 		| ({
+				relationTo: "oracle-readings";
+				value: string | OracleReading;
+		  } | null)
+		| ({
 				relationTo: "hackathon-builds";
 				value: string | HackathonBuild;
 		  } | null)
@@ -3959,6 +4028,24 @@ export interface RwaAssetsSelect<T extends boolean = true> {
 	measureBasis?: T;
 	measuredAt?: T;
 	note?: T;
+	updatedAt?: T;
+	createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "oracle-readings_select".
+ */
+export interface OracleReadingsSelect<T extends boolean = true> {
+	key?: T;
+	network?: T;
+	contractId?: T;
+	checkedAt?: T;
+	contract?: T;
+	method?: T;
+	maxAgeSeconds?: T;
+	lastUpdateAt?: T;
+	feedList?: T;
+	feeds?: T;
 	updatedAt?: T;
 	createdAt?: T;
 }

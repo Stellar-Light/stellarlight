@@ -5599,7 +5599,8 @@ export const SEEDS: Array<{
 	// 2026-11-04). supportedNetworks stays empty: a stored list is served as
 	// networksBasis "curated", which the spec reads as complete, and the docs
 	// give no full chain list. Proxies ride PRODUCTS_FIX in curate-projects.ts
-	// and the mainnet deployment rides DEPLOYMENT_VERIFIED.
+	// and the mainnet deployment rides DEPLOYMENT_VERIFIED. Since sls-029
+	// (2026-11-11) the proxies are records in src/data/oracle-registry.ts.
 	{
 		slug: "chainlink",
 		name: "Chainlink",
@@ -7078,6 +7079,39 @@ export const AVAILABILITY_CHECKED: Record<string, AvailabilityCheck> = {
 // STATUS_FIX/WEBSITE_FIXES/SEEDS live here. No rows changed in the move.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** sls-029 (2026-11-11): note-only lifecycle corrections, exact-sync on
+ * `lifecycle.note` alone. The stored notes of three oracle rows carried
+ * freshness (Lightecho's the July sample, "~4 months stale as of
+ * 2026-07-10"; RedStone's "liveness not independently re-confirmed";
+ * Reflector's "Live on mainnet"), and backfill-status-provenance only fills
+ * an empty note. A Live to Live STATUS_FIX stamp with replaceNote would also
+ * replace it, but STATUS_FIX makes `status` curated-owned (curatedFieldsFor),
+ * so the status lanes and the feed sync would then skip these rows; this map
+ * touches the note and nothing else. A slug here must not also carry a
+ * STATUS_FIX note (curate skips it and says so; a test pins it). */
+export const LIFECYCLE_NOTE_SET: Record<string, string> = {
+	lightecho:
+		"Deployment evidence: the README's production contract CDOR3QD27WAAF4TK4MO33TGQXR6RPNANNVLOY277W2XVV6ZVJ6X6X42T held a contract instance on mainnet on 2026-11-11. This note makes no freshness claim: per-feed freshness is served only in this row's oracle-feed products (observation, null until a check has run).",
+	"redstone-finance":
+		"Stellar connector audited by Veridise and Zenith (Stellar's oracle-providers page); mainnet launch announced 2026-03-04. Deployment evidence: RedStone's relayer manifests list its Stellar adapters and SEP-40 contracts, each holding a contract instance on 2026-11-11. This note makes no freshness claim: per-feed freshness is served only in this row's oracle-feed products (observation, null until a check has run).",
+	reflector:
+		"Deployment evidence: Reflector's orchestrator config lists four mainnet oracle contracts (three of type oracle, also on Stellar's oracle-providers page, and one of type oracle_beam), each holding a contract instance on 2026-11-11. This note makes no freshness claim: per-feed freshness is served only in this row's oracle-feed products (observation, null until a check has run).",
+};
+
+/** Why curate leaves a LIFECYCLE_NOTE_SET note unwritten, or null when it
+ * writes. The note describes a Live product, so it is never written over a
+ * row that is no longer Live: a shutdown note (from a STATUS_FIX move with
+ * or without a note, or backfill-lifecycle) must stand. Any STATUS_FIX entry
+ * for the slug owns its lifecycle, so this map steps aside for it. */
+export function lifecycleNoteHold(
+	slug: string,
+	row: { status?: string | null },
+): "status-fix" | "not-live" | null {
+	if (slug in STATUS_FIX) return "status-fix";
+	if (row.status !== "Live") return "not-live";
+	return null;
+}
+
 /**
  * Partner descriptions that are no longer true, corrected by
  * scripts/data/curate-partners.ts. From-guarded: the stored description is
@@ -7100,6 +7134,24 @@ export const PARTNER_DESCRIPTION_FIXES: Record<
 };
 
 export const DESCRIPTION_FIXES: Record<string, string> = {
+	// sls-029 (2026-11-11): every oracle provider in src/data/oracle-registry.ts
+	// says only what its evidence supports: no freshness ("real-time",
+	// "updating every 10 minutes"), no deployment beyond the registry's
+	// contracts (DIA's only published contract is gone from testnet; Band and
+	// DIA are no longer "one of three" on Stellar's page, which lists six),
+	// and a listed integration is a listing, not verified use. Freshness is
+	// the oracle lane's observation, in products. Pinned by oracle-feeds.test.ts.
+	reflector:
+		"Reflector is an oracle protocol for Stellar and Soroban smart contracts: its prices are agreed by a peer-to-peer consensus of nodes run by Stellar ecosystem organizations, and a DAO of those node operators governs it. Its SEP-40 oracles serve Stellar DEX prices, external CEX and DEX prices, and fiat exchange rates, through free Reflector Pulse contracts and Reflector Beam contracts with prepaid access, on mainnet and testnet. Stellar's oracle-providers page lists Blend, OrbitCDP, DeFindex, Laina, EquitX, Slender and SorobanDomains as integrations; that list is a listing, not verified use. Each contract is in products, with each feed's dated freshness once checked.",
+	band: "Band Protocol is a cross-chain data oracle built on BandChain. Stellar's oracle-providers page lists a Band contract for mainnet and one for testnet; Band's blog, Soroban repository and supported-blockchains page publish no Stellar address. The mainnet contract answers get_reference_data, the read of Band's StandardReference contract; the testnet one no longer exists on testnet (checked 2026-11-11). The mainnet contract is in products, with the dated freshness of its two seeded symbols once checked.",
+	dia: "DIA is a cross-chain oracle network. Its Stellar guide documents a Soroban oracle contract on testnet, but that contract is no longer on the testnet (checked 2026-11-11), and no mainnet contract is published in the guide.",
+	lightecho:
+		"Lightecho is an MIT-licensed SEP-40 oracle contract for Soroban by BP Ventures; its README describes it as a Stellar oracle for emerging markets data and XLM volatility feeds. The README's production contract is on mainnet, where the contract's own resolution() is 10 minutes; the README's testnet contract no longer exists on testnet (checked 2026-11-11). The mainnet contract is in products, with each feed its assets() lists and that feed's dated freshness once checked.",
+	"redstone-finance":
+		"RedStone is a modular oracle. On Stellar it uses a push model: its relayers write prices to a MultiFeed adapter, read through per-asset price feed contracts, and to SEP-40 contracts, on mainnet (launch announced 2026-03-04) and testnet. Its relayer manifests list the feeds; Stellar's oracle-providers page names XLM, BTC, ETH, USDC, PYUSD and tokenized assets among them. Stellar's oracle-providers page lists Blend and Templar as integrations; that list is a listing, not verified use. Each contract is in products, with each feed's dated freshness once checked.",
+	chainlink:
+		"Chainlink Data Feeds bring Chainlink's price feeds to Stellar: Chainlink's docs list them for Stellar Testnet and Stellar Mainnet (Pubnet), and its changelog dates the release 2026-09-29. A Soroban contract reads every feed through one proxy contract per network and selects a feed by its 32-byte data_id: Testnet proxy CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4, Mainnet proxy CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ. For Data Streams, Chainlink's testnet tutorial calls a verifier contract, and its Data Streams pages name no mainnet verifier for Stellar (checked 2026-11-11). Separate from the third-party Chainlink Oracles Relayer (VRF). Each proxy is in products, with each Data Feed's dated freshness once checked.",
+	pyth: "Pyth delivers market data published first-party by exchanges, market makers and banks. On Stellar it uses a pull model: an application obtains signed price updates off chain and verifies them on chain through Pyth's verifier contract, which Pyth's docs list for Stellar Mainnet and Stellar Testnet; receiving the feeds requires a Pyth Pro subscription. Prices are verified per call rather than written to an on-chain feed, so feed freshness is not observable on chain.",
 	// sls-113 (#1905), read 2026-11-07 from balanced.network/timeline/: Balanced
 	// began using SODAX Intents for its trades on 2025-09-15 ("the first step in
 	// Balanced's transition from a protocol to a frontend"), its DAO removed

@@ -39,6 +39,10 @@ import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { instanceMemo } from "@/lib/instance-memo";
 import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import {
+	hasOracleProducts,
+	withOracleObservations,
+} from "@/lib/oracle-products";
 import { ANCHOR_PROFILE_SELECT, anchorProfileOf } from "@/lib/partner-public";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
@@ -185,6 +189,9 @@ async function semanticProjectRows(
 				// sls-033: wallet product kind + per-platform availability
 				productKind: 1,
 				availability: 1,
+				// #742 / sls-029: stored product records (F3 class: semantic rows
+				// served only the registries' records without this)
+				products: 1,
 				availabilityCheck: 1,
 				score: { $meta: "vectorSearchScore" },
 			},
@@ -320,6 +327,18 @@ const entityRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
 		select: { name: true, slug: true, projects: true },
 	});
 });
+// sls-029: one row per oracle contract, written only by the
+// refresh-oracle-feeds lane; a few dozen rows, read whole.
+const oracleReadingsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
+	const payload = await getPayloadSafe();
+	if (!payload) throw new Error("no database handle");
+	return payload.find({
+		collection: "oracle-readings",
+		limit: 0,
+		pagination: false,
+		depth: 0,
+	});
+});
 const anchorRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
 	const payload = await getPayloadSafe();
 	if (!payload) throw new Error("no database handle");
@@ -336,7 +355,7 @@ const anchorRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
 // sls-089: reads that only decorate served rows. Their failure leaves the
 // page partial but its total known; any other failed read nulls the total.
 const ROW_DECORATION_READ =
-	/^projects (audits rollup|page populate|semantic fallback|per-project repos|builtBy attribution|anchor profiles)/;
+	/^projects (audits rollup|page populate|semantic fallback|per-project repos|builtBy attribution|anchor profiles|oracle readings)/;
 const withProjectsPartial = partialFor(
 	(read) => !ROW_DECORATION_READ.test(read),
 );
@@ -2605,8 +2624,30 @@ async function handle(req: NextRequest) {
 		return { ...roll, driftDays, codeChangedSinceAudit };
 	};
 
+	// sls-029: an oracle record's observation (what the chain showed, dated
+	// by its checkedAt) joins here, once for every row path. A failed read
+	// leaves it null and meta.failedReads names the read.
+	let oracleReadings = new Map<string, unknown>();
+	if (payload && projectsOut.some((p) => hasOracleProducts(p.slug as string))) {
+		try {
+			const res = await withReadTimeout(
+				oracleReadingsMemo(),
+				DEFAULT_READ_TIMEOUT_MS,
+			);
+			oracleReadings = new Map(
+				(res.docs as unknown as Array<Record<string, unknown>>).map((d) => [
+					String(d.key),
+					d,
+				]),
+			);
+		} catch (e) {
+			warnings.push(degradedWarning("projects oracle readings", e));
+		}
+	}
+
 	const projectsWithOrg = projectsOut.map((p) => ({
 		...p,
+		products: withOracleObservations(p.products, oracleReadings),
 		builtBy: builtByMap.get(p.id) ?? null,
 		anchorProfile: isAnchorRow(p)
 			? (anchorProfiles.get(norm(p.name)) ?? null)

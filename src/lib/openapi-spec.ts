@@ -13,6 +13,10 @@
 
 import { TRACK_KINDS } from "../data/curated-hackathons";
 import {
+	ORACLE_ADDRESS_TIERS,
+	ORACLE_READ_METHODS,
+} from "../data/oracle-registry";
+import {
 	RWA_KINDS,
 	RWA_PRODUCT_KINDS,
 	RWA_STATES,
@@ -46,6 +50,12 @@ import {
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
 import { RESEARCH_MODES } from "./match-mode";
 import { SOURCE_CHECK_STATES } from "./note-pins";
+import {
+	ORACLE_CONTRACT_STATES,
+	ORACLE_FEED_LIST_BASES,
+	ORACLE_FEED_STATES,
+	ORACLE_OBSERVATION_TIERS,
+} from "./oracle-products";
 import { PARTNER_TYPES } from "./partner-match";
 import {
 	DEPLOYMENT_BASES,
@@ -11575,7 +11585,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						nullable: true,
 						description:
-							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. A registry product whose issuer has said it no longer offers it (getRwaAssets `discontinued`) is served as retired, with that statement in note.",
+							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows, and by the oracle registry for oracle providers (Band, DIA, Lightecho, Reflector, RedStone, Chainlink, Pyth): one oracle-feed record per contract the provider published for each network, each address checked on chain on asOf. On an oracle record, status live means a contract existed at contractId on asOf and retired means the published address held none; status never says whether feeds update, which is `observation`: what the chain showed at its checkedAt. Evidence tiers (sls-029) read off two fields: addressTier (official-address or directory-only) and observation.tier (observed-updating, observed-stale, published-address-absent, or not-observable-pull-model); retired status is published-address-absent as of asOf. A provider that announced Stellar support without publishing an address has no record (provider-announced is not served as a tier). Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. A registry product whose issuer has said it no longer offers it (getRwaAssets `discontinued`) is served as retired, with that statement in note.",
 						items: {
 							type: "object",
 							properties: {
@@ -11633,6 +11643,115 @@ export const spec: OpenAPISpec = {
 										authRevocable: { type: "boolean" },
 										authImmutable: { type: "boolean" },
 										clawbackEnabled: { type: "boolean" },
+									},
+								},
+								addressTier: {
+									type: "string",
+									enum: [...ORACLE_ADDRESS_TIERS],
+									description:
+										"Oracle registry records only: who publishes the contract address (evidenceUrl). official-address = the provider itself (its docs, repository, app or config); directory-only = only a third-party directory, Stellar's oracle-providers page, lists it, as for Band, which publishes no Stellar address. A statement about the address only: what the chain showed is observation.tier.",
+								},
+								observation: {
+									type: "object",
+									nullable: true,
+									description:
+										"Oracle registry records only: what the chain showed at checkedAt. Written only by the refresh-oracle-feeds lane, one reading per contract, replaced by each check that runs; a check that could not run keeps the previous reading. Null = no reading is stored for this contract, or the readings could not be loaded (meta.failedReads then names the read); never 'not updating'. Every freshness claim here is as of checkedAt, not later.",
+									properties: {
+										checkedAt: {
+											type: "string",
+											description: "When the chain was read (ISO 8601).",
+										},
+										contract: {
+											type: "string",
+											enum: [...ORACLE_CONTRACT_STATES],
+											description:
+												"present = a contract instance exists at contractId on this network; absent = getLedgerEntries found none.",
+										},
+										method: {
+											type: "string",
+											enum: [...ORACLE_READ_METHODS],
+											description:
+												"How the feeds were read, each by simulating the provider's own getter: sep40-lastprice = assets(), then lastprice(asset) per asset; reflector-beam-last-timestamp = assets() and the contract's own last write, as Beam per-asset reads need prepaid access; chainlink-latest-round = latest_round(data_id, 18) per feed in Chainlink's published Stellar feed list; band-reference-data = get_reference_data against USD per seeded symbol; redstone-adapter-read = the adapter's checked read per feed id in RedStone's relayer manifest, plus its price history for a feed the check rejects; pull-verifier = existence only, as a pull-model verifier stores no prices and its freshness is not observable on chain; instance-only = existence only, no reader for this contract yet.",
+										},
+										maxAgeSeconds: {
+											type: "integer",
+											nullable: true,
+											description:
+												"The bound behind updating and stale: twice the longer of the contract's resolution() and a heartbeat the provider publishes for it (sep40-lastprice, reflector-beam-last-timestamp); for Chainlink, each feed is judged against twice its own heartbeat in Chainlink's feed list and this field is twice the longest; 108000 for RedStone (the 30 hours its adapter enforces); 86400 for Band, which publishes no update interval. Null when no feed is read.",
+										},
+										lastUpdateAt: {
+											type: "string",
+											nullable: true,
+											description:
+												"The newest price write observed on the contract: the newest feed timestamp, or the contract's own last write where it keeps one (Reflector, Lightecho). Null when none was observed.",
+										},
+										tier: {
+											type: "string",
+											nullable: true,
+											enum: [...ORACLE_OBSERVATION_TIERS],
+											description:
+												"The evidence tier this reading supports, derived from its own fields only. observed-updating = at least one feed read this check had a value written within maxAgeSeconds before checkedAt; it says the contract is being written, not that every feed is (read feeds[].state). A contract that exists, or whose contract-wide timestamp is recent while no feed could be read, is never observed-updating. observed-stale = no feed read was updating, no feed was unreadable, and the newest write observed is older than maxAgeSeconds. published-address-absent = no contract at contractId. not-observable-pull-model = a pull-model verifier: prices are verified per call and nothing is stored on chain, so freshness is not observable on chain. Null = this check could not judge (a feed could not be read and none was updating), or the check is more than 24 hours old when served: a contract the lane stopped reading keeps its feeds and dates but loses its tier.",
+										},
+										feedList: {
+											type: "object",
+											nullable: true,
+											description:
+												"Where `feeds` came from and as of when. Null exactly when feeds is null.",
+											properties: {
+												basis: {
+													type: "string",
+													enum: [...ORACLE_FEED_LIST_BASES],
+													description:
+														"contract = the contract's own assets(), read at asOf (sourceUrl is its Stellar Lab page, where anyone can call it); provider-list = the provider's published machine-readable list, read at asOf (Chainlink's feed list, RedStone's relayer manifest); seeded = symbols copied into our registry from sourceUrl on asOf, which do not follow later changes (Band, which publishes no list).",
+												},
+												sourceUrl: { type: "string" },
+												asOf: {
+													type: "string",
+													description:
+														"When the list was read (ISO 8601) or, for seeded, the seeding date (YYYY-MM-DD).",
+												},
+											},
+										},
+										feeds: {
+											type: "array",
+											nullable: true,
+											description:
+												"Every feed this check read, in the order of its list (feedList; not a rank). Null when the contract is absent, and for pull-verifier and instance-only (a check that could not read the list stores nothing).",
+											items: {
+												type: "object",
+												properties: {
+													feed: {
+														type: "string",
+														description:
+															"The key a consumer passes to read the feed: an asset symbol or Stellar asset contract address (SEP-40), a Chainlink data_id in hex, a RedStone feed id, or BASE/USD for Band.",
+													},
+													label: {
+														type: "string",
+														nullable: true,
+														description:
+															"The asset code a Stellar asset contract states for itself, or Chainlink's feed name; null otherwise.",
+													},
+													contractId: {
+														type: "string",
+														nullable: true,
+														description:
+															"The feed's own contract where it has one (RedStone MultiFeed price feed contracts); null when read through the record's contractId.",
+													},
+													lastUpdateAt: {
+														type: "string",
+														nullable: true,
+														description:
+															"The time the provider's own getter gives for this feed's latest value: the SEP-40 lastprice timestamp (for Reflector the round timestamp, the price period the value belongs to, not the write transaction), Chainlink's round timestamp, Band's resolve time (last_updated_base), or RedStone's write timestamp. Null when the getter returned no value or could not be read.",
+													},
+													state: {
+														type: "string",
+														enum: [...ORACLE_FEED_STATES],
+														description:
+															"updating = written within its bound before checkedAt (maxAgeSeconds; for Chainlink, twice that feed's own heartbeat); stale = older, or the contract's own check rejected the value as stale (RedStone), or the whole contract has not been written within maxAgeSeconds (Beam); no-value = the contract answered with no value: the SEP-40 getter returned None, or the contract's own no-data error (Chainlink #50, Band #1); could-not-check = the read failed or is not public (Beam per-asset reads), which says nothing about the feed.",
+													},
+												},
+											},
+										},
 									},
 								},
 							},

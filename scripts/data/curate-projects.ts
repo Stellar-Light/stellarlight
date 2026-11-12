@@ -32,7 +32,9 @@ import {
 	GITHUB_LINK_FIX,
 	GITHUB_LINK_REMOVE,
 	GITHUB_REPOS_ADD,
+	LIFECYCLE_NOTE_SET,
 	LOGO_SET,
+	lifecycleNoteHold,
 	NAME_FIXES,
 	PRODUCT_KIND,
 	PROMINENCE_SET,
@@ -667,10 +669,13 @@ const IDENTITY_FIX: Record<
  * bitso's corridors are proven by its own CNBV/GFSC compliance currencies
  * (MXN/BRL/ARS/COP). Rows retire (no-op) once applied — equality-checked. */
 /** #742 products model (sls-023/029 root): per-product deployment records.
- * EVERY row cites its evidence — a product without a verifiable evidenceUrl
- * does not ship (Band/RedStone/DIA/WisdomTree/Figure rows await verified
- * mappings; deferred is honest, fabricated is not). Exact-sync on the value
- * tuple; asOf = the date the evidence was last verified. */
+ * EVERY row cites its evidence; a product without a verifiable evidenceUrl
+ * does not ship (WisdomTree/Figure rows await verified mappings; deferred is
+ * honest, fabricated is not). Oracle-feed records are not written here: the
+ * oracle registry (src/data/oracle-registry.ts) is their one writer, and the
+ * search route serves no stored oracle-feed row for a provider it lists.
+ * Exact-sync on the value tuple; asOf = the date the evidence was last
+ * verified. */
 const PRODUCTS_FIX: Record<
 	string,
 	Array<{
@@ -695,42 +700,13 @@ const PRODUCTS_FIX: Record<
 			note: "operator states Stellar availability expected H1 2027; provider row status Development covers the org, this row covers the product claim",
 		},
 	],
-	lightecho: [
-		{
-			name: "Lightecho Stellar Oracle",
-			kind: "oracle-feed",
-			network: "mainnet",
-			status: "live",
-			contractId: null,
-			evidenceUrl: "https://github.com/bp-ventures/lightecho-stellar-oracle",
-			asOf: "2026-08-13",
-			note: "contract IDs published in the operator repo; per-network ID labels pending verification, so none is asserted here. Consumer caution: price state observed stale in upstream checks",
-		},
-	],
-	// sls-112 (#1904): one proxy per network serves every feed (seeded in
-	// SEEDS the same day). Both contracts read on stellar.expert 2026-11-04.
-	chainlink: [
-		{
-			name: "Chainlink Data Feeds proxy (Stellar Mainnet)",
-			kind: "oracle-feed",
-			network: "mainnet",
-			status: "live",
-			contractId: "CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ",
-			evidenceUrl: "https://docs.chain.link/data-feeds/stellar",
-			asOf: "2026-11-04",
-			note: "one proxy serves every feed; a contract selects a feed by its 32-byte data_id (feed IDs on docs.chain.link/data-feeds/price-feeds/addresses with Stellar selected). Created on mainnet 2026-09-14 per stellar.expert",
-		},
-		{
-			name: "Chainlink Data Feeds proxy (Stellar Testnet)",
-			kind: "oracle-feed",
-			network: "testnet",
-			status: "live",
-			contractId: "CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4",
-			evidenceUrl: "https://docs.chain.link/data-feeds/stellar",
-			asOf: "2026-11-04",
-			note: "same interface as the mainnet proxy; created on testnet 2026-09-08 per stellar.expert",
-		},
-	],
+	// sls-029 (2026-11-11): oracle-feed records moved to
+	// src/data/oracle-registry.ts, their one writer, with every published
+	// contract per network and a lane that reads each feed's freshness. [] so
+	// exact-sync clears the stored copies; the search route already serves
+	// the registry's records in their place.
+	lightecho: [],
+	chainlink: [],
 };
 
 const COVERAGE_COUNTRY_FIX: Record<string, string[]> = {
@@ -1983,6 +1959,50 @@ async function main() {
 		if (fix.sourceUrl) data.statusSourceUrl = fix.sourceUrl;
 		if (fix.basis) data.statusBasis = fix.basis;
 		writes.push({ id: d.id, slug, data });
+	}
+
+	// ── LIFECYCLE_NOTE_SET: note-only, exact-sync (sls-029) ──
+	// Touches lifecycle.note and nothing else, so status provenance and
+	// status ownership stay as they are.
+	console.log("\n── Lifecycle notes (note-only, exact-sync) ──");
+	for (const [slug, note] of Object.entries(LIFECYCLE_NOTE_SET)) {
+		if (lifecycleNoteHold(slug, { status: "Live" }) === "status-fix") {
+			console.log(
+				`  WARN ${slug}: a STATUS_FIX entry owns this row's lifecycle; skipped here`,
+			);
+			continue;
+		}
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}", skipped`);
+			continue;
+		}
+		if (lifecycleNoteHold(slug, d) === "not-live") {
+			console.log(
+				`  ${slug}: status '${d.status}', not Live; the stored note stands, skip`,
+			);
+			continue;
+		}
+		if (d.lifecycle?.note === note) {
+			console.log(`  ${slug}: lifecycle note already in sync, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: lifecycle note`);
+		console.log(`    old: ${d.lifecycle?.note ?? "(none)"}`);
+		console.log(`    new: ${note}`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { lifecycle: { ...(d.lifecycle ?? {}), note } },
+		});
 	}
 
 	console.log("\n── Website fixes (dead recorded URL → verified live URL) ──");
