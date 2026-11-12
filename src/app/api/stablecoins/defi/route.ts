@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
 	// Independent sources — one being slow or down must not blank the other.
 	const [liquidity, blendPools, venues] = await Promise.all([
 		fetchLiquidity(code, issuer, priceUSD),
-		blendListings(code),
+		blendListings(code, issuer),
 		fetchVenues(code, issuer, priceUSD),
 	]);
 
