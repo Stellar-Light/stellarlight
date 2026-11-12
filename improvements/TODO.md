@@ -276,6 +276,53 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 
 ## Next
 
+Found by the third-party host lane on 2026-11-12 (branch
+lane/r1112-dq1-host). Toml links that hold one way, found and not changed;
+each probe is a read-only request.
+
+- The enrich-onchain toml auto-join (scripts/data/enrich-onchain-projects.ts)
+  keys an Anchor or Stablecoin row's asset to the first live currency its
+  website's stellar.toml declares, without reading the issuer's home_domain,
+  and basis-from-onchain awards onchain-activity off that asset's activity.
+  backfill-deployment's tomlChain checks both ways and now skips third-party
+  hosts. No served row rests on such a join today: of the 27 rows with an
+  onchain asset, every one whose issuer's home_domain names another domain
+  is human-verified or curated (`curl
+  https://horizon.stellar.org/accounts/<issuer>`, 2026-11-12). The lane
+  writes nothing while api.stellar.expert answers 402. Done when the join
+  calls tomlChain and the fix that unblinds the lane carries it.
+- Six rows served before this lane carry `statusBasis` unverified with a
+  `statusSourceUrl`, though the spec defines unverified as having no citable
+  source (`/api/projects?where[statusBasis][equals]=unverified`, 2026-11-12):
+  caatinga (Draft, docs-caatinga.netlify.app), cryptix (tokenlaunchpad.eu),
+  mydatacoin (Development, the org's GitHub repo list), posted-app
+  (posted.app), sorosan (sorosan-dapp.vercel.app) and stellar-pulse (a
+  Wayback capture). mydatacoin's and stellar-pulse's are curated on purpose
+  as the newest thing observed. Done when the spec and these six agree: the
+  definition allows an observation record, or the sources are retracted.
+  The 35 rows this lane moves to unverified have their sources retracted.
+- Registry-filled deployments that stop under the two-way rule
+  (deploymentFromRegistry, 2026-11-12): rivool-finance (entity-toml; its
+  issuer names lobstr.co), centrifuge and liqvidxyz (contract-metadata; the
+  deployer accounts set no home_domain), matrixdock (its deployer names
+  www.matrixdock.com, whose toml answered a Cloudflare challenge from here,
+  could-not-check) and stablecorp (stablecorp.ca's toml answers 404) read
+  unknown, and centrifuge, matrixdock and stablecorp lose
+  `supportedNetworks`. matrixdock should be re-read from the Actions runner;
+  each can also return through a DEPLOYMENT_VERIFIED entry that cites the
+  issuer's own page, as Spiko's did (DEPLOYMENT_VERIFIED, its docs name its
+  nine Stellar token contracts, 2026-11-12).
+- The 16 Mercado Bitcoin rows (issuer GBVMRBARLKFM..., on-chain-only, no
+  project) name www.mercadobitcoin.com.br, whose toml answered 403 from here
+  on 2026-11-12; the nightly reconcile now names them for promotion if the
+  runner reads a toml that declares them.
+- velo serves onchain-activity off VELO by
+  GDM4RQUQQUVSKQA7S6EM7XBZP3FCGH4Q7CL6TABQ7B2BEJ5ERARM2M5M, keyed by a
+  hand-verified seed (src/data/onchain-contracts.ts) whose source is
+  velo.org's toml; that issuer sets no home_domain, so the link holds one
+  way. Velo's USDV issuer (GDB6ZOJ4...) names velo.org back, and its
+  operator-toml deployment rests on that one.
+
 Found by the sls-024 deployment-provenance lane on 2026-11-11 (branch
 lane/r1111-deploy-provenance). Lifecycle and record items it found and did
 not change; each probe is a read-only request.
@@ -819,6 +866,12 @@ Found 2026-10-23 in review of the smart wallet O2 ship
   requiring the smart concept when q names it.
 
 ## Owner decisions (safe default in brackets)
+
+- An RWA registry row below toml-bidirectional (entity-toml, on-chain-home-domain,
+  contract-metadata, on-chain-only) no longer lends a deployment, but still
+  feeds the project's `products`, each record serving its level. Should a
+  link that does not hold both ways also stop feeding products? [keep
+  products, level served].
 
 - Replace the production `GITHUB_TOKEN` (and `NEXT_PUBLIC_GITHUB_TOKEN` if set): on 2026-10-24
   GitHub answered 401 for the token the server reads with. Live judging reads now fall back to

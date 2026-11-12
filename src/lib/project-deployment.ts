@@ -37,7 +37,8 @@ export function isTestnetEvidence(url: string | null | undefined): boolean {
  *     the mainnet ledger holds.
  *   defillama-tvl: DefiLlama tracks the protocol on Stellar (a reading of at
  *     most TVL_FRESH_DAYS); it reads mainnet contracts.
- *   rwa-registry: a minted product in the verified RWA registry.
+ *   rwa-registry: a minted product in the verified RWA registry whose
+ *     attribution holds both ways (toml-bidirectional; deploymentFromRegistry).
  *   operator-toml: the project's own stellar.toml declares an asset that
  *     Horizon holds and whose issuer names the project's domain back.
  */
@@ -206,28 +207,35 @@ export function pickDeployment(
 	return deploymentFromRegistry(stored, slug);
 }
 
-const LEVEL_RANK: Record<string, number> = {
-	"toml-bidirectional": 0,
-	"entity-toml": 1,
-	"contract-metadata": 2,
-	"on-chain-home-domain": 3,
-	"on-chain-only": 4,
-};
-
 /**
- * Fill an UNKNOWN deployment from the verified RWA registry — never overwrite
+ * Fill an UNKNOWN deployment from the verified RWA registry; never overwrite
  * a known one.
  *
  * sls-023's 2026-09-04 re-check: "Deployment exists on 61 rows, but 47 have
  * network unknown, basis null, and sourceUrl null." A project whose live
- * product is in the registry has proven mainnet deployment — the issuer's own
- * stellar.toml plus Horizon, or the Soroban contract itself — and that is
- * exactly the evidence `deployment` is documented to require. The strongest
- * verified row lends its evidence URL, so the claim is re-checkable at source.
+ * product is in the registry is deployed on mainnet, when the registry can
+ * say the product is the project's. The row lends its evidence URL, so the
+ * claim is re-checkable at source.
+ *
+ * Only a row whose attribution holds both ways from first-party records
+ * lends: toml-bidirectional, where the issuer's own stellar.toml names the
+ * asset and the issuer's home_domain names that domain back. Neither side
+ * can be produced by a third party alone. Every other level rests on one side
+ * or on somebody else (audit 2026-11-12):
+ *  - entity-toml: the entity's toml names the issuer, but the issuer's
+ *    home_domain names the minting tool (rivool-finance: lobstr.co), so any
+ *    toml could name that issuer;
+ *  - on-chain-home-domain: the issuer names the entity, which anyone can do
+ *    for an issuer they hold, and the entity's toml omits the asset;
+ *  - contract-metadata: a Soroban token's own name and symbol, which its
+ *    deployer chooses, plus rwa.xyz's listing;
+ *  - on-chain-only: the asset exists, and rwa.xyz's listing is the only
+ *    attribution.
+ * Those rows still feed `products`, where each serves its level.
  *
  * A stored mainnet/testnet fact is a stronger, human- or scanner-placed claim
- * and stands; a slug with no live registry row stays unknown, because unknown
- * is an admission and this must not turn it into a claim.
+ * and stands; a slug with no lending row stays unknown, because unknown is an
+ * admission and this must not turn it into a claim.
  */
 export function deploymentFromRegistry(
 	stored: DeploymentFact,
@@ -236,16 +244,12 @@ export function deploymentFromRegistry(
 	if (stored.network !== "unknown" || !slug) return stored;
 	// Minted rows lend evidence: a single-holder tranche IS deployed on
 	// mainnet. A zero-supply contract or a listing that no longer resolves is not.
-	const live = RWA_REGISTRY.filter(
+	const best = RWA_REGISTRY.filter(
 		(r) =>
 			r.projectSlug === slug &&
+			r.verificationLevel === "toml-bidirectional" &&
 			(r.state === "live" || r.state === "issued-single-holder"),
-	).sort(
-		(a, b) =>
-			(LEVEL_RANK[a.verificationLevel] ?? 9) -
-				(LEVEL_RANK[b.verificationLevel] ?? 9) || a.id.localeCompare(b.id),
-	);
-	const best = live[0];
+	).sort((a, b) => a.id.localeCompare(b.id))[0];
 	if (!best) return stored;
 	return {
 		network: "mainnet",

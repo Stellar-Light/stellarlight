@@ -80,6 +80,7 @@ import { Contract } from "@stellar/stellar-sdk";
 import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
 import { isOwnContract } from "../../src/lib/contract-basis";
 import { rpcProbes } from "../../src/lib/hackproof";
+import { thirdPartyHost } from "../../src/lib/page-verdict";
 import {
 	type DeploymentCandidate,
 	decideDeployment,
@@ -299,6 +300,9 @@ export function registrable(host: string): string | null {
 export async function tomlChain(
 	website: string,
 ): Promise<{ code: string; issuer: string; tomlUrl: string } | null> {
+	// A page on somebody else's host (a Linktree, a GitHub repo, the SCF
+	// project page) has the host's toml at its origin, never the project's.
+	if (thirdPartyHost(website)) return null;
 	const host = website
 		.replace(/^https?:\/\//, "")
 		.split(/[/?#]/)[0]

@@ -693,23 +693,23 @@ describe("planDeployments: the deployment pass, without a database", () => {
 		expect(abstained).toHaveLength(1);
 	});
 
-	it("a stale DefiLlama reading evidences nothing; Spiko falls to its RWA registry product", async () => {
-		const reg = pickDeployment(null, "spiko");
+	const staleLlama = (id: number, slug: string, llama: string) => ({
+		id,
+		slug,
+		status: "Live",
+		statusBasis: "onchain-activity",
+		statusSourceUrl: llama,
+		tvlSource: "defillama",
+		tvlUSD: 1653789314,
+		tvlAsOf: "2026-09-14T10:30:21.591Z",
+		deployment: noSource,
+	});
+
+	it("a stale DefiLlama reading evidences nothing; Benji falls to its RWA registry product", async () => {
+		const reg = pickDeployment(null, "benji");
 		expect(reg.basis).toBe("rwa-registry");
 		const { plan } = await planDeployments(
-			[
-				{
-					id: 4,
-					slug: "spiko",
-					status: "Live",
-					statusBasis: "onchain-activity",
-					statusSourceUrl: "https://defillama.com/protocol/spiko",
-					tvlSource: "defillama",
-					tvlUSD: 1653789314,
-					tvlAsOf: "2026-09-14T10:30:21.591Z",
-					deployment: noSource,
-				},
-			],
+			[staleLlama(4, "benji", "https://defillama.com/protocol/benji")],
 			[],
 			io({}),
 			NOW,
@@ -717,6 +717,55 @@ describe("planDeployments: the deployment pass, without a database", () => {
 		expect(plan.map((w) => [w.to.basis, w.to.sourceUrl, w.to.asOf])).toEqual([
 			["rwa-registry", reg.sourceUrl, reg.asOf],
 		]);
+	});
+
+	it("Spiko's registry rows lend nothing; its claim rests on its own docs, which name its Stellar contracts (2026-11-12)", async () => {
+		expect(pickDeployment(null, "spiko").network).toBe("unknown");
+		const stored = {
+			network: "mainnet",
+			basis: "rwa-registry",
+			sourceUrl:
+				"https://stellar.expert/explorer/public/contract/CAGYRRKPFSWKM6SJOE4QAAVYMOSHMDS5WOQ4T5A2E6XNCU7LZZKUNQKP",
+			asOf: "2026-09-04T00:00:00.000Z",
+		};
+		const { plan, kept } = await planDeployments(
+			[
+				{
+					...staleLlama(4, "spiko", "https://defillama.com/protocol/spiko"),
+					deployment: stored,
+				},
+			],
+			[],
+			io({}),
+			NOW,
+		);
+		expect(kept).toEqual([]);
+		expect(plan.map((w) => [w.was, w.to])).toEqual([
+			[
+				stored,
+				{
+					network: "mainnet",
+					basis: "human-verified",
+					sourceUrl:
+						"https://docs.spiko.io/documentation/tokenization/addresses",
+					asOf: "2026-11-12",
+					why: "DEPLOYMENT_VERIFIED",
+				},
+			],
+		]);
+		const note = (DEPLOYMENT_VERIFIED.spiko as { note: string }).note;
+		for (const id of [
+			"CARUUX2FZNPH6DGJOEUFSIUQWYHNL5AVDV7PMVSHWL7OBYIBFC76F4TO",
+			"CBGV2QFQBBGEQRUKUMCPO3SZOHDDYO6SCP5CH6TW7EALKVHCXTMWDDOF",
+			"CDT3KU6TQZNOHKNOHNAFFDQZDURVC3MSTL4ML7TUTZGNOPBZCLABP4FR",
+			"CDS2GCAQTNQINSCJUJIVBJXILKBWP5PU7LOBGHMP3X47QCQBFKPMTCNT",
+			"CDWOB6T7SVSMMQN5V3P2OPTBAXOP7DAZHGVW3PYTZIKHVFKN6TBSXR6A",
+			"CDGSC6BA4TCAOVSFQCUEHDMOIIHYYVNYBT6YEARS4MX3ITAHUINVGQHX",
+			"CBOOCGZSVRSZFRE4U2NWR2B4RXYVJWRCBTGOUD2JPI2TDJPWMTJX7FZP",
+			"CAGYRRKPFSWKM6SJOE4QAAVYMOSHMDS5WOQ4T5A2E6XNCU7LZZKUNQKP",
+			"CAJD2IBSP7VO2VYJQUYJSOGPJINTUYV7MQITINXVPTIH3CCLCUENNMW4",
+		])
+			expect(note, id).toContain(id);
 	});
 
 	it("a testnet explorer link cited as status evidence is checked on testnet and becomes the source (CleverCon)", async () => {

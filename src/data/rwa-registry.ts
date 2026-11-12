@@ -17,7 +17,10 @@
  * you it has 18 live funds. These rows carry the product-level facts a
  * project row cannot — and they feed `products` on the project row.
  *
- * How a row earned its place (verificationLevel), strongest first:
+ * How a row earned its place (verificationLevel). Only toml-bidirectional
+ * holds both ways from first-party records, and only it lends its project a
+ * deployment (deploymentFromRegistry); every other level rests on one side or
+ * on rwa.xyz's listing (2026-11-12):
  *   toml-bidirectional   the ISSUER's own stellar.toml names this (code,
  *                        issuer) AND the issuer account's home_domain points
  *                        back. A squatter controls its own home_domain; it
@@ -47,7 +50,8 @@
  * zero events, or a classic asset the issuer declares that has trustlines but
  * nothing minted — CETESZ, FOCGX) | not-found (a listing that no longer
  * resolves). Only live and issued-single-holder are minted on mainnet and may
- * lend deployment evidence; only live is served as a live product.
+ * lend deployment evidence, at toml-bidirectional; only live is served as a
+ * live product.
  *
  * productKind follows rwa.xyz's asset class on listed rows; on issuer-declared
  * rows (no rwa.xyz class to follow) it follows the toml's own
@@ -163,7 +167,7 @@ export interface RwaAsset {
 }
 
 /** The most recent verifiedAt in the registry — the date it was last reconciled. Rows keep their own verifiedAt. */
-export const RWA_REGISTRY_AS_OF = "2026-09-09";
+export const RWA_REGISTRY_AS_OF = "2026-11-12";
 
 export const RWA_REGISTRY: RwaAsset[] = [
 	{
@@ -1300,11 +1304,11 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		network: "mainnet",
 		state: "live",
 		launchedAt: null,
-		verifiedAt: "2026-09-04",
-		evidenceUrl:
-			"https://stellar.expert/explorer/public/asset/EURC-GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2",
-		verificationLevel: "on-chain-only",
-		basisNote: "on-chain only (toml could-not-check or absent)",
+		verifiedAt: "2026-11-12",
+		evidenceUrl: "https://circle.com/.well-known/stellar.toml",
+		verificationLevel: "toml-bidirectional",
+		basisNote:
+			"toml-bidirectional; re-read 2026-11-12: the issuer's home_domain circle.com serves a toml that lists it in ACCOUNTS and declares EURC (could-not-check or absent when the row was first verified)",
 		decimals: null,
 		totalSupply: null,
 		horizonNote: "holders=32632",
@@ -2544,11 +2548,11 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		network: "mainnet",
 		state: "live",
 		launchedAt: null,
-		verifiedAt: "2026-09-04",
-		evidenceUrl:
-			"https://stellar.expert/explorer/public/asset/PYUSD-GDQE7IXJ4HUHV6RQHIUPRJSEZE4DRS5WY577O2FY6YQ5LVWZ7JZTU2V5",
-		verificationLevel: "on-chain-only",
-		basisNote: "on-chain only (toml could-not-check or absent)",
+		verifiedAt: "2026-11-12",
+		evidenceUrl: "https://token-metadata.paxos.com/.well-known/stellar.toml",
+		verificationLevel: "toml-bidirectional",
+		basisNote:
+			"toml-bidirectional; re-read 2026-11-12: the issuer's home_domain token-metadata.paxos.com serves a toml that lists the issuer in ACCOUNTS and declares PYUSD (read by the stablecoin lane 2026-11-12, and in the Wayback capture of 2026-10-23); it answered 403 when the row was first verified, and still does from some networks",
 		decimals: null,
 		totalSupply: null,
 		horizonNote: "holders=9733",
@@ -3456,11 +3460,11 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		network: "mainnet",
 		state: "live",
 		launchedAt: null,
-		verifiedAt: "2026-09-04",
-		evidenceUrl:
-			"https://stellar.expert/explorer/public/asset/USDM1-GDM5QWWXCMDTQMZAKMYTCI52LA7FWBHAZMU5NJLMIFHDJISJRP2ZWPKC",
-		verificationLevel: "on-chain-only",
-		basisNote: "on-chain only (no home_domain)",
+		verifiedAt: "2026-11-12",
+		evidenceUrl: "https://usdm1.com/.well-known/stellar.toml",
+		verificationLevel: "toml-bidirectional",
+		basisNote:
+			"toml-bidirectional; re-read 2026-11-12: the issuer now sets home_domain usdm1.com, whose toml lists it in ACCOUNTS and declares USDM1 (no home_domain when the row was first verified)",
 		decimals: null,
 		totalSupply: null,
 		horizonNote: "holders=28",
@@ -4066,6 +4070,29 @@ export interface RwaIssuerCoverage {
 }
 
 export const RWA_ISSUER_COVERAGE: RwaIssuerCoverage[] = [
+	// 2026-11-12: three issuers whose rows were promoted to toml-bidirectional
+	// once their home-domain tomls were read (see each row's basisNote).
+	{
+		issuer: "GDQE7IXJ4HUHV6RQHIUPRJSEZE4DRS5WY577O2FY6YQ5LVWZ7JZTU2V5",
+		issuerEntity: "Paxos Trust Company",
+		tomlUrl: "https://token-metadata.paxos.com/.well-known/stellar.toml",
+		declared: ["PYUSD"],
+		reconciledAt: "2026-11-12",
+	},
+	{
+		issuer: "GDM5QWWXCMDTQMZAKMYTCI52LA7FWBHAZMU5NJLMIFHDJISJRP2ZWPKC",
+		issuerEntity: "Republic of the Marshall Islands",
+		tomlUrl: "https://usdm1.com/.well-known/stellar.toml",
+		declared: ["USDM1"],
+		reconciledAt: "2026-11-12",
+	},
+	{
+		issuer: "GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2",
+		issuerEntity: "Circle Internet Financial",
+		tomlUrl: "https://circle.com/.well-known/stellar.toml",
+		declared: ["EURC"],
+		reconciledAt: "2026-11-12",
+	},
 	{
 		issuer: "GDC7X2MXTYSAKUUGAIQ7J7RPEIM7GXSAIWFYWWH4GLNFECQVJJLB2EEU",
 		issuerEntity: "AUDC Pty Ltd",

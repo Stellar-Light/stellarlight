@@ -11,10 +11,10 @@ import { execSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import yaml from "js-yaml";
-import { getPayload } from "payload";
 import {
 	changedFields,
 	feedOwnedFields,
+	feedStampsProvenance,
 	withoutCuratedFields,
 } from "../src/lib/utils/curated-fields";
 import {
@@ -23,7 +23,6 @@ import {
 	mapLumenloopEntry,
 } from "../src/lib/utils/lumenloop-mapper";
 import { generateSlug } from "../src/lib/utils/normalize";
-import configPromise from "../src/payload.config";
 import { curatedFieldsFor } from "./data/curation-maps";
 
 // --- CLI args ---
@@ -48,7 +47,44 @@ const stats = {
 };
 const errors: string[] = [];
 
+/** The provenance the feed stamps on a row it updates, or {} for none.
+ *
+ * sls-024: the inherited label's citable source IS the lumenloop file this
+ * row syncs from. Stamp it (plus a dated basis) when the row has no stronger
+ * basis: never over human-verified, site-liveness or on-chain evidence, nor
+ * over a basis a curation map wrote for a status it owns (2026-11-12: a
+ * dated unverified stamp flipped back to source-inherited every morning).
+ *
+ * statusAsOf DATES THE OBSERVATION, not the sync. It moved to `now` on every
+ * run for every weak-basis row, so 850 projects nobody had re-checked since
+ * import reported "Live, as of today" each morning: a freshness claim the
+ * sync had not earned, and worse than leaving it null. It advances only when
+ * the incoming status actually differs from what we hold; an unchanged label
+ * keeps the date we first observed it. */
+export function feedProvenanceStamp(
+	doc: {
+		status?: string | null;
+		statusBasis?: string | null;
+		statusAsOf?: unknown;
+	},
+	owned: ReadonlySet<string>,
+	patch: { status?: string },
+	file: string,
+	now: Date = new Date(),
+): Record<string, unknown> {
+	if (!feedStampsProvenance(owned, doc.statusBasis)) return {};
+	const statusChanged =
+		typeof patch.status === "string" && patch.status !== doc.status;
+	return {
+		statusBasis: "source-inherited",
+		...(statusChanged || !doc.statusAsOf ? { statusAsOf: now } : {}),
+		statusSourceUrl: `https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/${file}`,
+	};
+}
+
 async function main() {
+	const { getPayload } = await import("payload");
+	const configPromise = (await import("../src/payload.config")).default;
 	console.log("=== Lumenloop Ecosystem Sync ===");
 	console.log(
 		`Mode: ${dryRun ? "DRY RUN (no changes)" : "EXECUTE (writing to DB)"}`,
@@ -245,34 +281,12 @@ async function main() {
 							}`,
 						);
 					} else {
-						// sls-024: the inherited label's citable source IS the lumenloop
-						// file this row syncs from. Stamp it (plus a dated basis) when
-						// the row has no stronger basis — never stomp human-verified/
-						// site-liveness/onchain evidence.
-						const weakBasis =
-							!doc.statusBasis ||
-							doc.statusBasis === "source-inherited" ||
-							doc.statusBasis === "unverified";
-						// statusAsOf DATES THE OBSERVATION, not the sync. It moved to
-						// `now` on every run for every weak-basis row, so 850 projects
-						// nobody had re-checked since import reported "Live, as of
-						// today" each morning — a freshness claim the sync had not
-						// earned, and worse than leaving it null. It advances only when
-						// the incoming status actually differs from what we hold; an
-						// unchanged label keeps the date we first observed it.
-						const incomingStatus = (patch as { status?: string }).status;
-						const statusChanged =
-							typeof incomingStatus === "string" &&
-							incomingStatus !== doc.status;
-						const provenanceStamp = weakBasis
-							? {
-									statusBasis: "source-inherited",
-									...(statusChanged || !doc.statusAsOf
-										? { statusAsOf: new Date() }
-										: {}),
-									statusSourceUrl: `https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/${file}`,
-								}
-							: {};
+						const provenanceStamp = feedProvenanceStamp(
+							doc,
+							owned,
+							patch as { status?: string },
+							file,
+						);
 						await payload.update({
 							collection: "projects",
 							id: doc.id,
@@ -443,7 +457,8 @@ async function linkEntity(
 	}
 }
 
-main().catch((e) => {
-	console.error("Fatal error:", e);
-	process.exit(1);
-});
+if (process.argv[1]?.includes("sync-lumenloop"))
+	main().catch((e) => {
+		console.error("Fatal error:", e);
+		process.exit(1);
+	});

@@ -1,8 +1,13 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { SEEDS, STATUS_FIX } from "../../../scripts/data/curation-maps";
 import { isMaintenance, kindOf } from "../improvement-ledger";
-import { ANOTHER_BUSINESS_VERDICTS, classifyPage } from "../page-verdict";
+import {
+	ANOTHER_BUSINESS_VERDICTS,
+	classifyPage,
+	thirdPartyHost,
+} from "../page-verdict";
 
 // Every fixture is a real page the 2026-08-21 liveness sweep fetched from a
 // row that was `Live` on a site-liveness basis.
@@ -133,5 +138,70 @@ describe("a page that reads as another business reaches the ledger", () => {
 				typeof isMaintenance
 			>[0]),
 		).toBe(true);
+	});
+});
+
+/** A page on a host the project does not own is about the project, not the
+ * product: what it answers describes the host (audit 2026-11-12). */
+describe("thirdPartyHost", () => {
+	it("names the host behind each known case", () => {
+		expect(
+			thirdPartyHost(
+				"https://communityfund.stellar.org/project/lumenshade-privacy-pools-hnp",
+			),
+		).toBe("communityfund.stellar.org");
+		expect(
+			thirdPartyHost("https://github.com/frankszendzielarz/sorobanrpcsdk"),
+		).toBe("github.com");
+		expect(thirdPartyHost("https://linktr.ee/dobprotocol")).toBe("linktr.ee");
+		expect(
+			thirdPartyHost("https://moonlight-10.gitbook.io/moonlight-docs"),
+		).toBe("gitbook.io");
+		expect(thirdPartyHost("https://www.youtube.com/@hififo")).toBe(
+			"youtube.com",
+		);
+		expect(thirdPartyHost("linktr.ee/dobprotocol")).toBe("linktr.ee");
+	});
+	it("passes a product's own site, one on a hosting platform, and SDF's own products", () => {
+		for (const u of [
+			"https://rivool.finance/",
+			"https://stellar-chef.github.io/",
+			"https://zilt.vercel.app/",
+			"https://dashboard.stellar.org/",
+			"https://quest.stellar.org/",
+			"https://notgithub.com/",
+			null,
+			"",
+			"not a url",
+		])
+			expect(thirdPartyHost(u), String(u)).toBeNull();
+	});
+	it("no curated status or seed claims liveness or an integration from one", () => {
+		const claims = [
+			...Object.entries(STATUS_FIX).map(([slug, f]) => ({
+				slug,
+				basis: f.basis,
+				url: f.sourceUrl,
+			})),
+			...SEEDS.map((s) => {
+				const seed = s as {
+					slug: string;
+					statusBasis?: string;
+					statusSourceUrl?: string;
+					links?: { website?: string };
+				};
+				return {
+					slug: seed.slug,
+					basis: seed.statusBasis,
+					url: seed.statusSourceUrl ?? seed.links?.website,
+				};
+			}),
+		];
+		const bad = claims.filter(
+			(c) =>
+				(c.basis === "site-liveness" || c.basis === "product-integration") &&
+				thirdPartyHost(c.url),
+		);
+		expect(bad.map((c) => `${c.slug} ${c.url}`)).toEqual([]);
 	});
 });
