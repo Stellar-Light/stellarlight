@@ -39,13 +39,14 @@ import {
 	carryIssuerOfRecord,
 	type IssuerOfRecordFields,
 	type IssuerOfRecordRead,
-	issuerOfRecordPatch,
 	issuerOfRecordWriteOn,
 	type MeasuredStablecoin,
 	measureRegistry,
 	nextPaymentsHistory,
 	paymentsCount24hFrom,
 	RATE_LIMIT_MARK,
+	rowIdentity,
+	rowsToRetire,
 	supplyBaseline,
 	supplyBaselineWindow,
 } from "../src/lib/stablecoin-pipeline";
@@ -174,23 +175,10 @@ async function main() {
 		let kept = false;
 
 		const row = {
-			assetId: m.id,
-			code: m.code,
-			issuer: m.issuer,
-			name: m.name,
-			company: m.company,
-			// The issuer of record: none of its keys while the write switch is
-			// off, so the stored fields stay exactly as they are.
-			...issuerOfRecordPatch(
-				m.issuerOfRecordRead,
-				prev,
-				WRITE_ISSUER_OF_RECORD,
-			),
-			domain: m.domain,
-			website: m.website,
-			peg: m.peg,
-			country: m.country,
-			assetType: m.assetType,
+			// Brand, identity and class; the issuer of record has none of its
+			// keys while the write switch is off, so the stored fields stay
+			// exactly as they are.
+			...rowIdentity(m, prev, WRITE_ISSUER_OF_RECORD),
 			supply: keep(m.supply, prev?.supply),
 			priceUSD: keep(m.priceUSD, prev?.priceUSD),
 			// Moves with priceUSD, never on its own: the pipeline sets priceBasis
@@ -295,19 +283,19 @@ async function main() {
 	// explorer both filter retired rows out, and — per the collection's own
 	// contract — retired means WE stopped tracking it, never that the issuer
 	// stopped issuing it.
-	const measuredIds = new Set(measured.map((m) => m.id));
 	const everything = await payload.find({
 		collection: "stablecoins",
 		limit: 500,
 		depth: 0,
 	});
-	const toRetire = (
+	const toRetire = rowsToRetire(
 		everything.docs as Array<{
 			id: string;
 			assetId?: string;
 			retiredAt?: string;
-		}>
-	).filter((d) => d.assetId && !measuredIds.has(d.assetId) && !d.retiredAt);
+		}>,
+		measured.map((m) => m.id),
+	);
 
 	if (toRetire.length) {
 		console.log(`\n${toRetire.length} row(s) no longer in the registry:`);

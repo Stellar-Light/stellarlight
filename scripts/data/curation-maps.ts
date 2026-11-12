@@ -2769,6 +2769,35 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://interstellar.exchange/",
 		note: "Every interstellar.exchange path times out, its Google Play page answers 404 and its iOS app is delisted, and the account that issues its BTC, BCH and DOGE tokens, GCNSGHUCG5VMGLT5RIYYZSO7VQULQKAJ62QA33DBC5PPBSO57LFWVV6P, has signed nothing in Horizon's history since 2025-09-23 (read 2026-11-07).",
 	},
+	// -- sls-107, 2026-11-11: issuers that discontinued the product, in their
+	// own words. Onchain-activity kept these rows Live because the tokens
+	// still move; the issuer's statement outranks a probe. The same facts
+	// retire them from the stablecoin registry and mark their RWA rows
+	// discontinued (src/data/rwa-registry.ts).
+	gyen: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-11",
+		sourceUrl: "https://stablecoin.z.com/.well-known/stellar.toml",
+		note: "GMO-Z.com Trust Company's stellar.toml (read 2026-11-11) says issuance of GYEN has been wound down, with the initial 1:1 redemption period with GMO Trust running from 15 May to 11 November 2026.",
+	},
+	zusd: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-11",
+		sourceUrl: "https://stablecoin.z.com/.well-known/stellar.toml",
+		note: "GMO-Z.com Trust Company's stellar.toml (read 2026-11-11) says issuance of ZUSD has been wound down, with the initial 1:1 redemption period with GMO Trust running from 15 May to 11 November 2026.",
+	},
+	veur: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-11",
+		sourceUrl: "https://vnx.li/blog",
+		note: "VNX no longer offers exchange services for VEUR and no longer lists it among its stablecoins: VNX Commodities AG's notice of 2026-04-22 said its exchange services of VEUR 'will be fully discontinued', with holders to settle by 22 May 2026, and VNX's stablecoins page (read 2026-11-11) lists only VCHF and VGBP.",
+	},
 };
 
 /** Website corrections (liveness triage 2026-07-10, boxy-approved): the
@@ -5247,6 +5276,27 @@ export const VENUE_ROLE_UNRESOLVED: Record<string, string> = {};
 // STATUS_FIX/WEBSITE_FIXES/SEEDS live here. No rows changed in the move.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Partner descriptions that are no longer true, corrected by
+ * scripts/data/curate-partners.ts. From-guarded: the stored description is
+ * replaced only while it still reads exactly `from` (our own seed text), so
+ * a description the partner has since claimed and edited is never touched.
+ */
+export const PARTNER_DESCRIPTION_FIXES: Record<
+	string,
+	{ from: string; to: string; asOf: string; sourceUrl: string }
+> = {
+	// sls-107, 2026-11-11: GMO-Z.com Trust's own stellar.toml says issuance
+	// of GYEN and ZUSD has been wound down; the seeded description still said
+	// "issuing".
+	"gmo-zcom-trust": {
+		from: "GMO Internet Group's NY-regulated trust company issuing GYEN (JPY) and ZUSD stablecoins on Stellar.",
+		to: "GMO Internet Group's NY-regulated trust company. It issued the GYEN (JPY) and ZUSD stablecoins on Stellar and has wound down issuance of both; its stellar.toml (read 2026-11-11) gives an initial 1:1 redemption period from 15 May to 11 November 2026.",
+		asOf: "2026-11-11",
+		sourceUrl: "https://stablecoin.z.com/.well-known/stellar.toml",
+	},
+};
+
 export const DESCRIPTION_FIXES: Record<string, string> = {
 	// sls-113 (#1905), read 2026-11-07 from balanced.network/timeline/: Balanced
 	// began using SODAX Intents for its trades on 2025-09-15 ("the first step in
@@ -5304,7 +5354,9 @@ export const DESCRIPTION_FIXES: Record<string, string> = {
 	// (stablecoin.z.com/.well-known/stellar.toml, read 2026-07-20) states
 	// issuance is wound down with a 1:1 redemption window through Nov 11
 	// 2026 — material lifecycle truth an agent must see on the row.
-	gyen: "GYEN is a regulated Japanese-yen stablecoin (with sister USD token ZUSD) issued on Stellar by GMO-Z.com Trust Company. Per the issuer's own stellar.toml (July 2026), new issuance is wound down; 1:1 redemption remains open through November 11, 2026.",
+	// 2026-11-11 (sls-107): past tense now that the window has closed; the
+	// row moves to Inactive in STATUS_FIX.
+	gyen: "GYEN was a regulated Japanese-yen stablecoin (with sister USD token ZUSD) issued on Stellar by GMO-Z.com Trust Company. The issuer's own stellar.toml (read 2026-11-11) says issuance of both has been wound down; the initial 1:1 redemption period with GMO Trust ran from 15 May to 11 November 2026.",
 	// 2026-07-16: SDF announced MoneyGram, Figure and Range as new Tier 1
 	// validator organizations (Tier 1 set: 7 → 10 orgs). Source: stellar.org/
 	// press/moneygram-figure-markets-and-range-to-help-secure-the-stellar-

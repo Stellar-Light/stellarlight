@@ -19,7 +19,12 @@ import {
 	type TokenSnapshot,
 } from "@/lib/stablecoin-series";
 import { aggregateDaily, type SnapshotPoint } from "@/lib/stablecoin-view";
-import { type StoreRow, storeRowToApi } from "@/lib/stablecoins";
+import {
+	retirementOf,
+	type StoreRow,
+	storeRowToApi,
+	UNCLASSIFIED,
+} from "@/lib/stablecoins";
 import { graph, itemListNode } from "@/lib/structured-data";
 import { getAppUrl } from "@/lib/utils/app-url";
 
@@ -66,7 +71,7 @@ export default async function StablecoinsPage() {
 		]);
 
 		coins = (current.docs as StoreRow[])
-			.filter((d) => !d.retiredAt)
+			.filter((d) => !retirementOf(d))
 			.map((d) => {
 				const r = storeRowToApi(d);
 				return {
@@ -82,7 +87,8 @@ export default async function StablecoinsPage() {
 					issuerOfRecordNote: r.issuerOfRecordNote,
 					country: r.country,
 					peg: r.peg,
-					assetType: r.assetType,
+					// The explorer tags a recorded class only, as before.
+					assetType: r.assetType === UNCLASSIFIED ? null : r.assetType,
 					logoUrl: d.logoUrl ?? null,
 					// The explorer drew a peg flag for assets whose issuer serves no
 					// usable logo (BRLT, ARST, PEN, MXNe, mZAR) — same rule here.

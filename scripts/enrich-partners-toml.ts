@@ -134,7 +134,7 @@ const OFFICIAL_ANCHOR_SEEDS: Array<{
 		websiteUrl: "https://stablecoin.z.com",
 		sectors: ["stablecoins"],
 		description:
-			"GMO Internet Group's NY-regulated trust company issuing GYEN (JPY) and ZUSD stablecoins on Stellar.",
+			"GMO Internet Group's NY-regulated trust company. It issued the GYEN (JPY) and ZUSD stablecoins on Stellar and has wound down issuance of both; its stellar.toml (read 2026-11-11) gives an initial 1:1 redemption period from 15 May to 11 November 2026.",
 	},
 	{
 		name: "Zeam Money",

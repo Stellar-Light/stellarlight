@@ -620,28 +620,36 @@ describe("company is the brand; issuerOfRecord is what the issuer's toml says", 
 
 /**
  * sls-107, second half: USDY and YLDS (assetType "Yield Stablecoin") sit in the
- * same list as par coins and ?assetType= answered 400. A qualifier is
- * recorded only where the registry found the unit is not 1:1 with its peg;
- * null means no qualifier was recorded (unclassified), not a verified plain
- * peg, so a qualifier filter never matches a null row and `none` selects the
- * null rows without calling them par.
+ * same list as par coins and ?assetType= answered 400. A class is recorded
+ * only where the registry found the unit is not 1:1 with its peg. A row with
+ * none served null, and null had stood for two things (a plain peg, in the
+ * spec until 1.9.121, and not classified); every row now serves a class, and
+ * the rows the registry records none for say so: Unclassified, which is not
+ * a verified plain peg.
  */
-describe("assetType filter", () => {
+describe("assetType: a class on every row, and its filter", () => {
 	const rows = [
 		USDY,
 		USDC,
 		GYEN,
-		{ ...USDC, code: "USDM1", assetType: "Treasury-Backed" },
+		{
+			...USDC,
+			assetId: "USDM1-GDM5QWWX",
+			code: "USDM1",
+			assetType: "Treasury-Backed",
+		},
 	].map(storeRowToApi);
 
-	it("resolves a value case-insensitively to its canonical spelling; an unknown value resolves to nothing", () => {
+	it("resolves a value case-insensitively to its class; none is Unclassified; an unknown value resolves to nothing", () => {
 		expect(assetTypeFilter("yield stablecoin")).toBe("Yield Stablecoin");
 		expect(assetTypeFilter(" Treasury-Backed ")).toBe("Treasury-Backed");
-		expect(assetTypeFilter("NONE")).toBe("none");
-		expect(assetTypeFilter("Fiat-backed")).toBeUndefined();
+		expect(assetTypeFilter("unclassified")).toBe("Unclassified");
+		expect(assetTypeFilter("NONE")).toBe("Unclassified");
+		expect(assetTypeFilter("fiat-backed")).toBe("Fiat-Backed");
+		expect(assetTypeFilter("Fiat")).toBeUndefined();
 	});
 
-	it("a qualifier keeps only the rows recorded with it; a null row never matches one", () => {
+	it("a class keeps only the rows recorded with it; an unclassified row never matches a qualifier", () => {
 		expect(
 			filterByAssetType(rows, "Yield Stablecoin").map((r) => r.ticker),
 		).toEqual(["USDY"]);
@@ -650,26 +658,115 @@ describe("assetType filter", () => {
 		).toEqual(["USDM1"]);
 	});
 
-	it("none keeps only the rows with no qualifier recorded", () => {
-		expect(filterByAssetType(rows, "none").map((r) => r.ticker)).toEqual([
-			"USDC",
-			"GYEN",
-		]);
+	it("Unclassified keeps only the rows with no class recorded", () => {
+		expect(
+			filterByAssetType(rows, "Unclassified").map((r) => r.ticker),
+		).toEqual(["GYEN"]);
+		expect(filterByAssetType(rows, "Fiat-Backed").map((r) => r.ticker)).toEqual(
+			["USDC"],
+		);
 	});
 
-	it("a stored assetType outside the vocabulary is served as null, never passed through", () => {
+	it("before the refresh writes a class, a row serves the registry's class and source by assetId", () => {
+		// Production on 2026-11-11: 38 rows store no class until the next run.
+		expect(storeRowToApi(USDC)).toMatchObject({
+			assetType: "Fiat-Backed",
+			assetTypeSourceUrl: "https://www.circle.com/usdc",
+			assetTypeAsOf: "2026-11-11T00:00:00.000Z",
+			assetTypeNote: expect.stringContaining("redeemable 1:1"),
+		});
+		// USDY stores its qualifier but no source yet: the registry's source.
+		expect(storeRowToApi(USDY)).toMatchObject({
+			assetType: "Yield Stablecoin",
+			assetTypeSourceUrl: "https://ondo.finance/usdy",
+		});
+	});
+
+	it("once the refresh has written a class, the stored values are served", () => {
 		expect(
-			storeRowToApi({ code: "X", assetType: "Mystery" }).assetType,
-		).toBeNull();
+			storeRowToApi({
+				...USDC,
+				assetType: "Unclassified",
+				assetTypeSourceUrl: null,
+				assetTypeAsOf: "2026-12-01T00:00:00.000Z",
+				assetTypeNote: "Checked 2026-12-01: a stored verdict.",
+			}),
+		).toMatchObject({
+			assetType: "Unclassified",
+			assetTypeSourceUrl: null,
+			assetTypeNote: "Checked 2026-12-01: a stored verdict.",
+		});
+	});
+
+	it("a row neither the store nor the registry classes serves Unclassified, never null, and no source", () => {
+		expect(storeRowToApi({ code: "X" })).toMatchObject({
+			assetType: "Unclassified",
+			assetTypeSourceUrl: null,
+			assetTypeAsOf: null,
+			assetTypeNote: null,
+		});
+		expect(storeRowToApi({ code: "X", assetType: null }).assetType).toBe(
+			"Unclassified",
+		);
+	});
+
+	it("a stored assetType outside the vocabulary is served as Unclassified, never passed through", () => {
+		expect(storeRowToApi({ code: "X", assetType: "Mystery" }).assetType).toBe(
+			"Unclassified",
+		);
 		expect(storeRowToApi(USDY).assetType).toBe("Yield Stablecoin");
 	});
 
-	it("every registry qualifier is in the vocabulary the filter accepts", () => {
-		for (const a of STABLECOIN_REGISTRY)
-			if (a.assetType)
-				expect(STABLECOIN_ASSET_TYPES as readonly string[]).toContain(
-					a.assetType,
-				);
+	it("over the whole registry: every row has a class with the issuer's statement, or Unclassified with what was checked", () => {
+		const bad: string[] = [];
+		for (const a of STABLECOIN_REGISTRY) {
+			const { url, checkedOn, note } = a.assetTypeSource;
+			const id = `${a.code}-${a.issuer.slice(0, 8)}`;
+			if (!(STABLECOIN_ASSET_TYPES as readonly string[]).includes(a.assetType))
+				bad.push(`${id}: class ${a.assetType}`);
+			if (!/^\d{4}-\d{2}-\d{2}$/.test(checkedOn))
+				bad.push(`${id}: no read date`);
+			if (a.assetType === "Unclassified") {
+				if (url !== null) bad.push(`${id}: Unclassified with a source`);
+				if (!note.startsWith("Checked ")) bad.push(`${id}: no checked note`);
+			} else {
+				if (!url?.startsWith("https://")) bad.push(`${id}: no source URL`);
+				if (note.length < 40) bad.push(`${id}: no statement`);
+			}
+		}
+		expect(bad).toEqual([]);
+		// Read on 2026-11-11: no issuer statement of the backing could be read
+		// for these seven; every other row has one.
+		expect(
+			STABLECOIN_REGISTRY.filter((a) => a.assetType === "Unclassified")
+				.map((a) => `${a.code}-${a.issuer.slice(0, 8)}`)
+				.sort(),
+		).toEqual(
+			[
+				"APSEURM-GB7OUO5N",
+				"APSUSDM-GB7OUO5N",
+				"ARST-GCSAZVWX",
+				"BRLT-GCHQ3F2B",
+				"EURC-GAQRF3UG",
+				"MXNe-GCQCNWT2",
+				"NGNC-GASBV6W7",
+			].sort(),
+		);
+	});
+
+	it("served as the refresh stores it: the class and its source, never null", () => {
+		for (const a of STABLECOIN_REGISTRY) {
+			const served = storeRowToApi({
+				code: a.code,
+				assetType: a.assetType,
+				assetTypeSourceUrl: a.assetTypeSource.url,
+				assetTypeAsOf: a.assetTypeSource.checkedOn,
+				assetTypeNote: a.assetTypeSource.note,
+			});
+			expect(served.assetType, a.code).toBe(a.assetType);
+			expect(served.assetTypeSourceUrl, a.code).toBe(a.assetTypeSource.url);
+			expect(served.assetTypeNote, a.code).toBe(a.assetTypeSource.note);
+		}
 	});
 });
 
@@ -691,9 +788,12 @@ describe("getStablecoins in the spec", () => {
 		expect(served.filter((k) => !declared.includes(k))).toEqual([]);
 	});
 
-	it("declares the issuer-of-record fields as nullable strings", () => {
+	it("declares the issuer-of-record and class source fields as nullable strings", () => {
 		const p = S.components.schemas.Stablecoin.properties;
 		for (const f of [
+			"assetTypeSourceUrl",
+			"assetTypeAsOf",
+			"assetTypeNote",
 			"issuerOfRecord",
 			"issuerOfRecordCheck",
 			"issuerOfRecordSourceUrl",

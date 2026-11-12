@@ -10169,6 +10169,11 @@ export const spec: OpenAPISpec = {
 															description:
 																"Served rows that carry a `measured` reading from the six-hour lane.",
 														},
+														discontinued: {
+															type: "integer",
+															description:
+																"Registry rows whose issuer has said it no longer offers the product (`discontinued` set). They keep state live while the tokens are minted and held, so subtract them from byState.live to count live products.",
+														},
 														byLevel: {
 															type: "object",
 															additionalProperties: { type: "integer" },
@@ -10242,6 +10247,8 @@ export const spec: OpenAPISpec = {
 													state: {
 														type: "string",
 														enum: [...RWA_STATES],
+														description:
+															"What is minted on chain: live (at least two holders), issued-single-holder, deployed-no-supply or not-found. It is an on-chain fact, not a product status: a row whose issuer has discontinued the product (`discontinued` set) keeps state live while its tokens are minted and held.",
 													},
 													launchedAt: {
 														type: "string",
@@ -10311,6 +10318,17 @@ export const spec: OpenAPISpec = {
 														description:
 															"Where controls came from; null when controls is null.",
 													},
+													discontinued: {
+														type: "object",
+														nullable: true,
+														description:
+															"The issuer's own dated statement that it no longer offers this product (issuance wound down, exchange services ended): `note` says what it states, `sourceUrl` where, `asOf` the day it was read. The row stays, since the token still exists on chain and `state` says what is minted; the project row serves the product with status retired and this note. null = no such statement found, never a verified 'still offered'.",
+														properties: {
+															note: { type: "string" },
+															sourceUrl: { type: "string" },
+															asOf: { type: "string" },
+														},
+													},
 													measured: {
 														type: "object",
 														nullable: true,
@@ -10354,7 +10372,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Ecosystem"],
 				summary: "Stellar stablecoins ranked by USD market cap",
 				description:
-					"Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; GYEN supply is yen, ARST is pesos), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.",
+					"Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; ARST supply is pesos, mZAR is rand), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.",
 				"x-routing": {
 					purpose:
 						"Authoritative USD-comparable stablecoin ranking. Answers 'biggest stablecoin', 'largest issuer', 'total stablecoin market cap' with USD market cap, NOT raw supply, which is denominated in each asset's own peg and not comparable across rows.",
@@ -10371,7 +10389,6 @@ export const spec: OpenAPISpec = {
 						"ondo",
 						"pyusd",
 						"eurc",
-						"gyen",
 						"issuer",
 						"peg",
 						"holders",
@@ -10416,7 +10433,7 @@ export const spec: OpenAPISpec = {
 						name: "assetType",
 						in: "query",
 						description:
-							"Filter on the row's assetType, case-insensitive: Yield Stablecoin (e.g. USDY), Treasury-Backed (e.g. USDM1), or none for the rows with no assetType recorded. A qualifier is recorded only where the unit is not 1:1 with its peg and a row without one was not classified, so assetType=none leaves out the known yield and Treasury products but does not certify every row left as par. Unrecognized values return 400 with the valid set.",
+							"Filter on the row's assetType, case-insensitive: one class (defined on Stablecoin.assetType), e.g. Fiat-Backed for the coins whose issuer states cash or cash-equivalent reserves in the peg currency. Unclassified returns the rows whose issuer states no backing we could read; none is an alias of Unclassified, kept for compatibility, and returns the same rows. Unrecognized values return 400 with the valid set.",
 						schema: {
 							type: "string",
 							enum: [...STABLECOIN_ASSET_TYPE_FILTERS],
@@ -11536,7 +11553,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						nullable: true,
 						description:
-							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
+							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. A registry product whose issuer has said it no longer offers it (getRwaAssets `discontinued`) is served as retired, with that statement in note.",
 						items: {
 							type: "object",
 							properties: {
@@ -13493,7 +13510,7 @@ export const spec: OpenAPISpec = {
 					ticker: {
 						type: "string",
 						description:
-							"Asset code (USDC, USDY, GYEN, …). NOT unique on its own: see assetId.",
+							"Asset code (USDC, USDY, ARST, …). NOT unique on its own: see assetId.",
 					},
 					name: { type: "string", nullable: true },
 					issuer: {
@@ -13525,7 +13542,7 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						enum: [...ISSUER_OF_RECORD_CHECKS],
 						description:
-							"What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account sets no home_domain, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made changes nothing, so the stored check and its date stay as they were: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body). A toml read that cannot answer changes nothing either: an ORG_NAME in a form the parser cannot read, or an account the toml does not list where it holds a listing the parser cannot read (a currency linked to its own toml, a code it cannot read).",
+							"What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account is not on Horizon, sets no home_domain or one that is not a plain host name, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made changes nothing, so the stored check and its date stay as they were: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body). A toml read that cannot answer changes nothing either: an ORG_NAME in a form the parser cannot read, or an account the toml does not list where it holds a listing the parser cannot read (a currency linked to its own toml, a code it cannot read).",
 					},
 					issuerOfRecordSourceUrl: {
 						type: "string",
@@ -13544,7 +13561,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"On a named check: that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'), else null. On a not-named check: why no issuer of record was named.",
+							"On a named check: that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'), else null. On a not-named check: why no issuer of record was named, with what that leaves unconfirmed where the registry has checked it (USDT0: the toml at usdt0.to names Everdawn Labs Limited and lists the account, but the account sets no home_domain pointing there, so the link is not confirmed from the account side).",
 					},
 					website: { type: "string", nullable: true },
 					peg: {
@@ -13561,10 +13578,28 @@ export const spec: OpenAPISpec = {
 					},
 					assetType: {
 						type: "string",
-						nullable: true,
 						enum: [...STABLECOIN_ASSET_TYPES],
 						description:
-							"Recorded only where the registry found the unit is not 1:1 with its peg; such rows are priced from their own market where it can be read (priceBasis). Yield Stablecoin = yield accrues to or is paid on the unit (Ondo's USDY); Treasury-Backed = a Treasury-backed bond (USDM1). Null = no qualifier recorded: the row was not classified, so null is unknown, NOT a verified plain peg and NOT 'not yield-bearing'. Filter with ?assetType=.",
+							"What backs the unit as its issuer states it, never null; read by hand from the issuer's own page (assetTypeSourceUrl, read on assetTypeAsOf), never from a stellar.toml's anchor fields. Fiat-Backed = backed by its peg currency in cash, deposits or cash equivalents (short-dated government debt, government money market funds). Crypto-Backed = backed by crypto it holds or locks, another stablecoin included (USDT0: USDT locked on Ethereum). Multi-Asset-Backed = a reserve mixing asset types, fiat with crypto, gold or bonds (USDV, EURMTL). Treasury-Backed = a bond secured by US Treasuries, with par redemption and a coupon (USDM1); a bond takes this class though it pays yield. Yield Stablecoin = a stablecoin on which yield accrues or is paid, whatever backs it (USDY). Unclassified = no issuer statement of the backing could be read; assetTypeNote says what was checked. A class is the issuer's claim, not an audit. Filter with ?assetType=.",
+					},
+					assetTypeSourceUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"The issuer's own page or document the class rests on (a reserve, attestation or product page, a whitepaper or token terms, or its stellar.toml's description); re-verify there. Null for an Unclassified row. Served from the registry until the six-hourly refresh stores it, then as stored.",
+					},
+					assetTypeAsOf: {
+						type: "string",
+						format: "date-time",
+						nullable: true,
+						description:
+							"The day assetTypeSourceUrl was read, or for an Unclassified row the day the sources in assetTypeNote were checked.",
+					},
+					assetTypeNote: {
+						type: "string",
+						nullable: true,
+						description:
+							"What the issuer's page states about the backing, in short, and anything that qualifies it (a suspended platform, a page that refused automated reads); for an Unclassified row, what was checked and why it names no class.",
 					},
 					supply: {
 						type: "number",
@@ -13627,7 +13662,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"Plain-words reason a row is curated-static or unmeasured. Null for live rows.",
+							"Plain-words reason a row is curated-static or unmeasured, followed by any standing caveat the registry carries for the row (USDM1's bond terms; BRLT's home_domain, which did not resolve when checked). Null when there is neither.",
 					},
 					logoUrl: {
 						type: "string",

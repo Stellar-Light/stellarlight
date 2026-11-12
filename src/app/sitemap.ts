@@ -17,6 +17,7 @@ import { CURATED_SKILLS } from "@/lib/integrations/curated-skills";
 import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
 import { fetchSdfSkillNames } from "@/lib/integrations/sdf-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { retirementOf } from "@/lib/stablecoins";
 
 const SITE_URL = "https://stellarlight.xyz";
 
@@ -160,13 +161,24 @@ async function loadDetailUrls(now: Date): Promise<MetadataRoute.Sitemap> {
 				where,
 				limit: 0,
 				depth: 0,
-				select: { [key]: true, updatedAt: true },
+				select: {
+					[key]: true,
+					updatedAt: true,
+					...(collection === "stablecoins" ? { retiredAt: true } : {}),
+				},
 			} as any);
 			for (const d of res.docs as unknown as Array<
 				Record<string, string | undefined>
 			>) {
 				const id = d[key];
 				if (!id) continue;
+				// A retired stablecoin keeps its page (noindex, with the reason),
+				// but it is no longer submitted for indexing.
+				if (
+					collection === "stablecoins" &&
+					retirementOf({ assetId: id, retiredAt: d.retiredAt })
+				)
+					continue;
 				out.push({
 					url: `${SITE_URL}${prefix}/${id}`,
 					lastModified: d.updatedAt ? new Date(d.updatedAt) : now,

@@ -1349,9 +1349,30 @@ export interface Stablecoin {
 	peg?: string | null;
 	country?: string | null;
 	/**
-	 * Qualifier where the asset is not a pure peg (e.g. 'Yield Stablecoin' for USDY)
+	 * What backs the unit as its issuer states it (Fiat-Backed for USDC, Yield Stablecoin for USDY); Unclassified where no issuer statement was found
 	 */
-	assetType?: string | null;
+	assetType?:
+		| (
+				| "Fiat-Backed"
+				| "Crypto-Backed"
+				| "Multi-Asset-Backed"
+				| "Treasury-Backed"
+				| "Yield Stablecoin"
+				| "Unclassified"
+		  )
+		| null;
+	/**
+	 * The issuer's own page the class rests on; empty for Unclassified
+	 */
+	assetTypeSourceUrl?: string | null;
+	/**
+	 * The day that page was read
+	 */
+	assetTypeAsOf?: string | null;
+	/**
+	 * What the page states, in short; for Unclassified, what was checked
+	 */
+	assetTypeNote?: string | null;
 	/**
 	 * Circulating units in the asset's OWN peg. NOT comparable across pegs.
 	 */
@@ -3852,6 +3873,9 @@ export interface StablecoinsSelect<T extends boolean = true> {
 	peg?: T;
 	country?: T;
 	assetType?: T;
+	assetTypeSourceUrl?: T;
+	assetTypeAsOf?: T;
+	assetTypeNote?: T;
 	supply?: T;
 	priceUSD?: T;
 	priceBasis?: T;

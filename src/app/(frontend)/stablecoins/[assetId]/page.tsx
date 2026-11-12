@@ -14,7 +14,12 @@ import {
 	formatUSD,
 	pegFlag,
 } from "@/lib/stablecoin-view";
-import { type StoreRow, storeRowToApi } from "@/lib/stablecoins";
+import {
+	retirementOf,
+	type StoreRow,
+	storeRowToApi,
+	UNCLASSIFIED,
+} from "@/lib/stablecoins";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +46,8 @@ async function load(assetId: string) {
 	});
 	return {
 		row: storeRowToApi(doc),
+		// A retired row keeps its page, marked as such and kept out of search.
+		retirement: retirementOf(doc),
 		history: (
 			snaps.docs as Array<{ day: string; marketCapUSD?: number | null }>
 		)
@@ -57,12 +64,16 @@ export async function generateMetadata({
 	const { assetId } = await params;
 	const data = await load(assetId);
 	if (!data) return { title: "Stablecoin not found" };
-	const { row } = data;
+	const { row, retirement } = data;
 	return {
 		title: `${row.ticker}: ${row.company ?? "Stellar stablecoin"}`,
+		...(retirement ? { robots: { index: false, follow: true } } : {}),
 		alternates: { canonical: `/stablecoins/${row.assetId}` },
 		// `company` is the brand; only the issuer's own toml names the issuer.
-		description: `${row.ticker}, a ${row.company ?? "Stellar"} stablecoin${row.issuerOfRecordCheck === "named" && row.issuerOfRecord ? ` issued by ${row.issuerOfRecord}` : ""}, pegged to ${row.peg ?? "an unstated currency"}. Market cap, supply, holders and issuer details, measured every six hours.`,
+		// A retired page is not measured any more and says so.
+		description: retirement
+			? `${row.ticker} is no longer tracked: retired from this stablecoin registry${retirement.reason ? `. ${retirement.reason}` : "."} Its figures are the last ones measured.`
+			: `${row.ticker}, a ${row.company ?? "Stellar"} stablecoin${row.issuerOfRecordCheck === "named" && row.issuerOfRecord ? ` issued by ${row.issuerOfRecord}` : ""}, pegged to ${row.peg ?? "an unstated currency"}. Market cap, supply, holders and issuer details, measured every six hours.`,
 	};
 }
 
@@ -116,7 +127,13 @@ export default async function StablecoinDetailPage({
 	const { assetId } = await params;
 	const data = await load(assetId);
 	if (!data) notFound();
-	const { row, history } = data;
+	const { row, history, retirement } = data;
+	const retiredLabel = retirement?.retiredAt
+		? new Date(retirement.retiredAt).toLocaleDateString("en-US", {
+				dateStyle: "medium",
+				timeZone: "UTC",
+			})
+		: null;
 	// Curated venues, keyed by code+issuer (a ticker alone is not an identity).
 	const markets = row.issuer
 		? (STABLECOIN_MARKETS[`${row.ticker}-${row.issuer}`] ?? [])
@@ -170,7 +187,7 @@ export default async function StablecoinDetailPage({
 						<span className="text-xs font-medium px-2 py-1 rounded-md bg-white/[0.04] text-muted-foreground border border-border/50">
 							{pegFlag(row.peg)} {row.peg ?? "-"}
 						</span>
-						{row.assetType && (
+						{row.assetType !== UNCLASSIFIED && (
 							<span className="text-xs font-medium px-2 py-1 rounded-md bg-white/[0.04] text-muted-foreground border border-border/50">
 								{row.assetType}
 							</span>
@@ -182,7 +199,40 @@ export default async function StablecoinDetailPage({
 					</p>
 				</div>
 
-				{row.basis !== "live" && (
+				{retirement && (
+					<Card className="border border-border/50 bg-card mb-6">
+						<CardContent className="py-4">
+							<p className="text-sm font-medium text-foreground">
+								No longer tracked: retired from this registry
+								{retiredLabel ? ` on ${retiredLabel}` : ""}.
+							</p>
+							{retirement.reason && (
+								<p className="text-sm text-muted-foreground mt-1">
+									{retirement.reason}
+									{retirement.sourceUrl && (
+										<>
+											{" "}
+											<a
+												href={retirement.sourceUrl}
+												className="underline"
+												rel="noopener noreferrer"
+												target="_blank"
+											>
+												Source
+											</a>
+										</>
+									)}
+								</p>
+							)}
+							<p className="text-xs text-muted-foreground mt-1">
+								The figures below are the last ones measured before then and are
+								no longer updated.
+							</p>
+						</CardContent>
+					</Card>
+				)}
+
+				{!retirement && row.basis !== "live" && (
 					<Card className="border border-border/50 bg-card mb-6">
 						<CardContent className="py-4">
 							<p className="text-sm text-foreground">

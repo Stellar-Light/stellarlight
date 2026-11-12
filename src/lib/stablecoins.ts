@@ -18,6 +18,12 @@
  * default order, and every row carries its `peg` so denomination is explicit.
  */
 
+import {
+	STABLECOIN_REGISTRY,
+	STABLECOIN_RETIREMENTS,
+	stablecoinId,
+} from "@/data/stablecoin-registry";
+
 /** One row as our `stablecoins` collection stores it. */
 export interface StoreRow {
 	assetId?: string | null;
@@ -35,6 +41,9 @@ export interface StoreRow {
 	peg?: string | null;
 	country?: string | null;
 	assetType?: string | null;
+	assetTypeSourceUrl?: string | null;
+	assetTypeAsOf?: string | null;
+	assetTypeNote?: string | null;
 	supply?: number | null;
 	priceUSD?: number | null;
 	priceBasis?: string | null;
@@ -87,9 +96,18 @@ export interface StablecoinRow {
 	/** Home country code of the PEG currency (US for USD, EU for EUR) or
 	 *  "Global", for flag display. Not the issuer's jurisdiction. */
 	country: string | null;
-	/** Recorded where the registry found the unit is not 1:1 with its peg.
-	 *  Null = no qualifier recorded (unclassified), not a verified plain peg. */
-	assetType: StablecoinAssetType | null;
+	/** Never null: the class the registry records from the issuer's own
+	 *  statement, or Unclassified where no statement was found. */
+	assetType: StablecoinAssetType;
+	/** The issuer's own page or document the class rests on; null for an
+	 *  Unclassified row, and before the refresh first records the class. */
+	assetTypeSourceUrl: string | null;
+	/** The day that page was read, or for an Unclassified row the day the
+	 *  sources in assetTypeNote were checked. */
+	assetTypeAsOf: string | null;
+	/** What the page states, in short; for an Unclassified row, what was
+	 *  checked and why it names no class. */
+	assetTypeNote: string | null;
 	/** Circulating supply in whole asset units of its OWN peg — NOT USD, NOT
 	 *  comparable across pegs. Null = not measured, never zero. */
 	supply: number | null;
@@ -156,45 +174,47 @@ export const STABLECOIN_QUERY_PARAMS = [
 	"limit",
 ] as const;
 
+/** The class a row serves when the registry records none for it. */
+export const UNCLASSIFIED = "Unclassified";
+
 /**
- * The qualifiers the registry records on a row whose unit is not 1:1 with its
- * peg (such rows are priced from the market, priceBasis measured-market). A
- * row without one was not classified: null is unknown, never "plain peg".
+ * The class every row serves, never null: what backs the unit as its issuer
+ * states it, read by hand from the issuer's own page and stored in the
+ * registry with that page's URL and the day it was read. Definitions are in
+ * the spec (Stablecoin.assetType). Unclassified is the stated value for a row
+ * whose issuer states no backing we could read: unknown, never "plain peg".
  */
 export const STABLECOIN_ASSET_TYPES = [
-	"Yield Stablecoin",
+	"Fiat-Backed",
+	"Crypto-Backed",
+	"Multi-Asset-Backed",
 	"Treasury-Backed",
+	"Yield Stablecoin",
+	UNCLASSIFIED,
 ] as const;
 export type StablecoinAssetType = (typeof STABLECOIN_ASSET_TYPES)[number];
 
-/** What ?assetType= accepts: a qualifier, or `none` for the rows with none. */
+/** What ?assetType= accepts: a class, or `none`, the earlier name of
+ *  Unclassified, kept so a caller that learned it gets the same rows. */
 export const STABLECOIN_ASSET_TYPE_FILTERS = [
 	...STABLECOIN_ASSET_TYPES,
 	"none",
 ] as const;
-export type StablecoinAssetTypeFilter =
-	(typeof STABLECOIN_ASSET_TYPE_FILTERS)[number];
 
-/** An ?assetType= value in its canonical spelling (case-insensitive), or
- *  undefined when it is not one the filter accepts. */
-export function assetTypeFilter(
-	raw: string,
-): StablecoinAssetTypeFilter | undefined {
+/** The class an ?assetType= value selects (case-insensitive; `none` is
+ *  Unclassified), or undefined when the filter does not accept it. */
+export function assetTypeFilter(raw: string): StablecoinAssetType | undefined {
 	const want = raw.trim().toLowerCase();
-	return STABLECOIN_ASSET_TYPE_FILTERS.find((v) => v.toLowerCase() === want);
+	if (want === "none") return UNCLASSIFIED;
+	return STABLECOIN_ASSET_TYPES.find((v) => v.toLowerCase() === want);
 }
 
-/** The rows an ?assetType= filter keeps. A qualifier keeps the rows recorded
- *  with it; `none` keeps the rows with no qualifier recorded. A null row is
- *  unclassified, so it never matches a qualifier, and `none` selects it
- *  without calling it par. */
+/** The rows of one class. */
 export function filterByAssetType(
 	rows: StablecoinRow[],
-	f: StablecoinAssetTypeFilter,
+	f: StablecoinAssetType,
 ): StablecoinRow[] {
-	return rows.filter((r) =>
-		f === "none" ? r.assetType == null : r.assetType === f,
-	);
+	return rows.filter((r) => r.assetType === f);
 }
 
 /** Legal forms by every spelling (lowercased, dots dropped) to one form, so
@@ -335,11 +355,68 @@ export type PriceBasis = (typeof PRICE_BASES)[number];
 const BASES = new Set(["live", "curated-static", "unmeasured"]);
 const PRICE_BASIS_SET = new Set<string>(PRICE_BASES);
 const ASSET_TYPE_SET = new Set<string>(STABLECOIN_ASSET_TYPES);
+const REGISTRY_BY_ID = new Map(
+	STABLECOIN_REGISTRY.map((a) => [stablecoinId(a), a]),
+);
+
+/** A row the registry stopped tracking: the day and, where recorded, why. */
+export interface StablecoinRetirement {
+	retiredAt: string;
+	reason: string | null;
+	sourceUrl: string | null;
+}
+
+/**
+ * Whether a stored row is retired, and why. Retired once the refresh has
+ * stamped `retiredAt`, or from deploy when the registry records the
+ * retirement (STABLECOIN_RETIREMENTS), so a dropped asset is not served for
+ * the hours until the next refresh. Null for a row still tracked.
+ */
+export function retirementOf(d: {
+	assetId?: string | null;
+	retiredAt?: string | null;
+}): StablecoinRetirement | null {
+	const rec = d.assetId ? STABLECOIN_RETIREMENTS[d.assetId] : undefined;
+	if (!d.retiredAt && !rec) return null;
+	return {
+		retiredAt: d.retiredAt ?? rec?.retiredOn ?? "",
+		reason: rec?.reason ?? null,
+		sourceUrl: rec?.sourceUrl ?? null,
+	};
+}
 const CHECK_SET = new Set<string>(ISSUER_OF_RECORD_CHECKS);
 
 /** A finite number, or null. Guards against a stored NaN reaching the wire. */
 function num(v: unknown): number | null {
 	return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+/**
+ * The class and its source. Once the refresh has written them (assetTypeAsOf
+ * set), the stored values are served. Until then the registry's are, read
+ * by assetId, so a deploy serves the right class without waiting hours for
+ * the next run. A row neither holds, or a stored value outside the
+ * vocabulary, is Unclassified: never null, never a value the spec lacks.
+ */
+function classOf(d: StoreRow) {
+	const reg =
+		!d.assetTypeAsOf && d.assetId ? REGISTRY_BY_ID.get(d.assetId) : undefined;
+	if (reg)
+		return {
+			assetType: reg.assetType,
+			assetTypeSourceUrl: reg.assetTypeSource.url,
+			// As the store returns the date the refresh writes.
+			assetTypeAsOf: `${reg.assetTypeSource.checkedOn}T00:00:00.000Z`,
+			assetTypeNote: reg.assetTypeSource.note,
+		};
+	return {
+		assetType: ASSET_TYPE_SET.has(d.assetType ?? "")
+			? (d.assetType as StablecoinAssetType)
+			: UNCLASSIFIED,
+		assetTypeSourceUrl: d.assetTypeSourceUrl ?? null,
+		assetTypeAsOf: d.assetTypeAsOf ?? null,
+		assetTypeNote: d.assetTypeNote ?? null,
+	};
 }
 
 /** Map one stored row onto the public shape. */
@@ -371,13 +448,7 @@ export function storeRowToApi(d: StoreRow): StablecoinRow {
 		website: d.website ?? null,
 		peg: d.peg ?? null,
 		country: d.country ?? null,
-		// A stored qualifier outside the vocabulary is served as null (no
-		// qualifier recorded), never passed through as an enum value the spec
-		// does not list.
-		assetType:
-			d.assetType && ASSET_TYPE_SET.has(d.assetType)
-				? (d.assetType as StablecoinAssetType)
-				: null,
+		...classOf(d),
 		supply: num(d.supply),
 		marketCapUSD: num(d.marketCapUSD),
 		priceUSD: price,

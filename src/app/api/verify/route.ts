@@ -11,6 +11,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { unknownParamWarning } from "@/lib/http-params";
 import { noteScanOf, noteSourceCheck } from "@/lib/note-pins";
 import { type ResolvableProject, resolveProject } from "@/lib/resolve-project";
+import { retirementOf } from "@/lib/stablecoins";
 import { getAppUrl } from "@/lib/utils/app-url";
 import {
 	type AuditEvidenceRow,
@@ -79,7 +80,15 @@ export async function GET(req: NextRequest) {
 			depth: 0,
 		});
 		const rows = (store.docs as unknown as Array<Record<string, unknown>>)
-			.filter((d) => !d.retiredAt)
+			// Retired from deploy when the registry records it, as the list
+			// serves it, not only once the refresh stamps retiredAt.
+			.filter(
+				(d) =>
+					!retirementOf({
+						assetId: d.assetId as string | undefined,
+						retiredAt: d.retiredAt as string | undefined,
+					}),
+			)
 			.map(
 				// Raw collection dialect: the FIELD is `code` (the API's ticker)
 				// and `domain` (the API's issuerDomain) — read the collection's

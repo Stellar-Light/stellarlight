@@ -823,7 +823,7 @@ export interface paths {
         };
         /**
          * Stellar stablecoins ranked by USD market cap
-         * @description Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; GYEN supply is yen, ARST is pesos), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.
+         * @description Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; ARST supply is pesos, mZAR is rand), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.
          */
         get: operations["getStablecoins"];
         put?: never;
@@ -1297,7 +1297,7 @@ export interface components {
             scfAmountStatus?: "disclosed" | "undisclosed" | null;
             /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. EMPTY IS NOT 'NO SCF FUNDING': SCF grants awards outside the numbered rounds (a Liquidity Award carries no SCF #N), so a project can hold real award money with this array empty; check scfTotalAwardedUSD and read scfRoundAwards, where such awards appear with round null and their own awardName. Per-award official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round). */
             scfAwardedRounds?: number[];
-            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. */
+            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. A registry product whose issuer has said it no longer offers it (getRwaAssets `discontinued`) is served as retired, with that statement in note. */
             products?: {
                 name?: string;
                 kind?: string;
@@ -2532,7 +2532,7 @@ export interface components {
         Stablecoin: {
             /** @description `CODE-<first 8 of issuer>`: the stable natural key, and the safe join key when a ticker is ambiguous. */
             assetId?: string | null;
-            /** @description Asset code (USDC, USDY, GYEN, …). NOT unique on its own: see assetId. */
+            /** @description Asset code (USDC, USDY, ARST, …). NOT unique on its own: see assetId. */
             ticker?: string;
             name?: string | null;
             /** @description Full mainnet issuer account (G…): the universal join key. With `ticker` this IS the asset's identity. */
@@ -2544,7 +2544,7 @@ export interface components {
             /** @description The legal issuer as the issuer publishes it: ORG_NAME in the stellar.toml at the issuer account's home_domain (from Horizon), counted only when that toml lists the account in ACCOUNTS or as a currency issuer, so both sides of the link agree (SEP-1). AUDD: AUDC PTY LTD. Set only when issuerOfRecordCheck is named; read by the 6-hourly writer, never at request time, and never derived from company. Cite it with issuerOfRecordAsOf. */
             issuerOfRecord?: string | null;
             /**
-             * @description What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account sets no home_domain, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made changes nothing, so the stored check and its date stay as they were: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body). A toml read that cannot answer changes nothing either: an ORG_NAME in a form the parser cannot read, or an account the toml does not list where it holds a listing the parser cannot read (a currency linked to its own toml, a code it cannot read).
+             * @description What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account is not on Horizon, sets no home_domain or one that is not a plain host name, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made changes nothing, so the stored check and its date stay as they were: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body). A toml read that cannot answer changes nothing either: an ORG_NAME in a form the parser cannot read, or an account the toml does not list where it holds a listing the parser cannot read (a currency linked to its own toml, a code it cannot read).
              * @enum {string|null}
              */
             issuerOfRecordCheck?: "named" | "not-named" | null;
@@ -2555,7 +2555,7 @@ export interface components {
              * @description When the stored check was made. A failed read does not move it, so a date well before updatedAt means the latest runs could not reach the toml. Date issuerOfRecord by this, not by updatedAt. Null = never read.
              */
             issuerOfRecordAsOf?: string | null;
-            /** @description On a named check: that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'), else null. On a not-named check: why no issuer of record was named. */
+            /** @description On a named check: that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'), else null. On a not-named check: why no issuer of record was named, with what that leaves unconfirmed where the registry has checked it (USDT0: the toml at usdt0.to names Everdawn Labs Limited and lists the account, but the account sets no home_domain pointing there, so the link is not confirmed from the account side). */
             issuerOfRecordNote?: string | null;
             website?: string | null;
             /** @description Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit, so raw supply is NOT comparable across rows with different pegs; use marketCapUSD. */
@@ -2563,10 +2563,19 @@ export interface components {
             /** @description Home country code of the PEG currency (US for USD, EU for EUR), or Global, for flag display. It describes the peg, NOT the issuer's jurisdiction or place of incorporation. */
             country?: string | null;
             /**
-             * @description Recorded only where the registry found the unit is not 1:1 with its peg; such rows are priced from their own market where it can be read (priceBasis). Yield Stablecoin = yield accrues to or is paid on the unit (Ondo's USDY); Treasury-Backed = a Treasury-backed bond (USDM1). Null = no qualifier recorded: the row was not classified, so null is unknown, NOT a verified plain peg and NOT 'not yield-bearing'. Filter with ?assetType=.
-             * @enum {string|null}
+             * @description What backs the unit as its issuer states it, never null; read by hand from the issuer's own page (assetTypeSourceUrl, read on assetTypeAsOf), never from a stellar.toml's anchor fields. Fiat-Backed = backed by its peg currency in cash, deposits or cash equivalents (short-dated government debt, government money market funds). Crypto-Backed = backed by crypto it holds or locks, another stablecoin included (USDT0: USDT locked on Ethereum). Multi-Asset-Backed = a reserve mixing asset types, fiat with crypto, gold or bonds (USDV, EURMTL). Treasury-Backed = a bond secured by US Treasuries, with par redemption and a coupon (USDM1); a bond takes this class though it pays yield. Yield Stablecoin = a stablecoin on which yield accrues or is paid, whatever backs it (USDY). Unclassified = no issuer statement of the backing could be read; assetTypeNote says what was checked. A class is the issuer's claim, not an audit. Filter with ?assetType=.
+             * @enum {string}
              */
-            assetType?: "Yield Stablecoin" | "Treasury-Backed" | null;
+            assetType?: "Fiat-Backed" | "Crypto-Backed" | "Multi-Asset-Backed" | "Treasury-Backed" | "Yield Stablecoin" | "Unclassified";
+            /** @description The issuer's own page or document the class rests on (a reserve, attestation or product page, a whitepaper or token terms, or its stellar.toml's description); re-verify there. Null for an Unclassified row. Served from the registry until the six-hourly refresh stores it, then as stored. */
+            assetTypeSourceUrl?: string | null;
+            /**
+             * Format: date-time
+             * @description The day assetTypeSourceUrl was read, or for an Unclassified row the day the sources in assetTypeNote were checked.
+             */
+            assetTypeAsOf?: string | null;
+            /** @description What the issuer's page states about the backing, in short, and anything that qualifies it (a suspended platform, a page that refused automated reads); for an Unclassified row, what was checked and why it names no class. */
+            assetTypeNote?: string | null;
             /** @description Circulating supply in whole asset units of its own peg. NOT USD, NOT comparable across pegs. Null = not measured. */
             supply?: number | null;
             /** @description Supply valued in USD (supply × priceUSD). THE comparable ranking metric (default sort). Null = unpriced. Read it with `priceBasis`: on an assumed-peg row this is supply at par, not a market valuation. */
@@ -2591,7 +2600,7 @@ export interface components {
              * @enum {string|null}
              */
             basis?: "live" | "curated-static" | "unmeasured" | null;
-            /** @description Plain-words reason a row is curated-static or unmeasured. Null for live rows. */
+            /** @description Plain-words reason a row is curated-static or unmeasured, followed by any standing caveat the registry carries for the row (USDM1's bond terms; BRLT's home_domain, which did not resolve when checked). Null when there is neither. */
             note?: string | null;
             /** @description The issuer's own mark, when one resolves. Null means render your own fallback (e.g. a peg flag); absence is not itself an error. */
             logoUrl?: string | null;
@@ -8126,6 +8135,8 @@ export interface operations {
                                 returned?: number;
                                 /** @description Served rows that carry a `measured` reading from the six-hour lane. */
                                 measured?: number;
+                                /** @description Registry rows whose issuer has said it no longer offers the product (`discontinued` set). They keep state live while the tokens are minted and held, so subtract them from byState.live to count live products. */
+                                discontinued?: number;
                                 byLevel?: {
                                     [key: string]: number;
                                 };
@@ -8161,7 +8172,10 @@ export interface operations {
                             assetClass?: string | null;
                             /** @enum {string} */
                             network?: "mainnet";
-                            /** @enum {string} */
+                            /**
+                             * @description What is minted on chain: live (at least two holders), issued-single-holder, deployed-no-supply or not-found. It is an on-chain fact, not a product status: a row whose issuer has discontinued the product (`discontinued` set) keeps state live while its tokens are minted and held.
+                             * @enum {string}
+                             */
                             state?: "live" | "issued-single-holder" | "deployed-no-supply" | "not-found";
                             /** @description Contract creation date (Soroban). null for classic assets. Horizon does not date issuance. */
                             launchedAt?: string | null;
@@ -8196,6 +8210,12 @@ export interface operations {
                              * @enum {string|null}
                              */
                             controlsBasis?: "horizon-issuer-flags" | null;
+                            /** @description The issuer's own dated statement that it no longer offers this product (issuance wound down, exchange services ended): `note` says what it states, `sourceUrl` where, `asOf` the day it was read. The row stays, since the token still exists on chain and `state` says what is minted; the project row serves the product with status retired and this note. null = no such statement found, never a verified 'still offered'. */
+                            discontinued?: {
+                                note?: string;
+                                sourceUrl?: string;
+                                asOf?: string;
+                            } | null;
                             /** @description What the six-hour refresh lane measured about this asset: supply, holders, activityCount, dated by measuredAt. null until the lane has measured it: an admission, never zero. measureBasis live = read that cycle; unmeasured = the fetch failed and the previous good numbers were kept (note says why). */
                             measured?: {
                                 supply?: number | null;
@@ -8227,8 +8247,8 @@ export interface operations {
                 sort?: "marketcap" | "supply" | "holders" | "volume";
                 /** @description Filter to one fiat peg (e.g. USD, EUR, JPY, ARS). Case-insensitive. Omit for all pegs. */
                 peg?: string;
-                /** @description Filter on the row's assetType, case-insensitive: Yield Stablecoin (e.g. USDY), Treasury-Backed (e.g. USDM1), or none for the rows with no assetType recorded. A qualifier is recorded only where the unit is not 1:1 with its peg and a row without one was not classified, so assetType=none leaves out the known yield and Treasury products but does not certify every row left as par. Unrecognized values return 400 with the valid set. */
-                assetType?: "Yield Stablecoin" | "Treasury-Backed" | "none";
+                /** @description Filter on the row's assetType, case-insensitive: one class (defined on Stablecoin.assetType), e.g. Fiat-Backed for the coins whose issuer states cash or cash-equivalent reserves in the peg currency. Unclassified returns the rows whose issuer states no backing we could read; none is an alias of Unclassified, kept for compatibility, and returns the same rows. Unrecognized values return 400 with the valid set. */
+                assetType?: "Fiat-Backed" | "Crypto-Backed" | "Multi-Asset-Backed" | "Treasury-Backed" | "Yield Stablecoin" | "Unclassified" | "none";
                 /** @description Max rows (default 50, max 100). */
                 limit?: number;
             };
