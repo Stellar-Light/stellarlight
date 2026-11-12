@@ -73,7 +73,10 @@ describe("lifecycle.wasLive records a launch, never a label that once read Live"
 	});
 	it("retiring a row from Live to Inactive still records that it ran", () => {
 		expect(
-			statusFixWasLive({ from: "Live", to: "Inactive" }, { status: "Inactive" }),
+			statusFixWasLive(
+				{ from: "Live", to: "Inactive" },
+				{ status: "Inactive" },
+			),
 		).toBe(true);
 		expect(
 			statusFixWasLive(
@@ -162,6 +165,104 @@ describe("lifecycle.wasLive records a launch, never a label that once read Live"
 				}),
 				slug,
 			).toBe(false);
+	});
+});
+
+describe("an Inactive row records a launch only on evidence (2026-11-12)", () => {
+	// 104 Inactive rows carried wasLive true only because a Live to Inactive
+	// entry retired them. Each was checked against the Wayback Machine (every
+	// host of the domain), GitHub by product name, Horizon, Soroban RPC, store
+	// listings and the operator's own pages; the verdicts sit in each entry's
+	// comment.
+	const noRecord = [
+		"0xauth",
+		"aerochain",
+		"assetdesk",
+		"canfy",
+		"centaurus",
+		"chaincred",
+		"forge",
+		"lumens-for-charity",
+		"mimoto",
+		"mxlet",
+		"opensolar",
+		"pactta",
+		"prophe",
+		"sgf-solutions",
+		"snnac",
+		"soracle",
+		"sorobanide",
+		"soroban-optimistic-oracle",
+		"sorodrop",
+		"sorosorcerer",
+		"sorosplits",
+	];
+	// A launch on record under another host or org (pluto-loans, digicus,
+	// sora), and a sample of the rest.
+	const launched = [
+		"pluto-loans",
+		"digicus",
+		"sora",
+		"apay",
+		"lobster",
+		"slender",
+		"soroban-learn",
+		"lettuce",
+		"kunst21",
+		"scam-flagging-system",
+		"the-blue-marble",
+	];
+	// Left as stored: a product that launched but not on Stellar, a deployed
+	// component short of a product, or evidence that could not be read.
+	const unchanged = [
+		"soundness",
+		"triiyo",
+		"polaris-lend",
+		"chainsatlas",
+		"every-finance",
+		"ea-kazi",
+		"gecko-fuzz",
+		"cypher",
+		"wagelink",
+		"typiqo",
+		"aurapay",
+		"ping",
+		"quidroo",
+		"stocken-capital",
+		"eascrow",
+		"didstellar",
+		"plutus",
+		"sorscan",
+		"stex",
+		"stellarstrides",
+	];
+	it("a row with no record of a launch clears the flag its retirement wrote", () => {
+		for (const slug of noRecord)
+			expect(
+				statusFixWasLive(STATUS_FIX[slug], {
+					status: "Inactive",
+					wasLive: true,
+				}),
+				slug,
+			).toBe(false);
+	});
+	it("a row with a launch on record, or left to the owner, keeps it", () => {
+		for (const slug of [...launched, ...unchanged]) {
+			const fix = STATUS_FIX[slug];
+			expect(fix.wasLive, slug).toBeUndefined();
+			expect(
+				statusFixWasLive(fix, { status: "Inactive", wasLive: true }),
+				slug,
+			).toBeNull();
+		}
+	});
+	it("soroban-learn's note says what its captures show, not that it never shipped", () => {
+		// Its learning app was captured live on 2023-11-28 and 2024-05-23; the
+		// note said the course never shipped a live site.
+		const note = STATUS_FIX["soroban-learn"].note ?? "";
+		expect(note).not.toMatch(/never shipped/);
+		expect(note).toMatch(/2023-11-28/);
+		expect(note).toMatch(/2024-05-23/);
 	});
 });
 

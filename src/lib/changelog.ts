@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-12",
 		surfaces: ["api"],
+		version: "spec@1.9.143",
+		type: "fixed",
+		summary:
+			"Once the curation lane runs, 21 Inactive searchProjects rows with no record of a launch stop claiming `lifecycle.wasLive`, and /api/lifecycle counts 916 launched projects, not 937 (SCF 577, not 582; non-SCF 339, not 355; read against the 2026-11-12 snapshot). Each carried the flag only because an entry had retired it from a Live label.",
+		detail:
+			"All 104 Inactive rows whose flag came from a Live to Inactive retirement were checked against the Wayback Machine across every host of each domain, GitHub by product name across organisations, Horizon, Soroban RPC, DefiLlama, store listings and the operators' own pages. 43 have a launch on record and keep the flag. 21 have none: sites that only ever read coming soon, waitlist or under construction, products whose code runs on testnet only with no other launched product, or footprints that are gone everywhere; their entries now say so. 40 are left as stored: 14 for the owner to decide, mostly products that launched with no Stellar tie found, and 26 whose evidence could not be read. The curation pass also skipped a status stamp already in sync, and a stamp held for a weaker basis, without writing its wasLive verdict; two of the 21 are such stamps, and both paths now write it. Soroban Learn's lifecycle note said its course never shipped a live site; it now says what the Wayback Machine shows, a public learning app captured on 2023-11-28 and 2024-05-23 and a forum served until 2025-04.",
+	},
+	{
+		date: "2026-11-12",
+		surfaces: ["api"],
 		version: "spec@1.9.142",
 		type: "fixed",
 		summary:

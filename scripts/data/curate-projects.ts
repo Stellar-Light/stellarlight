@@ -2027,16 +2027,34 @@ async function main() {
 		// live bug: a row that had EARNED package-release would not be
 		// recognised as strong, and a weak curated entry could overwrite it.
 		// statusFixHold reads the shared list (isStrongStatusBasis).
-		if (hold === "stronger-basis") {
+		// lifecycle.wasLive is the entry's verdict (statusFixWasLive), judged
+		// against the status this pass leaves. Neither a basis hold nor a stamp
+		// already in sync on every other field cancels it: chaincred's and
+		// pactta's overrides were skipped by the in-sync check (2026-11-12).
+		const wasLive = statusFixWasLive(fix, {
+			status: fix.to,
+			wasLive: d.lifecycle?.wasLive,
+		});
+		const wasLiveOnly = (why: string) => {
 			console.log(
-				`  ${slug}: keeps ${d.statusBasis} — the curated ${fix.basis} entry is weaker than the basis a lane earned; nothing written`,
+				`  ${slug}: ${why}; ${wasLive ? "wasLive set" : `wasLive cleared (${fix.to}${fix.asOf ? ` as of ${fix.asOf}` : ""}: no record of a launch)`}`,
 			);
-			continue;
-		}
-		if (hold === "earned-basis") {
-			console.log(
-				`  ${slug}: keeps ${d.statusBasis}, a basis a lane earned over the curated ${fix.basis} entry; nothing written`,
-			);
+			writes.push({
+				id: d.id,
+				slug,
+				data: { lifecycle: { ...(d.lifecycle ?? {}), wasLive } },
+			});
+		};
+		if (hold === "stronger-basis" || hold === "earned-basis") {
+			if (wasLive !== null) wasLiveOnly(`keeps ${d.statusBasis} (basis hold)`);
+			else if (hold === "stronger-basis")
+				console.log(
+					`  ${slug}: keeps ${d.statusBasis} — the curated ${fix.basis} entry is weaker than the basis a lane earned; nothing written`,
+				);
+			else
+				console.log(
+					`  ${slug}: keeps ${d.statusBasis}, a basis a lane earned over the curated ${fix.basis} entry; nothing written`,
+				);
 			continue;
 		}
 		// Idempotence (2026-09-06): a stamp whose every field already matches
@@ -2053,7 +2071,9 @@ async function main() {
 			(!fix.basis || d.statusBasis === fix.basis) &&
 			note === null
 		) {
-			console.log(`  ${slug}: stamp already in sync, skip`);
+			if (wasLive === null)
+				console.log(`  ${slug}: stamp already in sync, skip`);
+			else wasLiveOnly("stamp in sync");
 			continue;
 		}
 		console.log(`  ${slug}: status ${fix.from} → ${fix.to}`);
@@ -2064,12 +2084,7 @@ async function main() {
 		// A status MOVE is a verdict: its note replaces whatever was there. A
 		// stamp (from === to) only fills an empty note, unless replaceNote.
 		if (note) data.lifecycle = { ...(d.lifecycle ?? {}), note };
-		// lifecycle.wasLive rides the same write, as the entry's verdict
-		// (statusFixWasLive), judged against the status this write sets.
-		const wasLive = statusFixWasLive(fix, {
-			status: fix.to,
-			wasLive: d.lifecycle?.wasLive,
-		});
+		// lifecycle.wasLive rides the same write (computed above).
 		if (wasLive !== null)
 			data.lifecycle = { ...(d.lifecycle ?? {}), ...data.lifecycle, wasLive };
 		// sls-024: date + source + kind-of-evidence ride the same write, so the
