@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-11T13:10:53.803Z",
+	"generatedAt": "2026-11-12T14:13:14.204Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -29,7 +29,7 @@
 		},
 		{
 			"probe": "note-stale:blindpaylabs/blindpay-node:npm:@blindpay/node",
-			"note": "note (asOf 2026-09-02) cites 5.3.1; registry latest is 6.0.0 (published 2026-10-28)",
+			"note": "note (asOf 2026-09-02) cites 5.3.1; registry latest is 6.1.0 (published 2026-11-11)",
 			"surface": "code"
 		},
 		{
@@ -94,7 +94,7 @@
 		},
 		{
 			"probe": "note-stale:raceeyxo/use-stellar:npm:use-stellar",
-			"note": "note (asOf 2026-09-02) cites 0.1.5; registry latest is 0.2.1 (published 2026-10-11)",
+			"note": "note (asOf 2026-09-02) cites 0.1.5; registry latest is 0.2.2 (published 2026-11-12)",
 			"surface": "code"
 		},
 		{
@@ -159,7 +159,7 @@
 		},
 		{
 			"probe": "note-stale:rahul-soshte/rs-soroban-client:crates:soroban-client",
-			"note": "note (asOf 2026-09-07) cites 0.6.0; registry latest is 0.7.0 (published 2026-11-03)",
+			"note": "note (asOf 2026-09-07) cites 0.6.0; registry latest is 0.7.1 (published 2026-11-11)",
 			"surface": "code"
 		},
 		{
@@ -179,7 +179,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-rpc:docker:stellar/stellar-rpc",
-			"note": "note (asOf 2026-09-01) cites 2026-08-27; registry latest is 2026-10-21 (published 2026-10-21)",
+			"note": "note (asOf 2026-09-01) cites 2026-08-27; registry latest is 2026-11-12 (published 2026-11-12)",
 			"surface": "code"
 		},
 		{
@@ -278,6 +278,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:soroswap/sdk:npm:@soroswap/sdk",
+			"note": "note (asOf 2026-09-14) cites 0.5.0; registry latest is 0.5.1 (published 2026-11-12)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:Soneso/stellar_wallet_flutter_sdk:pub:stellar_wallet_flutter_sdk",
 			"note": "note (asOf 2026-09-14) cites 1.1.4; registry latest is 1.1.8 (published 2026-10-25)",
 			"surface": "code"
@@ -305,6 +310,11 @@
 		{
 			"probe": "note-stale:Dione-b/caatinga:npm:@caatinga/cli",
 			"note": "note (asOf 2026-09-14) cites 3.9.2; registry latest is 3.12.0 (published 2026-10-03)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:blindpaylabs/blindpay-python:pypi:blindpay",
+			"note": "note (asOf 2026-09-14) cites 3.4.0; registry latest is 4.0.1 (published 2026-11-11)",
 			"surface": "code"
 		},
 		{
