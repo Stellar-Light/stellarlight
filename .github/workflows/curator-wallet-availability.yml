@@ -3,8 +3,10 @@
 # The LLM proposes, the deterministic layer disposes: this workflow runs the
 # agent (reads wallets with empty availability, extracts evidenced platform
 # claims from operator sites via Claude), commits the drafts file to a branch,
-# and opens a PR — the human gate is the diff review. Landing happens later
-# via apply-wallet-availability.ts (dry-run default) once the PR is merged.
+# and opens a PR; the human gate is the diff review. A reviewed entry lands
+# by copying it into WALLET_AVAILABILITY (scripts/data/curation-maps.ts),
+# which the curate-projects lane writes: that lane is availability's one
+# writer since 2026-11-11, when the separate applier was retired.
 #
 # Needs the ANTHROPIC_API_KEY secret; until it exists the agent step SKIPS
 # with a clear warning instead of failing, so this workflow is safe to merge
@@ -66,5 +68,5 @@ jobs:
           FILE="$(git diff --name-only HEAD~1 | head -1)"
           gh pr create --base main --head "$BRANCH" \
             --title "curator: wallet-availability drafts $(date -u +%Y-%m-%d)" \
-            --body "$(printf 'Agent-proposed availability entries — every claim carries a store/product URL verified to appear in the fetched page. REVIEW THE DIFF (this PR is the human gate), merge, then land via the apply-wallet-availability workflow:\n\n    gh workflow run apply-wallet-availability.yml -f file=%s        # dry run\n    gh workflow run apply-wallet-availability.yml -f file=%s -f execute=true\n\nAgent log tail:\n```\n%s\n```' "$FILE" "$FILE" "$(tail -20 /tmp/agent.log)")" \
+            --body "$(printf 'Agent-proposed availability entries: every claim carries a store/product URL verified to appear in the fetched page. REVIEW THE DIFF (this PR is the human gate). To land an entry, copy it from %s into WALLET_AVAILABILITY in scripts/data/curation-maps.ts; the curate-projects lane writes it (dry run first).\n\nAgent log tail:\n```\n%s\n```' "$FILE" "$(tail -20 /tmp/agent.log)")" \
             || echo "::warning::PR creation blocked — open manually: https://github.com/$GITHUB_REPOSITORY/compare/$BRANCH"

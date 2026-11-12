@@ -600,7 +600,7 @@ export interface Project {
 		  )
 		| null;
 	/**
-	 * Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, and the date it was checked. Distinct from `status` (project lifecycle). Populated by scripts/data/curate-projects.ts AVAILABILITY_SET only — empty means not-yet-curated, not unavailable.
+	 * Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, and the date it was checked. Distinct from `status` (project lifecycle). Written only by the curate-projects lane (AVAILABILITY_SET and WALLET_AVAILABILITY in scripts/data/curation-maps.ts). Empty means unknown, not unavailable; availabilityCheck records a check that found nothing.
 	 */
 	availability?:
 		| {
@@ -610,9 +610,10 @@ export interface Project {
 					| "web"
 					| "browser-extension"
 					| "desktop"
-					| "hardware-device";
+					| "hardware-device"
+					| "sms";
 				/**
-				 * available = the store listing / product surface was reachable when checked; unavailable = a previously-listed surface is gone (404 / delisted).
+				 * available = the store listing / product surface was reachable when checked; unavailable = the operator listed or announced the product for this platform but it could not be used there when checked: the listing is gone or 404s, it is not out yet, or the operator says it has shut down (the note says which).
 				 */
 				state: "available" | "unavailable";
 				/**
@@ -630,6 +631,24 @@ export interface Project {
 				id?: string | null;
 		  }[]
 		| null;
+	/**
+	 * A dated availability check that found nothing to serve (sls-033): none-found = the listed sources were read and offer no app, extension, device, web app or SMS service, or the operator's domain no longer resolves (the note says which); could-not-check = a source could not be read. Unknown either way, never 'unavailable'. Empty when no check is recorded.
+	 */
+	availabilityCheck?: {
+		result?: ("none-found" | "could-not-check") | null;
+		/**
+		 * YYYY-MM-DD the sources were read.
+		 */
+		checkedAt?: string | null;
+		/**
+		 * The URLs that were read.
+		 */
+		sources?: string[] | null;
+		/**
+		 * What the sources showed, in one line.
+		 */
+		note?: string | null;
+	};
 	/**
 	 * SCF Public Goods Award (Pilots) recipient data — CSV-confirmed rounds only (pg-atlas-frontend Airtable exports), never merged-proposal inference (both accepted AND rejected proposals get merged upstream). Q2'26 outcomes live on Tansu and are excluded until readable.
 	 */
@@ -3637,6 +3656,14 @@ export interface ProjectsSelect<T extends boolean = true> {
 				checkedAt?: T;
 				note?: T;
 				id?: T;
+		  };
+	availabilityCheck?:
+		| T
+		| {
+				result?: T;
+				checkedAt?: T;
+				sources?: T;
+				note?: T;
 		  };
 	publicGoods?:
 		| T

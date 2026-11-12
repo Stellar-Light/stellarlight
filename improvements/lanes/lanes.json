@@ -27,14 +27,6 @@
 			"since": null
 		},
 		{
-			"id": "apply-wallet-availability",
-			"workflow": "apply-wallet-availability.yml",
-			"cadence": "dispatch",
-			"executeInput": "execute",
-			"writeSet": "wallet `availability` (+ storeUrl, checkedAt) from a reviewed, committed drafts file \u2014 only where availability is currently empty",
-			"since": null
-		},
-		{
 			"id": "award-import",
 			"workflow": "award-import.yml",
 			"cadence": "dispatch",
@@ -167,7 +159,7 @@
 			"workflow": "curate-projects.yml",
 			"cadence": "cron 30 7 * * 2",
 			"executeInput": "execute",
-			"writeSet": "targeted per-slug project edits (description / tags / status), then projects.deployment { network, basis } from evidence via scripts/data/backfill-deployment.ts",
+			"writeSet": "targeted per-slug project edits (description / tags / status / wallet productKind, availability and availabilityCheck), then projects.deployment { network, basis } from evidence via scripts/data/backfill-deployment.ts",
 			"since": null
 		},
 		{

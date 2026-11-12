@@ -27,6 +27,10 @@
  *      every venue count without a word. Search honours type=DEX with
  *      status=Live (2026-11-07: 38 of 47 DEX rows), and the check reads both
  *      fields again on every row.
+ *   S6 wallet coverage: every Wallet row carries a productKind or a dated
+ *      reason in PRODUCT_KIND_UNRESOLVED, and availability rows or a dated
+ *      availabilityCheck (sls-033). Searching type=Wallet is exact (74 rows on
+ *      2026-11-11), and the check reads the type again on every row.
  *
  *   SCOUT_BASE=https://stellarlight.xyz npx tsx scripts/check-record-completeness.ts
  *
@@ -37,7 +41,11 @@
 
 import { tvlCitationGaps } from "../src/lib/status-checks";
 import { unclassifiedLiveDexRows } from "../src/lib/venue-role-coverage";
-import { VENUE_ROLE_UNRESOLVED } from "./data/curation-maps";
+import { walletCoverageGaps } from "../src/lib/wallet-coverage";
+import {
+	PRODUCT_KIND_UNRESOLVED,
+	VENUE_ROLE_UNRESOLVED,
+} from "./data/curation-maps";
 import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
@@ -301,6 +309,39 @@ async function main() {
 			});
 		}
 		if (unclassified.length) failures++;
+	}
+
+	// ── S6: every Wallet row has a recorded state for both wallet facts (sls-033) ──
+	// productKind (PRODUCT_KIND) or a dated reason (PRODUCT_KIND_UNRESOLVED);
+	// availability rows or a dated availabilityCheck. A null with neither was
+	// 39 of 72 rows on 2026-11-06, read by consumers as unknown at best.
+	const wallets = await sweep("/api/projects/search?type=Wallet");
+	if (wallets.length === 0) {
+		console.error("✗ S6 swept 0 Wallet rows: an outage, not a clean pass");
+		failRows.push({ probe: "S6 sweep outage", note: "0 Wallet rows returned" });
+		failures++;
+	} else {
+		const gaps = walletCoverageGaps(
+			wallets.map((p) => ({
+				slug: String(p.slug),
+				types: p.types,
+				productKind: p.productKind,
+				availability: p.availability,
+				availabilityCheck: p.availabilityCheck,
+			})),
+			PRODUCT_KIND_UNRESOLVED,
+		);
+		console.log(
+			`S6 wallet coverage: ${wallets.length} Wallet rows · ${gaps.length} with no recorded productKind or availability state`,
+		);
+		for (const g of gaps) {
+			console.log(`  ✗ ${g.slug}: ${g.missing.join(" and ")} not recorded`);
+			failRows.push({
+				probe: `wallet coverage: ${g.slug}`,
+				note: `Wallet row with no recorded ${g.missing.join(" or ")}: classify it in PRODUCT_KIND or give a dated reason in PRODUCT_KIND_UNRESOLVED; add dated rows to WALLET_AVAILABILITY or a dated check to AVAILABILITY_CHECKED (scripts/data/curation-maps.ts)`,
+			});
+		}
+		if (gaps.length) failures++;
 	}
 
 	writeNightlyFindings("record-completeness", failRows);

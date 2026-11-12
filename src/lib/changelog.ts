@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-11",
+		surfaces: ["api"],
+		version: "spec@1.9.132",
+		type: "fixed",
+		summary:
+			"Once the curation lane runs, every Wallet row carries a `productKind` and either dated `availability` rows or a dated `availabilityCheck`. On 2026-11-11 type=Wallet returned 74 rows: 11 had no productKind and 41 had a null availability, which could not say whether anyone had looked. The new `availabilityCheck` says a check of named sources on a date found no app, extension, device, web app or SMS service, or that the operator's domain no longer resolves (none-found, the note says which), or could not read a source (could-not-check); a null availability still means unknown, never unavailable. The productKind description listed five values the field never held; it now names the six it holds, as an enum.",
+		detail:
+			"Each of the 41 rows was read on 2026-11-11 from the operator's own site, docs or repo and the store listings they link, never from a store search by name, and each listing was read in its store. 31 rows gain 68 availability rows: 60 available and 8 unavailable. Five unavailable rows are listings their operator links that are gone (Interstellar's App Store and Google Play apps, Scopuly's App Store app, Empowch's Google Play app, the OpenZeppelin privacy wallet's testnet web app); three are Cypher's App Store, Google Play and web dApp surfaces, still reachable but shut down on 2026-09-06 by Cypher's own notice, and Cypher's `status` moves from Live to Inactive with `statusBasis` operator-announcement and that notice as `statusSourceUrl`. Availability gains the platform sms, a wallet used by text message with no app: Kotani Pay's SMS Wallet, sourced to its own page. 10 rows gain a check: 9 none-found, three of them because the operator's domain no longer resolves, and 1 could-not-check (Blaze gives its app link only through an email form). Of the 11 rows with no kind, Amulets, Chainless, Haven, Ibis, Piggy Wallet, Zig3v2 and the OpenZeppelin privacy wallet are end-user wallets, Privy and Rehive wallet SDKs, Smart Treasury smart-account tooling, and MXlet a hardware wallet, as its own repository describes it. The Stellar MetaMask Snap moves from integration-kit to end-user-wallet: its maker describes it as a Stellar wallet for MetaMask. Availability rows gain enums for platform and state, and say where an app is offered, not that it supports Stellar there. A nightly check names any Wallet row left with neither state.",
+	},
+	{
+		date: "2026-11-11",
 		surfaces: ["api", "skill"],
 		version: "spec@1.9.131",
 		type: "changed",

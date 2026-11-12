@@ -1503,16 +1503,30 @@ export interface components {
             /** @description Editorial ranking boost (0-100); higher = more canonical for its category. */
             prominence?: number;
             verificationLevel?: string | null;
-            /** @description Curated product-kind for wallet-class records (hardware-wallet | mobile-app | browser-extension | web-app | protocol | sdk-kit). null = not-yet-classified (never a negative claim). */
-            productKind?: string | null;
-            /** @description Per-platform availability with as-of dates. null = not curated. */
+            /**
+             * @description What kind of wallet-landscape product a Wallet row is, curated from the operator's own description: end-user-wallet (an app people or organizations hold funds in), hardware-wallet (a physical signing device), connectivity-protocol (a wallet-to-dApp connection protocol, not a wallet), wallet-sdk (a library or platform for building wallets), integration-kit (a library for connecting existing wallets to dApps), smart-account-tooling (passkey or smart-account infrastructure). Null = not yet classified (unknown, never 'not a wallet').
+             * @enum {string|null}
+             */
+            productKind?: "end-user-wallet" | "hardware-wallet" | "connectivity-protocol" | "wallet-sdk" | "integration-kit" | "smart-account-tooling" | null;
+            /** @description Per-platform app availability, each row dated by checkedAt (YYYY-MM-DD). platform sms is a wallet used by text message, with no app; its storeUrl is the operator's page for that service. available = the store listing or product surface at storeUrl was reachable on checkedAt; unavailable = the operator listed or announced the product for that platform but it could not be used there on checkedAt: the listing is gone or 404s, the product is not out yet, or the operator says it has shut down (the note says which; storeUrl is null unless a listing is still up). Rows say where the product's app is offered, not that it supports Stellar on that platform, and are separate from `status` (lifecycle). Null = no platform fact recorded: unknown, never 'unavailable'; availabilityCheck says whether a check found none. */
             availability?: {
-                platform?: string;
-                state?: string;
+                /** @enum {string} */
+                platform?: "ios" | "android" | "web" | "browser-extension" | "desktop" | "hardware-device" | "sms";
+                /** @enum {string} */
+                state?: "available" | "unavailable";
                 storeUrl?: string | null;
                 checkedAt?: string | null;
                 note?: string | null;
             }[] | null;
+            /** @description A dated check behind a null availability. result none-found = the sources (the operator's site, docs or repo and the store links they give) were read on checkedAt and offer no app, extension, device, web app or SMS service, or the operator's domain no longer resolves (the note says which); could-not-check = a source could not be read on checkedAt. Unknown either way, never 'unavailable'; note says what the sources showed. Null when availability has rows or no check is recorded. */
+            availabilityCheck?: {
+                /** @enum {string} */
+                result?: "none-found" | "could-not-check";
+                /** Format: date */
+                checkedAt?: string;
+                sources?: string[];
+                note?: string;
+            } | null;
             /** @description Capability tags (Wallet, DEX, Lending, Oracle, SDK, RPC, Faucet, NFT, RWA, Anchor, Stablecoin, Indexer, Explorer, Security, Gaming). */
             types?: string[];
             /** @description The project OWN canonical homes - cite these as the primary source, not StellarLight or any directory. Only present, non-empty fields are included. */

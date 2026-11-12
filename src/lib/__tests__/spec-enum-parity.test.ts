@@ -20,7 +20,14 @@ import {
 	RESOLVABLE_PROJECT_STATUSES,
 	STATUS_BASES,
 } from "../project-status";
-import { PROJECT_TYPES, VENUE_ROLES } from "../project-types";
+import {
+	AVAILABILITY_CHECK_RESULTS,
+	AVAILABILITY_PLATFORMS,
+	AVAILABILITY_STATES,
+	PRODUCT_KINDS,
+	PROJECT_TYPES,
+	VENUE_ROLES,
+} from "../project-types";
 import { RATE_LIMIT_SCOPE } from "../rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
 import { REPO_MATCH_MODES } from "../repo-search";
@@ -275,6 +282,35 @@ describe("status and types params are the code's lists too (found 2026-09-09 by 
 			"utf8",
 		);
 		expect(search).toContain("VALID_VENUE_ROLES = VENUE_ROLES");
+	});
+
+	it("productKind, the availability rows and availabilityCheck are the code's lists (sls-033)", () => {
+		const P = S.components.schemas.Project.properties;
+		expect(sorted(P.productKind.enum)).toEqual(sorted(PRODUCT_KINDS));
+		const item = P.availability.items.properties;
+		expect(sorted(item.platform.enum)).toEqual(sorted(AVAILABILITY_PLATFORMS));
+		expect(sorted(item.state.enum)).toEqual(sorted(AVAILABILITY_STATES));
+		expect(sorted(P.availabilityCheck.properties.result.enum)).toEqual(
+			sorted(AVAILABILITY_CHECK_RESULTS),
+		);
+		// The description listed six values the field never held (mobile-app,
+		// sdk-kit, ...) until 2026-11-11; it now names the ones it does.
+		for (const k of PRODUCT_KINDS)
+			expect(P.productKind.description).toContain(k);
+		expect(P.productKind.description).not.toMatch(/mobile-app|sdk-kit/);
+		// [^{}] keeps the match inside one field definition: it cannot run
+		// on into the next field's options.
+		for (const [field, list] of [
+			["productKind", "PRODUCT_KINDS"],
+			["platform", "AVAILABILITY_PLATFORMS"],
+			["state", "AVAILABILITY_STATES"],
+			["result", "AVAILABILITY_CHECK_RESULTS"],
+		])
+			expect(collection, field).toMatch(
+				new RegExp(
+					`name:\\s*"${field}",[^{}]*?options:\\s*\\[\\.\\.\\.${list}\\]`,
+				),
+			);
 	});
 
 	it("both route validators use the shared lists, not local literals", () => {

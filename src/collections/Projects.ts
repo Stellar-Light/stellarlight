@@ -1,5 +1,12 @@
 import type { CollectionConfig } from "payload";
-import { PROJECT_TYPES, VENUE_ROLES } from "@/lib/project-types";
+import {
+	AVAILABILITY_CHECK_RESULTS,
+	AVAILABILITY_PLATFORMS,
+	AVAILABILITY_STATES,
+	PRODUCT_KINDS,
+	PROJECT_TYPES,
+	VENUE_ROLES,
+} from "@/lib/project-types";
 import { LLAMA_LISTING_STATES } from "@/lib/status-checks";
 import { generateSlug, normalizeUrlField } from "../lib/utils/normalize";
 import { adminOnly, isAdmin } from "./access";
@@ -609,14 +616,7 @@ export const Projects: CollectionConfig = {
 		{
 			name: "productKind",
 			type: "select",
-			options: [
-				"end-user-wallet",
-				"hardware-wallet",
-				"connectivity-protocol",
-				"wallet-sdk",
-				"integration-kit",
-				"smart-account-tooling",
-			],
+			options: [...PRODUCT_KINDS],
 			admin: {
 				description:
 					"What KIND of wallet-landscape product this is (sls-033): end-user-wallet = a consumer app users hold funds in; hardware-wallet = a physical signing device product; connectivity-protocol = a wallet↔dApp connection protocol (not a wallet); wallet-sdk = a library for BUILDING wallets; integration-kit = a library for integrating existing wallets into dApps; smart-account-tooling = passkey/smart-account infrastructure. Null = not yet classified (unknown, NOT 'not a wallet').",
@@ -627,37 +627,30 @@ export const Projects: CollectionConfig = {
 			// from the project lifecycle `status` — a Live project can have a dead
 			// store listing (xBull: product Live via web + Chrome extension while
 			// its formerly-listed iOS/Android store apps 404, checked 2026-07-13).
-			// Each row is a dated, store-checked fact (AVAILABILITY_SET in
-			// scripts/data/curate-projects.ts). Empty = availability not yet
+			// Each row is a dated, store-checked fact (AVAILABILITY_SET and
+			// WALLET_AVAILABILITY in scripts/data/curation-maps.ts). Empty = availability not yet
 			// curated (unknown), NEVER "not available anywhere".
 			name: "availability",
 			type: "array",
 			admin: {
 				description:
-					"Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, and the date it was checked. Distinct from `status` (project lifecycle). Populated by scripts/data/curate-projects.ts AVAILABILITY_SET only; empty means not-yet-curated, not unavailable.",
+					"Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, and the date it was checked. Distinct from `status` (project lifecycle). Written only by the curate-projects lane (AVAILABILITY_SET and WALLET_AVAILABILITY in scripts/data/curation-maps.ts). Empty means unknown, not unavailable; availabilityCheck records a check that found nothing.",
 			},
 			fields: [
 				{
 					name: "platform",
 					type: "select",
 					required: true,
-					options: [
-						"ios",
-						"android",
-						"web",
-						"browser-extension",
-						"desktop",
-						"hardware-device",
-					],
+					options: [...AVAILABILITY_PLATFORMS],
 				},
 				{
 					name: "state",
 					type: "select",
 					required: true,
-					options: ["available", "unavailable"],
+					options: [...AVAILABILITY_STATES],
 					admin: {
 						description:
-							"available = the store listing / product surface was reachable when checked; unavailable = a previously-listed surface is gone (404 / delisted).",
+							"available = the store listing / product surface was reachable when checked; unavailable = the operator listed or announced the product for this platform but it could not be used there when checked: the listing is gone or 404s, it is not out yet, or the operator says it has shut down (the note says which).",
 					},
 				},
 				{
@@ -683,6 +676,42 @@ export const Projects: CollectionConfig = {
 						description:
 							"Optional one-line evidence note (e.g. 'Play listing for app.xbull.mobile 404s').",
 					},
+				},
+			],
+		},
+		{
+			// sls-033: the checked-empty state. Without it an empty availability
+			// read the same whether nobody looked or a dated check of the
+			// operator's pages found nothing. Written only by curate-projects
+			// (AVAILABILITY_CHECKED in scripts/data/curation-maps.ts), only
+			// while availability is empty, and served only then.
+			name: "availabilityCheck",
+			type: "group",
+			admin: {
+				description:
+					"A dated availability check that found nothing to serve (sls-033): none-found = the listed sources were read and offer no app, extension, device, web app or SMS service, or the operator's domain no longer resolves (the note says which); could-not-check = a source could not be read. Unknown either way, never 'unavailable'. Empty when no check is recorded.",
+			},
+			fields: [
+				{
+					name: "result",
+					type: "select",
+					options: [...AVAILABILITY_CHECK_RESULTS],
+				},
+				{
+					name: "checkedAt",
+					type: "text",
+					admin: { description: "YYYY-MM-DD the sources were read." },
+				},
+				{
+					name: "sources",
+					type: "text",
+					hasMany: true,
+					admin: { description: "The URLs that were read." },
+				},
+				{
+					name: "note",
+					type: "text",
+					admin: { description: "What the sources showed, in one line." },
 				},
 			],
 		},

@@ -19,9 +19,13 @@ import {
 	parseGithubRepoRef,
 } from "../../src/lib/github-identity";
 import { fillScfFromDupe } from "../../src/lib/scf-merge";
+import { availabilityPatch } from "../../src/lib/wallet-coverage";
 import configPromise from "../../src/payload.config";
 import {
 	ALIAS_ADD,
+	AVAILABILITY_CHECKED,
+	AVAILABILITY_SET,
+	type AvailabilityRow,
 	CANONICAL_SET,
 	DESCRIPTION_FIXES,
 	DOCS_LINKS,
@@ -30,6 +34,7 @@ import {
 	GITHUB_REPOS_ADD,
 	LOGO_SET,
 	NAME_FIXES,
+	PRODUCT_KIND,
 	PROMINENCE_SET,
 	REBRANDS,
 	SEEDS,
@@ -43,6 +48,7 @@ import {
 	TYPES_ADD,
 	TYPES_SET,
 	VENUE_ROLE,
+	WALLET_AVAILABILITY,
 	WEBSITE_FIXES,
 	WEBSITE_REMOVE,
 	WEBSITE_REMOVE_DEAD,
@@ -651,440 +657,6 @@ const IDENTITY_FIX: Record<
 		renameSourceUrl:
 			"https://stellar.org/blog/foundation-news/freighter-is-now-varial",
 	},
-};
-
-/** sls-033 (#519): productKind — WHAT KIND of wallet-landscape product each row
- * is, so a consumer can tell an end-user wallet from adjacent tooling (Tyler's
- * exact ask: distinguish hardware wallets, connectivity protocols, wallet SDKs,
- * integration kits, and passkey/smart-account tooling). Enum matches
- * Projects.ts productKind options EXACTLY. Fill-if-different (single value,
- * equality-guarded). Each row grounded in the project's OWN curated description
- * (which is itself primary-source-derived). A slug left OFF this map keeps
- * productKind null = "not yet classified" (NOT "not a wallet") — precision over
- * recall: DEX/DeFi-platform/portfolio-tool/pure-B2B-infra rows (swiftex,
- * hedgepay, equilibre, cobo, openxswitch, lumexo, pakananet, stellarfolio) and
- * the ambiguous hardware-card arculus are deliberately unclassified rather than
- * asserted. */
-const PRODUCT_KIND: Record<string, string> = {
-	// hardware-wallet — description literally says "hardware wallet"
-	ledger: "hardware-wallet", // "Ledger is a hardware wallet designed to securely store…"
-	trezor: "hardware-wallet", // "Trezor is a hardware wallet…"
-	onekey: "hardware-wallet", // "Open-source hardware and software wallet with Stellar support"
-	// wallet-sdk — a library/builder for BUILDING wallets
-	spatium: "wallet-sdk", // "open-source Web3 Wallet Builder for businesses"
-	// integration-kit — integrating existing wallets into dApps / host wallets
-	"simple-signer": "integration-kit", // "in-browser transaction signer that supports different stellar wallets"
-	"stellar-metamask": "integration-kit", // "Stellar Integration on MetaMask… MetaMask Snaps Platform" — a snap adding Stellar to an existing wallet
-	metamask: "end-user-wallet", // sls-112: support.metamask.io: "MetaMask supports Stellar as a default network, allowing you to manage XLM and other assets" (seeded 2026-11-04)
-	// smart-account-tooling — passkey / smart-account infrastructure
-	"stellar-passport": "smart-account-tooling", // "passkey-secured identity and participation layer"
-	"volta-circuit": "smart-account-tooling", // "smart contract-based security protocol… automated asset protection, recovery"
-	humantech: "smart-account-tooling", // "keys, wallets, and identity infrastructure for personhood, self-custody"
-	// end-user-wallet — a consumer/institutional app users hold funds in
-	lobstr: "end-user-wallet",
-	xbull: "end-user-wallet",
-	freighter: "end-user-wallet",
-	hana: "end-user-wallet",
-	beans: "end-user-wallet",
-	albedo: "end-user-wallet",
-	rabet: "end-user-wallet",
-	vesseo: "end-user-wallet",
-	"solar-wallet": "end-user-wallet",
-	"hot-wallet": "end-user-wallet",
-	"bitget-wallet": "end-user-wallet",
-	klever: "end-user-wallet",
-	mpcvault: "end-user-wallet",
-	"unstoppable-wallet": "end-user-wallet",
-	sollpay: "end-user-wallet",
-	sentit: "end-user-wallet",
-	freelii: "end-user-wallet",
-	"freedom-pay-wallet": "end-user-wallet",
-	coca: "end-user-wallet",
-	bousol: "end-user-wallet",
-	"ben-wallet": "end-user-wallet",
-	peer: "end-user-wallet",
-	meru: "end-user-wallet",
-	lemon: "end-user-wallet",
-	"kotani-pay": "end-user-wallet",
-	bebop: "end-user-wallet",
-	blaze: "end-user-wallet",
-	cypher: "end-user-wallet",
-	scopuly: "end-user-wallet",
-	"neon-wallet": "end-user-wallet",
-	bexo: "end-user-wallet",
-	akuna: "end-user-wallet",
-	stellarport: "end-user-wallet",
-	interstellar: "end-user-wallet",
-	empowch: "end-user-wallet",
-	elsa: "end-user-wallet",
-	"boss-revolution": "end-user-wallet",
-	"tago-cash": "end-user-wallet",
-	ripio: "end-user-wallet",
-	emigro: "end-user-wallet",
-	nemorixpay: "end-user-wallet",
-	airgap: "end-user-wallet", // "turn a spare smartphone into a fully offline cold wallet" — end-user cold wallet app (software, not a hardware product)
-	// sls-033 residual (2026-07-15, boxy): the 14 remaining null-productKind
-	// type=Wallet rows, each web-verified via the directory-quality-verify
-	// workflow. 10 live wallets classified here; 3 non-wallets get Wallet dropped
-	// in TYPES_SET (pakananet/stellarfolio/equilibre); mxlet + equilibre are
-	// dead-domain (NXDOMAIN) and were already Inactive from the earlier triage.
-	decaf: "end-user-wallet", // App Store "Decaf Wallet", non-custodial Solana+Stellar, MoneyGram off-ramp
-	"cactus-link": "end-user-wallet", // Cactus Link Chrome-extension wallet (Matrixport / Cactus Custody)
-	lumexo: "end-user-wallet", // lumexo.io "Your Stellar Wallet & DEX" — self-custody accounts (in-app swap ≠ standalone DEX)
-	swiftex: "end-user-wallet", // App Store "SwiftEx Wallet — Multi-Chain Wallet & Swaps", self-custody (wallet-first, swap is a feature)
-	hedgepay: "end-user-wallet", // "Your Self-Custodial App" — stablecoin wallet on Stellar/Soroban (yield is an in-app feature)
-	cobo: "wallet-sdk", // Wallet-as-a-Service: one API/SDK stack; institutional WaaS + custody infra (Cobo Guard is a companion)
-	openxswitch: "wallet-sdk", // wallet-as-a-service / WaaS + custody infra for African fintechs (B2B, developer-facing)
-	"hito-wallet": "hardware-wallet", // Hito HOLD — physical $150 NFC hardware wallet device
-	arculus: "hardware-wallet", // Arculus Key Card — physical signing device + companion app
-	keystone: "hardware-wallet", // Keystone 3 Pro — air-gapped cold hardware wallet
-	// sls-033 recheck (2026-08-13): the agent-stack seed row — a library that
-	// CREATES and operates Stellar wallets programmatically for AI agents
-	// (signing, tx-building, x402/mpp caps verified by code scan). A wallet
-	// built BY software from a library = wallet-sdk; mxlet stays null by the
-	// documented dead-domain precision decision (cannot evidence-classify).
-	"stellar-agent-wallet-skill": "wallet-sdk",
-};
-
-/** sls-033 (#519): per-platform app availability — DATED, store-checked facts,
- * deliberately separate from lifecycle `status` (a Live project can have a dead
- * store listing — Tyler's own xBull evidence). Shape matches Projects.ts
- * availability{platform,state,storeUrl,checkedAt,note}. EXACT-SYNC for listed
- * slugs. Every `available` row below was curl-verified live on 2026-07-14 (200
- * on the exact surface URL); the xBull ios/android `unavailable` rows carry
- * Tyler's own 2026-07-13 re-check date + note (the evidence the issue cited).
- * Seeded for the flagship set only — a wallet left off keeps availability empty
- * = "not yet curated", never "unavailable": each platform row is a claim we
- * only make once the surface is checked. checkedAt dates it; re-verify before
- * relying. */
-interface AvailabilityRow {
-	platform: string;
-	state: string;
-	storeUrl?: string;
-	checkedAt: string;
-	note?: string;
-}
-const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
-	// ── Store evidence 2026-09-07. Every listing below was found on the
-	// PROJECT'S OWN SITE, never by searching a store for the project's name:
-	// the operator publishing their own store link IS the intersection, and a
-	// name search is the collision trap that cost 26 of 31 matches on the
-	// package-registry pass. Release dates come from Apple's lookup API by id
-	// and Play's "Updated on"; all 13 shipped a build within 90 days.
-	// Three ship under a product name that differs from the row (fastbuka →
-	// "Choppaddi", providencia-onchain → "VIIO", utoken → "Upesa") — kept,
-	// because the link came from their own site, and named here so the
-	// mismatch is visible rather than silently resolved.
-	akuna: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/akuna-wallet/id6748705575?uo=4",
-			checkedAt: "2026-09-07",
-			note: "Akuna Wallet — release 2026-08-31, found via the project's own site",
-		},
-	],
-	bousol: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl:
-				"https://apps.apple.com/us/app/bousol-wallet-paon-bleu-inc/id6503965498?uo=4",
-			checkedAt: "2026-09-07",
-			note: "Bousol Wallet - Paon Bleu Inc. — release 2026-08-26, found via the project's own site",
-		},
-	],
-	dollarize: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl:
-				"https://apps.apple.com/us/app/dollarize-usd-account/id1627818185?uo=4",
-			checkedAt: "2026-09-07",
-			note: "Dollarize: USD Account — release 2026-08-10, found via the project's own site",
-		},
-	],
-	ebioro: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/ebioro/id1662259255?uo=4",
-			checkedAt: "2026-09-07",
-			note: "ebioro — release 2026-09-06, found via the project's own site",
-		},
-	],
-	fastbuka: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/choppaddi/id6761775761?uo=4",
-			checkedAt: "2026-09-07",
-			note: "Choppaddi — release 2026-08-03, found via the project's own site",
-		},
-	],
-	fewticket: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/fewticket/id6743091510?uo=4",
-			checkedAt: "2026-09-07",
-			note: "Fewticket — release 2026-09-02, found via the project's own site",
-		},
-	],
-	"freedom-pay-wallet": [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl:
-				"https://apps.apple.com/us/app/freedom-pay-wallet/id6448116005?uo=4",
-			checkedAt: "2026-09-07",
-			note: "Freedom Pay Wallet — release 2026-07-16, found via the project's own site",
-		},
-	],
-	meru: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl:
-				"https://apps.apple.com/us/app/meru-cuenta-en-d%C3%B3lares/id1636697895?uo=4",
-			checkedAt: "2026-09-07",
-			note: "Meru | Cuenta en dólares — release 2026-09-06, found via the project's own site",
-		},
-	],
-	"providencia-onchain": [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/viio/id6452803312?uo=4",
-			checkedAt: "2026-09-07",
-			note: "VIIO — release 2026-08-31, found via the project's own site",
-		},
-	],
-	scopex: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/scopex/id6456889025?uo=4",
-			checkedAt: "2026-09-07",
-			note: "Scopex — release 2026-08-28, found via the project's own site",
-		},
-	],
-	seevcash: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl:
-				"https://apps.apple.com/us/app/seevcash-send-money-anywhere/id6444502519?uo=4",
-			checkedAt: "2026-09-07",
-			note: "Seevcash: Send Money Anywhere — release 2026-09-06, found via the project's own site",
-		},
-	],
-	utoken: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/upesa/id6480348587?uo=4",
-			checkedAt: "2026-09-07",
-			note: "Upesa — release 2026-08-19, found via the project's own site",
-		},
-	],
-	yolat: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/yolat/id6742225873?uo=4",
-			checkedAt: "2026-09-07",
-			note: "Yolat — release 2026-09-04, found via the project's own site",
-		},
-	],
-	xbull: [
-		{
-			platform: "web",
-			state: "available",
-			storeUrl: "https://xbull.app",
-			checkedAt: "2026-07-14",
-		},
-		{
-			platform: "browser-extension",
-			state: "available",
-			storeUrl:
-				"https://chromewebstore.google.com/detail/xbull-wallet/omajpeaffjgmlpmhbfdjepdejoemifpe",
-			checkedAt: "2026-07-14",
-		},
-		{
-			platform: "ios",
-			state: "unavailable",
-			checkedAt: "2026-07-13",
-			note: "formerly-listed iOS app not reachable (sls-033 #519 re-check) — web + Chrome extension remain live",
-		},
-		{
-			platform: "android",
-			state: "unavailable",
-			checkedAt: "2026-07-13",
-			note: "formerly-listed Play app not reachable (sls-033 #519 re-check) — web + Chrome extension remain live",
-		},
-	],
-	freighter: [
-		{
-			platform: "browser-extension",
-			state: "available",
-			storeUrl:
-				"https://chromewebstore.google.com/detail/freighter/bcacfldlkkdogcmkkibnjlakofdplcbk",
-			checkedAt: "2026-07-14",
-		},
-	],
-	ledger: [
-		{
-			platform: "hardware-device",
-			state: "available",
-			storeUrl: "https://shop.ledger.com",
-			checkedAt: "2026-07-14",
-		},
-	],
-	lobstr: [
-		{
-			platform: "web",
-			state: "available",
-			storeUrl: "https://lobstr.co",
-			checkedAt: "2026-07-14",
-		},
-	],
-	// sls-033 residual (2026-07-15): app availability for the newly-classified
-	// wallets, each URL reached live via the directory-quality-verify workflow.
-	decaf: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/decaf-wallet/id1616564038",
-			checkedAt: "2026-07-15",
-		},
-		{
-			platform: "android",
-			state: "available",
-			storeUrl: "https://play.google.com/store/apps/details?id=so.decaf.wallet",
-			checkedAt: "2026-07-15",
-		},
-	],
-	"cactus-link": [
-		{
-			platform: "browser-extension",
-			state: "available",
-			storeUrl:
-				"https://chromewebstore.google.com/detail/cactus-link/chiilpgkfmcopocdffapngjcbggdehmj",
-			checkedAt: "2026-07-15",
-			note: "Chrome Web Store, v2.1.30, offered by Matrixport (Cactus Custody)",
-		},
-	],
-	lumexo: [
-		{
-			platform: "web",
-			state: "available",
-			storeUrl: "https://app.lumexo.io/",
-			checkedAt: "2026-07-15",
-		},
-		{
-			platform: "ios",
-			state: "unavailable",
-			checkedAt: "2026-07-15",
-			note: "mobile app 'arriving soon' — no App Store listing yet",
-		},
-		{
-			platform: "android",
-			state: "unavailable",
-			checkedAt: "2026-07-15",
-			note: "mobile app 'arriving soon' — no Play listing yet",
-		},
-	],
-	swiftex: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/swiftex-wallet/id6759080930",
-			checkedAt: "2026-07-15",
-		},
-		{
-			platform: "android",
-			state: "available",
-			storeUrl:
-				"https://play.google.com/store/apps/details?id=org.app.swiftEx.wallet",
-			checkedAt: "2026-07-15",
-		},
-	],
-	"hito-wallet": [
-		{
-			platform: "hardware-device",
-			state: "available",
-			storeUrl: "https://shop.hito.xyz/products/hold",
-			checkedAt: "2026-07-15",
-			note: "physical HOLD device ($150); listing live, currently sold out (limited edition)",
-		},
-	],
-	hedgepay: [
-		{
-			platform: "android",
-			state: "available",
-			storeUrl:
-				"https://play.google.com/store/apps/details?id=finance.nabla.hedgepay",
-			checkedAt: "2026-07-15",
-			note: "developer Nabla Finance OU",
-		},
-	],
-	cobo: [
-		{
-			platform: "web",
-			state: "available",
-			storeUrl: "https://www.cobo.com/products/wallet/mpc",
-			checkedAt: "2026-07-15",
-			note: "Cobo Portal WaaS dashboard",
-		},
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/cobo-guard/id6450997458",
-			checkedAt: "2026-07-15",
-			note: "Cobo Guard — companion MPC key-share/signing app",
-		},
-	],
-	arculus: [
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/arculus-wallet/id1575425801",
-			checkedAt: "2026-07-15",
-			note: "companion app to the Arculus Key Card",
-		},
-		{
-			platform: "android",
-			state: "available",
-			storeUrl:
-				"https://play.google.com/store/apps/details?id=co.arculus.wallet.android",
-			checkedAt: "2026-07-15",
-		},
-	],
-	keystone: [
-		{
-			platform: "hardware-device",
-			state: "available",
-			storeUrl: "https://keyst.one/shop/products/keystone-3-pro",
-			checkedAt: "2026-07-15",
-			note: "Keystone 3 Pro air-gapped cold wallet ($149)",
-		},
-		{
-			platform: "ios",
-			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/keystone-nexus/id6742313403",
-			checkedAt: "2026-07-15",
-			note: "Keystone Nexus companion app",
-		},
-		{
-			platform: "android",
-			state: "available",
-			storeUrl:
-				"https://play.google.com/store/apps/details?id=com.keystone.wallet",
-			checkedAt: "2026-07-15",
-			note: "Keystone Nexus companion app",
-		},
-	],
 };
 
 /** Review finding 27 one-shot corrections — OVERWRITES coverage.countries for
@@ -3208,20 +2780,33 @@ async function main() {
 		writes.push({ id: d.id, slug, data: { productKind: want } });
 	}
 
-	console.log("\n── Wallet availability (sls-033 #519, EXACT-SYNC) ──");
-	// Normalize to the curated shape (drop Payload row ids) so reruns no-op.
-	// biome-ignore lint/suspicious/noExplicitAny: Payload array-field row shape
-	const normAvail = (rows: any): string =>
-		JSON.stringify(
-			(Array.isArray(rows) ? rows : []).map((r) => ({
-				platform: r.platform ?? null,
-				state: r.state ?? null,
-				storeUrl: r.storeUrl ?? null,
-				checkedAt: r.checkedAt ?? null,
-				note: r.note ?? null,
-			})),
+	console.log(
+		"\n── Wallet availability and checks (sls-033 #519, EXACT-SYNC) ──",
+	);
+	// One writer, one pass: rows from AVAILABILITY_SET and WALLET_AVAILABILITY
+	// (both in curation-maps.ts, where a test reads them), and the dated
+	// check from AVAILABILITY_CHECKED, planned together
+	// per row by availabilityPatch (src/lib/wallet-coverage.ts). A slug in
+	// both rows maps would be written twice with different rows, so the run
+	// stops before planning. A slug in a rows map and AVAILABILITY_CHECKED is
+	// allowed: its rows are written and its check is cleared.
+	const twice = Object.keys(WALLET_AVAILABILITY).filter(
+		(s) => s in AVAILABILITY_SET,
+	);
+	if (twice.length) {
+		console.error(
+			`Fatal: ${twice.join(", ")} named by both AVAILABILITY_SET and WALLET_AVAILABILITY`,
 		);
-	for (const [slug, avail] of Object.entries(AVAILABILITY_SET)) {
+		process.exit(1);
+	}
+	const rowsBySlug: Record<string, AvailabilityRow[]> = {
+		...AVAILABILITY_SET,
+		...WALLET_AVAILABILITY,
+	};
+	for (const slug of new Set([
+		...Object.keys(rowsBySlug),
+		...Object.keys(AVAILABILITY_CHECKED),
+	])) {
 		const r = await payload.find({
 			collection: "projects",
 			where: { slug: { equals: slug } },
@@ -3232,22 +2817,30 @@ async function main() {
 		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 		const d = r.docs[0] as any;
 		if (!d) {
-			console.log(`  WARN: no project "${slug}" — skipped`);
+			console.log(`  WARN: no project "${slug}" (skipped)`);
 			continue;
 		}
-		const want = avail.map((a) => ({
-			platform: a.platform,
-			state: a.state,
-			storeUrl: a.storeUrl ?? null,
-			checkedAt: a.checkedAt,
-			note: a.note ?? null,
-		}));
-		if (normAvail(d.availability) === normAvail(want)) {
+		const patch = availabilityPatch(
+			d,
+			rowsBySlug[slug],
+			AVAILABILITY_CHECKED[slug],
+		);
+		if (!patch.availability && !patch.availabilityCheck) {
 			console.log(`  ${slug}: availability already in sync, skip`);
 			continue;
 		}
-		console.log(`  ${slug}: availability → ${want.length} platform row(s)`);
-		writes.push({ id: d.id, slug, data: { availability: want } });
+		if (patch.availability)
+			console.log(
+				`  ${slug}: availability → ${patch.availability.length} platform row(s)`,
+			);
+		const check = patch.availabilityCheck;
+		if (check)
+			console.log(
+				check.result
+					? `  ${slug}: availability check → ${check.result} (${check.checkedAt})`
+					: `  ${slug}: availability check cleared, the row has availability`,
+			);
+		writes.push({ id: d.id, slug, data: { ...patch } });
 	}
 
 	console.log("\n── Bridge routes (sls-032 #516, EXACT-SYNC) ──");
