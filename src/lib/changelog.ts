@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-12",
+		surfaces: ["api"],
+		version: "spec@1.9.142",
+		type: "fixed",
+		summary:
+			"Rows that shared a site, a repo or a GitHub account are resolved once the curation lane runs, each from the project's own site, repo and SCF page. Eight duplicates fold into their canonical row (`canonicalSlug`, status Draft): safu-protocol into safu, cryptix into stellar-token-launchpad, net-sdk into net-stellar-sdk, ios-mac-stellar-sdk into ios-stellar-sdk, lusty-finance into lusty, autowhale into renesis (Autowhale's new name), stellar-vrf into vrf-soroban and soroban-elk into stellar-command-insights; where only the folded row held the SCF award (safu-protocol, net-sdk, lusty-finance, autowhale) the award record moves with it. vrf-soroban becomes Live: its VRF contract runs on Stellar mainnet. Seven pairs stay two products and lose the link one row took from the other. inferera is renamed soroban-ret, the Soroban decompiler its SCF #41 award funded. kedgeway, a Stellar SDK drift checker (CLI, GitHub Action, MCP server), is added as Live on package-release. No schema change.",
+		detail:
+			"Kept apart: estrela and allbridge (Estrela is Allbridge's Soroban stablecoin AMM, its link moves from the bridge's SDK to allbridge-io/dex-soroban-contracts), inference and soroban-ret (Inference now links inference-lang.org), octarine and mystic, chaincerts and chaincred (ChainCred links its own repo), catalyst and chef (Catalyst links no repo), rampmedaddy and wellspring (Wellspring stops claiming RampMeDaddy's frontend) and pakananet and stellar-razor-and-blazor-suite (Pakana.Net links no repo: its company's org holds none of its own). MoneyGram no longer links SDF's archived demo wallet; MoneyGram publishes no Stellar repo. Pretium links its own MCP server repo instead of an individual's account. theahaco/attest-contract, now stellar-registry/actions, moves from the-aha-company to stellar-registry on the next repo pass, and Allbridge Core's SDK from estrela to allbridge. vrf-soroban's `statusBasis` is human-verified, dated 2026-11-12: contract CAW6KECQMHRTX2GS3JVHWBMOB5JNNOHNOCE635RQS4SWJ72YF56EUPRX exists on mainnet, deployed 2026-09-24, with its oracle's latest fulfill on 2026-10-18 cited as `statusSourceUrl`. soroban-ret's basis becomes package-release (crates.io 0.0.4, 2026-07-26). stellar-command-insights links the app its SCF page names. Estrela's and Mystic's `statusBasis` become unverified with a null `statusSourceUrl`, statuses unchanged: Estrela's rested on the bridge SDK's commits and Mystic's on Octarine's repo. Counts: the eight folded rows leave search and every listed count (six Live, two Development), kedgeway adds one Live row, and vrf-soroban moves from Development to Live.",
+	},
+	{
+		date: "2026-11-12",
 		surfaces: ["api", "skill"],
 		version: "spec@1.9.141",
 		type: "added",

@@ -732,14 +732,22 @@ export const STATUS_FIX: Record<
 		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet next100-b 2026-09-06: the app lists 15+ live exchange communities (El Poblet, Ecoxarxa del Bages, Greencoin, TimeInWest \u2026) in a browser (observed 2026-09-06; raw fetch is a shell); docs carry a 'Stellar model' accounting page; own repo community-exchange-network/komunitin pushed 2026-09-03 (high).",
 	},
 	// ── Deep verification 2026-09-06 downgrades, owner-approved.
+	// mystic: moved Live to Development on 2026-09-06 citing
+	// mystic-finance/Stellar-RFQ, whose README is "Octarine Settlement" and
+	// whose milestone form is Octarine's SCF #44 Build tranche: the evidence
+	// was Octarine's, a separate product with its own row (octarine.finance,
+	// "powered by Mystic"). Mystic's own SCF #29 product is an RWA lending
+	// market. Identity lane 2026-11-12: the status stays, the borrowed basis
+	// and source go (STATUS_SOURCE_RETRACT), and the note that read
+	// Octarine's tranche as Mystic's is replaced.
 	mystic: {
-		from: "Live",
+		from: "Development",
 		to: "Development",
-		basis: "human-verified",
-		asOf: "2026-09-01",
-		sourceUrl:
-			"https://github.com/mystic-finance/Stellar-RFQ/blob/main/docs/MILESTONE_1.md",
-		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: Stellar product is a testnet MVP \u2014 the repo's SCF Build tranche form says 'Pre-Launch #1 \u2014 MVP', 'Done on testnet: 20+ Order fills'; deployments/testnet.json deployedAt 2026-08-27, testnet contract CDB75DJB\u2026 has 40 events; docs/Circle directory show no Stellar. The company's live vaults ($22.03M) are Morpho on Flare, a different product. Row scf says no award but the repo is an SCF Build tranche \u2014 enrich-scf gap. Receipt improvements/receipts/mystic-2026-09-06.json (markers: Pre-Launch, testnet).",
+		basis: "unverified",
+		asOf: "2026-11-12",
+		withdraw: true,
+		replaceNote: true,
+		note: "Basis withdrawn 2026-11-12: this status rested on the milestone form in mystic-finance/Stellar-RFQ, which is Octarine's repository (its README is Octarine Settlement, and the form is Octarine's SCF #44 Build tranche). Octarine is a separate product of the same company with its own row. Mystic's own SCF #29 product is an RWA lending market; the status stands until evidence about it arrives, and this is no finding that it stopped.",
 	},
 	// ── Deep verification 2026-09-06: rows the packet tiers could not decide, re-verified
 	// by two agents under the product-state rule and hand-checked by the coordinator.
@@ -2588,9 +2596,10 @@ export const STATUS_FIX: Record<
 		note: "Operator README (repo pushed 2026-08-29) states 'Network: Stellar Testnet'; positions settled end-to-end on testnet; LUSD distributor backs the testnet faucet only. A testnet venue is not Live. Development, not Inactive — work is current.",
 	},
 	// sls-113 review, 2026-11-07: lusty is the same product as lusty-finance
-	// above (same site, same repo; the merge is an owner decision, see
-	// improvements/TODO.md). This row read Live on product-integration while
-	// the product still runs on testnet only.
+	// above (same site, same repo). This row read Live on product-integration
+	// while the product still runs on testnet only. Owner go 2026-11-12:
+	// lusty-finance folds into this row (DUPE_MERGES in curate-projects.ts),
+	// which keeps this newer verdict and takes the SCF #44 award.
 	lusty: {
 		from: "Live",
 		to: "Pre-Release",
@@ -3019,6 +3028,49 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://registry.npmjs.org/@x402/stellar",
 		note: "Basis corrected 2026-11-12: @x402/stellar 2.30.0 was published to npm on 2026-11-04, and the registry names github.com/x402-foundation/x402, this project's own repository, as the package source. The status had rested on the npm web page answering, filed as site-liveness.",
 	},
+	// Identity lane 2026-11-12: a status that rested on another product's
+	// evidence. Estrela is Allbridge's Soroban stablecoin AMM (allbridge.io:
+	// "Estrela, an AMM built on Soroban"; SCF estrela-mrf), a separate product
+	// from the Allbridge Core bridge, and its repo-activity came from commits
+	// to the bridge's JS SDK (GITHUB_LINK_FIX moves the link to the AMM's own
+	// repo, last commit 2025-07-24). STATUS_SOURCE_RETRACT nulls the source.
+	estrela: {
+		from: "Live",
+		to: "Live",
+		basis: "unverified",
+		asOf: "2026-11-12",
+		withdraw: true,
+		note: "Basis withdrawn 2026-11-12: this status rested on commits to allbridge-io/allbridge-core-js-sdk, the SDK of Allbridge's Core bridge, a separate product. Estrela is Allbridge's Soroban stablecoin AMM, whose own repository (allbridge-io/dex-soroban-contracts) was last committed 2025-07-24. The status stands until evidence about the AMM itself arrives; this is no finding that it stopped.",
+	},
+	// Identity lane 2026-11-12: stellar-vrf (Live) folds into vrf-soroban
+	// (Development), and the merge must not hide a running product. Read
+	// that day: contract CAW6KECQ...EUPRX holds its instance on mainnet
+	// (Soroban RPC getLedgerEntries, absent on testnet); Horizon shows the
+	// six transactions the repo README lists, all successful and from the
+	// oracle account, including its deploy (CreateContractV2, 2026-09-24) and
+	// a request whose target decodes to the contract; and the oracle account
+	// has kept calling fulfill on it, most recently 2026-10-18 (the source).
+	"vrf-soroban": {
+		from: "Development",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-11-12",
+		sourceUrl:
+			"https://horizon.stellar.org/transactions/5f1f72ba18ec312ab3a033905a2687ec2b56d33606b008f2499c92928bc82f51",
+		note: "Live on Stellar mainnet, read 2026-11-12: the VRF contract CAW6KECQMHRTX2GS3JVHWBMOB5JNNOHNOCE635RQS4SWJ72YF56EUPRX exists on mainnet, was deployed by its oracle account on 2026-09-24, and has served requests since; the oracle's latest fulfill call is dated 2026-10-18. The SCF frontend (soroban-vrf-frontend.onrender.com) is suspended; the product is the on-chain oracle.",
+	},
+	// soroban-ret (slug inferera) was Live on site-liveness from inferara.com,
+	// the maker's site. crates.io lists soroban-ret 0.0.4, published
+	// 2026-07-26 (0.0.1 on 2026-04-29), and its repository field names
+	// github.com/Inferara/soroban-ret, the row's own repo: package-release.
+	inferera: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-07-26",
+		sourceUrl: "https://crates.io/api/v1/crates/soroban-ret",
+		note: "soroban-ret 0.0.4 (with soroban-ret-cli 0.0.4) was published to crates.io on 2026-07-26, and the registry names github.com/Inferara/soroban-ret, this project's own repository, as its source. The README calls the tool early development. The status had rested on inferara.com, the maker's site, answering.",
+	},
 };
 
 /** Website corrections (liveness triage 2026-07-10, boxy-approved): the
@@ -3037,6 +3089,9 @@ export const TWITTER_LINK_FIX: Record<string, string> = {
 	// links (RampMeDaddy, a sister product of the same company). Wellspring's
 	// own site, wellspring.money, links x.com/WellspringApp.
 	wellspring: "https://x.com/WellspringApp",
+	// 2026-11-12: lusty, the row lusty-finance folds into, stored a bare
+	// "https://x.com/". lusty.finance links x.com/Lustyfinance.
+	lusty: "https://x.com/Lustyfinance",
 };
 
 /** links.github corrections — equality-guarded overwrites for records whose
@@ -3128,6 +3183,40 @@ export const GITHUB_LINK_FIX: Record<string, string> = {
 	// profile links peerpesa.co, the row's own site, and holds
 	// Stellar.PeerPESA ("Peerpesa-Stellar ... DApp").
 	peerpesa: "https://github.com/peerpesa",
+	// ── 2026-11-12 identity lane: two products shared one link, or a row
+	// cited another product's repo. Each value is what the row's own evidence
+	// names; GITHUB_REPOS_SET makes the github group agree.
+	// Estrela is Allbridge's Soroban stablecoin AMM (allbridge.io: "Estrela,
+	// an AMM built on Soroban"), separate from the Allbridge Core bridge. Its
+	// SCF page (estrela-mrf) links this repo, the code Quarkslab audited as
+	// Allbridge Estrela. The row linked the bridge's JS SDK.
+	estrela: "https://github.com/allbridge-io/dex-soroban-contracts",
+	// ChainCred linked Chaincerts' contracts repo (kommitters, SCF #13 and
+	// #18). Its own code is the ChainCred repo of an individual's account, the
+	// repo its Inactive verdict already cites.
+	chaincred: "https://github.com/Prince29chouhan/ChainCred",
+	// The row is Inferara's SCF #41 award, "Soroban Disassembler (Working
+	// Title)", whose page asks for a Soroban reverse engineering tool. This
+	// repo is Inferara's reverse-engineering tool for Soroban contracts and
+	// says the Stellar Community Fund funds it. The org link stays on
+	// inference, which keeps the org's other repos.
+	inferera: "https://github.com/Inferara/soroban-ret",
+	// The row linked an individual's account. This repo's homepage is the
+	// row's own site (pretium.africa) and its README introduces it as the MCP
+	// server for Pretium.
+	pretium: "https://github.com/derrickbundi/pretium-mcp",
+	// Not relinked on 2026-11-12, each still naming an account rather than an
+	// org or repo, because no evidence ties a better target: benkiko
+	// (BenkikoDAO is the project's own account, named for it, with no public
+	// repos), icanproveit (the account its SCF page links; its one
+	// project-named repo is empty), docking-zone (the account its SCF page
+	// links; its one product repo holds NEAR contracts, not Stellar code),
+	// borderdollar (an individual's account holding no BorderDollar repo),
+	// stellars-finance (an account named for the project and linked by its SCF
+	// page; its one repo is a fork whose homepage is another product's demo)
+	// and renesis (an individual's account whose profile names Renesis; its
+	// two repos are unrelated forks, no Renesis org exists, and renesis.fi
+	// links no GitHub).
 };
 
 /** Rebrands — name, website, and description move together so both the old
@@ -3174,6 +3263,10 @@ export const NAME_FIXES: Record<string, string> = {
 	// was named for the Wirex Pay product; wirexpaychain.com now 301s to
 	// wirexapp.com. The company is the entity; Wirex Pay stays as an alias.
 	"wirex-pay": "Wirex",
+	// 2026-11-12, identity lane: "Inferera" names no product; it misspells
+	// Inferara, the maker. The row is Inferara's SCF #41 award (Soroban
+	// Disassembler, a working title), shipped as soroban-ret.
+	inferera: "soroban-ret",
 };
 
 /** Editorial search-ranking boost (Projects.prominence, 0–100; 90 = the
@@ -3386,6 +3479,16 @@ export const WEBSITE_FIXES: Record<string, string> = {
 	// group); the invite resolves 200 ("WEB3DEV", 9,692 members) — same
 	// canonical invite form as the web3dev row above.
 	"study-stellar-sdk-soroban": "https://discord.com/invite/web3dev",
+	// 2026-11-12, identity lane: inference and inferera both linked
+	// inferara.com, the maker's site. The Inference language has its own,
+	// which serves the release its status cites ("v0.0.5 is available" and
+	// install.sh). inferera keeps inferara.com, the site its SCF page names.
+	inference: "https://inference-lang.org/",
+	// 2026-11-12: the row's website was its GitHub repo. Its SCF page
+	// (stellar-command-insights-sci-czo) names this app as the website, the
+	// one the folded soroban-elk row linked. It answered 429 to two reads
+	// that day, a rate limit, which is no verdict either way.
+	"stellar-command-insights": "https://voluble-fairy-844611.netlify.app/",
 };
 
 /** Curated seeds — create-if-missing directory entries with human-verified
@@ -3508,7 +3611,7 @@ export const ALIAS_ADD: Record<string, string[]> = {
 	"bp-ventures": ["StellarMesh", "BPV"], // BPV = BP Ventures; bpventures.us
 	"stellar-router-sdk": ["Meta Contracts"], // exact jsr.io/@creit-tech/stellar-router-sdk match
 	reclaim: ["zkFetch"], // row desc already names its zkFetch SDK
-	inferera: ["Inferara"], // our slug spells it differently than inferara.com
+	inferera: ["Inferara", "Inferera"], // renamed soroban-ret (NAME_FIXES); the maker's name and the old misspelling still find it
 };
 
 export const TYPE_ADD: Record<string, string[]> = {
@@ -5904,6 +6007,37 @@ export const SEEDS: Array<{
 		statusSourceUrl: "https://support.metamask.io/configure/networks/stellar",
 		statusBasis: "operator-announcement",
 	},
+	// kedgeway (owner request, 2026-11-12). Absent before this entry: search
+	// by name, by its site's host and by its GitHub owner returned no row
+	// sharing any of them. The npm registry record lists 0.3.x releases,
+	// first published 2026-11-12, MIT, and names github.com/Klorenn/kedgeway
+	// (MIT, created 2026-11-11) as its repository, a backlink only the repo and
+	// package owner can make: package-release, the basis the other registry
+	// seeds carry. The README documents the CLI, a GitHub Action
+	// (Klorenn/kedgeway), an MCP server (`kedgeway mcp`) and a TypeScript
+	// library. Its README and the npm record name the site
+	// kedgeway.vercel.app and kedgeway.xyz respectively; the first answers
+	// 200 ("kedgeway, Stellar toolchain diagnosis"), the second did not
+	// resolve on 2026-11-12. A developer tool runs on no network, so
+	// supportedNetworks stays empty.
+	{
+		slug: "kedgeway",
+		name: "kedgeway",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK"],
+		supportedNetworks: [],
+		shortDescription:
+			"kedgeway diagnoses Stellar SDK drift: it reads a repo's Cargo.toml and package.json files and compares the soroban-sdk, Stellar JavaScript SDK and Stellar CLI versions they pin with the current and deprecated versions Stellar Raven reports, with each finding's severity and evidence. It ships as a CLI on npm, a GitHub Action that can gate CI or open migration pull requests, an MCP server and a TypeScript library.",
+		links: {
+			website: "https://kedgeway.vercel.app/",
+			github: "https://github.com/Klorenn/kedgeway",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-12",
+		statusSourceUrl: "https://registry.npmjs.org/kedgeway",
+		statusBasis: "package-release",
+	},
 ];
 
 /** sls-035 (#517): DEX-landscape role for the clearest records: makes the
@@ -7399,6 +7533,11 @@ export const PARTNER_DESCRIPTION_FIXES: Record<
 };
 
 export const DESCRIPTION_FIXES: Record<string, string> = {
+	// 2026-11-12, identity lane: the row carried the Inference language's
+	// description word for word. It is Inferara's SCF #41 decompiler (see
+	// NAME_FIXES and GITHUB_LINK_FIX); this is its README, condensed.
+	inferera:
+		"soroban-ret is Inferara's reverse-engineering tool for Soroban smart contracts: it decompiles a contract's WebAssembly back into Rust. Signatures, types, error enums and events are recovered from the contract's own spec metadata; function bodies are inferred from bytecode, with an explicit hole wherever a value cannot be proven. Early development: small and mid-size contracts decompile into Rust that compiles back and behaves like the original, while large mainnet contracts recover full interfaces but partial bodies. Published on crates.io as soroban-ret and soroban-ret-cli, and funded by SCF #41 as the Soroban Disassembler.",
 	// sls-029 (2026-11-11): every oracle provider in src/data/oracle-registry.ts
 	// says only what its evidence supports: no freshness ("real-time",
 	// "updating every 10 minutes"), no deployment beyond the registry's
@@ -7653,6 +7792,15 @@ export const GITHUB_REPOS_ADD: Record<
 	"stellar-registry": [
 		{ owner: "stellar-registry", name: "contracts" },
 		{ owner: "stellar-registry", name: "cli" },
+		// 2026-11-12: theahaco/attest-contract moved into the registry's org
+		// (GitHub answers 301 to stellar-registry/actions, "Github Workflow to
+		// create an attested soroban contract"), but the stored repo row kept
+		// the old path and the-aha-company's slug: the repo pass never unlinks.
+		// Listed under the OLD path on purpose. The pass looks a row up by the
+		// listed name, finds the stored one, and rewrites it under GitHub's new
+		// name with this row's slug; listed under the new name it would create
+		// a second row and leave the first where it is.
+		{ owner: "theahaco", name: "attest-contract" },
 	],
 	// Row-facts 2026-09-05: the row links the 2024 core-v1 repo only; the
 	// same org's raum-raumfi-v3 ("CLMM implementation of RaumFi DEX", pushed
@@ -7671,6 +7819,45 @@ export const GITHUB_REPOS_ADD: Record<
 	// not indexed, so searchRepos cannot give it the archived repo's place.
 	// Attach it so enrich-repos indexes it under the project.
 	defindex: [{ owner: "defindex-io", name: "stellar-contracts" }],
+	// 2026-11-12: the Allbridge Core bridge's JS SDK, which estrela claimed
+	// until its link moved to its own AMM repo. Claimed here so the repo pass
+	// rejoins the stored row to the bridge's project: the allbridge-io org
+	// (37 repos) is keyword-gated, and this repo names no Stellar term.
+	allbridge: [{ owner: "allbridge-io", name: "allbridge-core-js-sdk" }],
+};
+
+/** The whole github group (orgLogin and repos), exact, for rows whose stored
+ * group still claims another product's repo after their link was fixed or
+ * removed (2026-11-12). enrich-repos claims every repo in github.repos, and a
+ * stored orgLogin makes the row a sibling of that org, which claims the
+ * org's repos by name; so a link fix alone left the old claim in force (the
+ * served `repos` kept the other product's code). Owns `github`, so the feed
+ * sync cannot write the old group back. Compared case-insensitively, as
+ * GitHub logins are. Each value matches the link the row ends with. */
+export const GITHUB_REPOS_SET: Record<
+	string,
+	{ orgLogin: string | null; repos: Array<{ owner: string; name: string }> }
+> = {
+	estrela: {
+		orgLogin: "allbridge-io",
+		repos: [{ owner: "allbridge-io", name: "dex-soroban-contracts" }],
+	},
+	chaincred: {
+		orgLogin: "Prince29chouhan",
+		repos: [{ owner: "Prince29chouhan", name: "ChainCred" }],
+	},
+	pakananet: { orgLogin: null, repos: [] },
+	catalyst: { orgLogin: null, repos: [] },
+	// orgLogin "stellar" made MoneyGram a sibling of SDF's org, which would
+	// hand it back the demo by name (moneygram-access-wallet-mvp).
+	moneygram: { orgLogin: null, repos: [] },
+	// Wellspring's group also listed trustek-io/rampmedaddy-frontend, which is
+	// RampMeDaddy's: the rampmedaddy row links it, and so does SCF's #30
+	// record (wellspring-xuv), which is RampMeDaddy's award (#1938).
+	wellspring: {
+		orgLogin: "trustek-io",
+		repos: [{ owner: "trustek-io", name: "wellspring-mvp-treasurymanagement" }],
+	},
 };
 
 export const TYPES_ADD: Record<string, string[]> = {
@@ -8039,6 +8226,7 @@ export function curatedFieldsFor(slug: string): Set<string> {
 	if (slug in GITHUB_LINK_REMOVE) owned.add("links.github");
 	if (slug in DOCS_LINKS) owned.add("links.docs");
 	if (slug in GITHUB_REPOS_ADD) owned.add("github");
+	if (slug in GITHUB_REPOS_SET) owned.add("github");
 	// Curate's own correction lists (moved here 2026-10-03). A rebrand moves
 	// the name, the description and the website together.
 	if (slug in GITHUB_LINK_FIX) owned.add("links.github");
@@ -8064,6 +8252,7 @@ export function curatedSlugs(): string[] {
 			...Object.keys(WEBSITE_FIXES),
 			...Object.keys(DOCS_LINKS),
 			...Object.keys(GITHUB_REPOS_ADD),
+			...Object.keys(GITHUB_REPOS_SET),
 			...Object.keys(WEBSITE_REMOVE),
 			...Object.keys(WEBSITE_REMOVE_DEAD),
 			...Object.keys(GITHUB_LINK_REMOVE),
@@ -8468,6 +8657,12 @@ export const STATUS_SOURCE_RETRACT: Record<string, string> = {
 	// evidence the DEX lives; WEBSITE_REMOVE unlinks the same URL. Status is
 	// the owner's call (the-blue-marble went Inactive on the same evidence).
 	stabble: "https://stabble.org/",
+	// 2026-11-12, identity lane: each source is another product's repo (the
+	// Allbridge Core bridge's SDK; Octarine's milestone form). STATUS_FIX
+	// withdraws the basis each backed.
+	estrela: "https://github.com/allbridge-io/allbridge-core-js-sdk",
+	mystic:
+		"https://github.com/mystic-finance/Stellar-RFQ/blob/main/docs/MILESTONE_1.md",
 	venalabs: "https://venalabs.com/",
 	whalestack: "https://coinqvest.com/",
 	// 2026-11-12, the third-party host class: the status source of each row
@@ -8541,8 +8736,27 @@ export const STATUS_SOURCE_RETRACT: Record<string, string> = {
  *    (normal) had corroborating evidence — its repo homepage is the project
  *    site — so it is a GITHUB_LINK_FIX above and the other six were rejected.
  *    A name is a hypothesis; a link is evidence.
+ *  - ANOTHER PRODUCT'S CODE (2026-11-12): the repo answers, but it belongs
+ *    to a different product, and the project publishes no repo of its own.
+ *    GITHUB_REPOS_SET clears the same claim from the row's github group.
  */
 export const GITHUB_LINK_REMOVE: Record<string, string> = {
+	// ── another product's code (2026-11-12) ──
+	// MoneyGram's only link was SDF's archived MVP wallet demo (last pushed
+	// 2022-06-24), which read a Live anchor as a codebase with no commits.
+	// MoneyGram's GitHub org holds one repo, a 2018 wiki sidebar builder.
+	moneygram: "https://github.com/stellar/moneygram-access-wallet-mvp",
+	// Catalyst Blockchain Manager (IntellectEU, SCF #22) linked the repo of
+	// Chef, a separate SCF #22 project. Its SCF page lists no repo, and
+	// IntellectEU's org holds none for it.
+	catalyst: "https://github.com/stellar-chef/stellar-chef",
+	// Pakana.Net linked the repo of the Stellar Razor and Blazor Suite, the
+	// same company's separate SCF project (#25, #27, #31). Its SCF page and
+	// pakana.net link only the company org, lockb0x-llc, whose 29 public
+	// repos hold no Pakana.Net repo: the Razor suite, SDEX components, the
+	// Lockb0x protocol, RelayForge and forks. A bare org link would fan out to
+	// all of them (enrich-repos expands an owner link), so the row links none.
+	pakananet: "https://github.com/lockb0x-llc/pakana-stellar-razor-components",
 	// ── not a GitHub path (real URL noted; the stored value 404s) ──
 	// real: https://gitlab.com/b4b-world
 	b4b: "https://github.com/gitlab.com/b4b-world",
@@ -8902,6 +9116,7 @@ export const OWNERSHIP_COVERAGE: Array<{
 	},
 	{ map: DOCS_LINKS, name: "DOCS_LINKS", field: "links.docs" },
 	{ map: GITHUB_REPOS_ADD, name: "GITHUB_REPOS_ADD", field: "github" },
+	{ map: GITHUB_REPOS_SET, name: "GITHUB_REPOS_SET", field: "github" },
 	{ map: GITHUB_LINK_FIX, name: "GITHUB_LINK_FIX", field: "links.github" },
 	{
 		map: TWITTER_LINK_FIX,

@@ -140,9 +140,11 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    passed.
    Open beside it: enrich-repos only ever sets a row's projectSlug, so a row
    whose repo was renamed (16, 6 with a twin row under the new name), moved
-   to another project's org (theahaco/attest-contract, now
-   stellar-registry/actions, still cited by the-aha-company) or dropped from
-   a project's links stays linked; nothing unlinks it.
+   to another project's org or dropped from a project's links stays linked;
+   nothing unlinks it. Lane r1112-dq4-identity rejoins the ones it names by
+   having the right project claim the repo (theahaco/attest-contract to
+   stellar-registry, listed under its old path; allbridge-core-js-sdk to
+   allbridge); the general unlink is still missing.
 
 7. **"Recent mainnet upgrade" leads with an upgrade not yet on mainnet.**
    Probe: in `/api/research?q=recent mainnet upgrade&limit=5`, no row
@@ -298,6 +300,21 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     someone other than the author.
 
 ## Next
+
+Found by the identity lane on 2026-11-12 (branch lane/r1112-dq4-identity),
+not changed there:
+
+- GITHUB_LINK_FIX rewrites links.github and leaves the github group as it
+  was, so a relinked row can keep claiming its old repo through
+  `github.repos` and `github.orgLogin` (safu still lists the 404
+  mrkanchwala/safu-protocol). The lane added GITHUB_REPOS_SET for the six
+  rows where the old repo is another product's; a derived pass that keeps
+  the group in step with the link would close the class.
+- stellar-registry's status rests on stellar-scaffold/cli (Scaffold
+  Stellar's CLI, another product) and its stored github.orgLogin is
+  theahaco.
+- catalyst.intellecteu.com now redirects to catalyx.solutions (CatalyX),
+  and the row's description, copied from its SCF page, describes EcoXChange.
 
 Found by the third-party host lane on 2026-11-12 (branch
 lane/r1112-dq1-host). Toml links that hold one way, found and not changed;
@@ -848,13 +865,13 @@ Found 2026-10-23 by the dead-protocol guard round
   and `binance`, `gate-io` and `cex-io` (CEX reserves, excluded by rule).
   Benji's project page shows its Horizon supply at $1.00 a share while its
   API row has no tvlUSD.
-- Estrela is served Live (basis repo-activity) with Allbridge Core's bridge
-  routes copied in curate-projects, but its SCF page (#22 and #35) describes
-  Allbridge's Soroban stablecoin AMM (allbridge-io/dex-soroban-contracts, last
-  commit 2025-07-24), not the bridge. The round clears the copied routes and
-  network matrix (it now serves derived networks, basis scf-award); its
-  identity (a separate product, or a duplicate to fold) and its Live status
-  are unreviewed.
+- Estrela's Live status is unreviewed. Its identity was decided on
+  2026-11-12 (lane r1112-dq4-identity): a separate product, Allbridge's
+  Soroban stablecoin AMM (allbridge.io names it), not a duplicate of the
+  allbridge row. Its link moves to allbridge-io/dex-soroban-contracts (last
+  commit 2025-07-24) and its repo-activity basis, which came from the bridge's
+  SDK, is withdrawn to unverified. Its types are still SDK and Bridge, copied
+  from the bridge; an AMM is a DEX, which would need a venue role.
 - The research golden case `bridge-evm-to-stellar` still expects Allbridge as
   a current EVM to Stellar route, while docs-core.allbridge.io says Stellar
   support on the relaunched Core is unavailable pending audit (read
@@ -957,11 +974,3 @@ Found 2026-10-23 in review of the smart wallet O2 ship
   put it in a URL (request logs, browser history). It signs every session,
   so rotating logs every admin and partner out [no rotation unless a log
   holding it is known to be readable by others].
-- Lusty has two rows for one product: `lusty` (served Live on
-  product-integration; the curation lane moves it to Pre-Release) and
-  `lusty-finance` (Development, human-verified 2026-08-29), both linking
-  lusty.finance and the same repo. Evidence read 2026-11-07: the repo README
-  says "Network: Stellar Testnet", and the vault the live app calls
-  (CBJZGTCF2PJVHX2BNFTFZ2L2LX6DWD5JMTLHNCVYTSOD3BLVSXZRUCJZ) exists on testnet
-  and not on mainnet. Merge them into one row with a canonical pointer and one
-  status [keep both rows, no merge, until decided].
