@@ -1,0 +1,16 @@
+{
+	"generatedAt": "2026-11-12T18:43:37.403Z",
+	"source": "scripts/check-sdk-facts.ts",
+	"factsAsOf": "2026-11-12",
+	"rule": "Every advisory, package deprecation, yank, latest major and inherited range in src/data/sdk-facts.ts is re-read from its own source; renamed and moved statements and idiom source pages are not. A row is drift between the source and the list. A source that could not be read is listed under unchecked, adds no row, and keeps the rows the previous run held for it (carriedFrom).",
+	"tally": {
+		"drift": 0,
+		"carried": 0,
+		"unchecked": 0,
+		"advisoriesRead": 7,
+		"repositoriesRead": 10,
+		"registriesRead": 16
+	},
+	"unchecked": [],
+	"rows": []
+}

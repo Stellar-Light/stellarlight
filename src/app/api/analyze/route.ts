@@ -23,12 +23,25 @@
 import { createHash } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
+import {
+	ALSO_AFFECTS_MAX_HOPS,
+	SDK_ADVISORIES,
+	SDK_FACTS_ASOF,
+	SDK_IDIOMS,
+	SDK_PACKAGES,
+} from "@/data/sdk-facts";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { computeEcosystemGaps, GAP_VERTICALS } from "@/lib/ecosystem-gaps";
 import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	ACTIVE_PROJECT_STATUSES,
+	type PopulationScope,
+	populationScope,
+} from "@/lib/population";
+import { jsSdkAdoption, sorobanSdkAdoption } from "@/lib/sdk-facts";
 import {
 	combinedVersionStatus,
 	deprecatedBy,
@@ -41,11 +54,6 @@ import {
 	TABLE_ASOF,
 	versionStatusOf,
 } from "@/lib/soroban-versions";
-import {
-	ACTIVE_PROJECT_STATUSES,
-	type PopulationScope,
-	populationScope,
-} from "@/lib/population";
 import {
 	parseDate,
 	TVL_FRESH_DAYS,
@@ -813,6 +821,17 @@ export async function GET(req: NextRequest) {
 			// 881 of them on a soroban-sdk that is not deprecated), so each line
 			// is counted on its own too and every row says which line put it
 			// there.
+			// The JS line's own population: 2,791 of the 6,136 repos with a
+			// stored JS dependency carry no soroban-sdk version (2026-11-12), so
+			// the read above would miss them. One field, same cap.
+			const jsScanned = await payload.find({
+				collection: "repos",
+				where: { stellarJsDep: { exists: true } },
+				limit: TOOLCHAIN_SCAN_CAP,
+				depth: 0,
+				overrideAccess: true,
+				select: { stellarJsDep: true },
+			});
 			const byStatus: Record<string, number> = {};
 			const bySoroban: Record<string, number> = {};
 			const byJs: Record<string, number> = {};
@@ -893,7 +912,33 @@ export async function GET(req: NextRequest) {
 					ciPresent: ciCount,
 					testsPresent: testsCount,
 				},
-				basis: `SDK support status per repo carrying a soroban-sdk version (scannedRepos; repos whose scan found only a JavaScript or other-language Stellar dependency are not in this block), read at request time from each repo's stored versions through the dated tables in soroban-versions.ts (Rust soroban-sdk table as of ${TABLE_ASOF}, JavaScript @stellar/stellar-sdk table as of ${JS_SDK_ASOF}). Two SDK lines: bySorobanSdkStatus is the Rust soroban-sdk crate alone; byJsSdkStatus is the JavaScript Stellar SDK dependency alone, over the same repos, so it is not an ecosystem-wide JavaScript count. byVersionStatus and deprecatedTotal combine them: a repo counts as deprecated when EITHER line is deprecated, so they are not a soroban-sdk count; for that read bySorobanSdkStatus.deprecated. Each deprecatedRepos row names the line behind it in deprecatedBy; rows deprecated on the soroban-sdk line come first, then JS-only rows, with no rank within each group. deprecationRule states the rule itself. Deprecated means below our floors (soroban-sdk major < ${SUPPORTED_FLOOR_MAJOR}; @stellar/stellar-sdk major < ${JS_SDK_SUPPORTED_FLOOR_MAJOR}, or a package its npm publisher marks deprecated: ${[...PUBLISHER_DEPRECATED_JS_PACKAGES].join(", ")}). The publishers support fewer majors than our floors admit (soroban-sdk: the two newest majors; JS: v17 and v16), so supported is not a publisher support claim. 'unknown' = no released version the table can read on that line (none, a pre-release, unpinned, git, workspace, or an unparsed range) or a JS dependency the table does not cover, never a demotion. deprecatedRepos capped at 50, deprecatedTotal is the full count. engineeringPractice counts repos whose latest scan recorded tree-level CI/test presence: presence facts only, not CI results; reposWithPracticeFacts < scannedRepos until re-scans reach the corpus.`,
+				// Dated SDK facts (src/data/sdk-facts.ts), each row with its own
+				// source and asOf, re-read weekly by scripts/check-sdk-facts.ts.
+				factsAsOf: SDK_FACTS_ASOF,
+				advisories: SDK_ADVISORIES,
+				packages: SDK_PACKAGES,
+				idioms: SDK_IDIOMS,
+				adoption: {
+					sorobanSdk: sorobanSdkAdoption(
+						(scanned.docs as Array<{ sorobanSdkVersion?: string | null }>).map(
+							(r) => r.sorobanSdkVersion,
+						),
+					),
+					jsSdk: {
+						// The field also holds the scanner's language markers
+						// (rust-infra:cargo.toml, go:go.mod); only npm packages count.
+						reposWithNpmDependency: (
+							jsScanned.docs as Array<{ stellarJsDep?: string | null }>
+						).filter((r) => npmStellarDep(r.stellarJsDep)).length,
+						measurementComplete: jsScanned.docs.length >= jsScanned.totalDocs,
+						...jsSdkAdoption(
+							(jsScanned.docs as Array<{ stellarJsDep?: string | null }>).map(
+								(r) => r.stellarJsDep,
+							),
+						),
+					},
+				},
+				basis: `SDK support status per repo carrying a soroban-sdk version (scannedRepos; repos whose scan found only a JavaScript or other-language Stellar dependency are not in this block), read at request time from each repo's stored versions through the dated tables in soroban-versions.ts (Rust soroban-sdk table as of ${TABLE_ASOF}, JavaScript @stellar/stellar-sdk table as of ${JS_SDK_ASOF}). Two SDK lines: bySorobanSdkStatus is the Rust soroban-sdk crate alone; byJsSdkStatus is the JavaScript Stellar SDK dependency alone, over the same repos, so it is not an ecosystem-wide JavaScript count. byVersionStatus and deprecatedTotal combine them: a repo counts as deprecated when EITHER line is deprecated, so they are not a soroban-sdk count; for that read bySorobanSdkStatus.deprecated. Each deprecatedRepos row names the line behind it in deprecatedBy; rows deprecated on the soroban-sdk line come first, then JS-only rows, with no rank within each group. deprecationRule states the rule itself. Deprecated means below our floors (soroban-sdk major < ${SUPPORTED_FLOOR_MAJOR}; @stellar/stellar-sdk major < ${JS_SDK_SUPPORTED_FLOOR_MAJOR}, or a package its npm publisher marks deprecated: ${[...PUBLISHER_DEPRECATED_JS_PACKAGES].join(", ")}). The publishers support fewer majors than our floors admit (soroban-sdk: the two newest majors; JS: v17 and v16), so supported is not a publisher support claim. 'unknown' = no released version the table can read on that line (none, a pre-release, unpinned, git, workspace, or an unparsed range) or a JS dependency the table does not cover, never a demotion. deprecatedRepos capped at 50, deprecatedTotal is the full count. engineeringPractice counts repos whose latest scan recorded tree-level CI/test presence: presence facts only, not CI results; reposWithPracticeFacts < scannedRepos until re-scans reach the corpus. SDK facts (factsAsOf ${SDK_FACTS_ASOF}; each row carries its own asOf and source URL): advisories are the GitHub Advisory Database's (or, where it does not hold one, the repository's) records for the listed packages, with affected ranges verbatim. alsoAffects adds the soroban-sdk releases whose dependency tree reaches an affected version of the crate an advisory names, with the path (crates.io index: normal, non-optional dependencies through soroban-* and stellar-* crates, up to ${ALSO_AFFECTS_MAX_HOPS} hops; pin exact or minimum; appliesTo names the builds, so a host-only path is never read as the deployed contract). A repo can inherit an advisory on a crate it never declares, and an empty alsoAffects is no clearance beyond that depth: check the lockfile (Cargo.lock, package-lock.json) for the versions actually built. The list does not map scanned repos to advisories. packages: status from each registry's own field or the publisher's own words; statusScope narrows it when it covers part of a package (soroban-cli is renamed as a binary and remains a library). idioms: deprecated code patterns an official source states, not every deprecation; absence is not a claim a pattern is current. adoption: repos per SDK major from stored requirements (the first major a requirement names; a pre-release counts under its major, unlike the status counts), soroban-sdk over scannedRepos, @stellar/stellar-sdk over every repo whose stored JS dependency it is (one stored dependency per repo, so a floor); share is of readable, newest major first, not a rank. A weekly check re-reads the advisories, registry fields and the crates.io index behind these rows; it does not re-read the renamed and moved statements or the idiom source pages.`,
 			};
 		} catch {
 			// answered below: result.toolchain stays unset

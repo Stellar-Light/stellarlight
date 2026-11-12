@@ -1,0 +1,87 @@
+# Re-read the sources behind src/data/sdk-facts.ts: the GitHub Advisory
+# Database, the packages' repository advisories, npm, crates.io (registry and
+# soroban-sdk's index), JSR and new SDK and CLI release notes. A new advisory,
+# deprecation, yank, major or inherited range that the table does not list
+# turns this run red instead of drifting silently. Statements of renamed and
+# moved packages and idiom source pages are not re-read.
+#
+# Weekly, because advisories and majors land on a weeks-long cadence and the
+# whole read is about 35 requests. Schedule only: it reads live upstreams, so
+# on a pull request it would go red on the very PR that updates the table.
+#
+# A red at "Check" is drift: a finding for a person to read (the artifact
+# feeds the improvement ledger via nightly-health). A red at "Sources
+# readable" means a source could not be read, so the table went unchecked
+# there (its earlier rows are carried forward, never closed). A red at "Run
+# the check" is the script crashing. Both are this lane broken, not a finding.
+# workflow-health: signal-steps: ^Check$
+name: sdk-facts
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sdk-facts
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+
+      # The script's last line is "sdk-facts verdict: <current|drift|unchecked>".
+      # No verdict line = the script crashed: this step fails, so a crash is
+      # never read as drift. Exit 1 (drift) fails at "Check", exit 2 (a source
+      # could not be read) at "Sources readable", so no two reds share a step.
+      - name: Run the check
+        id: run
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          pnpm exec tsx scripts/check-sdk-facts.ts > /tmp/sdk-facts.log 2>&1
+          code=$?
+          cat /tmp/sdk-facts.log
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          grep -q '^sdk-facts verdict: ' /tmp/sdk-facts.log
+
+      - name: Check
+        if: steps.run.outputs.code == '1'
+        run: |
+          echo "Drift between src/data/sdk-facts.ts and its sources; see improvements/audits/sdk-facts-latest.json."
+          exit 1
+
+      # always(): the artifact is written before the exit code is chosen, and
+      # a red run is the run whose evidence the board needs.
+      - name: Commit it
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/sdk-facts-latest.json
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "chore(quality): sdk facts check [skip ci]"
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase -X theirs || git rebase --abort
+          done
+          git push
+
+      - name: Sources readable
+        if: always() && steps.run.outputs.code == '2'
+        run: |
+          echo "A source could not be read; see the unchecked list in improvements/audits/sdk-facts-latest.json."
+          exit 1

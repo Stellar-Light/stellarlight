@@ -449,6 +449,18 @@ export const MAINTENANCE_MODES = new Set([
 	// A URL that answers but reads as another business or a parked domain:
 	// the same repair on the record, so the same queue.
 	"link-not-the-product",
+	// A source moved past the dated SDK facts table (check-sdk-facts): a
+	// deprecation, a yank, a new major, or release notes to review. The repair
+	// is a table refresh from the named source. Advisory and inherited-range
+	// rows are not here: a missing or wrong one is a security fact served
+	// wrong.
+	"sdk-deprecation-unlisted",
+	"sdk-deprecation-changed",
+	"sdk-major-unlisted",
+	"sdk-major-changed",
+	"sdk-withdrawn-unlisted",
+	"sdk-withdrawn-changed",
+	"sdk-idiom-review",
 ]);
 
 export const isMaintenance = (f: Finding) =>
@@ -504,6 +516,19 @@ const KIND_OF: Record<string, FindingKind> = {
 	// So this is the repository actually deleted upstream, not our scanner
 	// failing — that distinction is the reason the state exists.
 	"gone-repos|repo-gone": "world",
+	// check-sdk-facts: the publisher's own record moved past our table. A
+	// source it could not read never becomes a row (it sits in `unchecked`).
+	"sdk-facts|sdk-advisory-unlisted": "world",
+	"sdk-facts|sdk-advisory-changed": "world",
+	"sdk-facts|sdk-advisory-not-upstream": "world",
+	"sdk-facts|sdk-deprecation-unlisted": "world",
+	"sdk-facts|sdk-deprecation-changed": "world",
+	"sdk-facts|sdk-major-unlisted": "world",
+	"sdk-facts|sdk-major-changed": "world",
+	"sdk-facts|sdk-withdrawn-unlisted": "world",
+	"sdk-facts|sdk-withdrawn-changed": "world",
+	"sdk-facts|sdk-idiom-review": "world",
+	"sdk-facts|sdk-also-affects-changed": "world",
 	// ── instrument: our measurement or serving broke ──
 	"golden-eval|golden-fail": "instrument",
 	"engine-a-recall|recall-miss": "instrument",

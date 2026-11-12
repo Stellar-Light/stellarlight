@@ -669,6 +669,38 @@ const PACKET_STAMPS_SPEC: SourceSpec = {
 	],
 };
 
+// The weekly SDK facts check (scripts/check-sdk-facts.ts): a source that
+// moved past src/data/sdk-facts.ts. Unread sources sit in `unchecked` and
+// never become rows. An unlisted or changed advisory is a security fact the
+// lists get wrong, and so is a wrong inherited range (alsoAffects): both are
+// defects; the rest are refreshes of the table. Rows a run carried forward
+// from an unread source stay findings: an unread week is not a repair.
+const SDK_FACTS_SPEC: SourceSpec = {
+	source: "sdk-facts",
+	file: "sdk-facts-latest.json",
+	dir: AUDITS,
+	arrays: [
+		{
+			key: "rows",
+			surface: "code",
+			mode: (r) => `sdk-${str(r?.kind) ?? "drift"}`,
+			severity: (r) =>
+				str(r?.kind)?.startsWith("advisory-") ||
+				str(r?.kind) === "also-affects-changed"
+					? "high"
+					: str(r?.kind)?.startsWith("deprecation-") ||
+							str(r?.kind)?.startsWith("withdrawn-")
+						? "medium"
+						: "low",
+			probe: (r) => {
+				const kind = str(r?.kind);
+				const subject = str(r?.subject);
+				return kind && subject ? `${kind} ${subject}` : undefined;
+			},
+		},
+	],
+};
+
 function readJson(path: string): Row | null {
 	try {
 		return JSON.parse(readFileSync(path, "utf8"));
@@ -705,6 +737,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 		RAVEN_LOOP_SPEC,
 		RAVEN_ROUTING_SPEC,
 		PACKET_STAMPS_SPEC,
+		SDK_FACTS_SPEC,
 	]) {
 		const path = join(spec.dir ?? WEEKLY, spec.file);
 		const data = readJson(path);

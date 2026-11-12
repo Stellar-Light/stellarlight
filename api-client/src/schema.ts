@@ -7772,6 +7772,138 @@ export interface operations {
                                 ciPresent?: number;
                                 testsPresent?: number;
                             };
+                            /**
+                             * Format: date
+                             * @description When the SDK facts below were last read from their sources as a set; each row also carries its own asOf. A weekly check re-reads the advisories, registry fields (deprecated message, latest major, yanks) and the soroban-sdk crates.io index behind them and flags drift; it does not re-read the renamed and moved statements or the idiom source pages.
+                             */
+                            factsAsOf?: string;
+                            /** @description Security advisories on the packages in packages, each as its publisher records it: the GitHub Advisory Database (source reviewed, unreviewed or malware) or, where the database does not hold one, the maintainer's repository advisory (source repository). affected is verbatim. alsoAffects names the soroban-sdk releases whose dependency tree reaches an affected version of a crate in affected, with the path, so a repo can inherit an advisory on a crate it never declares; the walk has a depth cap, so check the lockfile (Cargo.lock, package-lock.json) for the versions actually built. Not a mapping of scanned repos to advisories. Order carries no rank. */
+                            advisories?: {
+                                ghsa?: string;
+                                cve?: string | null;
+                                /** @enum {string} */
+                                severity?: "low" | "medium" | "high" | "critical";
+                                summary?: string;
+                                /** @enum {string} */
+                                source?: "reviewed" | "unreviewed" | "malware" | "repository";
+                                /** Format: uri */
+                                url?: string;
+                                /** @description owner/repo of the affected code. */
+                                repository?: string;
+                                /** Format: date */
+                                publishedAt?: string;
+                                affected?: {
+                                    /** @description GitHub's advisory ecosystem (rust = crates.io). */
+                                    ecosystem?: string;
+                                    package?: string;
+                                    /** @description Comparators joined by ', ', e.g. '>= 25.0.0, < 25.3.0'. */
+                                    vulnerableRange?: string;
+                                    /** @description null = the advisory names no patched version. */
+                                    firstPatched?: string | null;
+                                }[];
+                                /** @description soroban-sdk releases whose dependency tree reaches an affected version of a crate in affected, read from the crates.io index: normal, non-optional dependencies through soroban-* and stellar-* crates, up to 4 hops, stable releases. Per release and build class the strongest path is kept. [] = no soroban-sdk release reaches an affected version within 4 hops of that tree, not a clearance beyond it: check the lockfile. */
+                                alsoAffects?: {
+                                    ecosystem?: string;
+                                    /** @description The crate a repo declares (soroban-sdk). */
+                                    package?: string;
+                                    /** @description Its releases that inherit the advisory, in the advisory range grammar. */
+                                    vulnerableRange?: string;
+                                    /** @description The crate the advisory names (the last crate of path). */
+                                    via?: string;
+                                    /** @description Crate names from package to via, e.g. soroban-sdk, soroban-env-host, soroban-env-common, stellar-xdr. */
+                                    path?: string[];
+                                    /** @description The target cfg of each hop (one per hop); null = every target. */
+                                    targets?: (string | null)[];
+                                    /**
+                                     * @description The builds the path is in, from every hop's target: a host-only path never reaches the deployed wasm contract.
+                                     * @enum {string}
+                                     */
+                                    appliesTo?: "every build" | "host builds and tests, not the deployed wasm contract" | "wasm contract builds only" | "builds matching every hop's target";
+                                    /**
+                                     * @description exact = every hop of path is an = requirement, so those builds compile an affected version; minimum = at least one hop admits a range of versions, so the lockfile decides.
+                                     * @enum {string}
+                                     */
+                                    pin?: "exact" | "minimum";
+                                    basis?: string;
+                                    /** Format: uri */
+                                    sourceUrl?: string;
+                                }[];
+                                /** Format: date */
+                                asOf?: string;
+                            }[];
+                            /** @description Stellar SDK packages and their status on their own registry: active, deprecated (the registry's own deprecated field), renamed (the publisher names a new package; the old name still resolves unmarked) or moved (the publisher names a new registry or scope; the old one still gets releases for now). statement is the publisher's words, verbatim. Packages named by an advisory are listed too. Order carries no rank. */
+                            packages?: {
+                                /** @enum {string} */
+                                registry?: "crates.io" | "npm" | "jsr";
+                                name?: string;
+                                repository?: string;
+                                /** @enum {string} */
+                                status?: "active" | "deprecated" | "renamed" | "moved";
+                                /** @description What the status covers when it is not the whole package (soroban-cli: renamed as a binary, still a library); null = the whole package. */
+                                statusScope?: string | null;
+                                /** @description null for an active package. */
+                                replacement?: {
+                                    /** @enum {string} */
+                                    registry?: "crates.io" | "npm" | "jsr";
+                                    name?: string;
+                                } | null;
+                                statement?: string | null;
+                                /** Format: uri */
+                                statementUrl?: string | null;
+                                /** @description Major of the registry's latest stable release on asOf. */
+                                latestMajor?: number;
+                                /** @description Versions the registry marks not for use: crates.io and JSR yanks, npm versions deprecated one by one. [] = checked, none. */
+                                withdrawnVersions?: string[];
+                                /** Format: uri */
+                                registryUrl?: string;
+                                /** Format: date */
+                                asOf?: string;
+                            }[];
+                            /** @description Deprecated code patterns with their replacements, each stated by an official source (SDK or CLI source, release notes, or developers.stellar.org) and applying from appliesFrom. Not every deprecation: a pattern missing here is not a claim that it is current. pattern is a JavaScript regular expression source, no flags, applied to one line at a time; a match is a place to look, not proof of use. Order carries no rank. */
+                            idioms?: {
+                                id?: string;
+                                /** @enum {string} */
+                                scope?: "rust-source" | "build-config" | "cli";
+                                deprecated?: string;
+                                replacement?: string;
+                                pattern?: string;
+                                example?: string;
+                                appliesFrom?: {
+                                    name?: string;
+                                    version?: string;
+                                };
+                                statement?: string;
+                                /** Format: uri */
+                                sourceUrl?: string;
+                                /** Format: date */
+                                asOf?: string;
+                            }[];
+                            /** @description Repos per SDK major, from each repo's stored requirement (the first major it names; git, path, workspace and unpinned requirements are not readable). share = repos / readable. byMajor is newest major first, not a rank. */
+                            adoption?: {
+                                /** @description Over scannedRepos (repos carrying a soroban-sdk version). */
+                                sorobanSdk?: {
+                                    repos?: number;
+                                    readable?: number;
+                                    byMajor?: {
+                                        major?: number;
+                                        repos?: number;
+                                        share?: number;
+                                    }[];
+                                };
+                                /** @description @stellar/stellar-sdk over every scanned repo whose stored JS dependency it is, with or without a soroban-sdk version. The scan stores one Stellar JS dependency per repo (@stellar/stellar-sdk first), so repos is a floor. */
+                                jsSdk?: {
+                                    /** @description Scanned repos whose stored Stellar JS dependency is an npm package (any the scanner reads, not only @stellar/stellar-sdk); the scanner's language markers are not counted. */
+                                    reposWithNpmDependency?: number;
+                                    measurementComplete?: boolean;
+                                    repos?: number;
+                                    readable?: number;
+                                    byMajor?: {
+                                        major?: number;
+                                        repos?: number;
+                                        share?: number;
+                                    }[];
+                                };
+                            };
                             basis?: string;
                         };
                         /** @description Present for dimension=all|categories: project counts by category over the active population (see meta.population). */
