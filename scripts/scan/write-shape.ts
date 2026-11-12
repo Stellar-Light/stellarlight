@@ -16,6 +16,7 @@ import type {
 	ScanOutcome,
 	StellarProof,
 } from "../../src/lib/code-signals";
+import type { ContractBasis } from "../../src/lib/contract-basis";
 import type { PinnedValues } from "../../src/lib/note-pins";
 
 export interface SignalsInput {
@@ -39,7 +40,7 @@ export interface SignalsInput {
 	codeDomains: string[];
 	/** README contract id confirmed on mainnet by an RPC read (fetch layer). */
 	mainnetContractId: string | null;
-	mainnetContractBasis?: "self-validated" | "published" | null;
+	mainnetContractBasis?: ContractBasis | null;
 	/** Commit SHA the facts were computed at (provenance pin). */
 	scannedRef: string | null;
 	/** Each symbol a curated note pins, read at scannedRef (sls-115); null

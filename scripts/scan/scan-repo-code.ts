@@ -21,6 +21,7 @@
  *   npx tsx scripts/scan/scan-repo-code.ts --execute             # write that wave
  *   npx tsx scripts/scan/scan-repo-code.ts --lang all --limit 40 # any language
  *   flags: --limit N (60) · --lang X|all (Rust) · --rescan · --stale-first · --budget N (800)
+ *          --only owner/name · --with-contract (every row holding a contract id)
  */
 
 import "../load-env";
@@ -112,6 +113,12 @@ const argOf = (name: string, dflt: string) => {
 // it while the indexed snapshot describes a branch that no longer fronts the
 // repo.
 const ONLY = argOf("--only", "");
+// --with-contract pins the wave to every row holding a mainnetContractId,
+// scanned or not, so one wave re-judges each stored id with the scanner's own
+// ownership check (2026-11-11: 125 of 135 held the unjudged basis published).
+// It ignores --limit and reads the rows longest unscanned first, so a wave
+// the call budget stops resumes where it stopped when dispatched again.
+const WITH_CONTRACT = process.argv.includes("--with-contract");
 const LIMIT = Math.max(1, Number(argOf("--limit", "60")) || 60);
 const LANG = argOf("--lang", "Rust");
 // Explicit --budget wins; with no flag the budget is POOL-AWARE, resolved in
@@ -250,22 +257,30 @@ async function main() {
 	// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
 	let docs: any[];
 	let eligible: number;
-	if (ONLY) {
+	if (ONLY || WITH_CONTRACT) {
 		const res = await payload.find({
 			collection: "repos",
-			where: { fullName: { equals: ONLY } },
-			limit: 1,
+			where: ONLY
+				? { fullName: { equals: ONLY } }
+				: { mainnetContractId: { exists: true } },
+			limit: ONLY ? 1 : 1000,
+			sort: ONLY ? "fullName" : "codeScannedAt",
 			depth: 0,
 			// The #896 class recurring in a second call site (audit 2026-08-31):
 			// without context.internal the afterRead privacy hook strips triageTags,
 			// so the notTriaged() filter above could never see them on --only runs.
 			context: { internal: true },
 		});
-		docs = res.docs;
-		eligible = res.docs.length;
-		if (!docs.length) {
+		// A null id is not one to re-judge.
+		docs = res.docs.filter((d) => ONLY || d.mainnetContractId);
+		eligible = ONLY ? docs.length : res.totalDocs;
+		if (ONLY && !docs.length) {
 			console.log(`--only ${ONLY}: no such repo in the index`);
 		}
+		if (WITH_CONTRACT && res.totalDocs > res.docs.length)
+			console.log(
+				`--with-contract: ${res.totalDocs} rows hold an id, this wave reads the ${res.docs.length} longest unscanned; dispatch again for the rest`,
+			);
 	} else if (STALE_FIRST) {
 		// Stale = scanned, but pushed since the scan. Payload where can't compare
 		// two fields, so fetch the scanned set (small select) + filter in memory.
@@ -665,7 +680,9 @@ async function main() {
 					// so a dry run shows the change it would make.
 					const planned = r.depthInput.scalars.mainnetContractId ?? null;
 					const held = doc.mainnetContractId ?? null;
-					const contract = `contract=${planned ? `${planned.slice(0, 8)}/${r.depthInput.scalars.mainnetContractBasis ?? "?"}` : "none"}${r.mainnetContractUnread ? " (check did not run: stored kept)" : planned !== held ? ` was=${held ? held.slice(0, 8) : "none"}` : ""}`;
+					const basis = r.depthInput.scalars.mainnetContractBasis ?? null;
+					const heldBasis = doc.mainnetContractBasis ?? null;
+					const contract = `contract=${planned ? `${planned.slice(0, 8)}/${basis ?? "?"}` : "none"}${r.mainnetContractUnread ? " (check did not run: stored kept)" : planned !== held ? ` was=${held ? `${held.slice(0, 8)}/${heldBasis ?? "?"}` : "none"}` : basis !== heldBasis ? ` was=${heldBasis ?? "?"}` : ""}`;
 					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} via=${(route?.route ?? "-").padEnd(5)} farm=${farm.score} syms=${symbols.length} iface=${contractInterface.length} ${contract}${pinnedValues ? ` pinned=${pinnedValues.reads.map((p) => `${p.path}#${p.symbol}:${p.state === "read" ? p.value : `${p.state} (${p.why})`}`).join(",")}` : ""}`;
 				} else {
 					if (r.outcome === "incomplete") incomplete++;

@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-11",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.135",
+		type: "fixed",
+		summary:
+			"A contract a repo's README only cites is no longer served as that repo's contract. Every repo surface serves `mainnetContractBasis` beside `mainnetContractId`, with three new values: source-matched (the repo's own #[contractimpl] source defines at least half of the functions the deployed WASM exports, or all of them when it exports fewer than four), sibling-matched (a repo under the same GitHub owner that it points to does) and cited (neither does; usually a contract the repo calls). A cited id leaves /api/contracts, its trust report signals cites-contract-id, and explain no longer calls it the repo's deployment.",
+		detail:
+			"No row moves on deploy: published, the basis stored before this version, now means not judged yet, and it and a missing basis are served exactly as before, so /api/contracts still serves 135 rows. A rescan (scan-repo-code --with-contract re-judges every row holding an id) moves a row to self-validated, source-matched, sibling-matched or cited where it can decide, and leaves it published where it cannot: a repo it points to is private or gone, a submodule's target cannot be read, or the contract's trait impls take the trait's default functions. A source read that was not whole (an unreadable file, a truncated tree) is a check that did not run and keeps the stored basis. Run read-only over the 135 rows the rescan leaves 115 rows on /api/contracts and judges 109 of 110 owners as theirs, every one of the 18 consumers cited, and 2 copies of an owner's source as owners (precision 0.98, recall 0.99). All 135 were labelled by hand on 2026-11-11: 111 owners, 18 consumers, 3 forks or copies, 3 unclear. Consumers held the SushiSwap V3 factory (reflector-network/reflector-stellar-connector, a config default), Soroswap's factory (lumenmap/lumenmap), two Blend pools (six repos) and the KALE farm contract. A sibling is found only where the repo points: the WASM's SEP-55 source_repo, a git submodule, or a README link, under the same GitHub owner; a fork defines nothing of its own, and an id whose build is attested to another owner's repo is cited. The source read takes a trait impl named by a path, with generics or with attribute arguments, the way a SEP-41 token implements its interface, and leaves out test code, inline test modules and mock contracts; a WASM exporting fewer than four functions matches only when the source defines all of them. A rescan keeps a cited id with its basis instead of dropping it, and judges the id a repo holds wherever its README still names it. The deployment pass counts a repo's contract id as mainnet-contract-join evidence only when it is not judged cited, and retracts to unknown a stored join claim whose source repo's id is judged cited: the evidence stays served as that repo's `mainnetContractBasis` cited on /api/repos/trust, and the run's plan prints the dated reason (the deployment row keeps none).",
+	},
+	{
+		date: "2026-11-11",
 		surfaces: ["api"],
 		version: "spec@1.9.134",
 		type: "added",

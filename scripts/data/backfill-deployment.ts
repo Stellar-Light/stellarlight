@@ -54,11 +54,19 @@
  * (a failed read never changes a claim), and a run in which every ledger read
  * failed exits 2 (BLIND), not 0.
  *
- * This pass never retracts on its own: a stored positive claim that no
- * candidate re-derives is reported and kept, because the evidence behind it
- * can vanish for reasons that are not its absence (a scan that erased a
- * verified contract id, a paywalled reader). A retraction is a curated
- * DEPLOYMENT_VERIFIED entry with network "unknown" and a dated reason.
+ * This pass retracts on its own only one kind of claim: a stored
+ * mainnet-contract-join whose source repo's contract id the contract scan
+ * has since judged cited (the README names a contract the repo calls), so
+ * its evidence is known false, not missing. It goes to network "unknown";
+ * the row stores no reason (a deployment group holds network, basis,
+ * sourceUrl and asOf only), so the dated reason is printed in the run's
+ * plan, and the evidence stays served as that repo's mainnetContractBasis
+ * cited on /api/repos/trust. Any other stored positive claim
+ * that no candidate re-derives is reported and kept, because the evidence
+ * behind it can vanish for reasons that are not its absence (a scan that
+ * erased a verified contract id, a paywalled reader). Every other retraction
+ * is a curated DEPLOYMENT_VERIFIED entry with network "unknown" and a dated
+ * reason.
  *
  * Everything else is left with NO deployment group (the API serializes that
  * as network "unknown"): absence of evidence is never proof of disuse.
@@ -70,6 +78,7 @@
 import "../load-env";
 import { Contract } from "@stellar/stellar-sdk";
 import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
+import { isOwnContract } from "../../src/lib/contract-basis";
 import { rpcProbes } from "../../src/lib/hackproof";
 import {
 	type DeploymentCandidate,
@@ -372,12 +381,16 @@ export async function planDeployments(
 		return !!owner && owner !== slug;
 	};
 
-	// Evidence source: repos with a mainnet contract id, by projectSlug.
+	// Evidence source: repos with a mainnet contract id, by projectSlug. An id
+	// the scan judged cited is a contract the repo's README names and its
+	// source does not define, usually one the repo calls: no evidence the
+	// project deployed anything.
 	const joins = new Map<string, { fullName: string; contractId: string }>();
 	for (const d of repos)
 		if (
 			d.projectSlug &&
 			d.mainnetContractId &&
+			isOwnContract(d.mainnetContractBasis) &&
 			!joins.has(d.projectSlug) &&
 			!ownedElsewhere(d.mainnetContractId, d.projectSlug)
 		)
@@ -613,6 +626,28 @@ export async function planDeployments(
 					why: "",
 				};
 		}
+		// A stored join claim whose source repo's id the contract scan has
+		// since judged cited rested on a contract the repo calls: its evidence
+		// is known false, not missing, so it is retracted to unknown. The dated
+		// reason is printed in the plan; the stored row keeps none.
+		const citedSource =
+			!to && cur.basis === "mainnet-contract-join"
+				? repos.find(
+						(d) =>
+							d.projectSlug === p.slug &&
+							d.mainnetContractBasis === "cited" &&
+							String(cur.sourceUrl ?? "").toLowerCase() ===
+								`https://github.com/${String(d.fullName).toLowerCase()}`,
+					)
+				: undefined;
+		if (citedSource)
+			to = {
+				network: "unknown",
+				basis: null,
+				sourceUrl: null,
+				asOf: null,
+				why: `retracted ${now.slice(0, 10)}: ${citedSource.fullName}'s contract id is one it cites, not its own (contract scan)`,
+			};
 		if (!to) {
 			if (cur.network === "mainnet" || cur.network === "testnet")
 				kept.push(
@@ -653,7 +688,14 @@ async function main() {
 			limit: 200,
 			page,
 			depth: 0,
-			select: { projectSlug: true, fullName: true, mainnetContractId: true },
+			// isOwnContract reads an absent basis as not judged: select it, or a
+			// cited id passes as evidence.
+			select: {
+				projectSlug: true,
+				fullName: true,
+				mainnetContractId: true,
+				mainnetContractBasis: true,
+			},
 		});
 		repos.push(...(r.docs as Doc[]));
 		if (!r.hasNextPage) break;
@@ -689,7 +731,7 @@ async function main() {
 		`\n${plan.length} row(s) to stamp of ${projects.length}; the rest stay as stored (unknown stays visible).`,
 	);
 	console.log(
-		`${kept.length} stored mainnet/testnet claim(s) no candidate re-derived this run (kept, never retracted by this pass):`,
+		`${kept.length} stored mainnet/testnet claim(s) no candidate re-derived this run (kept: this pass retracts only a join whose source repo's id is judged cited):`,
 	);
 	for (const k of kept) console.log(`  kept ${k}`);
 	console.log(

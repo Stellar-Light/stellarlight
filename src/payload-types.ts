@@ -1177,9 +1177,17 @@ export interface Repo {
 	 */
 	mainnetContractId?: string | null;
 	/**
-	 * Ownership evidence for mainnetContractId (self-validated = the WASM's SEP-55 source_repo names this repo and this repo holds a GitHub build attestation for it)
+	 * Whose contract mainnetContractId is: self-validated (the WASM's SEP-55 source_repo names this repo, which holds a GitHub build attestation for it), source-matched (this repo's own #[contractimpl] source defines the deployed functions: at least half, or all when it exports fewer than four), sibling-matched (a same-owner repo this repo points to defines them), cited (neither does: usually a contract the repo calls; the only basis not served as the repo's deployment), published (not judged: stored before spec 1.9.135, or a scan could not decide)
 	 */
-	mainnetContractBasis?: ("self-validated" | "published") | null;
+	mainnetContractBasis?:
+		| (
+				| "self-validated"
+				| "source-matched"
+				| "sibling-matched"
+				| "cited"
+				| "published"
+		  )
+		| null;
 	/**
 	 * Alive but no code-proof — soft-excluded, never archived
 	 */

@@ -77,6 +77,8 @@ export type CensusRepo = {
 	 * codeInUse.contracts, and reading the serialized name against raw rows
 	 * silently produced 2/12938 where the truth was 76 */
 	mainnetContractId?: string | null;
+	/** whose contract mainnetContractId is (src/lib/contract-basis.ts) */
+	mainnetContractBasis?: string | null;
 	isDeployableContract?: boolean | null;
 	lastCommitAt?: string | null;
 	isArchived?: boolean;
@@ -115,6 +117,7 @@ export const censusRepos = (origin = "https://stellarlight.xyz") =>
 			"knowledgeNotes",
 			"codeDepth",
 			"mainnetContractId",
+			"mainnetContractBasis",
 			"isDeployableContract",
 			"lastCommitAt",
 			"isArchived",

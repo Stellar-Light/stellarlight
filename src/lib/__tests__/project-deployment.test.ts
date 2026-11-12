@@ -537,6 +537,144 @@ describe("planDeployments: the deployment pass, without a database", () => {
 		expect(kept).toEqual(["some-sdk mainnet (onchain-activity) NO SOURCE"]);
 	});
 
+	describe("a repo's contract id the scan judged cited", () => {
+		// A README cites the contracts it calls as readily as its own:
+		// reflector-network/reflector-stellar-connector names the SushiSwap
+		// V3 factory as a config default.
+		const CITED = "CD3KRKGDRVWPXVB3VXLUMQKMX6XZ6Q2H334IVZD4XXNAMKSRVQL5GLYF";
+		const OWN = "CAEGJYOE6TYU36H3JLP2OJRNG7KPFSOL2KC374UKFFMCVWGL6EWOS5JP";
+		const project = { id: 7, slug: "acme", status: "Live" };
+		const repo = (
+			fullName: string,
+			basis: string | null | undefined,
+			mainnetContractId: string,
+		) => ({
+			projectSlug: "acme",
+			fullName,
+			mainnetContractId,
+			...(basis === undefined ? {} : { mainnetContractBasis: basis }),
+		});
+		const planFor = async (
+			repos: ReturnType<typeof repo>[],
+			p: Record<string, unknown> = project,
+		) =>
+			(
+				await planDeployments(
+					[p],
+					repos,
+					io({ [CITED]: "found", [OWN]: "found" }),
+					NOW,
+				)
+			).plan.map((w) => [w.to.network, w.to.basis, w.to.sourceUrl, w.to.why]);
+		const joined = (fullName: string) => [
+			[
+				"mainnet",
+				"mainnet-contract-join",
+				`https://github.com/${fullName}`,
+				"",
+			],
+		];
+
+		it("is no deployment evidence; any other basis, or none, still is", async () => {
+			expect(await planFor([repo("acme/app", "cited", CITED)])).toEqual([]);
+			for (const basis of ["source-matched", "published", null])
+				expect(await planFor([repo("acme/app", basis, OWN)])).toEqual(
+					joined("acme/app"),
+				);
+			// No basis key at all reads as not judged yet.
+			expect(await planFor([repo("acme/app", undefined, OWN)])).toEqual(
+				joined("acme/app"),
+			);
+		});
+
+		it("gives way to the project's own id, whichever repo comes first", async () => {
+			const cited = repo("acme/connector", "cited", CITED);
+			const own = repo("acme/contracts", "self-validated", OWN);
+			expect(await planFor([cited, own])).toEqual(joined("acme/contracts"));
+			expect(await planFor([own, cited])).toEqual(joined("acme/contracts"));
+		});
+
+		it("retracts a stored join claim that rests on it, with a dated reason", async () => {
+			const stored = {
+				...project,
+				deployment: {
+					network: "mainnet",
+					basis: "mainnet-contract-join",
+					sourceUrl: "https://github.com/acme/app",
+					asOf: "2026-09-05T05:28:54.666Z",
+				},
+			};
+			expect(await planFor([repo("acme/app", "cited", CITED)], stored)).toEqual(
+				[
+					[
+						"unknown",
+						null,
+						null,
+						"retracted 2026-11-11: acme/app's contract id is one it cites, not its own (contract scan)",
+					],
+				],
+			);
+			// A stored join whose source repo is its
+			// own stays as it is, and one whose source repo is not among the
+			// repos read is kept, never retracted.
+			const own = await planDeployments(
+				[stored],
+				[repo("acme/app", "self-validated", OWN)],
+				io({ [OWN]: "found" }),
+				NOW,
+			);
+			expect(own.plan).toEqual([]);
+			const unread = await planDeployments(
+				[stored],
+				[repo("acme/other", "cited", CITED)],
+				io({}),
+				NOW,
+			);
+			expect(unread.plan).toEqual([]);
+			expect(unread.kept).toEqual([
+				"acme mainnet (mainnet-contract-join) https://github.com/acme/app",
+			]);
+		});
+
+		it("never retracts when a ledger read could not run, or the stored source names the repo another way", async () => {
+			const stored = (sourceUrl: string) => ({
+				...project,
+				onchain: { contracts: [{ address: OWN }] },
+				deployment: {
+					network: "mainnet",
+					basis: "mainnet-contract-join",
+					sourceUrl,
+					asOf: "2026-09-05T05:28:54.666Z",
+				},
+			});
+			// An abstaining project leaves its stored claim as it is.
+			const abstains = await planDeployments(
+				[stored("https://github.com/acme/app")],
+				[repo("acme/app", "cited", CITED)],
+				io({ [OWN]: "could-not-check" }),
+				NOW,
+			);
+			expect(abstains.plan).toEqual([]);
+			expect(abstains.abstained).toHaveLength(1);
+			// Only the exact join source URL matches; a variant is kept.
+			for (const url of [
+				"https://github.com/acme/app/",
+				"https://github.com/acme/app.git",
+			]) {
+				const variant = await planDeployments(
+					[{ ...stored(url), onchain: undefined }],
+					[repo("acme/app", "cited", CITED)],
+					io({}),
+					NOW,
+				);
+				expect(variant.plan).toEqual([]);
+				expect(variant.kept).toEqual([
+					`acme mainnet (mainnet-contract-join) ${url}`,
+				]);
+			}
+		});
+	});
+
 	it("a ledger read that could not run leaves the stored claim as it is", async () => {
 		const { plan, abstained } = await planDeployments(
 			[

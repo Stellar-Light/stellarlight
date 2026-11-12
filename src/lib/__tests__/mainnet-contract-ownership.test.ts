@@ -13,16 +13,25 @@ import { createHash } from "node:crypto";
 import { Contract, StrKey, xdr } from "@stellar/stellar-sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+	CONTRACT_UNREAD,
 	keepStoredContract,
 	mainnetCheckUnread,
+	readContractFns,
+	type SourceRead,
 	verifyMainnetContract,
 } from "../../../scripts/scan/fetch-repo-code";
+import { contractSource } from "../code-symbols";
 import {
 	codeKey,
 	contractMeta,
 	instanceKey,
 	MAINNET_RPC,
+	sameOwnerLinks,
+	sourceMatches,
+	specFunctions,
+	submoduleTargets,
 } from "../contract-ownership";
+import fx from "./fixtures/contract-attribution.json";
 
 // Real contract strkeys: the scanner probes only ids whose checksum holds.
 const ID_A = StrKey.encodeContract(Buffer.alloc(32, 1));
@@ -97,6 +106,31 @@ function mainnet() {
 				).toXDR("base64"),
 			);
 			return hash.toString("hex");
+		},
+		/** A contract as mainnet serves it: its real instance and code entries. */
+		real(c: {
+			id: string;
+			wasmHash: string;
+			instanceXdr: string;
+			codeXdr: string;
+		}) {
+			ledger.set(instanceKey(c.id), c.instanceXdr);
+			ledger.set(codeKey(Buffer.from(c.wasmHash, "hex")), c.codeXdr);
+		},
+		/** A contract running exactly these WASM bytes. */
+		code(id: string, code: Buffer) {
+			const hash = createHash("sha256").update(code).digest();
+			instance(id, xdr.ContractExecutable.contractExecutableWasm(hash));
+			ledger.set(
+				codeKey(hash),
+				xdr.LedgerEntryData.contractCode(
+					new xdr.ContractCodeEntry({
+						ext: new xdr.ContractCodeEntryExt(0),
+						hash,
+						code,
+					}),
+				).toXDR("base64"),
+			);
 		},
 		/** A Stellar Asset Contract: a network token's wrapper. */
 		asset(id: string) {
@@ -178,7 +212,7 @@ describe("verifyMainnetContract ownership", () => {
 		).toBeNull();
 	});
 
-	it("rejects a contract whose build names a different repo that attested it", async () => {
+	it("keeps a contract whose build names a different repo that attested it as cited, never as this repo's", async () => {
 		const chain = mainnet();
 		const hash = chain.wasm(ID_A, {
 			source_repo: "github:reflector-network/reflector-contract",
@@ -190,7 +224,7 @@ describe("verifyMainnetContract ownership", () => {
 				`price feed ${ID_A}`,
 				"ELDEVODE/synapse-trade",
 			),
-		).toBeNull();
+		).toEqual({ id: ID_A, basis: "cited" });
 	});
 
 	it("accepts a contract whose build names THIS repo and is attested there, as self-validated", async () => {
@@ -215,18 +249,18 @@ describe("verifyMainnetContract ownership", () => {
 		expect(acct.api).toBe(1);
 	});
 
-	it("keeps an unclaimed, non-token address but marks the basis published", async () => {
+	it("keeps an unclaimed, non-token address its source does not define, as cited", async () => {
 		const chain = mainnet();
 		chain.wasm(ID_A, { rssdkver: "22.0.8" });
 		const { urls } = chain.serve();
 		expect(
 			await verifyMainnetContract(`ours: ${ID_A}`, "kalepail/ohloss"),
-		).toEqual({ id: ID_A, basis: "published" });
+		).toEqual({ id: ID_A, basis: "cited" });
 		// Nothing is claimed, so there is nothing to ask GitHub.
 		expect(urls.every((u) => u === MAINNET_RPC)).toBe(true);
 	});
 
-	it("prefers a self-validated id over a merely published sibling", async () => {
+	it("prefers a self-validated id over a cited sibling", async () => {
 		const chain = mainnet();
 		chain.wasm(ID_A);
 		const hash = chain.wasm(ID_B, { source_repo: "github:acme/vault" });
@@ -237,24 +271,24 @@ describe("verifyMainnetContract ownership", () => {
 		).toEqual({ id: ID_B, basis: "self-validated" });
 	});
 
-	it("marks a build that names THIS repo but holds no attestation published, not self-validated", async () => {
+	it("marks a build that names THIS repo but holds no attestation cited, not self-validated", async () => {
 		const chain = mainnet();
 		const hash = chain.wasm(ID_A, { source_repo: "github:acme/vault" });
 		const { urls } = chain.serve();
 		expect(await verifyMainnetContract(`ours: ${ID_A}`, "acme/vault")).toEqual({
 			id: ID_A,
-			basis: "published",
+			basis: "cited",
 		});
 		expect(urls).toContain(attestationUrl("acme/vault", hash));
 	});
 
-	it("marks a build that names another repo without an attestation published, not excluded", async () => {
+	it("marks a build that names another repo without an attestation cited, not excluded", async () => {
 		const chain = mainnet();
 		const hash = chain.wasm(ID_A, { source_repo: "github:someone/else" });
 		const { urls } = chain.serve();
 		expect(await verifyMainnetContract(`ours: ${ID_A}`, "acme/vault")).toEqual({
 			id: ID_A,
-			basis: "published",
+			basis: "cited",
 		});
 		expect(urls).toContain(attestationUrl("someone/else", hash));
 	});
@@ -266,7 +300,7 @@ describe("verifyMainnetContract ownership", () => {
 		const { rpcKeys } = chain.serve();
 		expect(
 			await verifyMainnetContract(`${ID_A} and ${ID_B}`, "acme/vault"),
-		).toEqual({ id: ID_A, basis: "published" });
+		).toEqual({ id: ID_A, basis: "cited" });
 		expect(rpcKeys.map((k) => k.length)).toEqual([2, 1]);
 	});
 });
@@ -345,7 +379,7 @@ describe("verifyMainnetContract: a check that did not run is not an answer", () 
 		const { rpcKeys } = chain.serve();
 		expect(
 			await verifyMainnetContract(`${BAD} then ${ID_B}`, "acme/vault"),
-		).toEqual({ id: ID_B, basis: "published" });
+		).toEqual({ id: ID_B, basis: "cited" });
 		expect(rpcKeys[0]).toEqual([instanceKey(ID_B)]);
 	});
 
@@ -355,7 +389,7 @@ describe("verifyMainnetContract: a check that did not run is not an answer", () 
 		chain.serve();
 		expect(
 			await verifyMainnetContract(`${ID_A} then ${ID_B}`, "acme/vault"),
-		).toEqual({ id: ID_B, basis: "published" });
+		).toEqual({ id: ID_B, basis: "cited" });
 	});
 
 	it("still reads every id absent from mainnet as a checked answer: no contract", async () => {
@@ -405,7 +439,7 @@ describe("verifyMainnetContract: missing or malformed evidence", () => {
 		);
 	});
 
-	it("reads an attestation answer listing none as no attestation: published, not self-validated", async () => {
+	it("reads an attestation answer listing none as no attestation: cited, not self-validated", async () => {
 		const chain = mainnet();
 		const hash = chain.wasm(ID_A, { source_repo: "github:acme/vault" });
 		chain.serve((u) =>
@@ -415,7 +449,7 @@ describe("verifyMainnetContract: missing or malformed evidence", () => {
 		);
 		expect(await verifyMainnetContract(`ours: ${ID_A}`, "acme/vault")).toEqual({
 			id: ID_A,
-			basis: "published",
+			basis: "cited",
 		});
 	});
 
@@ -431,7 +465,7 @@ describe("verifyMainnetContract: missing or malformed evidence", () => {
 			const { urls } = chain.serve();
 			expect(
 				await verifyMainnetContract(`ours: ${ID_A}`, "acme/vault"),
-			).toEqual({ id: ID_A, basis: "published" });
+			).toEqual({ id: ID_A, basis: "cited" });
 			expect(urls.every((u) => u === MAINNET_RPC)).toBe(true);
 		}
 	});
@@ -537,5 +571,644 @@ describe("keepStoredContract: the scan scores and writes the stored id when its 
 			mainnetContractId: null,
 			mainnetContractBasis: null,
 		});
+	});
+});
+
+/** The defect this answers (measured 2026-11-11 over all 135 /api/contracts
+ * rows): a README cites the contracts it calls as readily as the one it
+ * deployed, and every non-token id was served as the repo's own.
+ * reflector-network/reflector-stellar-connector held the SushiSwap V3 factory
+ * it reads prices from; lumenmap/lumenmap held Soroswap's factory, which
+ * soroswap/core deployed. The ledger entries and the README and Rust
+ * excerpts are real (fixtures/contract-attribution.json names each source). */
+describe("whose contract: the deployed interface against the repo's own source", () => {
+	const { sushiFactory: sushi, soroswapFactory: soroswap } = fx;
+	const code = (c: { codeXdr: string }) =>
+		xdr.LedgerEntryData.fromXDR(c.codeXdr, "base64").contractCode().code();
+	const noSource = {
+		defined: new Set<string>(),
+		defaults: [],
+		unread: false,
+		isFork: false,
+	};
+	const ownerSource = {
+		...contractSource([soroswap.owner.source]),
+		unread: false,
+		isFork: false,
+	};
+
+	it("reads the functions a deployed WASM exports from its contractspecv0", () => {
+		expect(specFunctions(code(soroswap)).sort()).toEqual(
+			[
+				"all_pairs",
+				"all_pairs_length",
+				"create_pair",
+				"fee_to",
+				"fee_to_setter",
+				"fees_enabled",
+				"get_pair",
+				"initialize",
+				"pair_exists",
+				"set_fee_to",
+				"set_fee_to_setter",
+				"set_fees_enabled",
+			].sort(),
+		);
+		expect(specFunctions(Buffer.from("not a wasm"))).toEqual([]);
+	});
+
+	it("Reflector's connector cites the SushiSwap factory in a config block: cited, not its contract", async () => {
+		const chain = mainnet();
+		chain.real(sushi);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				sushi.citedBy.readme,
+				sushi.citedBy.repo,
+				undefined,
+				sushi.id,
+				noSource,
+			),
+		).toEqual({ id: sushi.id, basis: "cited" });
+	});
+
+	it("soroswap/core, whose source is the deployed factory, stays its owner: source-matched", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				soroswap.owner.readme,
+				soroswap.owner.repo,
+				undefined,
+				soroswap.id,
+				ownerSource,
+			),
+		).toEqual({ id: soroswap.id, basis: "source-matched" });
+	});
+
+	it("lumenmap's entity registry cites the same factory: cited", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				soroswap.citedBy.readme,
+				soroswap.citedBy.repo,
+				undefined,
+				soroswap.id,
+				noSource,
+			),
+		).toEqual({ id: soroswap.id, basis: "cited" });
+	});
+
+	it("a #[contractclient] trait naming every factory function is a caller's, never the source", async () => {
+		const client = contractSource([soroswap.owner.clientTrait]).defined;
+		expect(client.size).toBe(0);
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				soroswap.citedBy.readme,
+				"someone/router-app",
+				undefined,
+				null,
+				{ ...noSource, defined: client },
+			),
+		).toEqual({ id: soroswap.id, basis: "cited" });
+	});
+
+	it("a GitHub fork carrying the owner's source and README is cited: both are its parent's", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				soroswap.owner.readme,
+				"someone/core",
+				undefined,
+				null,
+				{ ...ownerSource, isFork: true },
+			),
+		).toEqual({ id: soroswap.id, basis: "cited" });
+	});
+
+	it("an owned id wins over a cited one the README names first", async () => {
+		const chain = mainnet();
+		chain.real(sushi);
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				`${sushi.citedBy.readme}\n${soroswap.owner.readme}`,
+				soroswap.owner.repo,
+				undefined,
+				null,
+				ownerSource,
+			),
+		).toEqual({ id: soroswap.id, basis: "source-matched" });
+	});
+
+	it("judges the held id wherever the README still names it, past the first three", async () => {
+		// Kryon-Protocol/Kryon's README grew a table of eleven ids above its
+		// mainnet one; reading only the first three erased the held id.
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		const above = [1, 2, 3]
+			.map((n) => StrKey.encodeContract(Buffer.alloc(32, n)))
+			.join("\n");
+		expect(
+			await verifyMainnetContract(
+				`${above}\n${soroswap.owner.readme}`,
+				soroswap.owner.repo,
+				undefined,
+				soroswap.id,
+				ownerSource,
+			),
+		).toEqual({ id: soroswap.id, basis: "source-matched" });
+	});
+});
+
+/** Four documented deployers would have read cited (measured 2026-11-11):
+ * their contract lives in a repo next door. Lobster-Protocol/stellar-integrations
+ * is the team's frontend and links Lobster-Protocol/Stellar, whose source
+ * rebuilds the mainnet WASM; ackrate/ackrate-protocol's WASM names
+ * ackrate/ackrate-protocol-contracts in SEP-55; ALGOREX-PH's frontend links its
+ * contract repo; jashuleyn/HatiHatid's source is a submodule with no
+ * .gitmodules. The sibling must be one this repo points to, under its own
+ * GitHub owner. The deployed WASM and the sibling's source are real. */
+describe("whose contract: a same-owner repo this repo points to", () => {
+	const { sushiFactory: sushi, soroswapFactory: soroswap } = fx;
+	const factory: SourceRead = {
+		...contractSource([soroswap.owner.source]),
+		unread: false,
+	};
+	type Answer = SourceRead | null | typeof CONTRACT_UNREAD;
+	const reader = (answers: Record<string, Answer>) => async (repo: string) =>
+		repo in answers ? answers[repo] : null;
+	const judge = async (
+		readme: string,
+		repo: string,
+		siblings: {
+			pointed: string[];
+			opaque?: boolean;
+			answers: Record<string, Answer>;
+		},
+		isFork = false,
+		own: Partial<SourceRead> = {},
+	) =>
+		verifyMainnetContract(readme, repo, undefined, null, {
+			defined: new Set(),
+			defaults: [],
+			unread: false,
+			...own,
+			isFork,
+			siblings: {
+				pointed: siblings.pointed,
+				opaque: siblings.opaque ?? false,
+				read: reader(siblings.answers),
+			},
+		});
+
+	it("a team's frontend whose README links its contract repo: sibling-matched", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await judge(soroswap.owner.readme, "soroswap/frontend", {
+				pointed: ["soroswap/core"],
+				answers: { "soroswap/core": factory },
+			}),
+		).toEqual({ id: soroswap.id, basis: "sibling-matched" });
+	});
+
+	it("the repo the WASM's SEP-55 source_repo names, under the same owner, is read", async () => {
+		// The real factory WASM with a contractmetav0 section naming a sibling.
+		const leb = (n: number): number[] =>
+			n < 0x80 ? [n] : [(n & 0x7f) | 0x80, ...leb(n >>> 7)];
+		const meta = xdr.ScMetaEntry.scMetaV0(
+			new xdr.ScMetaV0({
+				key: "source_repo",
+				val: "github:soroswap/factory-contracts",
+			}),
+		).toXDR();
+		const name = Buffer.from("contractmetav0");
+		const body = Buffer.concat([Buffer.from(leb(name.length)), name, meta]);
+		const bytes = Buffer.concat([
+			xdr.LedgerEntryData.fromXDR(soroswap.codeXdr, "base64")
+				.contractCode()
+				.code(),
+			Buffer.from([0, ...leb(body.length)]),
+			body,
+		]);
+		const chain = mainnet();
+		chain.code(soroswap.id, bytes);
+		chain.serve();
+		const answers = { "soroswap/factory-contracts": factory };
+		expect(
+			await judge(soroswap.owner.readme, "soroswap/sdk", {
+				pointed: [],
+				answers,
+			}),
+		).toEqual({ id: soroswap.id, basis: "sibling-matched" });
+		// Another owner's build names its own repo: never this repo's sibling.
+		expect(
+			await judge(soroswap.citedBy.readme, "lumenmap/lumenmap", {
+				pointed: [],
+				answers,
+			}),
+		).toEqual({ id: soroswap.id, basis: "cited" });
+	});
+
+	it("Reflector's connector links a same-owner repo that does not define the SushiSwap factory: cited", async () => {
+		const chain = mainnet();
+		chain.real(sushi);
+		chain.serve();
+		expect(
+			await judge(sushi.citedBy.readme, sushi.citedBy.repo, {
+				pointed: ["reflector-network/reflector-contract"],
+				answers: {
+					"reflector-network/reflector-contract": {
+						defined: new Set(["lastprice", "decimals", "assets"]),
+						defaults: [],
+						unread: false,
+					},
+				},
+			}),
+		).toEqual({ id: sushi.id, basis: "cited" });
+	});
+
+	it("a pointed-to repo GitHub hides (private or gone) cannot decide it: published, not cited", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await judge(soroswap.owner.readme, "soroswap/frontend", {
+				pointed: ["soroswap/private-contracts"],
+				answers: { "soroswap/private-contracts": null },
+			}),
+		).toEqual({ id: soroswap.id, basis: "published" });
+	});
+
+	it("a submodule whose target cannot be read cannot decide it either: published", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await judge(soroswap.owner.readme, "jashuleyn/HatiHatid", {
+				pointed: [],
+				opaque: true,
+				answers: {},
+			}),
+		).toEqual({ id: soroswap.id, basis: "published" });
+	});
+
+	it("a sibling GitHub could not answer for is a check that did not run", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await judge(soroswap.owner.readme, "soroswap/frontend", {
+				pointed: ["soroswap/core"],
+				answers: { "soroswap/core": CONTRACT_UNREAD },
+			}),
+		).toBe(CONTRACT_UNREAD);
+	});
+
+	it("a fork's pointers are its parent's: cited, even when they match", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await judge(
+				soroswap.owner.readme,
+				"someone/frontend",
+				{ pointed: ["soroswap/core"], answers: { "soroswap/core": factory } },
+				true,
+			),
+		).toEqual({ id: soroswap.id, basis: "cited" });
+	});
+
+	it("points only at repos under the repo's own GitHub owner", () => {
+		expect(
+			sameOwnerLinks(
+				"Lobster-Protocol/stellar-integrations",
+				"from [Lobster-Protocol/Stellar](https://github.com/Lobster-Protocol/Stellar). See github.com/lobster-protocol/stellar-integrations and https://github.com/soroswap/core.git",
+			),
+		).toEqual(["Lobster-Protocol/Stellar"]);
+		expect(
+			submoduleTargets(
+				"acme/app",
+				["contracts", "vendor/blend", "lost"],
+				'[submodule "contracts"]\n\tpath = contracts\n\turl = git@github.com:acme/app-contracts.git\n[submodule "vendor/blend"]\n\tpath = vendor/blend\n\turl = https://github.com/blend-capital/blend-contracts\n',
+			),
+		).toEqual({ targets: ["acme/app-contracts"], opaque: true });
+		expect(submoduleTargets("acme/app", [], null)).toEqual({
+			targets: [],
+			opaque: false,
+		});
+	});
+});
+
+/** A SEP-41 token implements its interface as a trait impl: `impl
+ * token::Interface for Token` in older SDKs, `#[contractimpl(contracttrait)]
+ * impl TokenInterface for Token` in newer ones. Reading neither form,
+ * gabrielfonte/stellar-token's source defined 4 of its 14 deployed functions
+ * and its own token read as cited. The deployed WASM is that repo's; the
+ * source is the SDK example token it was built from. */
+describe("whose contract: a token's trait impl is its source", () => {
+	const { sep41Token: token } = fx;
+	it("reads the functions of a trait impl named by path or with attribute arguments", () => {
+		expect([...contractSource([token.source]).defined].sort()).toEqual(
+			[
+				"__constructor",
+				"allowance",
+				"approve",
+				"balance",
+				"burn",
+				"burn_from",
+				"decimals",
+				"get_allowance",
+				"mint",
+				"name",
+				"set_admin",
+				"symbol",
+				"transfer",
+				"transfer_from",
+			].sort(),
+		);
+		const older = `#[contractimpl]\nimpl token::Interface for Token {\n fn balance(e: Env, id: Address) -> i128 { 0 }\n fn transfer(e: Env, from: Address, to: Address, amount: i128) {}\n}`;
+		expect([
+			...contractSource([{ path: "src/contract.rs", text: older }]).defined,
+		]).toEqual(["balance", "transfer"]);
+	});
+	it("the deployed token is its repo's own: source-matched", async () => {
+		const chain = mainnet();
+		chain.real(token);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				`Contract: ${token.id}`,
+				token.deployedBy,
+				undefined,
+				token.id,
+				{ ...contractSource([token.source]), unread: false, isFork: false },
+			),
+		).toEqual({ id: token.id, basis: "source-matched" });
+	});
+});
+
+/** An independent audit of the rule (2026-11-11) broke it these ways. */
+describe("whose contract: what the audit broke", () => {
+	const { soroswapFactory: soroswap } = fx;
+	const factory: SourceRead = {
+		...contractSource([soroswap.owner.source]),
+		unread: false,
+	};
+	const own = (extra: Partial<SourceRead> = {}) => ({
+		defined: new Set<string>(),
+		defaults: [],
+		unread: false,
+		isFork: false,
+		...extra,
+	});
+	/** The real factory WASM, its build naming `repo` in SEP-55. */
+	const claiming = (repo: string) => {
+		const leb = (n: number): number[] =>
+			n < 0x80 ? [n] : [(n & 0x7f) | 0x80, ...leb(n >>> 7)];
+		const meta = xdr.ScMetaEntry.scMetaV0(
+			new xdr.ScMetaV0({ key: "source_repo", val: `github:${repo}` }),
+		).toXDR();
+		const name = Buffer.from("contractmetav0");
+		const body = Buffer.concat([Buffer.from(leb(name.length)), name, meta]);
+		return Buffer.concat([
+			xdr.LedgerEntryData.fromXDR(soroswap.codeXdr, "base64")
+				.contractCode()
+				.code(),
+			Buffer.from([0, ...leb(body.length)]),
+			body,
+		]);
+	};
+	const ghAnswering =
+		(routes: Record<string, unknown>) =>
+		async (url: string): Promise<Response> =>
+			url in routes
+				? Response.json(routes[url])
+				: Response.json({ message: "Not Found" }, { status: 404 });
+
+	it("a same-owner fork of the contract's source defines nothing of its own", async () => {
+		// acme/vault cites a Blend pool and links acme/blend-contracts-v2, its
+		// fork of Blend, which defines every pool function.
+		const r = await readContractFns(
+			ghAnswering({
+				"/repos/acme/blend-contracts-v2": {
+					full_name: "acme/blend-contracts-v2",
+					default_branch: "main",
+					fork: true,
+				},
+			}),
+			"acme/blend-contracts-v2",
+			{ api: 0, raw: 0 },
+		);
+		expect(r).toEqual({ defined: new Set(), defaults: [], unread: false });
+	});
+
+	it("an id attested to another owner's repo is cited without reading a sibling", async () => {
+		const bytes = claiming("soroswap/core");
+		const chain = mainnet();
+		chain.code(soroswap.id, bytes);
+		chain.attest(
+			"soroswap/core",
+			createHash("sha256").update(bytes).digest("hex"),
+		);
+		chain.serve();
+		let reads = 0;
+		expect(
+			await verifyMainnetContract(
+				soroswap.citedBy.readme,
+				"acme/vault",
+				undefined,
+				null,
+				{
+					...own(),
+					siblings: {
+						pointed: ["acme/core"],
+						opaque: false,
+						read: async () => {
+							reads++;
+							return factory;
+						},
+					},
+				},
+			),
+		).toEqual({ id: soroswap.id, basis: "cited" });
+		expect(reads).toBe(0);
+	});
+
+	it("a source read that was not whole cannot say cited: could not check", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				soroswap.citedBy.readme,
+				"acme/app",
+				undefined,
+				null,
+				own({ unread: true }),
+			),
+		).toBe(CONTRACT_UNREAD);
+		// A partial read that still matches is an answer.
+		expect(
+			await verifyMainnetContract(
+				soroswap.owner.readme,
+				soroswap.owner.repo,
+				undefined,
+				null,
+				own({ defined: factory.defined, unread: true }),
+			),
+		).toEqual({ id: soroswap.id, basis: "source-matched" });
+	});
+
+	it("a sibling read marks an unreadable file or a truncated tree as not whole", async () => {
+		vi.stubGlobal("fetch", async () => new Response("", { status: 404 }));
+		const meta = {
+			"/repos/acme/core": {
+				full_name: "acme/core",
+				default_branch: "main",
+				fork: false,
+			},
+		};
+		const file = { path: "src/lib.rs", type: "blob", sha: "a1", size: 1_000 };
+		const unreadable = await readContractFns(
+			ghAnswering({
+				...meta,
+				"/repos/acme/core/git/trees/main?recursive=1": { tree: [file] },
+			}),
+			"acme/core",
+			{ api: 0, raw: 0 },
+		);
+		expect(unreadable).toMatchObject({ unread: true });
+		const truncated = await readContractFns(
+			ghAnswering({
+				...meta,
+				"/repos/acme/core/git/trees/main?recursive=1": {
+					tree: [],
+					truncated: true,
+				},
+			}),
+			"acme/core",
+			{ api: 0, raw: 0 },
+		);
+		expect(truncated).toMatchObject({ unread: true });
+		// A file over fetchBlob's 400 KB cap is generated, not source: it is
+		// never selected, so it cannot leave every check unread.
+		const oversize = await readContractFns(
+			ghAnswering({
+				...meta,
+				"/repos/acme/core/git/trees/main?recursive=1": {
+					tree: [{ ...file, path: "src/bindings.rs", size: 500_000 }],
+				},
+			}),
+			"acme/core",
+			{ api: 0, raw: 0 },
+		);
+		expect(oversize).toEqual({
+			defined: new Set(),
+			defaults: [],
+			unread: false,
+		});
+	});
+
+	it("trait impls that take the trait's defaults leave the functions unnamed: published", async () => {
+		const read = (text: string) =>
+			contractSource([{ path: "src/contract.rs", text }]);
+		// OpenZeppelin's fungible token: the block names no function.
+		expect(
+			read(
+				"#[default_impl]\n#[contractimpl]\nimpl FungibleToken for Token {\n    type ContractType = Base;\n}",
+			).defaults,
+		).toEqual([new Set()]);
+		expect(
+			read(
+				"#[contractimpl]\nimpl C {\n    pub fn mint(e: Env) {}\n}\n#[contractimpl(contracttrait)]\nimpl Pausable for C {}",
+			).defaults,
+		).toEqual([new Set(["mint"])]);
+		// Another attribute before `impl`, and a trait with generics.
+		expect([
+			...read(
+				"#[contractimpl]\n#[allow(unused)]\nimpl C {\n    pub fn a(e: Env) {}\n}\n#[contractimpl]\nimpl Foo<Bar> for C {\n    fn b(e: Env) {}\n}",
+			).defined,
+		]).toEqual(["a", "b"]);
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				soroswap.citedBy.readme,
+				"acme/token",
+				undefined,
+				null,
+				own({ defaults: [new Set(["create_pair"])] }),
+			),
+		).toEqual({ id: soroswap.id, basis: "published" });
+		// A defaults contract naming a function the WASM lacks is another
+		// contract: Eras256/Nirium's account contract beside the DeFindex
+		// vault it cites.
+		expect(
+			await verifyMainnetContract(
+				soroswap.citedBy.readme,
+				"acme/token",
+				undefined,
+				null,
+				own({ defaults: [new Set(["__check_auth", "create_pair"])] }),
+			),
+		).toEqual({ id: soroswap.id, basis: "cited" });
+	});
+
+	it("mock contracts and test utilities are not the repo's source", () => {
+		const mock = (name: string) =>
+			`#[contractimpl]\nimpl Mock {\n    pub fn ${name}(e: Env) {}\n}`;
+		expect([
+			...contractSource([
+				{
+					path: "src/lib.rs",
+					text: `#[contractimpl]\nimpl Real {\n    pub fn real(e: Env) {}\n}\n#[cfg(test)]\nmod test {\n    ${mock("inline_mock")}\n}`,
+				},
+				{ path: "contracts/mock-pool/src/lib.rs", text: mock("pool_mock") },
+				{ path: "src/testutils.rs", text: mock("util_mock") },
+				{ path: "src/mock_pool.rs", text: mock("file_mock") },
+				{ path: "contracts/pool-mock/src/lib.rs", text: mock("suffix_mock") },
+				{ path: "contracts/mockoracle/src/lib.rs", text: mock("oracle_mock") },
+				{
+					path: "src/contract.rs",
+					text: `#[cfg(any(test, feature = "testutils"))]\nmod testutils {\n    ${mock("feature_mock")}\n}`,
+				},
+			]).defined,
+		]).toEqual(["real"]);
+	});
+
+	it("a WASM exporting fewer than four functions matches only when every one is defined", () => {
+		expect(
+			sourceMatches(["initialize", "execute"], new Set(["initialize"])),
+		).toBe(false);
+		expect(
+			sourceMatches(
+				["initialize", "execute"],
+				new Set(["initialize", "execute"]),
+			),
+		).toBe(true);
+		expect(sourceMatches(["a", "b", "c", "d"], new Set(["a", "b"]))).toBe(true);
+	});
+
+	it("a gist or an owner's .github repo is no sibling", () => {
+		expect(
+			sameOwnerLinks(
+				"acme/app",
+				"see https://gist.github.com/acme/abc123 and https://github.com/acme/.github and https://www.github.com/acme/contracts",
+			),
+		).toEqual(["acme/contracts"]);
 	});
 });

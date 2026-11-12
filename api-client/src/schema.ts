@@ -2242,8 +2242,13 @@ export interface components {
                 }[];
                 /** @description Stellar-ecosystem dependencies from the repo's manifests (Cargo.toml dependency sections + package.json dep maps), allowlist-matched package names stored verbatim: the dependency graph. Forward read: the repo's stack. Reverse read: search the package name to find dependents (adoption evidence no README mention can fake). Empty until a post-2026-08-10 scan. */
                 stellarDeps?: string[];
-                /** @description README-claimed contract id confirmed on Stellar mainnet at scan time by an RPC read of its contract instance; a confirmed id is kept when a later scan cannot run the check or no longer sees the instance. Existence is not ownership: read the repo's contract basis. Null when no confirmed address. */
+                /** @description A contract id the README names, confirmed on Stellar mainnet at scan time by an RPC read of its contract instance; a confirmed id is kept when a later scan cannot run the check or no longer sees the instance. Existence is not ownership: mainnetContractBasis says whose it is, and cited means a contract the repo calls, not its deployment. Null when no confirmed address. */
                 mainnetContractId?: string | null;
+                /**
+                 * @description Whose contract mainnetContractId is. self-validated = the deployed WASM names this repo as its source (SEP-55 source_repo) and this repo holds a GitHub build attestation for it. source-matched = this repo's own #[contractimpl] source defines at least half of the functions the deployed WASM exports (its contractspecv0), or all of them when it exports fewer than four; a function-name match, not a byte-level build, test code and mock contracts are not read, and a GitHub fork never qualifies. sibling-matched = a repo under the same GitHub owner that this repo points to (the WASM's SEP-55 source_repo, a git submodule, or a README link) defines at least half of them: a team's frontend or SDK repo whose contract lives next door. cited = the README names the contract but neither this repo nor such a sibling defines it, usually a contract the repo calls; it is NOT this repo's deployment. published = not judged under that rule yet: stored before spec 1.9.135 and served as it was until a scan of the repo moves it to one of the values above where it can decide, or left by a scan that could not decide (a pointed-to repo is private or gone, a submodule's target cannot be read, or the contract's trait impls take the trait's default functions, so its source names fewer functions than it exports). Every value but cited is served as the repo's deployment. null when mainnetContractId is null, or the id was recorded before its basis was (also not judged yet).
+                 * @enum {string|null}
+                 */
+                mainnetContractBasis?: "self-validated" | "source-matched" | "sibling-matched" | "cited" | "published" | null;
                 /** @description Stellar SDK capability tags detected in the repo's JS/TS sources; what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative). */
                 sdkCapabilities?: string[];
                 /** @description Evidence-only domain labels derived at scan time from ecosystem dependencies + capability tags + contract-interface traits; what the CODE proves the repo does, never README self-description: defi-lending, defi-amm, defi-yield, oracle, payments-x402, wallet-infra, anchor-ramp, indexer. [] = nothing domain-specific proven (an honest null). */
@@ -3099,7 +3104,7 @@ export interface operations {
                                 codeDepth?: number | null;
                                 /** @description the scanner marked this row a deployable contract */
                                 deployable?: boolean;
-                                /** @description a verified mainnet contract is attributed to this repo (raw field mainnetContractId) */
+                                /** @description the repo's own mainnet contract is on record: a mainnetContractId whose basis is not cited (an id its README only cites does not count) */
                                 mainnetJoined?: boolean;
                             }[];
                             /** @description Indexed but thinly evidenced: the repo work queue. */
@@ -3114,7 +3119,7 @@ export interface operations {
                                 codeDepth?: number | null;
                                 /** @description the scanner marked this row a deployable contract */
                                 deployable?: boolean;
-                                /** @description a verified mainnet contract is attributed to this repo (raw field mainnetContractId) */
+                                /** @description the repo's own mainnet contract is on record: a mainnetContractId whose basis is not cited (an id its README only cites does not count) */
                                 mainnetJoined?: boolean;
                             }[];
                             withCodeDepth?: number;
@@ -3809,6 +3814,11 @@ export interface operations {
                             }[];
                             stellarDeps?: string[];
                             mainnetContractId?: string | null;
+                            /**
+                             * @description Whose contract mainnetContractId is. self-validated = the deployed WASM names this repo as its source (SEP-55 source_repo) and this repo holds a GitHub build attestation for it. source-matched = this repo's own #[contractimpl] source defines at least half of the functions the deployed WASM exports (its contractspecv0), or all of them when it exports fewer than four; a function-name match, not a byte-level build, test code and mock contracts are not read, and a GitHub fork never qualifies. sibling-matched = a repo under the same GitHub owner that this repo points to (the WASM's SEP-55 source_repo, a git submodule, or a README link) defines at least half of them: a team's frontend or SDK repo whose contract lives next door. cited = the README names the contract but neither this repo nor such a sibling defines it, usually a contract the repo calls; it is NOT this repo's deployment. published = not judged under that rule yet: stored before spec 1.9.135 and served as it was until a scan of the repo moves it to one of the values above where it can decide, or left by a scan that could not decide (a pointed-to repo is private or gone, a submodule's target cannot be read, or the contract's trait impls take the trait's default functions, so its source names fewer functions than it exports). Every value but cited is served as the repo's deployment. null when mainnetContractId is null, or the id was recorded before its basis was (also not judged yet).
+                             * @enum {string|null}
+                             */
+                            mainnetContractBasis?: "self-validated" | "source-matched" | "sibling-matched" | "cited" | "published" | null;
                             sdkCapabilities?: string[];
                         } | null;
                         /** @description The answer text: answerSource states its grounding and answerAsOf its date. null when no grounded answer was produced (the routed repo is still returned). */
@@ -6572,6 +6582,11 @@ export interface operations {
                                     sdkCapabilities?: string[];
                                     interfaceSize?: number;
                                     mainnetContractId?: string | null;
+                                    /**
+                                     * @description Whose contract mainnetContractId is. self-validated = the deployed WASM names this repo as its source (SEP-55 source_repo) and this repo holds a GitHub build attestation for it. source-matched = this repo's own #[contractimpl] source defines at least half of the functions the deployed WASM exports (its contractspecv0), or all of them when it exports fewer than four; a function-name match, not a byte-level build, test code and mock contracts are not read, and a GitHub fork never qualifies. sibling-matched = a repo under the same GitHub owner that this repo points to (the WASM's SEP-55 source_repo, a git submodule, or a README link) defines at least half of them: a team's frontend or SDK repo whose contract lives next door. cited = the README names the contract but neither this repo nor such a sibling defines it, usually a contract the repo calls; it is NOT this repo's deployment. published = not judged under that rule yet: stored before spec 1.9.135 and served as it was until a scan of the repo moves it to one of the values above where it can decide, or left by a scan that could not decide (a pointed-to repo is private or gone, a submodule's target cannot be read, or the contract's trait impls take the trait's default functions, so its source names fewer functions than it exports). Every value but cited is served as the repo's deployment. null when mainnetContractId is null, or the id was recorded before its basis was (also not judged yet).
+                                     * @enum {string|null}
+                                     */
+                                    mainnetContractBasis?: "self-validated" | "source-matched" | "sibling-matched" | "cited" | "published" | null;
                                 };
                                 usage?: {
                                     contracts?: number;
@@ -6897,6 +6912,11 @@ export interface operations {
                                 /** @description The repo-relative source file of each contractInterface entry (up to 60), same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. Only contractInterface, symbols and sdkCapabilities leave test code out; stellarProof, codeDepth, isDeployableContract and stellarDeps still read every fetched file until a measured follow-up, so a repo whose only Soroban crate is a test fixture can serve an empty contractInterface beside a cargo-sdk proof. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan. */
                                 contractInterfacePaths?: string[] | null;
                                 mainnetContractId?: string | null;
+                                /**
+                                 * @description Whose contract mainnetContractId is. self-validated = the deployed WASM names this repo as its source (SEP-55 source_repo) and this repo holds a GitHub build attestation for it. source-matched = this repo's own #[contractimpl] source defines at least half of the functions the deployed WASM exports (its contractspecv0), or all of them when it exports fewer than four; a function-name match, not a byte-level build, test code and mock contracts are not read, and a GitHub fork never qualifies. sibling-matched = a repo under the same GitHub owner that this repo points to (the WASM's SEP-55 source_repo, a git submodule, or a README link) defines at least half of them: a team's frontend or SDK repo whose contract lives next door. cited = the README names the contract but neither this repo nor such a sibling defines it, usually a contract the repo calls; it is NOT this repo's deployment. published = not judged under that rule yet: stored before spec 1.9.135 and served as it was until a scan of the repo moves it to one of the values above where it can decide, or left by a scan that could not decide (a pointed-to repo is private or gone, a submodule's target cannot be read, or the contract's trait impls take the trait's default functions, so its source names fewer functions than it exports). Every value but cited is served as the repo's deployment. null when mainnetContractId is null, or the id was recorded before its basis was (also not judged yet).
+                                 * @enum {string|null}
+                                 */
+                                mainnetContractBasis?: "self-validated" | "source-matched" | "sibling-matched" | "cited" | "published" | null;
                             };
                             usage?: {
                                 contracts?: number;
@@ -6948,8 +6968,8 @@ export interface operations {
                                 successorRepo?: string | null;
                                 predecessors?: string[];
                             };
-                            /** @description Closed deterministic vocabulary; absence of a signal means the evidence doesn't hold, not that the opposite is proven. */
-                            signals?: ("scanned" | "deep-code" | "live-on-mainnet" | "verified-contract-id" | "publishes-contract-id" | "audited" | "multi-audited" | "code-changed-since-audit" | "actively-maintained" | "archived" | "superseded")[];
+                            /** @description Closed deterministic vocabulary; absence of a signal means the evidence doesn't hold, not that the opposite is proven. For a held mainnetContractId exactly one of: verified-contract-id (basis self-validated), publishes-contract-id (source-matched, sibling-matched, or published or no basis, which are not judged yet), cites-contract-id (cited: the README names a contract neither this repo nor a same-owner repo it points to defines). */
+                            signals?: ("scanned" | "deep-code" | "live-on-mainnet" | "verified-contract-id" | "publishes-contract-id" | "cites-contract-id" | "audited" | "multi-audited" | "code-changed-since-audit" | "actively-maintained" | "archived" | "superseded")[];
                         };
                     };
                 };
@@ -7031,13 +7051,13 @@ export interface operations {
                             note?: string;
                         };
                         contracts?: {
-                            /** @description Mainnet contract id (C…) published by this repo and confirmed on Stellar mainnet by the scanner's RPC read of its contract instance (a confirmed id is kept when a later read cannot run or no longer lists the instance), with shared token contracts (SACs) and contracts whose build is attested to another repo excluded. When the repo published no id but on-chain enrichment attributed contracts to it, the first attributed address is served here with `contractBasis: onchain-attributed` and the full list in `verifiedContracts`; null only when neither exists. Read `contractBasis` before treating it as the repo's own deployment. */
+                            /** @description The repo's mainnet contract id (C...): one its README names, confirmed on Stellar mainnet by the scanner's RPC read of its contract instance, and not judged cited. An id the README only cites, usually a contract the repo calls, is never served here; /api/repos/trust serves it with mainnetContractBasis cited. Read `contractBasis`: published or null means not judged yet under the source rule. When the repo has no such id but on-chain enrichment attributed contracts to it, the first attributed address is served with `contractBasis: onchain-attributed` and the full list in `verifiedContracts`; null when the row is listed for live usage (codeInUse) alone. */
                             contractId?: string | null;
                             /**
-                             * @description Ownership evidence for contractId. self-validated = the contract's WASM names THIS repo as its source (SEP-55 source_repo) and this repo holds a GitHub build attestation for that WASM. published = the repo publishes the address and it is provably neither a shared token contract nor another repo's, but nothing proves it is this repo's deployment. onchain-attributed = the repo published no id; the address comes from on-chain enrichment, which recorded stellar.expert naming this repo as the contract's source on the project row. null = recorded before the basis was tracked.
+                             * @description Ownership evidence for contractId. self-validated = the contract's WASM names THIS repo as its source (SEP-55 source_repo) and this repo holds a GitHub build attestation for that WASM. source-matched = this repo's own #[contractimpl] source defines at least half of the functions the deployed WASM exports, or all of them when it exports fewer than four (a function-name match, not a byte-level build; a GitHub fork never qualifies). sibling-matched = a repo under the same GitHub owner that this repo points to (SEP-55 source_repo, a git submodule, or a README link) defines them. published = not judged yet under that rule (stored before spec 1.9.135, or a scan could not read the repo the source is in); a rescan moves such a row to a judged value where it can decide, and a row judged cited leaves this registry. onchain-attributed = the repo has no such id; the address comes from on-chain enrichment, which recorded stellar.expert naming this repo as the contract's source on the project row. null when contractId is null (a row listed for live usage alone), or for an id recorded before its basis was (not judged yet).
                              * @enum {string|null}
                              */
-                            contractBasis?: "self-validated" | "published" | "onchain-attributed" | null;
+                            contractBasis?: "self-validated" | "source-matched" | "sibling-matched" | "published" | "onchain-attributed" | null;
                             /** @description Every mainnet address on-chain enrichment attributed to this repo (stellar.expert names it as the source), with the enrichment's label and the reading date that attributed it. Empty = nothing attributed, never a claim the repo deploys nothing. */
                             verifiedContracts?: {
                                 address: string;

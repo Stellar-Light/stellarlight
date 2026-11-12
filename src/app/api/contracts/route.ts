@@ -6,8 +6,9 @@
  *   GET /api/contracts?domain=oracle       → filter by code-evidenced domain
  *
  * MEMBERSHIP IS EVIDENCE-GATED: a row exists only when the scanner verified
- * a README-claimed contract id live on mainnet (an RPC read of its instance)
- * OR weekly on-chain enrichment attributed real activity to the repo. Each
+ * a README contract id live on mainnet and did not judge it cited OR weekly
+ * on-chain enrichment attributed real activity to the repo. An id the README
+ * only cites is not listed. Each
  * row joins code truth (proof, depth, interface, domains), live usage,
  * per-project audit records, and succession. Absence here is NOT a claim a
  * contract doesn't exist — the registry grows exactly as fast as scans and
@@ -154,7 +155,7 @@ export async function GET(req: NextRequest) {
 					offset,
 				},
 				counts: { returned: contracts.length, total },
-				note: "Evidence-gated: rows exist only for contracts the scanner verified live on mainnet or on-chain enrichment attributed real activity to. Absence is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Lead with rows that carry codeInUse (live usage is the strongest signal).",
+				note: "Evidence-gated: rows exist only for contracts the scanner verified live on mainnet and did not judge cited, contracts on-chain enrichment attributed to the repo, or repos with live usage. A contract a repo's README only cites, usually one it calls, is not listed here as that repo's; /api/repos/trust serves it with mainnetContractBasis cited. contractBasis published or null means not judged yet: a rescan moves such a row to a judged basis where it can decide. Absence is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Lead with rows that carry codeInUse (live usage is the strongest signal).",
 			},
 			contracts,
 		},

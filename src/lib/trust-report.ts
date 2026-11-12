@@ -19,6 +19,7 @@
 
 import type { Payload } from "payload";
 import { interfacePathsOf } from "./code-symbols";
+import { isOwnContract } from "./contract-basis";
 import { activityStateOf } from "./repo-grade";
 import { renamedTo } from "./repo-relations";
 import { securityOf } from "./repo-security";
@@ -29,6 +30,7 @@ export const TRUST_SIGNALS = [
 	"live-on-mainnet",
 	"verified-contract-id",
 	"publishes-contract-id",
+	"cites-contract-id",
 	"audited",
 	"multi-audited",
 	"code-changed-since-audit",
@@ -66,7 +68,9 @@ export interface TrustReport {
 		 * (issue #1906); null when the scan predates paths. */
 		contractInterfacePaths: string[] | null;
 		mainnetContractId: string | null;
-		mainnetContractBasis?: string | null;
+		/** Whose contract mainnetContractId is (src/lib/contract-basis.ts);
+		 * null when the id was recorded before its basis was. */
+		mainnetContractBasis: string | null;
 	};
 	usage: {
 		contracts: number;
@@ -206,13 +210,18 @@ export async function buildTrustReport(
 	if ((usage?.contracts ?? 0) >= 1) signals.push("live-on-mainnet");
 	// "verified" has to mean verified. A resolvable address only proves the
 	// contract exists; self-validated is the only basis under which the build
-	// itself (SEP-55 source_repo, GitHub-attested) names THIS repo. Anything
-	// weaker publishes an address, which is a real but different claim.
+	// itself (SEP-55 source_repo, GitHub-attested) names THIS repo. A repo
+	// whose own source, or a same-owner sibling's, defines the deployed
+	// contract publishes its id, and so does a row not judged yet; one whose
+	// README names a contract neither defines only cites it (Reflector's
+	// connector cited the SushiSwap factory).
 	if (d.mainnetContractId)
 		signals.push(
 			d.mainnetContractBasis === "self-validated"
 				? "verified-contract-id"
-				: "publishes-contract-id",
+				: isOwnContract(d.mainnetContractBasis)
+					? "publishes-contract-id"
+					: "cites-contract-id",
 		);
 	if ((audits?.count ?? 0) >= 1) signals.push("audited");
 	if ((audits?.count ?? 0) >= 3) signals.push("multi-audited");
@@ -259,6 +268,10 @@ export async function buildTrustReport(
 			mainnetContractId: d.mainnetContractId
 				? String(d.mainnetContractId)
 				: null,
+			mainnetContractBasis:
+				d.mainnetContractId && d.mainnetContractBasis
+					? String(d.mainnetContractBasis)
+					: null,
 		},
 		usage,
 		audits,
