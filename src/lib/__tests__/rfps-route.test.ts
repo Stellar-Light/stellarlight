@@ -36,24 +36,53 @@ const rfps = async (query = "") => {
 // x402-facilitator-bazaar as open in q3-2026, 17 days after SCF's RFP Track
 // page dropped them for "October 2026: New Q4 RFPs are coming soon."
 describe("the open brief roster follows SCF's RFP Track page", () => {
-	it("lists no open brief while the page names none, and keeps the live round", async () => {
+	it("serves the two Q4 briefs SCF's page lists as open, and keeps the live round", async () => {
 		const body = await rfps("?status=open");
 		expect(body.meta.activeQuarter).toBe("q4-2026");
 		expect(body.meta.activeQuarterLabel).toBe("Q4 2026");
-		expect(body.meta.counts.open).toBe(0);
+		expect(body.meta.counts.open).toBe(2);
+		const briefs = body.rfps.filter(
+			(r: { rowType: string }) => r.rowType === "rfp",
+		);
 		expect(
-			body.rfps.filter((r: { rowType: string }) => r.rowType === "rfp"),
-		).toEqual([]);
-		// The SCF submission window is a separate fact, still served.
-		expect(body.rfps.map((r: { id: string }) => r.id)).toEqual([
-			"scf-round-46",
+			briefs.map(
+				(r: {
+					id: string;
+					status: string;
+					publishedBrief: { title: string };
+				}) => [r.id, r.status, r.publishedBrief.title],
+			),
+		).toEqual([
+			[
+				"scf-web-api-analytics",
+				"open",
+				"Web and API Analytics for Stellar Ecosystem Projects",
+			],
+			[
+				"xdr-cap-coverage-audit",
+				"open",
+				"XDR/CAP-Coverage Audit Tool and Indexer-Hardening Guide",
+			],
 		]);
+		// Pinned to the page version that published them (2026-11-11).
+		for (const r of briefs) {
+			expect(r.publishedBrief.url, r.id).toBe(
+				"https://github.com/stellar/scf-handbook/blob/4cc1fae33d46618cf9193d1467e670fe7a48550a/scf-awards/build-award/rfp-track.md",
+			);
+			expect(r.publishedBrief.checkedOn, r.id).toBe("2026-11-12");
+		}
+		// The SCF submission window is a separate fact, still served.
+		expect(
+			body.rfps
+				.filter((r: { rowType: string }) => r.rowType === "scf-round")
+				.map((r: { id: string }) => r.id),
+		).toEqual(["scf-round-46"]);
 		expect(body.meta.scfRound.submissionWindow.closes).toBe("2026-11-09");
 		// The roster's basis: the page, and the day it was read.
 		expect(body.meta.briefRoster).toEqual({
 			source:
 				"https://stellar.gitbook.io/scf-handbook/scf-awards/build-award/rfp-track",
-			checkedOn: "2026-11-04",
+			checkedOn: "2026-11-12",
 		});
 		expect(BRIEF_ROSTER.checkedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 	});
@@ -151,7 +180,12 @@ describe("a brief SCF published is linked, apart from the idea summary", () => {
 		}
 		// A quarter's briefs were published together, on one page version.
 		for (const [quarter, urls] of copies) expect(urls.size, quarter).toBe(1);
-		expect([...copies.keys()]).toEqual(["q1-2026", "q2-2026", "q3-2026"]);
+		expect([...copies.keys()]).toEqual([
+			"q1-2026",
+			"q2-2026",
+			"q3-2026",
+			"q4-2026",
+		]);
 	});
 });
 
@@ -183,6 +217,21 @@ describe("the open briefs the RFP Track page lists", () => {
 			page(Q4_NOTICE, COMING_SOON, COMING_SOON),
 		);
 		expect(official).toEqual([]);
+	});
+
+	it("reads the two Q4 briefs from the November 2026 page, and they match what is served", () => {
+		// 2026-11-11 (handbook 4cc1fae3): no notice line, two bold summaries.
+		const official = officialOpenBriefs(
+			page(
+				null,
+				"<summary><strong>Web and API Analytics for Stellar Ecosystem Projects</strong></summary>\n\n### **Web and API Analytics for Stellar Ecosystem Projects**\n\n### 1. Scope of Work",
+				"<summary><strong>XDR/CAP-Coverage Audit Tool and Indexer-Hardening Guide</strong></summary>\n\n### **XDR/CAP-Coverage Audit Tool and Indexer-Hardening Guide**\n\n### 1. Scope of Work",
+			),
+		);
+		expect(official).toEqual([
+			"Web and API Analytics for Stellar Ecosystem Projects",
+			"XDR/CAP-Coverage Audit Tool and Indexer-Hardening Guide",
+		]);
 		const ours = IDEAS.filter((i) => rfpStatus(i.quarter) === "open").map(
 			(i) => i.publishedBrief?.title ?? i.title,
 		);

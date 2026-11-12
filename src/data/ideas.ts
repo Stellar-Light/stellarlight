@@ -46,13 +46,13 @@ export const ACTIVE_QUARTER: Quarter = "q4-2026";
 
 /** The official page the open briefs were last checked against, and the
  * day. SCF's RFP Track page lists the briefs open now under "Current Open
- * RFPs"; on 2026-11-04 it read "October 2026: New Q4 RFPs are coming soon."
- * and named none, so no brief here is in q4-2026 yet. /api/rfps serves this
- * as meta.briefRoster. */
+ * RFPs"; on 2026-11-12 it listed the two Q4 2026 briefs, published there on
+ * 2026-11-11 (handbook commit 4cc1fae3). /api/rfps serves this as
+ * meta.briefRoster. */
 export const BRIEF_ROSTER = {
 	source:
 		"https://stellar.gitbook.io/scf-handbook/scf-awards/build-award/rfp-track",
-	checkedOn: "2026-11-04",
+	checkedOn: "2026-11-12",
 } as const;
 
 /** Status of an RFP relative to ACTIVE_QUARTER. */
@@ -95,8 +95,9 @@ export interface Idea {
 	publishedBrief?: PublishedBrief;
 }
 
-// Commit-pinned copies of SCF's RFP Track page, each the last version that
-// carried a quarter's briefs, all read 2026-11-04.
+// Commit-pinned copies of SCF's RFP Track page: for a closed quarter, the last
+// version that carried its briefs (read 2026-11-04); for the open quarter, the
+// version that published them (read 2026-11-12).
 const RFP_TRACK = (commit: string) =>
 	`https://github.com/stellar/scf-handbook/blob/${commit}/scf-awards/build-award/rfp-track.md`;
 /** 2026-04-17: the six Q1 2026 briefs. */
@@ -105,10 +106,16 @@ const Q1_BRIEFS = RFP_TRACK("be0c693d89a0990d9fabebc61fd2894d23ec55e2");
 const Q2_BRIEFS = RFP_TRACK("1e04b79973358e3dea58d821ed6419b50c93370c");
 /** 2026-07-29: the two Q3 2026 briefs. */
 const Q3_BRIEFS = RFP_TRACK("7abdddd09fe05c6de47de300a5cde73caa61cb02");
-const brief = (url: string, title: string): PublishedBrief => ({
+/** 2026-11-11: the two Q4 2026 briefs ("GITBOOK-247: q4 RFPs"). */
+const Q4_BRIEFS = RFP_TRACK("4cc1fae33d46618cf9193d1467e670fe7a48550a");
+const brief = (
+	url: string,
+	title: string,
+	checkedOn = "2026-11-04",
+): PublishedBrief => ({
 	title,
 	url,
-	checkedOn: "2026-11-04",
+	checkedOn,
 });
 
 export const IDEAS: Idea[] = [
@@ -335,6 +342,38 @@ export const IDEAS: Idea[] = [
 		publishedBrief: brief(
 			Q3_BRIEFS,
 			"X402 Facilitator with Bazaar (discovery) support",
+		),
+	},
+	{
+		id: "scf-web-api-analytics",
+		title: "Web and API Analytics for Stellar Ecosystem Projects",
+		description:
+			"SCF has no trusted, unified source of end-user usage data for the projects it funds, so reviewers rely on self-reported metrics when weighing follow-on programs such as Growth Hack, the Public Goods Award and Integration Track traction. Ecosystem visibility tools can say which projects claim to build on Stellar, but not which are actually used. This RFP funds a privacy-first, multi-tenant web and API analytics service that SCF runs for Stellar projects at no charge, built on Umami or GoatCounter, hosted and supported by the proposer for 12 months, with stewardship handed to a community-appointed operator between months 6 and 12 at SCF's discretion.",
+		technicalRequirements:
+			"Web Analytics: privacy-first, GDPR-compliant analytics collected only from frontend code, through a version-pinned tracker script, with bot and inflation mitigation and supply-chain defenses. At minimum: page views, unique visitors, referrers, session duration, bounce rate, country-level geography, and device and browser breakdown.\n\nAPI Analytics: tenants dual-export OpenTelemetry to the SCF collector, which drops traces, spans and deep logs and keeps standardized metrics (service, normalized route, status code, latency) in PostgreSQL. Sized for about 1,000,000 requests a day, with aggregates kept at least 24 months.\n\nMulti-tenancy: self-service enrollment for any project built on Stellar, strict tenant isolation, a global view for SCF operators, revocable API keys for machine consumers, and zero fees.\n\nDashboards: a private view for each project and a global comparison view for SCF operators, for both web and API metrics.\n\nOpen Source: one OSI-licensed monorepo holding all application code, infrastructure-as-code, runbooks, a tenant onboarding guide, tests, and security and privacy documentation.\n\nHosting and Handover: the proposer hosts and supports the service for 12 months after the final development tranche (targets: 99.99% ingestion and 99.90% dashboard availability, critical and high vulnerabilities patched within 24 hours), and hands stewardship to a community-appointed operator between months 6 and 12, at SCF's discretion.\n\nAdoption: at least three SCF-awarded projects instrumented for web analytics and one for API traffic.\n\nEligibility: builders unknown to SCF are not eligible.",
+		category: "infrastructure",
+		authorName: "SCF Delegates",
+		quarter: "q4-2026",
+		publishedBrief: brief(
+			Q4_BRIEFS,
+			"Web and API Analytics for Stellar Ecosystem Projects",
+			"2026-11-12",
+		),
+	},
+	{
+		id: "xdr-cap-coverage-audit",
+		title: "XDR/CAP-Coverage Audit Tool and Indexer-Hardening Guide",
+		description:
+			"Every application that reads the Stellar ledger decodes XDR, and rare but valid transaction shapes keep crashing those readers because nobody tested them. Wallet-backend ingestion halted on CAP-0040 signed-payload signers, unbounded authorization trees and CAP-0073 trustlines; stellar-etl opened a Protocol 28 epic over about fifty correctness issues; and a decoding fix made in one Stellar SDK is not carried to the others. This RFP funds a shared test kit: a corpus of rare ledger patterns tagged by CAP, a replay harness for indexers, an SDK conformance runner, a linter, and an indexer-hardening guide.",
+		technicalRequirements:
+			"Corpus and Generator: XDR that stellar-core actually emits, covering the rare patterns each CAP introduced or changed, tagged with CAP and protocol version, reproducible on testnet and mainnet passphrases, each entry with its expected decoded values in a manifest. Entries round-trip through rs-stellar-xdr and agree with stellar-core's --check-lcm goldens.\n\nReplay Harness: feeds the corpus to any indexer through a documented adapter, delivering ledgers through an input existing pipelines already read (such as the Galexie data lake layout or a mock getLedgers endpoint; the proposal says which it supports first), and reports every shape it mishandles or silently drops. The reference adapter reproduces wallet-backend #729, #731 and #716 on pre-fix commits.\n\nSDK Conformance Runner: runs the corpus through at least the JavaScript, Go and Rust SDKs in CI, reports where they diverge from the network and from each other, files sibling issues in each affected SDK, and reproduces js-stellar-sdk #1766, #1785 and #1789 on pre-fix tags.\n\nLinter: for one language and framework, flags trusting unvalidated fields, missing depth and size caps on recursive structures, and deriving participants from the envelope instead of the ledger meta.\n\nIndexer-Hardening Guide: field by field, which transaction fields stellar-core validates and which it passes through, recommended caps, the participants-from-meta rule, and muxed and signed-payload address handling (SEP-0023), ready to publish on developers.stellar.org.\n\nFindings: the corpus run against at least one SDF pipeline (wallet-backend or stellar-etl), with each failure triaged and filed upstream.\n\nNon-functional: runs offline with no mainnet keys or funds, fast enough for CI on every pull request, bounded memory, a permissive open-source license, and a maintenance plan through the first protocol upgrade after delivery.",
+		category: "developer-tooling",
+		authorName: "SCF Delegates",
+		quarter: "q4-2026",
+		publishedBrief: brief(
+			Q4_BRIEFS,
+			"XDR/CAP-Coverage Audit Tool and Indexer-Hardening Guide",
+			"2026-11-12",
 		),
 	},
 ];
