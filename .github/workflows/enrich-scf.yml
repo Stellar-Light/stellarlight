@@ -1,5 +1,5 @@
 name: Enrich SCF data (manual)
-# workflow-health: signal-steps: ^Idempotence$
+# workflow-health: signal-steps: ^(Idempotence|Round counts)$
 # Re-runs scripts/enrich-from-scf.ts against prod to fix SCF award tagging.
 # Dry-run by default; set execute=true to write. Pulls the live SCF API.
 on:
@@ -10,7 +10,10 @@ permissions: { contents: read }
 jobs:
   enrich:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # 35, not 25 (2026-11-11): the execute and the Idempotence replan take
+    # about 16 minutes together, and Round counts adds SCF's 46 round pages
+    # plus up to three retries of a could-not-check.
+    timeout-minutes: 35
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
@@ -25,7 +28,11 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/enrich-from-scf.ts ${{ inputs.execute && '--execute' || '' }}
+      # SYNC_DONE dates the end of the writes for Round counts below.
+      - id: sync
+        run: |
+          pnpm exec tsx scripts/enrich-from-scf.ts ${{ inputs.execute && '--execute' || '' }}
+          echo "SYNC_DONE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
       # Idempotence gate (2026-09-06, same rule as curate-projects.yml): an
       # execute must leave nothing to enrich. A row still planned right after
       # it was written is a lane fight (curate's SCF_FIX / linkage on the same
@@ -44,3 +51,32 @@ jobs:
             exit 1
           fi
           echo "0 rows planned after execute — the page and the row agree everywhere"
+      # Round counts (sls-111): after an execute, the directory's awards in
+      # each SCF round must equal SCF's own round page, or hold the reviewed
+      # baseline of known shortfalls (scripts/eval/scf-round-shortfalls.json,
+      # a ratchet: scripts/eval/scf-round-counts.ts). Exit 1 is a finding: a
+      # new short round, a grown shortfall, any round over SCF, an SCF page no
+      # row carries that the baseline does not name, or a stale baseline
+      # entry. Exit 2 is a could-not-check: an SCF page, our API or
+      # the baseline unread, or an API page generated before the sync
+      # finished (the edge cache), which is retried and then reported as
+      # BLIND. Both fail the step: a check that did not run must not read as
+      # a pass. It runs even when Idempotence is red.
+      - name: Round counts
+        if: ${{ !cancelled() && inputs.execute && steps.sync.outcome == 'success' }}
+        shell: bash
+        run: |
+          code=0
+          for attempt in 1 2 3; do
+            code=0
+            pnpm exec tsx scripts/eval/scf-round-counts.ts --not-before "$SYNC_DONE" || code=$?
+            [ "$code" = "2" ] || break
+            echo "::warning::round counts could not check (attempt $attempt of 3)"
+            [ "$attempt" = "3" ] || sleep 120
+          done
+          if [ "$code" = "1" ]; then
+            echo "::error::awards per SCF round moved against the reviewed baseline; each FAIL line above names the round and what to do"
+          elif [ "$code" = "2" ]; then
+            echo "::warning::BLIND: the round counts could not be checked, so this run makes no claim about them"
+          fi
+          exit "$code"

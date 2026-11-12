@@ -41,6 +41,7 @@ import {
 	STATUS_FIX,
 	STATUS_SOURCE_BACKFILL,
 	STATUS_SOURCE_RETRACT,
+	SUPPORTED_NETWORKS,
 	statusFixHold,
 	statusFixNote,
 	TWITTER_LINK_FIX,
@@ -740,97 +741,11 @@ const COVERAGE_COUNTRY_FIX: Record<string, string[]> = {
 	bitso: ["Mexico", "Brazil", "Argentina", "Colombia"],
 };
 
-// sls-017 (durable half): chains a project supports, lowercase. Fill-if-empty —
-// so omission ≠ negation on wallet/multichain records.
-const SUPPORTED_NETWORKS: Record<string, string[]> = {
-	// Self-audit "bridge corridors" red (persistent since 2026-07-11): Bridge-
-	// typed rows must carry non-empty verified networks. Each below asserted
-	// from the project's OWN materials 2026-07-16 (precision over recall —
-	// verified subset, never the marketing chain-count).
-	proofbridge: ["stellar", "evm"], // pfbridge.xyz / its own description: "connecting Stellar and Ethereum" ZK bridge
-	// Second wave (2026-07-16, same red): the check's q=bridge window surfaced
-	// wowmax once the first four cleared — preempting every remaining Live
-	// Bridge-typed row with empty networks in one pass (full type=Bridge sweep,
-	// not the window).
-	wowmax: ["evm"], // wowmax.exchange: multi-chain EVM DEX/bridge aggregator; its own description says "EXPANDING to Stellar" — stellar deliberately NOT asserted until the deployment is live
-	usher: ["stellar"], // usher.so: "Enhancing Stellar's Anchors with the T Node" — Stellar-native anchor infrastructure
-	"soroban-polygon-interop": ["stellar", "evm"], // EEA crosschain spec: Soroban ↔ Polygon (EVM) asset transfers
-	"one-click": ["stellar"], // oneclick.fi: DeFi onboarding listed for its Stellar corridor; other chains not per-chain verified
-	rango: ["stellar", "evm"], // rango.exchange aggregates 70+ chains; asserting the verified subset (Stellar routing is why it is listed; EVM is its core business)
-	liquidsfi: ["stellar"], // liquids.fi (ex-ZKLiquid, Stellar-origin SCF-track project); cross-chain expansion claims not yet per-chain verified
-	lobstr: ["stellar", "xrpl"],
-	"ultra-stellar": ["stellar", "xrpl"],
-	// Bridge corridor matrix (boxy 2026-07-09: "same issue for Solana?" — yes).
-	// Every row below verified from PRIMARY sources on 2026-07-09 (vendor
-	// docs/APIs, quotes in the PR): the original Beacon-Q3 seeds were
-	// [stellar, evm] only, hiding real Solana/Tron/XRPL/... corridors.
-	// "evm" is the umbrella users' chain-names map onto via the search
-	// synonym layer (ethereum/polygon/base/bnb/arbitrum → evm).
-	// This list is EXACT-SYNC for its slugs (see apply loop): the canonical
-	// place to update a listed project's networks is HERE, not the admin.
-	// Lane DQ1 (2026-10-23): empty = exact-sync clears the curated matrix,
-	// so the row serves its derived evidence (onchain-activity: contracts on
-	// Stellar) with networksBasis saying so. The old matrix came from Core's
-	// pool API, which ended in July 2026; docs-core now lists EVM chains,
-	// Tron, Solana, Sui and Stacks, with Stellar unavailable pending audit,
-	// and the operator names no Stellar route for Allbridge Next.
-	allbridge: [],
-	"circle-cctp-cross-chain-transfer-protocol": [
-		"stellar", // CCTP V2 domain 27 (standard transfer)
-		"evm",
-		"solana",
-		"sui",
-		"aptos",
-		"noble",
-		"starknet",
-	], // developers.circle.com/cctp/concepts/supported-chains-and-domains
-	axelar: ["stellar", "evm", "solana", "sui", "xrpl"], // axelar-chains-config mainnet.json: stellar mainnet contracts deployed
-	rozo: ["stellar", "evm", "solana"], // rozo.ai/llms.txt: pay-in/out Ethereum/Arbitrum/Base/BSC/Polygon/Solana/Stellar; "Stellar CCTP V2 is live on ROZO"
-	spacewalk: ["stellar", "polkadot", "kusama"], // pendulumchain.org: Pendulum (Polkadot) + Amplitude (Kusama), launched
-	stronghold: ["stellar", "evm", "xrpl"], // gateway.stronghold.co/bridge (SHx-only: Stellar⇄Ethereum + XRPL leg live)
-	"templar-protocol": ["stellar", "bitcoin", "evm", "near"], // templarfi.org/blog/stellar launch post; bridgeless (NEAR chain sigs)
-	warpdrive: ["stellar", "evm"], // warp-drive.xyz targets Base/Ethereum/Optimism/BNB — NOT yet launched (see STATUS_FIX)
-	tricorn: ["stellar", "evm"], // Coinspect-audited Stellar⇄EVM bridge; live as Utexo (boxy-confirmed 2026-07-09)
-	helix: ["canton"], // helixlabs.org: "not live on any chain other than Canton"; Stellar = roadmap (see STATUS_FIX)
-	zkcross: ["stellar", "evm"],
-	// #414 real bridges (verified 2026-07-11):
-	rubic: [
-		"stellar",
-		"evm",
-		"solana",
-		"bitcoin",
-		"tron",
-		"near",
-		"polkadot",
-		"cosmos",
-		"sui",
-		"aptos",
-		"xrpl",
-		"ton",
-	], // Rubic's own chains API (api-v2.rubic.exchange/api/info/chains): 101 chains incl. STELLAR + dedicated rubic_stellar_api provider
-	"via-labs": ["evm"], // docs.vialabs.io omnichain messaging/bridging; public chain registry is exclusively EVM chain IDs — only evm verifiable
-	transfuse: ["stellar", "evm"], // github transfuselabs/transfuse-bridge: Stellar⇄Ethereum USDC/USDT bridge (testnet-only per README)
-	"bim-exchange": ["evm"], // bim.finance: swap/bridge interface aggregating Kyberswap/Bungee — EVM aggregator stacks; no non-EVM chain named
-	"usdc-swap": ["stellar", "evm", "solana"], // usdcswap.com sitemap: STE↔ETH/ARB/OPT/BASE/POL/AVA/SOL routes; Circle CCTP + horizon in app bundle
-	houdiniswap: ["stellar", "evm", "solana", "bitcoin", "tron"], // app.houdiniswap.com token picker: XLM/USDC-on-Stellar verified live; BTC/ETH/SOL/TRON named
-	// Not reviewed (TODO): the matrix was copied from Allbridge Core, but
-	// Estrela's SCF page describes a Soroban stablecoin AMM. Empty until
-	// reviewed, so its served networks are derived (basis scf-award), never
-	// claimed as curated.
-	estrela: [],
-	rarible: ["evm"], // sls-037 precision fix: SCF award + Rarible STELLAR schema enum establish the RELATIONSHIP, but public Stellar support is not verifiable on Rarible's live API/UI (Tyler GT-19 blind lane + our recheck) — evm only until it is; the award/integration story lives in prose+statusSourceUrl, not the deployment field
-	// sls-029 oracle network evidence (Live oracles with EMPTY networks made
-	// materially different deployment claims look equivalent). Both rows below
-	// verified from PRIMARY sources 2026-07-11:
-	band: ["stellar", "evm", "xrpl", "cosmos"], // stellar: developers.stellar.org/docs/data/oracles/oracle-providers lists Band's deployed MAINNET contract CCQXWMZVM3KRTXTUPTN53YHL272QGKF32L7XEDNZ2S6OSUFK3NFBGG5M (+ bandprotocol/band-std-reference-contracts-soroban + Band's own integration post); evm/xrpl/cosmos: docs.bandchain.org supported-blockchains MAINNET table (Astar/Celo/Cronos/Harmony/Sonic/Xlayer/... → evm umbrella; XRPL named; Secret/Nibiru → cosmos). That Band table LAGS — Stellar is absent from it despite the deployed, actively-relaying mainnet contract (sls-029 live reads 2026-07-10).
-	lightecho: ["stellar"], // github.com/bp-ventures/lightecho-stellar-oracle README: deployed MAINNET contract CDOR3QD27WAAF4TK4MO33TGQXR6RPNANNVLOY277W2XVV6ZVJ6X6X42T (+ testnet CA335...); Stellar-only Soroban oracle (BP Ventures). Deployment evidence, NOT freshness — sls-029's probe observed its mainnet price state ~4 months stale (2026-07-10).
-};
-
 /** sls-032 (#516): curated route-level bridge evidence — the first rows of
  * the `routes` field on Projects. EXACT-SYNC for listed slugs (the canonical
  * place to update a listed project's routes is HERE). Every row is grounded
  * in the provider's OWN docs/APIs, re-using the #414-wave primary-source
- * evidence recorded on SUPPORTED_NETWORKS above; chain names re-use the same
+ * evidence recorded on SUPPORTED_NETWORKS (curation-maps.ts); chain names re-use the same
  * vocabulary ("evm" umbrella). Rules:
  *   - assetRepresentation states what the DESTINATION asset is (canonical =
  *     issuer-native, e.g. Circle-issued USDC via CCTP burn-mint).
@@ -1710,11 +1625,11 @@ async function main() {
 			try {
 				await payload.create({
 					collection: "projects",
-					// biome-ignore lint/suspicious/noExplicitAny: the seed literals'
-					// inferred union produced a types-ratchet signature that CHURNED
-					// on every map edit (the baselined message is length-truncated,
-					// so upstream string-length changes moved its tail) — closed with
-					// the site cast the sibling prod writers already use.
+					// The seed literals' inferred union produced a types-ratchet
+					// signature that CHURNED on every map edit (the baselined message
+					// is length-truncated, so upstream string-length changes moved its
+					// tail): closed with the site cast the sibling prod writers use.
+					// biome-ignore lint/suspicious/noExplicitAny: see above
 					data: seed as any,
 					overrideAccess: true,
 				});

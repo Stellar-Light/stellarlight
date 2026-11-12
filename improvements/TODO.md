@@ -335,9 +335,86 @@ here as #1900 to #1905; each issue carries its read-only probes.
   canonical boost covers infrastructure queries only.
 - #1902: the HackMeridian 2026 record has the qualitative judging criteria
   but not the weighted rubric on hackmeridian.com/build.
-- #1903: 24 directory rows carry an SCF #45 award where the SCF site lists
-  at least 40; 13 awarded projects have no row, and Liqvid's record omits
-  rounds 30, 44 and 45.
+- #1903 (sls-111): SCF's #45 round page lists 40 awards and the directory
+  serves 28 (2026-11-11, after the 2026-11-07 enrich-scf execute set Liqvid
+  to [37, 45]; its #30 and #44 entries read Not Awarded). Branch
+  lane/r1111-scf45-coverage seeds the twelve awardees with no row and joins
+  each to its SCF page by slug. Done when, after the curate-projects
+  execute and then the enrich-scf execute, `pnpm exec tsx
+  scripts/eval/scf-round-counts.ts` reads `SCF #45: SCF 40 (+1 undecided),
+  ours 40`.
+- Intake of the earlier SCF rounds' awards: the same check, exact in every
+  round since it reads SCF's own round pages, finds 34 rounds before #45
+  short by 119 awards (2026-11-11, the state after the sls-111 executes).
+  They are the reviewed baseline the check ratchets against,
+  scripts/eval/scf-round-shortfalls.json, which names each round's 131
+  uncarried award pages; close a gap, then lower or remove its entry in the
+  same change. By round, short (SCF, ours; why): #44 3 (46, 43; 3 with no
+  row); #40 2 (24, 22; 2 no row); #38 2 (24, 22; 2 no row); #36 1 (23, 22;
+  2 no row); #35 1 (21, 20; 2 no row); #32 1 (17, 16; 3 no row); #29 6 (40,
+  34; 3 no row, 4 a row carries no award); #28 6 (30, 24; 2, 4); #27 6 (36,
+  30; 5, 1); #26 1 (43, 42; 1, 2); #25 3 (27, 24; 2, 1); #24 1 (27, 26; 0,
+  1); #23 5 (25, 20; 3, 3); #22 3 (33, 30; 1, 4); #21 6 (26, 20; 4, 2); #20
+  5 (33, 28; 3, 3); #19 2 (16, 14; 1, 1); #18 3 (15, 12; 2, 1); #17 3 (19,
+  16; 0, 3); #16 4 (21, 17; 0, 4); #15 4 (12, 8; 3, 1); #14 3 (12, 9; 2,
+  1); #13 3 (14, 11; 1, 2); #11 3 (20, 17; 1, 2); #10 5 (15, 10; 3, 3); #9
+  3 (14, 11; 0, 3); #8 3 (7, 4; 1, 2); #7 3 (8, 5; 2, 1); #6 3 (8, 5; 1, 2);
+  #5 8 (9, 1; 2, 6); #4 5 (8, 3; 2, 3); #3 4 (8, 4; 0, 4); #2 4 (8, 4; 0,
+  4); #1 4 (8, 4; 1, 3). Two remedies: 60 award pages have no row at all
+  (intake, as for SCF #45: SEEDS plus an SCF_SLUG_OVERRIDES join), and 71
+  sit outside SCF's 531-row listing beside a row of the page's name (64
+  rows, most of them Inactive, among them cosmicvote, mxlet, rigel,
+  stellarpay and the-blue-marble) that carries no award because the enrich
+  never reads the page: each needs an SCF_PAGES_BEYOND_CAP entry confirmed
+  by a link, since a name alone is not identity (Wally, Sendit, Relax, Grip
+  and Amber were left out of that map as collisions). Rounds that list more
+  pages than their net shortfall hold a row that claims the round with no
+  SCF page of its own: team-finance #36, muwp #35 and #26, attest #32 and
+  #29, cross-platform-soroban-rpc-sdk #32, unalivio #32, peer #26 and #22,
+  wagelink #24, solang #23 and #20, stbl #22, comet #18 and #13, sstream
+  #16. One page, fixed-rate-fixie-dxh (#21, our polaris-lend row), has a
+  double quote in its title, which readScfPage's record match does not
+  read, so it needs that reader fixed before it can be joined. The baseline
+  also records five swaps, rounds whose totals agree while an SCF award
+  page the check finds no row carrying is offset by a row it cannot tie to
+  a page. Three are a missing citation, not a wrong join: adamik (#37),
+  greeppay (#34) and solang (#33) already store the right page in scf.slug
+  (stellar-integration-in-adamik-api-piy, greep-pos-greep-pay-mhp,
+  hyperledger-solang-dwa) but no scf.sourceUrl, so the served scfSourceUrl
+  is null; a link-checked SCF_SLUG_OVERRIDES entry for each page lets
+  enrich-scf stamp it. #37's other page, paysomeai-7gh, is smilepay's
+  retitled record (the next item). Two are wrong joins: ankr stores IBIS's
+  page, ibis-stablecoin-neobank-ramp-api-infrastructure-g4c (which
+  SCF_SLUG_OVERRIDES gives the ibis row), and claims #42, while Unstoppable
+  Money (unstoppable-money-eii) has no row; stellarpay stores
+  arculus-x-stellar-payments-with-soroban-fpz and claims #30, while CHATS
+  (convexity-humanitarian-aid-transfer-solution-chats-bd8) has no row.
+  Check both rows against SCF and correct them (read 2026-11-11 through
+  GET /api/projects?where[slug][equals]=<slug>). Awards on pages outside
+  SCF's 531-row listing are not swap-checked: the round pages name them by
+  project record id, and the check holds no map from record id to page
+  slug (one built from the /project/<record id> pages would close it).
+- /api/verify serves a project's stored supportedNetworks raw, so a row
+  whose curated list was cleared to let the API derive its networks
+  (allbridge and estrela, and the nine 2026-09-15 SCF #45 seeds once
+  curate-projects executes) answers [] there, which the contract reads as
+  checked and none, while search serves the derived ["stellar"] with its
+  networksBasis. Probe: GET
+  /api/verify?type=live&subject=allbridge answers "supportedNetworks": []
+  (2026-11-11). Serve the derived list and its basis, as search does.
+  Found by the review of the sls-111 lane.
+- smilepay serves rounds [10, 37] from
+  https://communityfund.stellar.org/project/smilepay-global-7gh, but that
+  page no longer carries a project record (HTTP 200 with no record for the
+  slug, read 2026-11-11) and the SCF listing no longer lists it, so
+  enrich-scf can neither confirm nor update the row; the stored record
+  stands, unread. SCF retitled the record: project rechQd4T6SVeIF7gH is now
+  "PaySome.ai" at https://communityfund.stellar.org/project/paysomeai-7gh
+  (listed, lastAwardedRound 37; its #10 and #37 submissions Awarded, #31 and
+  #35 Not Awarded), and no row of ours joins that title. Confirm the page's
+  site against the row's, then add an SCF_SLUG_OVERRIDES entry
+  (paysomeai-7gh to smilepay) and an alias if PaySome.ai is the product's
+  current name. Found by the sls-111 lane's page re-read.
 - #1904: no row for Chainlink Data Feeds on Stellar or for MetaMask's
   native Stellar network.
 - #1905: `venueRole` is null on 31 of 38 Live DEX rows, and project search

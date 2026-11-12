@@ -726,7 +726,7 @@ export type ScfPage = {
  * that awards nothing. All 531 listed pages carried their own record on
  * 2026-11-05. */
 export function readScfPage(html: string, slug: string): ScfPage | null {
-	const result: any = {};
+	const result: ScfPage = {};
 
 	// Try __NEXT_DATA__ (Pages Router) first
 	const nextDataMatch = html.match(
@@ -841,6 +841,119 @@ export function readScfPage(html: string, slug: string): ScfPage | null {
 		.sort((a, b) => a - b);
 
 	return Object.keys(result).length > 0 ? result : null;
+}
+
+/** Every object in the flight text that opens `{"id":"rec…` (how SCF writes
+ * every record, on all 46 round pages read 2026-11-11), parsed whole with
+ * string-aware brace matching, so each later field is read by name wherever
+ * SCF puts it: SCF has reordered fields inside these objects before. Null
+ * when any record does not close or parse: a cut page is a partial read,
+ * never a page with fewer records (every opener on all 47 pages read
+ * 2026-11-11 parsed). A page whose records stop opening with their id reads
+ * as empty, which the round-count check also reports as could-not-check. */
+function recordObjects(txt: string): Array<Record<string, unknown>> | null {
+	const out: Array<Record<string, unknown>> = [];
+	for (const m of txt.matchAll(/\{"id":"rec[A-Za-z0-9]+"/g)) {
+		const start = m.index ?? 0;
+		let depth = 0;
+		let inString = false;
+		let parsed = false;
+		for (let i = start; i < txt.length; i++) {
+			const c = txt[i];
+			if (inString) {
+				if (c === "\\") i++;
+				else if (c === '"') inString = false;
+			} else if (c === '"') inString = true;
+			else if (c === "{") depth++;
+			else if (c === "}" && --depth === 0) {
+				try {
+					out.push(JSON.parse(txt.slice(start, i + 1)));
+					parsed = true;
+				} catch {
+					/* not one object: the page is not read whole */
+				}
+				break;
+			}
+		}
+		if (!parsed) return null;
+	}
+	return out;
+}
+
+/** The numbered build award rounds SCF's /awards page lists: the record id
+ * that addresses each round's own page (/awards/<id>), its number and its
+ * phase ("Ended", "Initial Review"). Null when the page was not read whole. */
+export function readAwardRounds(
+	html: string,
+): Array<{ id: string; round: number; phase: string }> | null {
+	const records = recordObjects(rebuildFlight(html));
+	if (!records) return null;
+	const rounds = new Map<
+		string,
+		{ id: string; round: number; phase: string }
+	>();
+	for (const o of records) {
+		const round = o.roundNumber;
+		if (
+			o.type === "Build Award Round" &&
+			typeof round === "number" &&
+			Number.isInteger(round) &&
+			round > 0 &&
+			typeof o.phase === "string"
+		)
+			rounds.set(String(o.id), { id: String(o.id), round, phase: o.phase });
+	}
+	return [...rounds.values()];
+}
+
+/** What a submission's status says about an award: "awarded" (Awarded, or a
+ * partly paid "Awarded (50%)"), "declined" (a decision against it: the
+ * negative verdicts above, or "Not Approved", which a round page gives the
+ * submissions turned down at its first review), or "pending" for every other
+ * status, a pipeline step a funded submission can sit in long after its award
+ * ("Information Collection") as well as one nobody decided. */
+export function submissionVerdict(
+	status: string,
+): "awarded" | "declined" | "pending" {
+	const s = status.trim();
+	if (/^Awarded\b/.test(s)) return "awarded";
+	if (isNegativeVerdict(s) || s === "Not Approved") return "declined";
+	return "pending";
+}
+
+/** Every submission one round's page (/awards/<id>) lists for that round, with
+ * the project record it belongs to (null for a submission SCF never linked to
+ * a project page: early rounds have some, a few of them awarded). Null when
+ * the page was not read whole. */
+export function readRoundSubmissions(
+	html: string,
+	round: number,
+): Array<{
+	id: string;
+	project: string | null;
+	verdict: ReturnType<typeof submissionVerdict>;
+}> | null {
+	const records = recordObjects(rebuildFlight(html));
+	if (!records) return null;
+	const subs = new Map<
+		string,
+		{
+			id: string;
+			project: string | null;
+			verdict: ReturnType<typeof submissionVerdict>;
+		}
+	>();
+	for (const o of records) {
+		if (typeof o.status !== "string" || typeof o.roundName !== "string")
+			continue;
+		if (Number(/SCF\s*#\s*(\d+)/i.exec(o.roundName)?.[1]) !== round) continue;
+		subs.set(String(o.id), {
+			id: String(o.id),
+			project: typeof o.project === "string" ? o.project : null,
+			verdict: submissionVerdict(o.status),
+		});
+	}
+	return [...subs.values()];
 }
 
 export async function fetchDetailHtml(url: string): Promise<string | null> {

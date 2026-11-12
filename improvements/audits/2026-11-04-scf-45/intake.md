@@ -36,7 +36,11 @@ domain is a builder's company site, noted on its line).
   "ZKELLA Protocol", "Open RWA Vault"), joins on the next enrich-scf run by
   title prefix. A row named for something else (for example "Strata" or
   "Deframe") needs an `SCF_SLUG_OVERRIDES` entry in
-  `scripts/enrich-from-scf.ts`, verified against the page's site.
+  `scripts/data/scf-joins.ts`, verified against the page's site.
 - Then dry-run and execute enrich-scf, and run
   `pnpm exec tsx scripts/eval/scf-round-counts.ts`. Its SCF #45 line should
-  read `exact: SCF 40, ours 40` (it read SCF 40, ours 24 on 2026-11-04).
+  read `SCF #45: SCF 40 (+1 undecided), ours 40` (it read SCF 40, ours 24 on
+  2026-11-04, in the format the check printed then).
+- Update, 2026-11-11 (branch lane/r1111-scf45-coverage): the twelve rows
+  above are seeded, each joined to its page by an `SCF_SLUG_OVERRIDES`
+  entry rather than by title prefix.
