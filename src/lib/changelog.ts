@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-12",
 		surfaces: ["api"],
+		version: "spec@1.9.144",
+		type: "fixed",
+		summary:
+			"A repo that no project claims any more can now be unlinked from the project it was served under, by a manually dispatched repo pass. The repo pass only ever set a repo's project link, so a link outlived the claim behind it: stellar/moneygram-access-wallet-mvp, SDF's archived demo wallet, still sat under MoneyGram after MoneyGram stopped linking it. A repo is unlinked when it entered the index through a project link and no listed project names it (by repo, by a renamed or differently cased name, or through a GitHub org the project still links). Claims made only by a Draft project or by a duplicate row folded into another project do not count. An unlinked repo's `project` on searchRepos and in codeReferences becomes null, its `scfAwarded` and `hackathonWinner`, which came from that project, become false, a `kind` of application that rested on the link (`kindBasis` projectSlug) reads code or hackathon instead, and the project's `repos` on searchProjects, getLeaderboard and the project page drop it. Every repo pass lists these repos; scheduled passes only list them until the unlink is promoted to them. Before the first unlink, curation claims 13 repos that would otherwise go: 7 of Normal's own repos that only its folded duplicate normal-finance named, DeFindex's SDK, vault rescue tools and integration tutorial (the SDK is served as defindex-io/defindex-sdk, where GitHub moved it), and three RaumFi DEX repos for raum-network that only the Draft row raumfi named. Predicted for the first unlink from the public repos and projects data on 2026-11-12: 38 repos on 13 projects, 33 of them claimed only by Draft or folded duplicate rows, and 13 of the 38 now serve `scfAwarded` true. No schema change.",
+		detail:
+			"Kept linked: every repo a project names, the canonical row of a name GitHub resolves through a rename, and a repo in a GitHub org its project still links, whether or not that pass refreshed it (2,181 rows on 2026-11-12). Never touched: repos indexed from Electric Capital's taxonomy or because a tracked builder owns them. A pass unlinks nothing when it is pinned to one repo, when any GitHub read it needed failed (an org listing, or a repo lookup GitHub could not answer), or when it would unlink more than 75 repos, which fails the pass for review, opted in or not. Each unlink records the project, date and reason on the row, drops a knowledge note citing the project's audits if the row carries one, and is read back after the write. A repo GitHub could not be read for (a partial response) no longer counts as a repo GitHub answered not found. The stored repoScore keeps its former project's standing until the regrade lane next runs (manual dispatch).",
+	},
+	{
+		date: "2026-11-12",
+		surfaces: ["api"],
 		version: "spec@1.9.143",
 		type: "fixed",
 		summary:

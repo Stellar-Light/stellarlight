@@ -969,6 +969,18 @@ export interface Repo {
 	readmeExcerpt?: string | null;
 	projectSlug?: string | null;
 	projectName?: string | null;
+	/**
+	 * { from, at, reason }: the project this row was unlinked from, when and why
+	 */
+	projectUnlink?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
 	hackathonWinner?: boolean | null;
 	scfAwarded?: boolean | null;
 	/**
@@ -3856,6 +3868,7 @@ export interface ReposSelect<T extends boolean = true> {
 	readmeExcerpt?: T;
 	projectSlug?: T;
 	projectName?: T;
+	projectUnlink?: T;
 	hackathonWinner?: T;
 	scfAwarded?: T;
 	builderReputation?: T;

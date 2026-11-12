@@ -104,6 +104,9 @@ export const Repos: CollectionConfig = {
 					// public surfaces express the same reality via tier +
 					// activityState in neutral language.
 					if (doc && "triageTags" in doc) doc.triageTags = undefined;
+					// Why and when enrich-repos unlinked the row: its record, not
+					// a served fact (the served fact is the null projectSlug).
+					if (doc && "projectUnlink" in doc) doc.projectUnlink = undefined;
 				}
 				// A repo that was replaced must say so on EVERY read path.
 				// Until 2026-09-07 this was attached in repo-search only, so
@@ -230,6 +233,26 @@ export const Repos: CollectionConfig = {
 		// link to the owning project + denormalized grade inputs
 		{ name: "projectSlug", type: "text", index: true },
 		{ name: "projectName", type: "text" },
+		{
+			// One writer: enrich-repos sets it when it clears projectSlug
+			// because no project claims the row any more, and clears it when a
+			// project claims the row again (src/lib/repo-unlink.ts). Internal:
+			// field access keeps it out of public REST and GraphQL output and
+			// where filters, and afterRead strips it from other server reads.
+			// Admins and internal scripts (the unlink's read-back) see it.
+			name: "projectUnlink",
+			type: "json",
+			access: {
+				read: ({ req }) =>
+					isAdmin(req?.user) || req?.context?.internal === true,
+			},
+			admin: {
+				position: "sidebar",
+				readOnly: true,
+				description:
+					"{ from, at, reason }: the project this row was unlinked from, when and why",
+			},
+		},
 		{ name: "hackathonWinner", type: "checkbox", defaultValue: false },
 		{ name: "scfAwarded", type: "checkbox", defaultValue: false },
 		{

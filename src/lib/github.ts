@@ -79,6 +79,11 @@ export interface OwnerRepo {
 // Returns metadata (not just names) so the caller can filter an org's repos to
 // the Stellar-relevant ones — a bare-org link to a multi-chain org (Axelar,
 // Allbridge) otherwise drags in dozens of non-Stellar repos.
+//
+// [] only when GitHub answers that the owner does not exist (repositoryOwner
+// null, no error). Any failed read throws: it used to return [] too, so a
+// rate-limited org read as an org with no repos, and enrich-repos' unlink
+// needs to tell the two apart.
 export async function listOwnerRepos(login: string): Promise<OwnerRepo[]> {
 	const token =
 		process.env.GITHUB_TOKEN?.trim() ||
@@ -88,34 +93,35 @@ export async function listOwnerRepos(login: string): Promise<OwnerRepo[]> {
 		"User-Agent": "stellar-ecosystem-directory",
 	};
 	if (token) headers.Authorization = `Bearer ${token}`;
-	try {
-		const res = await fetch(GQL, {
-			method: "POST",
-			headers,
-			body: JSON.stringify({ query: Q_OWNER_REPOS, variables: { login } }),
-		});
-		// biome-ignore lint/suspicious/noExplicitAny: GraphQL response shape
-		const data: any = JSON.parse(await res.text());
-		if (data?.errors) return []; // unknown login / rate-limited → skip gracefully
-		const nodes = data?.data?.repositoryOwner?.repositories?.nodes;
-		if (!Array.isArray(nodes)) return [];
-		return nodes
-			.filter(
-				(n: any) => n && n.isArchived !== true && typeof n.name === "string",
-			)
-			.map((n: any) => ({
-				name: n.name as string,
-				description: (n.description ?? null) as string | null,
-				primaryLanguage: (n.primaryLanguage?.name ?? null) as string | null,
-				topics: Array.isArray(n.repositoryTopics?.nodes)
-					? n.repositoryTopics.nodes
-							.map((t: any) => t?.topic?.name)
-							.filter((s: any): s is string => typeof s === "string")
-					: [],
-			}));
-	} catch {
-		return [];
-	}
+	const res = await fetch(GQL, {
+		method: "POST",
+		headers,
+		body: JSON.stringify({ query: Q_OWNER_REPOS, variables: { login } }),
+	});
+	// biome-ignore lint/suspicious/noExplicitAny: GraphQL response shape
+	const data: any = JSON.parse(await res.text());
+	if (!res.ok || data?.errors)
+		throw new Error(
+			`GitHub API error listing ${login}: ${data?.errors?.[0]?.message ?? data?.message ?? res.status}`,
+		);
+	if (data?.data?.repositoryOwner === null) return [];
+	const nodes = data?.data?.repositoryOwner?.repositories?.nodes;
+	if (!Array.isArray(nodes))
+		throw new Error(`GitHub API error listing ${login}: no repositories`);
+	return nodes
+		.filter(
+			(n: any) => n && n.isArchived !== true && typeof n.name === "string",
+		)
+		.map((n: any) => ({
+			name: n.name as string,
+			description: (n.description ?? null) as string | null,
+			primaryLanguage: (n.primaryLanguage?.name ?? null) as string | null,
+			topics: Array.isArray(n.repositoryTopics?.nodes)
+				? n.repositoryTopics.nodes
+						.map((t: any) => t?.topic?.name)
+						.filter((s: any): s is string => typeof s === "string")
+				: [],
+		}));
 }
 
 export async function fetchRepoInfo(owner: string, name: string) {
@@ -259,8 +265,10 @@ export async function fetchRepoInfo(owner: string, name: string) {
 
 	const r = data?.data?.repository;
 
+	// No repository and no error is a partial response, not GitHub saying
+	// the repo is gone (a missing repo comes with a NOT_FOUND error above).
 	if (!r) {
-		throw new Error("Repository not found");
+		throw new Error("GitHub API error: no repository in the response");
 	}
 
 	return normalizeRepoNode(r);
@@ -435,14 +443,19 @@ export async function fetchRepoInfoBatch(
 				out[idx] = { info: normalizeRepoNode(node) };
 				return;
 			}
+			// Only GitHub's own NOT_FOUND or FORBIDDEN is an answer about the
+			// repo. A null alias with no error (a partial response) leaves the
+			// slot empty so the per-repo fetch decides; any other error keeps
+			// its own message, never read as "not found".
 			const e = errByAlias.get(`r${i}`);
+			if (!e) return;
 			out[idx] = {
 				error:
-					e?.type === "NOT_FOUND"
+					e.type === "NOT_FOUND"
 						? "Repository not found"
-						: e?.type === "FORBIDDEN"
+						: e.type === "FORBIDDEN"
 							? "Private repository - access denied"
-							: (e?.message ?? "Repository not found"),
+							: `GitHub GraphQL error: ${e.message ?? e.type ?? "unknown"}`,
 			};
 		});
 	}

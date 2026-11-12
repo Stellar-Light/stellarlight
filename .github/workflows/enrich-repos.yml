@@ -10,6 +10,10 @@ on:
         description: "Pin to one repo (owner/repo) — targeted re-enrich"
         type: string
         default: ""
+      unlink:
+        description: "With execute: also unlink repos no project claims. Read a dry run's unlink lines first."
+        type: boolean
+        default: false
   schedule:
     - cron: "0 8 * * 1" # weekly, Monday 08:00 UTC
   # Chase DISPATCHED scan waves automatically: repoGrade only ingests
@@ -50,7 +54,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Scheduled runs ALWAYS execute (the whole point of the weekly refresh);
       # manual dispatch stays dry-run unless the execute box is ticked.
-      - run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run' || inputs.execute) && '--execute' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }}
+      # Unlinking repos no project claims needs both boxes on a manual
+      # dispatch: scheduled and chained runs only print the unlink plan.
+      - run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run' || inputs.execute) && '--execute' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }} ${{ github.event_name == 'workflow_dispatch' && inputs.execute && inputs.unlink && '--unlink' || '' }}
       # The writer guards its own class: a lookup/write key mismatch in the
       # pass above creates one duplicate row per run and nothing else
       # red-lines (the 2026-08-28 census found 381 copies this way). Runs

@@ -301,6 +301,31 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 
 ## Next
 
+Found by the repo-unlink lane on 2026-11-12 (branch lane/r1112-repo-unlink):
+
+- Promote repo unlink to scheduled runs after 3 clean dispatches. enrich-repos
+  lists every repo no project claims on every run but unlinks only on a
+  manual dispatch with execute and unlink ticked; a clean dispatch is one
+  whose dry run was read, whose unlinks all read back, and whose lines a
+  later run did not re-link. Then pass --unlink on schedule too.
+- Two repo paths projects list now resolve, through GitHub's rename
+  redirect, to repos in a third party's account that carry its notes
+  instead of the project's code: scalemote/flow to Moon-Launch/flow
+  (planet-pay still serves it; the description is the third party's note)
+  and orbit-cdp/hermes to Moon-Launch/hermes (the folded hermes row; created
+  2026-02-07, the README is a vulnerability-report note). enrich-repos
+  follows the redirect and writes the row under the new owner, so a
+  project page can serve a repo its project never owned. Probe:
+  `gh api graphql -f query='{repository(owner:"scalemote",name:"flow"){nameWithOwner description}}'`.
+- Public REST accepts a where on repos.triageTags (internal triage verdicts)
+  although the read hook strips them from the output, so a filter can still
+  tell which repos carry a tag. projectUnlink got field read access for the
+  same reason; triageTags has other consumers and was left as it is. Probe:
+  `curl 'https://www.stellarlight.xyz/api/repos?limit=1&where[triageTags][exists]=true'`
+  answers 200 with a totalDocs.
+- normal's github.repos lists normalfinance/normal-v1, which GitHub answers
+  404 for (2026-11-12).
+
 Found by the identity lane on 2026-11-12 (branch lane/r1112-dq4-identity),
 not changed there:
 
