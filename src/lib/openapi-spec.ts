@@ -83,6 +83,7 @@ import { LIVE_READ_PARTS } from "./repo-live-read";
 import { REPO_MATCH_MODES } from "./repo-search";
 import { INDICATOR_KINDS } from "./repo-security";
 import { RESEARCH_SOURCES } from "./research-sources";
+import { DEPRECATED_BY, VERSION_STATUSES } from "./soroban-versions";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
 import {
 	AUTHORITY_ROLES,
@@ -3737,7 +3738,30 @@ export const spec: OpenAPISpec = {
 														"The routed repo's PRODUCT is a deployable Soroban contract. Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE: they vendor cdylib crates as runtime/fixtures, and this flag must never be read as 'Stellar Core itself is deployable'.",
 												},
 												sorobanSdkVersion: { type: "string", nullable: true },
-												versionStatus: { type: "string", nullable: true },
+												sorobanSdkStatus: {
+													type: "string",
+													enum: [...VERSION_STATUSES],
+													description:
+														"The soroban-sdk pin's own status (same reading as searchRepos codeVerified.sorobanSdkStatus).",
+												},
+												stellarJsDep: {
+													type: "string",
+													nullable: true,
+													description:
+														"The JavaScript Stellar dependency as scanned (name@range); null = none found.",
+												},
+												jsSdkStatus: {
+													type: "string",
+													enum: [...VERSION_STATUSES],
+													description: "stellarJsDep's own status.",
+												},
+												versionStatus: {
+													type: "string",
+													enum: [...VERSION_STATUSES],
+													nullable: true,
+													description:
+														"Combined: deprecated when EITHER sorobanSdkStatus or jsSdkStatus is; not a soroban-sdk claim on its own.",
+												},
 												codeConfidence: {
 													type: "object",
 													nullable: true,
@@ -8999,7 +9023,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Analytics"],
 				summary: "Cross-event Stellar ecosystem analytics rollup",
 				description:
-					"The cross-ecosystem macro rollup: totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers|toolchain`: hackathon + SCF-funding totals, category distribution, DeFi TVL (dated), `gaps` (per-vertical whitespace: what should I build), `developers` (Electric Capital monthly-active devs + trend), and `toolchain` (Soroban-SDK version-status distribution + deprecated-toolchain roster + CI/test presence). gaps/developers/toolchain are SUPPLY/commit-side and as-of dated; never demand or a headcount.",
+					"The cross-ecosystem macro rollup: totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers|toolchain`: hackathon + SCF-funding totals, category distribution, DeFi TVL (dated), `gaps` (per-vertical whitespace: what should I build), `developers` (Electric Capital monthly-active devs + trend), and `toolchain` (Soroban-SDK and JS-SDK version-status distribution, apart and combined + deprecated-toolchain roster + CI/test presence). gaps/developers/toolchain are SUPPLY/commit-side and as-of dated; never demand or a headcount.",
 				"x-routing": {
 					purpose:
 						"Ecosystem-wide macro totals: hackathons, SCF funding, category distribution, TVL.",
@@ -9153,7 +9177,7 @@ export const spec: OpenAPISpec = {
 										toolchain: {
 											type: "object",
 											description:
-												"Soroban SDK toolchain health across scanned repos: how many run supported / current / deprecated SDK versions, with the deprecated rows named. Present for dimension=all|toolchain.",
+												"SDK support status across scanned repos, for two SDK lines apart and combined: bySorobanSdkStatus (the Rust soroban-sdk crate), byJsSdkStatus (the JavaScript Stellar SDK dependency), and byVersionStatus / deprecatedTotal (deprecated when EITHER line is). Deprecated rows are named with the line behind each. Present for dimension=all|toolchain.",
 											properties: {
 												scannedRepos: {
 													type: "integer",
@@ -9170,7 +9194,11 @@ export const spec: OpenAPISpec = {
 													description:
 														"false = the buckets describe only part of the population; a rate taken against scannedRepos would understate every status.",
 												},
-												deprecatedTotal: { type: "integer" },
+												deprecatedTotal: {
+													type: "integer",
+													description:
+														"Repos deprecated on EITHER SDK line (= byVersionStatus.deprecated). Not a soroban-sdk count: read bySorobanSdkStatus.deprecated for that, byJsSdkStatus.deprecated for the JS line. A repo deprecated on both counts once here.",
+												},
 												deprecatedListTruncated: {
 													type: "boolean",
 													description:
@@ -9178,10 +9206,44 @@ export const spec: OpenAPISpec = {
 												},
 												byVersionStatus: {
 													type: "object",
+													description:
+														"Combined status counts (current, supported, deprecated, unknown): deprecated when EITHER SDK line is, else the soroban-sdk status when readable, else the JS one.",
 													additionalProperties: { type: "integer" },
+												},
+												bySorobanSdkStatus: {
+													type: "object",
+													description:
+														"The Rust soroban-sdk pin alone, per status (current = newest major; deprecated = major below our floor of 21; unknown = rc/git/unpinned). supported is our floor, not the publisher's window of its two newest majors.",
+													additionalProperties: { type: "integer" },
+												},
+												byJsSdkStatus: {
+													type: "object",
+													description:
+														"The JavaScript Stellar dependency alone, per status, over the same repos as scannedRepos (those carrying a soroban-sdk version), so not an ecosystem-wide JavaScript count: repos whose scan found only a JS dependency are not in this block. deprecated = @stellar/stellar-sdk below 14, or stellar-sdk, @stellar/stellar-base or soroban-client (npm publisher-deprecated); unknown = no JS dependency the table covers, or one whose range names no released major (pre-release, unpinned, git, workspace, or a range without a dotted version).",
+													additionalProperties: { type: "integer" },
+												},
+												deprecationRule: {
+													type: "object",
+													description:
+														"The rule behind every deprecated status in this block, as of the dated tables. A soroban-sdk pin is deprecated when its major is below sorobanSdkMajorBelow; an @stellar/stellar-sdk pin when its major is below jsSdkMajorBelow; a package in jsDeprecatedPackages at any version. Otherwise a pre-release, git, workspace or unpinned version, or a JS range without a dotted major (^13), reads unknown, never deprecated. Our floors, not the publishers' support windows.",
+													properties: {
+														sorobanSdkMajorBelow: { type: "integer" },
+														jsSdkMajorBelow: { type: "integer" },
+														jsDeprecatedPackages: {
+															type: "array",
+															items: { type: "string" },
+														},
+														sorobanSdkTableAsOf: {
+															type: "string",
+															format: "date",
+														},
+														jsSdkTableAsOf: { type: "string", format: "date" },
+													},
 												},
 												deprecatedRepos: {
 													type: "array",
+													description:
+														"Repos deprecated on either SDK line (a capped sample; see deprecatedListTruncated), each naming the line behind it. Order: rows deprecated on the soroban-sdk line (deprecatedBy soroban-sdk or both) first, then js-sdk rows, which fill the sample only while fewer than 50 repos are deprecated on the soroban-sdk line; no rank within each group. Ordered, so not a representative sample: never read a share off it. A row's versions are not a deprecated-version list: apply deprecationRule.",
 													items: {
 														type: "object",
 														properties: {
@@ -9190,6 +9252,26 @@ export const spec: OpenAPISpec = {
 															sorobanSdkVersion: {
 																type: "string",
 																nullable: true,
+															},
+															sorobanSdkStatus: {
+																type: "string",
+																enum: [...VERSION_STATUSES],
+															},
+															stellarJsDep: {
+																type: "string",
+																nullable: true,
+																description:
+																	"The JavaScript Stellar dependency as scanned (name@range); null = none found.",
+															},
+															jsSdkStatus: {
+																type: "string",
+																enum: [...VERSION_STATUSES],
+															},
+															deprecatedBy: {
+																type: "string",
+																enum: [...DEPRECATED_BY],
+																description:
+																	"Which SDK line makes this row deprecated: soroban-sdk (the Rust crate), js-sdk (the JavaScript dependency only; its soroban-sdk may be supported), or both.",
 															},
 														},
 													},
@@ -12843,12 +12925,30 @@ export const spec: OpenAPISpec = {
 								description:
 									"Raw soroban-sdk version requirement (a sourced fact; never a bare protocol integer).",
 							},
-							versionStatus: {
+							sorobanSdkStatus: {
 								type: "string",
-								enum: ["current", "supported", "deprecated", "unknown"],
+								enum: [...VERSION_STATUSES],
+								description:
+									"The Rust soroban-sdk pin's own status, read through the dated table at request time: current = the newest major, deprecated = below our floor (major < 21). 'unknown' (rc/git/unpinned or none) never implies staleness. supported is our floor, not the publisher's: rs-soroban-sdk supports only its two newest majors.",
+							},
+							stellarJsDep: {
+								type: "string",
 								nullable: true,
 								description:
-									"soroban-sdk status vs the latest protocol at scan time. 'unknown' (rc/git/unpinned) never implies staleness.",
+									"The repo's JavaScript Stellar dependency as scanned (name@range, e.g. @stellar/stellar-sdk@^17.0.1). null = the scan found none.",
+							},
+							jsSdkStatus: {
+								type: "string",
+								enum: [...VERSION_STATUSES],
+								description:
+									"stellarJsDep's own status: @stellar/stellar-sdk by major (deprecated below 14), and the npm publisher-deprecated packages stellar-sdk, @stellar/stellar-base and soroban-client at any version. 'unknown' = no JS dependency the table covers, or one whose range names no released major (pre-release, unpinned, git, workspace, or a range without a dotted version).",
+							},
+							versionStatus: {
+								type: "string",
+								enum: [...VERSION_STATUSES],
+								nullable: true,
+								description:
+									"Combined SDK status: deprecated when EITHER sorobanSdkStatus or jsSdkStatus is deprecated, else sorobanSdkStatus when readable, else jsSdkStatus. Not a soroban-sdk claim on its own: a supported soroban-sdk with a deprecated JS dependency reads deprecated here. 'unknown' never implies staleness.",
 							},
 							codeConfidence: {
 								type: "object",
@@ -12910,7 +13010,7 @@ export const spec: OpenAPISpec = {
 									},
 								},
 								description:
-									"CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol: the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null.",
+									"CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol: the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null, or when the registry holds no CAP for that protocol (Protocol 29 introduced none).",
 							},
 							stellarDeps: {
 								type: "array",

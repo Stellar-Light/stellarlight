@@ -132,3 +132,29 @@ describe("explainRepo contract basis", () => {
 		}
 	});
 });
+
+/** 2026-11-12: the scan answer read "built on soroban-sdk `26` (deprecated)"
+ * for a repo whose soroban-sdk is supported and whose JS dependency is the
+ * deprecated one: the combined status sat next to the Rust version. */
+describe("explainRepo SDK status framing", () => {
+	it("puts the soroban-sdk's own status beside its version and names the JS one apart", async () => {
+		ROWS.push({
+			fullName: "o/js-deprecated",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			isDeployableContract: true,
+			sorobanSdkVersion: "26",
+			stellarJsDep: "stellar-sdk@^10.4.1",
+			versionStatus: "deprecated",
+		});
+		const body = await call("q=how+does+it+work&repo=o/js-deprecated");
+		expect(body.answer).toContain("built on soroban-sdk `26` (supported)");
+		expect(body.answer).toContain("`stellar-sdk@^10.4.1`");
+		expect(body.codeVerified).toMatchObject({
+			sorobanSdkStatus: "supported",
+			stellarJsDep: "stellar-sdk@^10.4.1",
+			jsSdkStatus: "deprecated",
+			versionStatus: "deprecated",
+		});
+	});
+});

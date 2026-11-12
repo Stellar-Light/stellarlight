@@ -35,7 +35,15 @@ import {
 	mergeVocabulary,
 	SPELLING_CORRECTIONS,
 } from "./search-vocabulary";
-import { parseSdkMajor, protocolForSdkMajor } from "./soroban-versions";
+import {
+	combinedVersionStatus,
+	jsSdkVersionStatusOf,
+	npmStellarDep,
+	parseSdkMajor,
+	protocolForSdkMajor,
+	type VersionStatus,
+	versionStatusOf,
+} from "./soroban-versions";
 
 // Minimal shape so we don't couple to the full Payload type.
 interface PayloadLike {
@@ -73,6 +81,7 @@ interface RepoDoc {
 	codeDepth?: number | null;
 	isDeployableContract?: boolean | null;
 	sorobanSdkVersion?: string | null;
+	stellarJsDep?: string | null;
 	versionStatus?: string | null;
 	ciPresent?: boolean | null;
 	testsPresent?: boolean | null;
@@ -268,8 +277,16 @@ export interface CodeVerified {
 	ciPresent: boolean | null;
 	testsPresent: boolean | null;
 	sorobanSdkVersion: string | null;
-	/** current | supported | deprecated | unknown — vs the latest protocol at scan time. */
-	versionStatus: string | null;
+	/** The Rust soroban-sdk pin's own status (current | supported | deprecated | unknown). */
+	sorobanSdkStatus: VersionStatus;
+	/** The JavaScript Stellar dependency as scanned ("@stellar/stellar-sdk@^17.0.1"), or null when none was found. */
+	stellarJsDep: string | null;
+	/** That JS dependency's own status. */
+	jsSdkStatus: VersionStatus;
+	/** Combined: deprecated when EITHER SDK line is deprecated, else the
+	 * soroban-sdk status when readable, else the JS one. Not a soroban-sdk
+	 * claim on its own; read sorobanSdkStatus for that. */
+	versionStatus: VersionStatus;
 	/** When the code was last scanned (ISO). */
 	scannedAt: string | null;
 	codeConfidence: FactConfidence | null;
@@ -340,7 +357,12 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 		sorobanSdkVersion: d.sorobanSdkVersion ?? null,
 		ciPresent: typeof d.ciPresent === "boolean" ? d.ciPresent : null,
 		testsPresent: typeof d.testsPresent === "boolean" ? d.testsPresent : null,
-		versionStatus: d.versionStatus ?? null,
+		// Read through the deployed table, not the stored versionStatus, which
+		// keeps the table it was written with until a backfill reaches it.
+		sorobanSdkStatus: versionStatusOf(d.sorobanSdkVersion),
+		stellarJsDep: npmStellarDep(d.stellarJsDep),
+		jsSdkStatus: jsSdkVersionStatusOf(d.stellarJsDep),
+		versionStatus: combinedVersionStatus(d.sorobanSdkVersion, d.stellarJsDep),
 		scannedAt: d.codeScannedAt ?? null,
 		codeConfidence: factConfidence(
 			d.codeScannedAt ? "code-scan" : null,

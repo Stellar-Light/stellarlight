@@ -274,6 +274,29 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     no other row carries a `statusCaveat` unless DefiLlama dates its protocol
     dead or retired it with nothing locked and no live successor.
 
+12. **The toolchain deprecated count reads as a soroban-sdk count.**
+    Probe: `curl -s 'https://www.stellarlight.xyz/api/analyze?dimension=toolchain' | jq '.toolchain | {deprecatedTotal, soroban: .bySorobanSdkStatus.deprecated, js: .byJsSdkStatus.deprecated, rowsWithReason: ([.deprecatedRepos[] | select(.deprecatedBy)] | length)}'`
+    serves `soroban` and `js` as null and `rowsWithReason` 0 on 2026-11-12 (spec
+    1.9.136): `deprecatedTotal` 1,284 of 5,865 is Rust OR JS, but only 404
+    repos pin a deprecated soroban-sdk; 881 pin one that is not deprecated
+    (824 supported, 25 current, 32 unreadable) and are deprecated only
+    through their JavaScript Stellar dependency, as are 36 of the 50 sample
+    rows. An external
+    README cites the 1,285 as repos "on a deprecated soroban-sdk", and its
+    tool builds its deprecated-version list from the sample's
+    `sorobanSdkVersion`, which today includes 29.0.0, 27.0.2 and 26. The SDK
+    table was also stale (2026-08-11, stopping at major 27) and the "CB6"
+    check its comment promised never existed. Found from the owner's probe
+    and a full-corpus read of `/api/repos` (rounds/2026-11-12-toolchain-truth.md).
+    State: branch `lane/toolchain-truth` (spec 1.9.140, renumbered at
+    merge) serves the per-line counts, a `deprecatedBy` reason per row with
+    soroban-sdk-line rows first in the sample, and `deprecationRule`, refreshes the table to
+    soroban-sdk 29 and Protocol 29, and adds a nightly table check; waiting
+    for the owner's go on the PR.
+    Done when: the probe serves `soroban` 404, `js` about 1,041 and
+    `rowsWithReason` equal to the row count on the live API, checked by
+    someone other than the author.
+
 ## Next
 
 Found by the third-party host lane on 2026-11-12 (branch
@@ -865,6 +888,25 @@ Found 2026-10-23 in review of the smart wallet O2 ship
   phrase-plus-one-word queries, graded blind) before any rule, for example
   requiring the smart concept when q names it.
 
+
+- Stored `versionStatus` lags the 2026-11-12 SDK table: 166 of 5,865 scanned
+  repos (rows on soroban-sdk 27 and 28 stored "current", one stored before
+  its JS read) differ from a recompute with the new table (full-corpus read of
+  `/api/repos`, rounds/2026-11-12-toolchain-truth.md). The Scout statuses
+  read through the table at request time; the stored value still feeds
+  repoScore (current +0.20, supported +0.12) and is what the raw Payload
+  `/api/repos` rows serve. A re-scan of those rows also lowers codeDepth
+  by up to 0.05 (code-depth.ts credits a current versionStatus inside its
+  0.20 baseline, scaled on the contract track by the clone factor). Fix: after spec 1.9.140
+  deploys, dispatch `backfill-version-status.yml` dry, read the diff,
+  execute, read back, then let the regrade lane pick up the scores.
+- The JS SDK classifier reads a range with no dotted major as unknown:
+  `jsSdkVersionStatusOf("@stellar/stellar-sdk@^13")` is unknown while
+  `@^13.0.0` is deprecated (`src/lib/soroban-versions.ts`, the range regex
+  needs a dot). Found by the cross-family review of spec 1.9.140; the
+  2026-11-12 corpus holds `@^13`, `@14` and `@^14` among 15 undotted
+  `@stellar/stellar-sdk` ranges. Fails safe (never a false deprecated).
+
 ## Owner decisions (safe default in brackets)
 
 - An RWA registry row below toml-bidirectional (entity-toml, on-chain-home-domain,
@@ -873,6 +915,16 @@ Found 2026-10-23 in review of the smart wallet O2 ship
   link that does not hold both ways also stop feeding products? [keep
   products, level served].
 
+- SDK support floors: ours admit soroban-sdk 21 and later and @stellar/stellar-sdk
+  14 and later as supported; the publishers support soroban-sdk's two newest
+  majors (28 and 29 on 2026-11-12, rs-soroban-sdk README since 2026-05-06)
+  and JS v17 and v16 (until March 2027). Adopting their windows moves
+  soroban-sdk deprecated from 404 to 5,651 of 5,865 scanned repos and JS from
+  1,041 to 2,531, and repoScore's deprecated penalty (x0.75) with them [keep
+  our floors; the spec, basis and skill text say supported is not a
+  publisher support claim].
+- Tell the external tool that cites "1,285 on a deprecated soroban-sdk"
+  that the count is Rust OR JS and to filter on `deprecatedBy` [draft only].
 - Replace the production `GITHUB_TOKEN` (and `NEXT_PUBLIC_GITHUB_TOKEN` if set): on 2026-10-24
   GitHub answered 401 for the token the server reads with. Live judging reads now fall back to
   GitHub's unauthenticated limit; reads through GraphQL cannot: `/api/projects/<id>/github` for
