@@ -40,6 +40,13 @@ import {
 	searchRepos,
 } from "@/lib/repo-search";
 import { securityOf } from "@/lib/repo-security";
+import {
+	combinedVersionStatus,
+	jsSdkVersionStatusOf,
+	npmStellarDep,
+	type VersionStatus,
+	versionStatusOf,
+} from "@/lib/soroban-versions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -179,7 +186,10 @@ export async function GET(req: NextRequest) {
 		codeDepth: number | null;
 		isDeployableContract: boolean;
 		sorobanSdkVersion: string | null;
-		versionStatus: string | null;
+		sorobanSdkStatus: VersionStatus;
+		stellarJsDep: string | null;
+		jsSdkStatus: VersionStatus;
+		versionStatus: VersionStatus;
 		scannedAt: string | null;
 		scannedRef: string | null;
 		successorRepo: string | null;
@@ -241,7 +251,7 @@ export async function GET(req: NextRequest) {
 					codeDepth: true,
 					isDeployableContract: true,
 					sorobanSdkVersion: true,
-					versionStatus: true,
+					stellarJsDep: true,
 					codeScanState: true,
 					codeScannedAt: true,
 					codeSymbols: true,
@@ -298,7 +308,17 @@ export async function GET(req: NextRequest) {
 							? false
 							: !!d.isDeployableContract,
 						sorobanSdkVersion: (d.sorobanSdkVersion as string) ?? null,
-						versionStatus: (d.versionStatus as string) ?? null,
+						// Through the deployed table, not the stored versionStatus
+						// (it keeps the table it was written with until a backfill).
+						sorobanSdkStatus: versionStatusOf(
+							d.sorobanSdkVersion as string | null,
+						),
+						stellarJsDep: npmStellarDep(d.stellarJsDep as string | null),
+						jsSdkStatus: jsSdkVersionStatusOf(d.stellarJsDep as string | null),
+						versionStatus: combinedVersionStatus(
+							d.sorobanSdkVersion as string | null,
+							d.stellarJsDep as string | null,
+						),
 						scannedAt: (d.codeScannedAt as string) ?? null,
 						scannedRef: typeof d.scannedRef === "string" ? d.scannedRef : null,
 						successorRepo:
@@ -416,8 +436,14 @@ export async function GET(req: NextRequest) {
 		const cv = codeVerified;
 		const bits: string[] = [
 			`DeepWiki hasn't indexed \`${repo}\`, so this answer is grounded in StellarLight's own source scan${cv.scannedAt ? ` (${cv.scannedAt.slice(0, 10)})` : ""} rather than a DeepWiki walkthrough.`,
-			`\`${repo}\` is ${cv.isDeployableContract ? "a deployable Soroban contract" : "Stellar-related code (its product is not a deployable contract)"}${cv.sorobanSdkVersion ? ` built on soroban-sdk \`${cv.sorobanSdkVersion}\`${cv.versionStatus ? ` (${cv.versionStatus})` : ""}` : ""}.`,
+			// The soroban-sdk's OWN status beside its version: the combined
+			// versionStatus is deprecated when only the JS dependency is.
+			`\`${repo}\` is ${cv.isDeployableContract ? "a deployable Soroban contract" : "Stellar-related code (its product is not a deployable contract)"}${cv.sorobanSdkVersion ? ` built on soroban-sdk \`${cv.sorobanSdkVersion}\` (${cv.sorobanSdkStatus})` : ""}.`,
 		];
+		if (cv.stellarJsDep && cv.jsSdkStatus === "deprecated")
+			bits.push(
+				`Its JavaScript Stellar dependency \`${cv.stellarJsDep}\` is deprecated.`,
+			);
 		if (cv.stellarProof) bits.push(`Code-verified: ${cv.stellarProof}.`);
 		if (cv.symbols.length)
 			bits.push(

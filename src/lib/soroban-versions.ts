@@ -15,15 +15,18 @@
  *         https://github.com/stellar/rs-soroban-sdk/releases
  *         https://developers.stellar.org/docs/networks/software-versions
  *
- * As-of: 2026-07-04. If today is materially later than TABLE_ASOF and this file
- * is unchanged, treat `versionStatus` as advisory (the constant is stale) — the
- * scanner's CB6 sanity check exists for exactly this.
+ * Staleness check: `versionTableStaleness()` below, run nightly by
+ * scripts/check-sdk-table.ts (nightly-health.yml). Until 2026-11-12 this
+ * comment promised a "CB6 sanity check" that no code implemented, and the
+ * table sat at 2026-08-11 while soroban-sdk 28 and 29 shipped and mainnet
+ * moved to Protocol 29.
  */
 
-export const TABLE_ASOF = "2026-08-11";
+export const TABLE_ASOF = "2026-11-12";
 
-/** The latest GA protocol version as of TABLE_ASOF. Drives current/supported. */
-export const LATEST_PROTOCOL = 27;
+/** The latest GA protocol version as of TABLE_ASOF. Drives current/supported.
+ * Horizon mainnet root on 2026-11-12: current_protocol_version 29. */
+export const LATEST_PROTOCOL = 29;
 
 /**
  * soroban-sdk MAJOR version → the Stellar protocol it targets. Keyed by the sdk
@@ -52,9 +55,23 @@ export const SDK_MAJOR_PROTOCOL: ReadonlyArray<{
 	// P27 live (verified 2026-08-11: Horizon root current_protocol_version: 27,
 	// sdk v27.0.x released since 2026-07-21).
 	{ major: 27, protocol: 27 },
+	// v28.0.0 (2026-09-18) release notes: "This is a release supporting
+	// Protocol 28". P28 reached mainnet 2026-09-16 (software-versions page).
+	{ major: 28, protocol: 28 },
+	// v29.0.0 (2026-10-07) moves to soroban-env 29.0.0, the Smart Contract Host
+	// Environment the software-versions page lists for P29 (mainnet
+	// 2026-10-01). P29 added no CAPs; that page still lists Rust SDK 28.0.0 as
+	// the SDK for it. Use 29.0.1: 29.0.0 shipped the v28 wasmi runtime.
+	{ major: 29, protocol: 29 },
 ];
 
-/** Oldest sdk major still "supported" (>= this → supported/current, < this → deprecated). */
+/**
+ * Oldest sdk major still "supported" (>= this → supported/current, < this →
+ * deprecated). OUR floor, not the publisher's: the rs-soroban-sdk README
+ * (since 2026-05-06) supports only "the two most recent soroban-sdk major
+ * releases" with critical security fixes, 28 and 29 on 2026-11-12. Moving
+ * this to the publisher's window is an owner decision (improvements/TODO.md).
+ */
 export const SUPPORTED_FLOOR_MAJOR = 21;
 
 /** Protocol a given sdk MAJOR targets per the maintained table, or null when
@@ -67,7 +84,16 @@ export function protocolForSdkMajor(major: number | null): number | null {
 	return SDK_MAJOR_PROTOCOL.find((r) => r.major === major)?.protocol ?? null;
 }
 
-export type VersionStatus = "current" | "supported" | "deprecated" | "unknown";
+export const VERSION_STATUSES = [
+	"current",
+	"supported",
+	"deprecated",
+	"unknown",
+] as const;
+export type VersionStatus = (typeof VERSION_STATUSES)[number];
+
+/** The SDK line behind a deprecated reading (see deprecatedBy). */
+export const DEPRECATED_BY = ["soroban-sdk", "js-sdk", "both"] as const;
 
 /**
  * The JavaScript SDK line — a SEPARATE major series from the Rust crate, and
@@ -82,10 +108,12 @@ export type VersionStatus = "current" | "supported" | "deprecated" | "unknown";
  *   dist-tags  latest=17.0.1, lts-16=16.3.0, p27=16.0.0-rc.2
  *   v17 2026-08-20 · v16 2026-06-15 · v15 2026-03-30 · v14 2025-08-14
  *   v13 2024-11-14 · v12 2024-05-02 · v11 2023-12-07
+ * Re-read 2026-11-12: latest=17.4.0, lts-16=16.4.1, rc=17.0.0-rc.2; no v18.
+ *   The js-stellar-sdk README supports v17 and v16 ("through March 2027").
  *
  * MAINTENANCE: re-verify against `npm view @stellar/stellar-sdk dist-tags`.
  */
-export const JS_SDK_ASOF = "2026-09-07";
+export const JS_SDK_ASOF = "2026-11-12";
 
 /** dist-tags.latest major at JS_SDK_ASOF. */
 export const JS_SDK_LATEST_MAJOR = 17;
@@ -105,12 +133,29 @@ export const JS_SDK_SUPPORTED_FLOOR_MAJOR = 14;
  * Not our judgement — the maintainers' own words:
  *   stellar-sdk            "This package has moved to @stellar/stellar-sdk!"
  *   @stellar/stellar-base  "now rolled into @stellar/stellar-sdk"
- * 681 and 39 indexed repos respectively still depend on them.
+ *   soroban-client         "now deprecated: transition to @stellar/stellar-sdk"
+ *                          (added 2026-11-12 from `npm view soroban-client
+ *                          deprecated`; 8 scanned repos depend on it)
+ * 681 and 39 indexed repos respectively still depend on the first two.
  */
 export const PUBLISHER_DEPRECATED_JS_PACKAGES: ReadonlySet<string> = new Set([
 	"stellar-sdk",
 	"@stellar/stellar-base",
+	"soroban-client",
 ]);
+
+/** detectStellarProof's lang-sdk markers read "python:requirements.txt";
+ * an npm dependency always holds an @ (an alias "npm:@stellar/..." too). */
+export const isLangMarker = (s: string | null | undefined): boolean =>
+	!!s && /^[a-z][a-z-]*:[^@]+$/.test(s);
+
+/** The stored `stellarJsDep` when it names an npm package, else null. The
+ * scanner also stores those markers in that field ("rust-infra:cargo.toml",
+ * "go:go.mod"; 343 scanned repos on 2026-11-12), which must not be served as
+ * a JavaScript dependency. */
+export function npmStellarDep(dep: string | null | undefined): string | null {
+	return dep && !isLangMarker(dep) ? dep : null;
+}
 
 /** Split a stored `stellarJsDep` ("@stellar/stellar-sdk@^17.0.1") into its parts. */
 export function splitJsDep(
@@ -154,7 +199,8 @@ export function jsSdkVersionStatusOf(
  * The repo's overall SDK support status. The Rust crate is the stronger signal
  * (a Soroban contract's own SDK) and wins when it says anything; the JS dep
  * fills in the scanned repos that carry no Cargo.toml. A "deprecated" reading
- * from either is kept — a stale pin is a stale pin.
+ * from either is kept: a stale pin is a stale pin. So "deprecated" here is
+ * NOT a soroban-sdk claim: `deprecatedBy()` names the line behind it.
  */
 export function combinedVersionStatus(
 	sorobanSdkVersion: string | null | undefined,
@@ -165,6 +211,87 @@ export function combinedVersionStatus(
 	if (rust !== "unknown" && js !== "unknown")
 		return rust === "deprecated" || js === "deprecated" ? "deprecated" : rust;
 	return rust !== "unknown" ? rust : js;
+}
+
+/** Which SDK line makes a repo's combined status "deprecated", or null when
+ * neither does. Non-null exactly when combinedVersionStatus() is
+ * "deprecated", because "unknown" is never deprecated on either side. */
+export function deprecatedBy(
+	sorobanSdkVersion: string | null | undefined,
+	stellarJsDep: string | null | undefined,
+): (typeof DEPRECATED_BY)[number] | null {
+	const rust = versionStatusOf(sorobanSdkVersion) === "deprecated";
+	const js = jsSdkVersionStatusOf(stellarJsDep) === "deprecated";
+	if (rust && js) return "both";
+	if (rust) return "soroban-sdk";
+	return js ? "js-sdk" : null;
+}
+
+/** The three upstream readings from their raw answers (crates.io crate,
+ * Horizon root, npm dist-tags), or null when any is not a released version:
+ * an unparsed field would compare as "not ahead" and read as current, and an
+ * error text holding "503" would read as major 503. */
+export function upstreamVersions(
+	crate: unknown,
+	horizon: unknown,
+	distTags: unknown,
+): {
+	sorobanSdkMaxStable: string;
+	networkProtocol: number;
+	jsSdkLatest: string;
+} | null {
+	const SEMVER = /^\d+\.\d+\.\d+$/;
+	// biome-ignore lint/suspicious/noExplicitAny: untyped upstream JSON
+	const sdk = (crate as any)?.crate?.max_stable_version;
+	// biome-ignore lint/suspicious/noExplicitAny: untyped upstream JSON
+	const protocol = (horizon as any)?.current_protocol_version;
+	// biome-ignore lint/suspicious/noExplicitAny: untyped upstream JSON
+	const js = (distTags as any)?.latest;
+	if (typeof sdk !== "string" || !SEMVER.test(sdk)) return null;
+	if (typeof js !== "string" || !SEMVER.test(js)) return null;
+	if (!Number.isInteger(protocol) || protocol < 1) return null;
+	return {
+		sorobanSdkMaxStable: sdk,
+		networkProtocol: protocol,
+		jsSdkLatest: js,
+	};
+}
+
+/**
+ * What upstream has shipped that this table does not know yet: one line per
+ * gap, [] when the table is current. Inputs are read by
+ * scripts/check-sdk-table.ts from crates.io (soroban-sdk max_stable_version),
+ * the Horizon mainnet root (current_protocol_version) and npm
+ * (@stellar/stellar-sdk dist-tags.latest). `table` is injectable for tests.
+ */
+export function versionTableStaleness(
+	upstream: {
+		sorobanSdkMaxStable: string;
+		networkProtocol: number;
+		jsSdkLatest: string;
+	},
+	table = {
+		newestSdkMajor: SDK_MAJOR_PROTOCOL[SDK_MAJOR_PROTOCOL.length - 1].major,
+		latestProtocol: LATEST_PROTOCOL,
+		jsLatestMajor: JS_SDK_LATEST_MAJOR,
+	},
+): string[] {
+	const out: string[] = [];
+	const rust = parseSdkMajor(upstream.sorobanSdkMaxStable);
+	if (rust !== null && rust > table.newestSdkMajor)
+		out.push(
+			`soroban-sdk ${upstream.sorobanSdkMaxStable} is out; SDK_MAJOR_PROTOCOL stops at major ${table.newestSdkMajor}.`,
+		);
+	if (upstream.networkProtocol > table.latestProtocol)
+		out.push(
+			`mainnet runs protocol ${upstream.networkProtocol}; LATEST_PROTOCOL is ${table.latestProtocol}.`,
+		);
+	const js = parseSdkMajor(upstream.jsSdkLatest);
+	if (js !== null && js > table.jsLatestMajor)
+		out.push(
+			`@stellar/stellar-sdk ${upstream.jsSdkLatest} is latest; JS_SDK_LATEST_MAJOR is ${table.jsLatestMajor}.`,
+		);
+	return out;
 }
 
 /**

@@ -43,6 +43,7 @@ import { RATE_LIMIT_SCOPE } from "../rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
 import { REPO_MATCH_MODES } from "../repo-search";
 import { RESEARCH_SOURCES } from "../research-sources";
+import { DEPRECATED_BY, VERSION_STATUSES } from "../soroban-versions";
 import {
 	AUTHORITY_ROLES,
 	CANDIDATE_CAP,
@@ -399,6 +400,20 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 			),
 		).toEqual(sorted(PARTNER_TYPES as readonly string[]));
 		expect(spread("PARTNER_TYPES")).toBe(4);
+	});
+
+	it("VERSION_STATUSES and DEPRECATED_BY: every SDK status the code serves is spread from soroban-versions", () => {
+		// Repo codeVerified (3), explainRepo codeVerified (3), toolchain rows (2)
+		expect(spread("VERSION_STATUSES")).toBe(8);
+		expect(spread("DEPRECATED_BY")).toBe(1);
+		const repo = S.components.schemas.Repo.properties.codeVerified.properties;
+		for (const k of ["sorobanSdkStatus", "jsSdkStatus", "versionStatus"])
+			expect(repo[k].enum, k).toEqual([...VERSION_STATUSES]);
+		const tc =
+			S.paths["/api/analyze"].get.responses["200"].content["application/json"]
+				.schema.properties.toolchain.properties.deprecatedRepos.items
+				.properties;
+		expect(tc.deprecatedBy.enum).toEqual([...DEPRECATED_BY]);
 	});
 
 	it("SOURCE_CHECK_STATES: one spread, two sites that equal it (explainRepo sourceCheck.state and knowledgeNotes[].sourceCheck.state)", () => {

@@ -30,6 +30,18 @@ import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
+	combinedVersionStatus,
+	deprecatedBy,
+	JS_SDK_ASOF,
+	JS_SDK_SUPPORTED_FLOOR_MAJOR,
+	jsSdkVersionStatusOf,
+	npmStellarDep,
+	PUBLISHER_DEPRECATED_JS_PACKAGES,
+	SUPPORTED_FLOOR_MAJOR,
+	TABLE_ASOF,
+	versionStatusOf,
+} from "@/lib/soroban-versions";
+import {
 	ACTIVE_PROJECT_STATUSES,
 	type PopulationScope,
 	populationScope,
@@ -789,37 +801,68 @@ export async function GET(req: NextRequest) {
 					fullName: true,
 					projectSlug: true,
 					sorobanSdkVersion: true,
-					versionStatus: true,
+					stellarJsDep: true,
 					ciPresent: true,
 					testsPresent: true,
 				},
 			});
+			// Statuses come from the stored raw versions read through the
+			// deployed table, not from the stored versionStatus, which keeps the
+			// table it was written with until a backfill or re-scan reaches it.
+			// "deprecated" in byVersionStatus is Rust OR JS (1,285 on 2026-11-12,
+			// 881 of them on a soroban-sdk that is not deprecated), so each line
+			// is counted on its own too and every row says which line put it
+			// there.
 			const byStatus: Record<string, number> = {};
+			const bySoroban: Record<string, number> = {};
+			const byJs: Record<string, number> = {};
 			let ciCount = 0;
 			let testsCount = 0;
 			let practiceKnown = 0;
-			const deprecated: Array<{
+			// The sample lists rows deprecated on the soroban-sdk line first, then
+			// JS-only ones: a consumer built its deprecated-version list from this
+			// sample, and JS-only rows (36 of 50 on 2026-11-12, soroban-sdk 21 to
+			// 29) marked every repo on soroban-sdk 27 deprecated.
+			type DeprecatedRow = {
 				fullName: string;
 				projectSlug: string | null;
 				sorobanSdkVersion: string | null;
-			}> = [];
+				sorobanSdkStatus: string;
+				stellarJsDep: string | null;
+				jsSdkStatus: string;
+				deprecatedBy: ReturnType<typeof deprecatedBy>;
+			};
+			const sorobanLine: DeprecatedRow[] = [];
+			const jsOnly: DeprecatedRow[] = [];
 			// biome-ignore lint/suspicious/noExplicitAny: select-narrowed docs
 			for (const r of scanned.docs as any[]) {
-				const st =
-					typeof r.versionStatus === "string" ? r.versionStatus : "unknown";
+				const sdk = r.sorobanSdkVersion ?? null;
+				const js = npmStellarDep(r.stellarJsDep);
+				const st = combinedVersionStatus(sdk, js);
+				const rust = versionStatusOf(sdk);
+				const jsSt = jsSdkVersionStatusOf(js);
 				byStatus[st] = (byStatus[st] ?? 0) + 1;
+				bySoroban[rust] = (bySoroban[rust] ?? 0) + 1;
+				byJs[jsSt] = (byJs[jsSt] ?? 0) + 1;
 				if (typeof r.ciPresent === "boolean") {
 					practiceKnown += 1;
 					if (r.ciPresent) ciCount += 1;
 					if (r.testsPresent) testsCount += 1;
 				}
-				if (st === "deprecated" && deprecated.length < 50)
-					deprecated.push({
+				const by = deprecatedBy(sdk, js);
+				const bucket = by === "js-sdk" ? jsOnly : sorobanLine;
+				if (by && bucket.length < 50)
+					bucket.push({
 						fullName: String(r.fullName),
 						projectSlug: r.projectSlug ?? null,
-						sorobanSdkVersion: r.sorobanSdkVersion ?? null,
+						sorobanSdkVersion: sdk,
+						sorobanSdkStatus: rust,
+						stellarJsDep: js,
+						jsSdkStatus: jsSt,
+						deprecatedBy: by,
 					});
 			}
+			const deprecated = [...sorobanLine, ...jsOnly].slice(0, 50);
 			const measuredRepos = (scanned.docs as unknown[]).length;
 			result.toolchain = {
 				scannedRepos: scanned.totalDocs,
@@ -829,6 +872,17 @@ export async function GET(req: NextRequest) {
 				measuredRepos,
 				measurementComplete: measuredRepos >= scanned.totalDocs,
 				byVersionStatus: byStatus,
+				bySorobanSdkStatus: bySoroban,
+				byJsSdkStatus: byJs,
+				// The rule behind every "deprecated" above, so a consumer applies
+				// it instead of inferring it from the capped sample.
+				deprecationRule: {
+					sorobanSdkMajorBelow: SUPPORTED_FLOOR_MAJOR,
+					jsSdkMajorBelow: JS_SDK_SUPPORTED_FLOOR_MAJOR,
+					jsDeprecatedPackages: [...PUBLISHER_DEPRECATED_JS_PACKAGES],
+					sorobanSdkTableAsOf: TABLE_ASOF,
+					jsSdkTableAsOf: JS_SDK_ASOF,
+				},
 				deprecatedRepos: deprecated,
 				deprecatedTotal: byStatus.deprecated ?? 0,
 				// deprecatedRepos is a sample capped at 50; deprecatedTotal is the
@@ -839,8 +893,7 @@ export async function GET(req: NextRequest) {
 					ciPresent: ciCount,
 					testsPresent: testsCount,
 				},
-				basis:
-					"Soroban-SDK toolchain status per scanned repo (soroban-versions.ts dated table; 'unknown' = version unparsed, never a demotion). deprecatedRepos capped at 50, deprecatedTotal is the full count. engineeringPractice counts repos whose latest scan recorded tree-level CI/test presence: presence facts only, not CI results; reposWithPracticeFacts < scannedRepos until re-scans reach the corpus.",
+				basis: `SDK support status per repo carrying a soroban-sdk version (scannedRepos; repos whose scan found only a JavaScript or other-language Stellar dependency are not in this block), read at request time from each repo's stored versions through the dated tables in soroban-versions.ts (Rust soroban-sdk table as of ${TABLE_ASOF}, JavaScript @stellar/stellar-sdk table as of ${JS_SDK_ASOF}). Two SDK lines: bySorobanSdkStatus is the Rust soroban-sdk crate alone; byJsSdkStatus is the JavaScript Stellar SDK dependency alone, over the same repos, so it is not an ecosystem-wide JavaScript count. byVersionStatus and deprecatedTotal combine them: a repo counts as deprecated when EITHER line is deprecated, so they are not a soroban-sdk count; for that read bySorobanSdkStatus.deprecated. Each deprecatedRepos row names the line behind it in deprecatedBy; rows deprecated on the soroban-sdk line come first, then JS-only rows, with no rank within each group. deprecationRule states the rule itself. Deprecated means below our floors (soroban-sdk major < ${SUPPORTED_FLOOR_MAJOR}; @stellar/stellar-sdk major < ${JS_SDK_SUPPORTED_FLOOR_MAJOR}, or a package its npm publisher marks deprecated: ${[...PUBLISHER_DEPRECATED_JS_PACKAGES].join(", ")}). The publishers support fewer majors than our floors admit (soroban-sdk: the two newest majors; JS: v17 and v16), so supported is not a publisher support claim. 'unknown' = no released version the table can read on that line (none, a pre-release, unpinned, git, workspace, or an unparsed range) or a JS dependency the table does not cover, never a demotion. deprecatedRepos capped at 50, deprecatedTotal is the full count. engineeringPractice counts repos whose latest scan recorded tree-level CI/test presence: presence facts only, not CI results; reposWithPracticeFacts < scannedRepos until re-scans reach the corpus.`,
 			};
 		} catch {
 			// answered below: result.toolchain stays unset

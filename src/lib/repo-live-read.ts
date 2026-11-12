@@ -25,6 +25,7 @@
  */
 import { detectStellarProof } from "@/lib/code-signals";
 import { githubToken } from "@/lib/github";
+import { isLangMarker } from "@/lib/soroban-versions";
 import { extractStellarDeps } from "@/lib/stellar-deps";
 
 export const LIVE_READ_PARTS = [
@@ -509,10 +510,6 @@ interface ReleaseRow {
 	published_at?: string | null;
 }
 
-/** detectStellarProof's lang-sdk markers read "python:requirements.txt";
- * an npm dependency always holds an @ (an alias "npm:@stellar/..." too). */
-const isLangMarker = (s: string | null): boolean =>
-	!!s && /^[a-z][a-z-]*:[^@]+$/.test(s);
 /** A declared npm dependency ("name@value") names a version unless its value
  * is a reference (workspace:*, file:, link:, github:, a URL). An alias
  * (npm:@stellar/stellar-sdk@17.0.1) names one. */
