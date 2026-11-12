@@ -199,6 +199,10 @@ export const STATUS_FIX: Record<
 	// package-release Live stamp from @cypherhq/agent-pay on npm. The operator
 	// has since announced the shutdown itself, and a package published in April
 	// says nothing about a platform its owner says is gone.
+	// 2026-11-12, owner call (wasLive left as stored): its termination notice
+	// says the app and card ran until 2026-09-06, and cypherhq.io (Wayback
+	// 2025-02-12) linked App Store and Play Store apps. It launched; no Stellar
+	// tie was found.
 	cypher: {
 		from: "Live",
 		to: "Inactive",
@@ -242,6 +246,10 @@ export const STATUS_FIX: Record<
 	// Found by the product-integration lane's own PARKED branch (2026-09-07):
 	// it probes for a Stellar integration and reports a domain that answers but
 	// is not a product. Verified in a browser before proposing.
+	// 2026-11-12, owner call (wasLive left as stored): triiyo.com (Wayback
+	// 2019-10-14 to 2025-10-15) shows a launched HR transitions app ('Try for
+	// free', 2024-08-11), but nothing shows the cross-border well-being
+	// payments SCF #22 funded. A product launched, but not the Stellar one.
 	triiyo: {
 		from: "Live",
 		to: "Inactive",
@@ -401,6 +409,8 @@ export const STATUS_FIX: Record<
 	// title: the row was Live on the strength of a listing that no longer
 	// exists, and the guard had reported could-not-check on it every week
 	// because the store renders client-side.
+	// 2026-11-12, launch on record (wasLive kept): the Chrome Web Store listed
+	// Stellar Tip with 11 users (Wayback 2021-01-24).
 	"stellar-tip": {
 		from: "Live",
 		to: "Inactive",
@@ -417,11 +427,21 @@ export const STATUS_FIX: Record<
 	assetdesk: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: AssetDesk/Smart-Contracts calls
+		// assetdesk.xyz a 'Front-end application working with the deployed testnet
+		// smart contract', the domain-wide sweep finds no other host, and no
+		// mainnet contract was found. Its Stellar product is testnet-only and it
+		// has no other launched product.
+		wasLive: false,
 		basis: "human-verified",
 		asOf: "2026-09-07",
 		sourceUrl: "http://assetdesk.xyz/",
 		note: 'Retired 2026-09-07: assetdesk.xyz serves Namecheap\'s "Domain registration has expired" notice over http and refuses https entirely; the domain lapsed. The GitHub org github.com/assetdesk still exists with 3 repos, last touched 2023-09-08. SCF #19, $77,000 — the award stands, the product does not. Found because a broken link on a LIVE row is a defect, not corroboration.',
 	},
+	// 2026-11-12, launch on record (wasLive kept): kunst21.app (Wayback
+	// 2022-08-11) served an exchange for artwork shares priced in EURK on the
+	// public network, and Horizon lists its EURK, BILD, PWM, SMP and WWM tokens
+	// (issuer GBFTB66Y..., toml on kunst21.app).
 	kunst21: {
 		from: "Live",
 		to: "Inactive",
@@ -441,6 +461,12 @@ export const STATUS_FIX: Record<
 	sorosplits: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: sorosplits.xyz served a wallet UI
+		// (Wayback 2024-04-19) and docs.sorosplits.xyz its docs (2024-09-12), but
+		// findolor/sorosplits sdk/config.ts defines only a testnet deployment, its
+		// README says the code is not ready for production, and
+		// www.pay.sorosplits.xyz is a parking page (2025-02-05).
+		wasLive: false,
 		basis: "human-verified",
 		asOf: "2026-09-06",
 		sourceUrl: "https://sorosplits.xyz/",
@@ -449,6 +475,10 @@ export const STATUS_FIX: Record<
 	sorodrop: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: sorodrop.xyz linked an app (Wayback
+		// 2024-11-19 to 2025-03-30; no other host captured), but findolor/sorodrop
+		// references testnet and never the public network.
+		wasLive: false,
 		basis: "human-verified",
 		asOf: "2026-09-06",
 		sourceUrl: "https://sorodrop.xyz/",
@@ -462,6 +492,8 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://sorobanpulse.app/",
 		note: 'Weak-basis sweep 2026-09-06: sorobanpulse.app "has expired and is parked free, courtesy of GoDaddy.com" — the domain lapsed. Rendered read; the raw markup carries only the /lander redirect.',
 	},
+	// 2026-11-12, launch on record (wasLive kept): Google Play listed 'Qolaq -
+	// Mutual Aid Platform' with 50+ downloads (Wayback 2025-07-17).
 	qolaq: {
 		from: "Live",
 		to: "Inactive",
@@ -481,11 +513,23 @@ export const STATUS_FIX: Record<
 	"0xauth": {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: 0xauth.co read 'Coming Soon', a site
+		// 'designated for our partner's demo purposes' (Wayback 2024-12-08,
+		// 2025-01-20); its other hosts are partner demos and sandboxes (franklin,
+		// franklin-dev and wisdom, 2024-05-15; abn-amro-sandbox and amr-sandbox,
+		// 2025-02) and docs, and authentication-labs/0xauth-stellar deploys to
+		// testnet only. No launched product of any kind found.
+		wasLive: false,
 		basis: "human-verified",
 		asOf: "2026-09-06",
 		sourceUrl: "https://0xauth.co/",
 		note: "Weak-basis sweep 2026-09-06: 0xauth.co no longer resolves (NXDOMAIN).",
 	},
+	// 2026-11-12, launch on record (wasLive kept): www.ide.digicus.dev served
+	// the Digicus IDE (Wayback 2025-01-22: main.3f59307a.js names 'Digicus IDE'
+	// and calls api.digicus.dev), built from
+	// spaced-out-thoughts-dev-foundation/digicus, digicus_web_frontend and
+	// digicus_web_backend. The row's links.github points elsewhere.
 	digicus: {
 		from: "Live",
 		to: "Inactive",
@@ -497,6 +541,10 @@ export const STATUS_FIX: Record<
 	"soroban-optimistic-oracle": {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: stackman27/SOO deploys to testnet
+		// only: its .stellar/contract-ids record names only the Test SDF Network
+		// and its README deploys with --network testnet.
+		wasLive: false,
 		basis: "human-verified",
 		asOf: "2026-09-06",
 		sourceUrl: "https://github.com/stackman27/soroban-opt-oracle",
@@ -804,6 +852,10 @@ export const STATUS_FIX: Record<
 	// / disabled-deployment page or a removed sole repository, each receipted in
 	// improvements/receipts/<slug>-2026-09-06.json (captured after the UTC rollover)
 	// and hand-checked before this write.
+	// 2026-11-12, owner call (wasLive left as stored): Jet Protocol's lending
+	// app ran on Solana (jetprotocol.io, 'LAUNCH APP', Wayback 2021-04-26 to
+	// 2022-12-06), but nothing names a Stellar deployment and jet-lab/polaris
+	// is gone. A product launched, but not the Stellar one.
 	"polaris-lend": {
 		from: "Live",
 		to: "Inactive",
@@ -812,6 +864,11 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://jetprotocol.io/lander",
 		note: "Re-graded 2026-09-05 under the product-state rule: jetprotocol.io redirects to a GoDaddy parking lander rendering 'jetprotocol.io is parked free, courtesy of GoDaddy.com'; own repo jet-lab/polaris 404. Parked page marker is client-rendered \u2014 see receipt caveat. Rendered 2026-09-05 in a browser: 'jetprotocol.io is parked free, courtesy of GoDaddy.com' \u2014 the raw HTML is GoDaddy's parking-lander shell with no text nodes, so the receipt (improvements/receipts/polaris-lend-2026-09-06.json) cites the markup markers ap:\"parking\" and /parking-lander/ — where: markup.",
 	},
+	// 2026-11-12, owner call (wasLive left as stored): every.finance served an
+	// early-access deposit app ('Every Beta launch campaign is NOW LIVE',
+	// Wayback 2024-04-13 to 2025-04-24) before its Stellar repos existed, and
+	// those publish testnet contracts only. A product launched, but not the
+	// Stellar one.
 	"every-finance": {
 		from: "Live",
 		to: "Inactive",
@@ -820,6 +877,10 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://every.finance/lander",
 		note: "Re-graded 2026-09-05 under the product-state rule: every.finance redirects to forsale.godaddy.com ('The domain name every.finance is for sale!'); own repo Frihat-dev/every_finance idle since 2024-08-29. Org repos EveryFinance/smart-contracts-Stellar (2026-07-13) and onchain-manager-dapp (2026-05-15) are not row repos \u2014 owner may prefer Development plus a repo fix.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): its SCF #35 submission says
+	// the MUWP DApp runs on Stellar mainnet (37 swaps in a month), and
+	// muwpay.com linked 'Launch Dapp' (Wayback 2024-03-03 to 2025-06-19).
+	// Self-reported.
 	muwp: {
 		from: "Live",
 		to: "Inactive",
@@ -828,6 +889,9 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://muwpay.com/",
 		note: "Re-graded 2026-09-05 under the product-state rule: muwpay.com answers 451 DEPLOYMENT_DISABLED ('This deployment is unavailable') and muwp.xyz 402 'Deployment Paused'; own repo muwpay-uniswapper/muwp-stellar 404. Org repo Muwpay-uniswapper/MUWP pushed 2026-08-18 is not a row repo \u2014 owner may prefer Development.",
 	},
+	// 2026-11-12, could not check (wasLive left as stored):
+	// Mavennet/did-stellar-resolver tagged releases 0.1 to 0.3 in 2023; whether
+	// a public resolver ran could not be read.
 	didstellar: {
 		from: "Live",
 		to: "Inactive",
@@ -1059,6 +1123,9 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://www.pendulumchain.org/spacewalk",
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Spacewalk"; repo pendulum-chain/vortex pushed 2026-09-02 (high confidence).',
 	},
+	// 2026-11-12, launch on record (wasLive kept): orbitcdp.finance (Wayback
+	// 2026-05-08, 2026-06-14) linked its Blend pool CAE7QVOM... on mainnet,
+	// which exists (Soroban RPC, 2026-11-12).
 	orbitcdp: {
 		// Owner verdict 2026-09-05: dead. The packet took the page's marketing
 		// banner "Live on Stellar" as evidence while the protocol stats on the
@@ -1190,6 +1257,11 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://boundless.network/",
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Boundless \u2014 The inference partner for AI-native startups"; repo boundless-xyz/steel pushed 2026-08-31 (high confidence).',
 	},
+	// 2026-11-12, owner call (wasLive left as stored): chainsatlas.com (Wayback
+	// 2022-08-08 to 2026-04-15) offers a multi-chain SDK with sign-up at
+	// app.chainsatlas.com, but nothing shows the Soroban virtualization unit
+	// SCF #20 funded deployed on any network. A product launched, but not the
+	// Stellar one.
 	chainsatlas: {
 		from: "Live",
 		to: "Inactive",
@@ -1198,6 +1270,9 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://chainsatlas.com/",
 		note: 'Verification packet 2026-09-05, owner-approved: Wix "ConnectYourDomain Error" \u2014 site removed (high confidence).',
 	},
+	// 2026-11-12, launch on record (wasLive kept): it ran Soroban audit
+	// contests: code-423n4/2025-02-blend and 2025-10-reflector are linked on
+	// the row.
 	code4rena: {
 		from: "Live",
 		to: "Inactive",
@@ -1271,6 +1346,10 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://runtimeverification.com/",
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Runtime Verification - Software Assurance for the AI"; repo runtimeverification/stellar-debugger pushed 2026-09-04 (high confidence).',
 	},
+	// 2026-11-12, launch on record (wasLive kept): its HITZ contract
+	// CBAPZAZN... exists on mainnet (Soroban RPC, 2026-11-12), and skyhitz.io
+	// served the 'Gravity HITZ Mainnet' app (Wayback 2026-04-29) and a music
+	// app from 2018.
 	skyhitz: {
 		// Owner verdict 2026-09-05: dead. The packet read the page title
 		// "Skyhitz - Gravity. Mainnet" and a same-day repo push as a live
@@ -1284,6 +1363,12 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://skyhitz.io/",
 		note: "Owner verdict 2026-09-05: dead — the page's protocol stats are zero (Total Mass 0.00 HITZ, Event Horizon 0.0000, Balance —); a title and a repo push are not a product state. Corrects the 2026-09-05 packet.",
 	},
+	// 2026-11-12, owner call (wasLive left as stored): a standalone verifier is
+	// on mainnet (CA5RY3BU..., in live state on 2026-11-12;
+	// SoundnessLabs/stellar-pq lists it as 'Deployed (mainnet)'), but the
+	// README advises against production reliance and smart-account mainnet use,
+	// and the wallet flow ran on testnet only. Whether a deployed component
+	// counts as a launch is the owner's call, as for lobster.
 	soundness: {
 		from: "Live",
 		to: "Inactive",
@@ -1348,6 +1433,9 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://docs.vanna.finance/developers/deployed-contracts.md",
 		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: docs state 'All contracts are deployed on Stellar Testnet. Mainnet addresses will be published at launch.'; Launch App \u2192 test.stellar.vanna.finance (testnet AMM API); app.vanna.finance has no DNS; linked repo protocol_v1_soroban 404; org backend Vercel 402 disabled (high). Receipt improvements/receipts/vanna-finance-2026-09-06.json.",
 	},
+	// 2026-11-12, owner call (wasLive left as stored): the App Store listed
+	// WageLink at 4.8 stars from 54 ratings (Wayback 2025-07-15). It launched;
+	// no Stellar tie was found for its wage payouts.
 	wagelink: {
 		from: "Live",
 		to: "Inactive",
@@ -1589,6 +1677,10 @@ export const STATUS_FIX: Record<
 	// (clickpesa-debt-fund, freelii, keizai, stellar-ai-agent-kit, transfuse)
 	// keep their status: the product may have moved. from-guarded, retires
 	// once applied.
+	// 2026-11-12, owner call (wasLive left as stored): somosaurapay.com
+	// (Wayback 2023-09-29 to 2025-03-02) served a remittance service from Spain
+	// to Latin America with client sign-in. It launched; no Stellar tie was
+	// found.
 	aurapay: {
 		from: "Live",
 		to: "Inactive",
@@ -1596,6 +1688,10 @@ export const STATUS_FIX: Record<
 		asOf: "2026-09-02",
 		basis: "human-verified",
 	},
+	// 2026-11-12, launch on record (wasLive kept): lettucepay.io (Wayback
+	// 2020-09-30) served its point of sale app, wired to api.lettucepay.io and
+	// the AnchorUSD API, telling payers it accepts wallets integrated with
+	// Stellar.
 	lettuce: {
 		from: "Live",
 		to: "Inactive",
@@ -1603,6 +1699,9 @@ export const STATUS_FIX: Record<
 		asOf: "2026-09-02",
 		basis: "human-verified",
 	},
+	// 2026-11-12, launch on record (wasLive kept): nicetrade.co served its
+	// Stellar DEX and web wallet (Wayback 2020-09-26 to 2022-01-19), a bundle
+	// wired to horizon.stellar.org and the public network passphrase.
 	nicetrade: {
 		from: "Live",
 		to: "Inactive",
@@ -1613,6 +1712,11 @@ export const STATUS_FIX: Record<
 	prophe: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: prophe.xyz read 'Join our waitlist',
+		// then 'Currently on beta testing' with 'Get early access' (Wayback
+		// 2024-07-19 to 2024-11-12), and beta.prophe.xyz (2024-09-30) served an
+		// unbranded app shell on a development sign-in instance.
+		wasLive: false,
 		note: "prophe.xyz is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
 		asOf: "2026-09-02",
 		basis: "human-verified",
@@ -1620,10 +1724,17 @@ export const STATUS_FIX: Record<
 	"sgf-solutions": {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: sgfsolutions.io read 'Coming soon'
+		// for its USDC to ARS service (Wayback 2024-07-30 to 2024-10-05, no other
+		// host), and no repository was found.
+		wasLive: false,
 		note: "sgfsolutions.io is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
 		asOf: "2026-09-02",
 		basis: "human-verified",
 	},
+	// 2026-11-12, launch on record (wasLive kept): sorobix.xyz served the
+	// Sorobix web IDE (Wayback 2023-07-22 to 2024-03-05); its README describes
+	// deploying contracts to Futurenet from the browser.
 	sorobix: {
 		from: "Live",
 		to: "Inactive",
@@ -1638,6 +1749,9 @@ export const STATUS_FIX: Record<
 		asOf: "2026-09-02",
 		basis: "human-verified",
 	},
+	// 2026-11-12, launch on record (wasLive kept): stellarbattle.com (Wayback
+	// 2020-03-05 to 2021-05-18) ran community battles with rankings, winning
+	// submissions and accounts.
 	"stellar-battle": {
 		from: "Live",
 		to: "Inactive",
@@ -1647,6 +1761,9 @@ export const STATUS_FIX: Record<
 			"https://www.hugedomains.com/domain_profile.cfm?d=stellarbattle.com",
 		basis: "human-verified",
 	},
+	// 2026-11-12, owner call (wasLive left as stored): stockencapital.com
+	// (Wayback 2023-05-07) served its share tokenization platform with account
+	// access and pricing. It launched; no Stellar tie was found.
 	"stocken-capital": {
 		from: "Live",
 		to: "Inactive",
@@ -1654,6 +1771,8 @@ export const STATUS_FIX: Record<
 		asOf: "2026-09-02",
 		basis: "human-verified",
 	},
+	// 2026-11-12, launch on record (wasLive kept): stellarauth.com (Wayback
+	// 2020-08-07 to 2023-01-30) offered the SDK's docs, a demo and a download.
 	stellarauth: {
 		from: "Live",
 		to: "Inactive",
@@ -1664,11 +1783,19 @@ export const STATUS_FIX: Record<
 	soracle: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: posted.app read 'Join Early Access'
+		// in every capture (Wayback 2024-10-13 to 2026-05-15; icp.posted.app is an
+		// Internet Computer page), and no Soracle repository was found.
+		wasLive: false,
 		note: "its recorded site posted.app is listed for sale at Porkbun; no linked code (checked 2026-09-02).",
 		asOf: "2026-09-02",
 		sourceUrl: "https://posted.app/",
 		basis: "human-verified",
 	},
+	// 2026-11-12, launch on record (wasLive kept): tolgayayci/sora (homepage
+	// thesora.app) published desktop releases v0.1.0 (2024-02-14) to v0.2.2
+	// (2024-09-19) for macOS and Linux, downloaded hundreds of times. The row's
+	// website and repo point elsewhere.
 	sora: {
 		from: "Live",
 		to: "Inactive",
@@ -1706,6 +1833,9 @@ export const STATUS_FIX: Record<
 	// generic page titled "connected world", not the protocol app. Inactive
 	// drops it from the live lists and down-ranks it in search; the SCF award
 	// stays on the row so the funded history is answerable.
+	// 2026-11-12, launch on record (wasLive kept): DefiLlama lists FxDAO on
+	// Stellar from 2024-10-07; its first Stellar TVL point (2024-10-17 00:00
+	// UTC) is $1.36M, and its peak $29M.
 	fxdao: {
 		from: "Live",
 		to: "Inactive",
@@ -1815,6 +1945,10 @@ export const STATUS_FIX: Record<
 	// enterprise AI") — the crypto-analytics product this row exists for is
 	// gone; the company pivoted. Receipt:
 	// improvements/receipts/flipside-2026-08-28.json.
+	// 2026-11-12, launch on record (wasLive kept): Flipside's docs publish
+	// Stellar core and DeFi tables
+	// (docs.flipsidecrypto.xyz/blockchain-data/stellar), and flipsidecrypto.xyz
+	// served its data studio (Wayback 2024-03-02).
 	flipside: {
 		from: "Live",
 		to: "Inactive",
@@ -1863,6 +1997,14 @@ export const STATUS_FIX: Record<
 	// 2023-07-20 with governance last touched 2022. Domain gone plus two years
 	// of silence is the Inactive bar; status was resting on source-inherited,
 	// the weakest basis we serve.
+	// 2026-11-12, launch on record (wasLive kept): www.plutoloans.com served
+	// the Pluto Loans site from 2022-10-02 (/en/plutoloans_en/), and its 'Test
+	// it!' link went to loans.plutodao.finance, which served 'PlutoDAO - Loans'
+	// from 2022-10-05 to 2024-10-08 (Wayback). PlutoDAO/loans-sdk targets a
+	// 'public' network server (src/config.ts) and went to npm as
+	// plutodao-loans-sdk 1.0.0 on 2023-01-19, and Horizon shows pUSD from
+	// GAVZO7CL... (home domain www.plutodao.finance) with 14 trustlines and
+	// 497.94 outstanding (2026-11-12).
 	"pluto-loans": {
 		from: "Live",
 		to: "Inactive",
@@ -1879,6 +2021,9 @@ export const STATUS_FIX: Record<
 	// directory still reads "Active", but that status is founder-reported and
 	// lags; it does not outweigh the product's own hosts. Status rested on
 	// source-inherited, the weakest basis we serve.
+	// 2026-11-12, owner call (wasLive left as stored): letsping.com (Wayback
+	// 2023-01-17 to 2025-12-01) served sign-in, registration and an iOS app
+	// (App Store id1628123761). It launched; no Stellar tie was found.
 	ping: {
 		from: "Live",
 		to: "Inactive",
@@ -1966,6 +2111,9 @@ export const STATUS_FIX: Record<
 	// spam page — which answers HTTP 200, so site-liveness called it Live. The
 	// boss-pay class (lapsed apex re-registered by strangers), except here the
 	// product is gone too, so this is Inactive rather than a website fix.
+	// 2026-11-12, launch on record (wasLive kept): getblockcard.com (Wayback
+	// 2020-08-03) served BlockCard sign-up and login, 'Currently available in
+	// the United States', for spending BTC, ETH, XLM and TERN.
 	getblockcard: {
 		from: "Live",
 		to: "Inactive",
@@ -2044,6 +2192,11 @@ export const STATUS_FIX: Record<
 	// dapp.eascrow.xyz froze 2025-06-25 — the EXACT day of the org's last
 	// GitHub commit (Eascrow/Eascrow, its only repo). Zero product mentions
 	// anywhere in 2025-26. SCF-funded ~$147,950; the note keeps the history.
+	// 2026-11-12, could not check (wasLive left as stored): commit f2066c11 in
+	// eascrow/eascrow (2025-05-30) switched the dapp to Networks.PUBLIC with
+	// contract CAYGT4GM..., which is not in live state today (Soroban RPC,
+	// 2026-11-12); an archived or evicted entry cannot be told apart from one
+	// that never existed.
 	eascrow: {
 		from: "Live",
 		to: "Inactive",
@@ -2062,6 +2215,10 @@ export const STATUS_FIX: Record<
 	// Stellar projects directory. Inactive is used only as the hide-from-
 	// directory lever here; the note keeps the data honest ("active, scoped
 	// out" — not "dead").
+	// 2026-11-12, launch on record (wasLive kept): its Soroban factory
+	// CAFGQVKF... and XLM/USDC vault CBEWCQWM..., listed in
+	// Lobster-Protocol/stellar-integrations, exist on mainnet (Soroban RPC,
+	// 2026-11-12).
 	lobster: {
 		from: "Live",
 		to: "Inactive",
@@ -2074,6 +2231,9 @@ export const STATUS_FIX: Record<
 	// web-check (dead/parked domain + no moved site + no recent activity + no
 	// product presence) — NOT a staleness heuristic. High-confidence only; the
 	// medium/uncertain candidates were held for human review.
+	// 2026-11-12, launch on record (wasLive kept): swplug.com (Wayback
+	// 2018-02-25 to 2020-11-09) offered the plugin download (v1.1.0) and a demo
+	// store accepting XLM, SLT, RMT and MOBI.
 	swplug: {
 		from: "Live",
 		to: "Inactive",
@@ -2084,6 +2244,10 @@ export const STATUS_FIX: Record<
 	// (The sls-033 wallet-verification workflow (2026-07-15) also flagged mxlet
 	// and equilibre as dead-domain "wallets" — both were already retired in the
 	// 2026-07-10 liveness triage below, so no new STATUS_FIX rows are needed.)
+	// 2026-11-12, could not check (wasLive left as stored): dev.plutus.rentals
+	// served a borrowing app listing USDC leases (Wayback 2024-10-03), but its
+	// bundle is not archived, so its network could not be read; arbach/stelien
+	// targets Futurenet.
 	plutus: {
 		from: "Live",
 		to: "Inactive",
@@ -2092,13 +2256,19 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://expireddomains.com/domain/plutus.rentals",
 		note: "Defunct: plutus.rentals 301s to an expired-domain/for-sale marketplace; the plutus.property rebrand domain is NXDOMAIN. No live product or repo.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): sorobanlearn.com served its
+	// public learning app ('Try Now', marked a testing ground) on 2023-11-28
+	// and 2024-05-23, and forum.sorobanlearn.com served from 2024-06 to 2025-04
+	// (Wayback). The note's 'never shipped a live site' is wrong.
 	"soroban-learn": {
 		from: "Live",
 		to: "Inactive",
 		asOf: "2026-07-15",
 		basis: "human-verified",
 		sourceUrl: "https://github.com/Soroban-Learn/soroban-learn",
-		note: "Defunct: sorobanlearn.com down (ECONNREFUSED); sole GitHub repo is a public ARCHIVE (archived Nov 2023, last commit Jun 2023). SCF awards all pre-2024; the IDE/course never shipped a live site.",
+		// 2026-11-12: the note had said the course never shipped a live site;
+		// the Wayback Machine shows it did.
+		note: "Defunct: sorobanlearn.com is down (ECONNREFUSED) and its sole GitHub repo was archived in 2023-11 (last commit 2023-06). Before that it served a public learning app, marked a testing ground where the database resets often, with a 'Try Now' button (Wayback 2023-11-28 and 2024-05-23), and forum.sorobanlearn.com served from 2024-06 to 2025-04 (read 2026-11-12).",
 	},
 	localcoin: {
 		from: "Live",
@@ -2107,6 +2277,10 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		note: "Defunct: builder UrbanChange Foundation formally announced shutdown ('UrbanChange Foundation and App Closing', May 5 2024 — their last post ever); urbanchange.com now parked (HugeDomains); localcoin.us serves only an empty Loading SPA shell.",
 	},
+	// 2026-11-12, could not check (wasLive left as stored): app.stex.xycloo.com
+	// served an app shell (Home, Marketplace, Publish, Search; Wayback
+	// 2024-03-23) and docs.stex.xycloo.com documented its API (2024-03-26);
+	// whether it served users, and on which network, could not be read.
 	stex: {
 		from: "Live",
 		to: "Inactive",
@@ -2115,6 +2289,9 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://github.com/xycloo",
 		note: "Defunct: stex.xycloo.com DNS gone. Builder Xycloo Labs is alive but fully pivoted to Soroban DeFi/infra (Mercury/Zephyr) — no sTeX repo or mention in years; the 2021 LaTeX-editor product is abandoned.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): blueorion.cc (Wayback
+	// 2019-04-28 to 2021-12-09) served a Stellar wallet, then a tokenization
+	// platform, each with sign-in.
 	"blue-orion": {
 		from: "Live",
 		to: "Inactive",
@@ -2124,6 +2301,8 @@ export const STATUS_FIX: Record<
 		note: "Defunct: blueorion.cc dead (all variants fail). GitHub org last push 2020-02-08; repo still advertises a Feb-2020 meetup. SCF participation was 2019. No activity in 5+ years.",
 	},
 	// Directory-quality engine verify pass (2026-07-15).
+	// 2026-11-12, launch on record (wasLive kept): nebula.eiger.co served the
+	// Nebula contract wizard and tools (Wayback 2025-03-16, 2025-10-12).
 	nebula: {
 		from: "Live",
 		to: "Inactive",
@@ -2153,6 +2332,10 @@ export const STATUS_FIX: Record<
 	// exists at the listed URL.
 	// boxy-confirmed dead 2026-07-11 (surfaced by the #414 bridge-corridor
 	// tail: Bridge-typed, empty networks, product gone).
+	// 2026-11-12, launch on record (wasLive kept): apay.io's stellar.toml
+	// (Wayback, 2020) lists its BTC, LTC and ETH anchor tokens as status live,
+	// and Horizon counts 16,994 trustlines to its BTC (GAUTUYY2...) on
+	// 2026-11-12.
 	apay: {
 		from: "Live",
 		to: "Inactive",
@@ -2160,6 +2343,9 @@ export const STATUS_FIX: Record<
 	},
 	// sls-028: domains REPURPOSED to unrelated gambling content (dual-lane
 	// verified 2026-07-10) — a Live row pointing there is unsafe navigation.
+	// 2026-11-12, launch on record (wasLive kept): thebluemarble.io (Wayback
+	// 2022-03-13 to 2025-03-04) served login, account creation and live
+	// campaigns (Biochar.Life), later a Shopify app.
 	"the-blue-marble": {
 		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
 		// rewritten from==to as a source fill (gap-matrix sourced pool
@@ -2209,6 +2395,9 @@ export const STATUS_FIX: Record<
 	// boxy 2026-07-09 (human-confirmed dead) + hard evidence: DefiLlama TVL
 	// $93 (a LENDING protocol), repo eq-lab/slender last push 2025-10-03.
 	// Site still resolves — zombie, not offline; status is the honest signal.
+	// 2026-11-12, launch on record (wasLive kept): DefiLlama lists Slender on
+	// Stellar from 2026-05-06 (TVL up to $116), and slender.fi linked 'Enter
+	// App' from 2024-04-13 (Wayback).
 	slender: { from: "Live", to: "Inactive" },
 	// ── Liveness wave (boxy-approved 2026-07-10, improvements/liveness-
 	// triage-2026-07-10.md): 38 confirmed-dead flips. Each verdict required
@@ -2220,8 +2409,17 @@ export const STATUS_FIX: Record<
 	aerochain: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: aerochain.wingleet.com has no capture
+		// on any host (a domain-wide sweep of wingleet.com finds only the parent's
+		// pages for an unrelated aircraft redelivery product, 2025-07 on), and
+		// SebWingleet/Aerochain-Stellar deploys to testnet only. Its Stellar
+		// product is testnet-only and it has no other launched product of its own.
+		wasLive: false,
 		note: "Confirmed defunct 2026-07-10 (liveness triage): Parent company site wingleet.com is live (\u00a9 2026) but pivoted to aircraft redelivery/compliance intelligence with zero mention of Aerochain, blockchain, or Stellar; aerochain.wingleet.com no longer\u2026",
 	},
+	// 2026-11-12, launch on record (wasLive kept): arcturus-gpt.com (Wayback
+	// 2024-02-29, 2024-09-13) linked two published ChatGPT GPTs, Arcturus
+	// Stellar and Arcturus Soroban.
 	arcturus: {
 		from: "Live",
 		to: "Inactive",
@@ -2237,6 +2435,9 @@ export const STATUS_FIX: Record<
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): benkiko.xyz has no DNS record, GitHub org benkikodao has zero public repos, newest footprint is 2021 press + passive SCF/LinkedIn listings.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): app.blip.watch served its
+	// sign-in (Wayback 2024-09-18), and blip.watch linked 'Open app' through
+	// 2025-09-04.
 	blip: {
 		from: "Live",
 		to: "Inactive",
@@ -2247,6 +2448,9 @@ export const STATUS_FIX: Record<
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): borderdollar.co 404, borderdollar.com parked lander, founder's GitHub pushes only unrelated personal repos, Tracxn profile reports the company no longer active.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): the BRL token (GDVKY2GU...)
+	// holds 6,982 trustlines and 2.24M trades on mainnet (row onchain,
+	// 2026-11-03), and nTokens' own notice discontinues it.
 	brl: {
 		from: "Live",
 		to: "Inactive",
@@ -2255,26 +2459,44 @@ export const STATUS_FIX: Record<
 	canfy: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: canfy.net's captures as Canfy
+		// (Wayback 2023-12-09, 2024-03-23) pitch a general LLM platform with no
+		// app, sign-in or download link and never name Stellar or Soroban; its
+		// earlier captures are an unrelated shop. No launched product of any kind
+		// found.
+		wasLive: false,
 		note: "Confirmed defunct 2026-07-10 (liveness triage): canfy.net NXDOMAIN with no Wayback snapshot, no GitHub org, zero product mentions via search \u2014 entire footprint gone.",
 	},
 	chaincred: {
-		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
+		// Flip Live→Inactive applied 2026-07-10;
 		// rewritten from==to as a source fill (gap-matrix sourced pool
 		// 2026-09-14, see comet). Two facts in the July note were wrong: the
 		// landing page 200s at its real (mixed-case) path and the author still
 		// has the repos. The verdict stands on the repos' dates instead.
 		from: "Inactive",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: its only product surface is a
+		// hackathon landing page (repos pushed 2024-07-23/24, this entry's note;
+		// the only capture on its host, 2025-07-10, is that page), and no app or
+		// deployment was found. The row's links.github names a different project,
+		// Chaincerts.
+		wasLive: false,
 		asOf: "2026-09-14",
 		sourceUrl: "https://github.com/Prince29chouhan/ChainCred",
 		basis: "human-verified",
 		note: "Re-read 2026-09-14: the author's ChainCred, ChainCred_landing, ChainCredLanding and ChaiCredLandingPage repos were all last pushed 2024-07-23/24 (one hackathon weekend) and nothing since; prince29chouhan.github.io/ChainCred_landing serves a JS shell titled 'ChainCred' (the July 404 was the lowercased path). Hackathon-grade project with no later footprint.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): cosmic.link (Wayback
+	// 2019-07-20 to 2023-03-28) served its Stellar transaction signer, with a
+	// public network option.
 	cosmiclink: {
 		from: "Live",
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): cosmic.link is NXDOMAIN, sibling cosmic.plus redirects to an expired-domain sale listing, and the cosmic-plus GitHub org's last real push was 2023-09.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): cosmic.vote (Wayback
+	// 2020-09-21 to 2023-11-29) served its voting app, a stellar-sdk build
+	// naming the public network passphrase (capture 2022-12-04).
 	cosmicvote: {
 		from: "Live",
 		to: "Inactive",
@@ -2285,11 +2507,18 @@ export const STATUS_FIX: Record<
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): blockshangerous.com unregistered (last indexed blog post 2021-04), GitHub org last push 2022-11; no newer footprint found.",
 	},
+	// 2026-11-12, owner call (wasLive left as stored): eakazi.com served a jobs
+	// board in Rwanda (Wayback 2017-06-05 to 2019-02-13), and BIoT Labs' EA
+	// KAZI repos target the Internet Computer; no Stellar deployment found. A
+	// product under the name launched, but not the Stellar one.
 	"ea-kazi": {
 		from: "Live",
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): biotlabs.africa NXDOMAIN (last archived 2024-08), org stale since 2023-03, eakazi.com broken TLS, .io/.org NXDOMAIN; last sign of life is a ~2023/24 pivot post to ICP with no working product since.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): equilibre.io (Wayback
+	// 2021-03-05 to 2024-09-11) served its portfolio balancer, with login by
+	// Stellar address.
 	equilibre: {
 		from: "Live",
 		to: "Inactive",
@@ -2298,13 +2527,24 @@ export const STATUS_FIX: Record<
 	forge: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: forgerpc.com read 'Coming soon' in
+		// every capture (Wayback 2024-02-29 to 2024-12-06; no other host), and no
+		// repository was found.
+		wasLive: false,
 		note: "Confirmed defunct 2026-07-10 (liveness triage): forgerpc.com is unresolvable, no GitHub org, and no footprint found via searches for 'Forge forgerpc Stellar Horizon Soroban RPC node deployment' \u2014 no mention of the product or a relaunch anywhere.",
 	},
+	// 2026-11-12, owner call (wasLive left as stored): a GeckoFuzz repository
+	// survives at tonyke-bot/geckofuzz (homepage gecko.security), an on-chain
+	// EVM auditing tool, and no Soroban release was found. A product launched,
+	// but not the Stellar one.
 	"gecko-fuzz": {
 		from: "Live",
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): Recorded website github.com/jjjutla/geckofuzz returns 404 \u2014 repo deleted (absent from the author's repo list) \u2014 and searches for 'geckofuzz' find no relaunch or other footprint.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): pool.lumenaut.net served the
+	// inflation pool, with its inflation destination and join steps (Wayback
+	// 2020-01-09), until Protocol 12 removed inflation.
 	lumenaut: {
 		from: "Live",
 		to: "Inactive",
@@ -2313,30 +2553,52 @@ export const STATUS_FIX: Record<
 	"lumens-for-charity": {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: no host of lumensforcharity.tech or
+		// .org was ever captured (the .com is a 2022 parking page), no repository
+		// was found, and the only footprint is SCF Round 3 material from 2020-01.
+		wasLive: false,
 		note: "Confirmed defunct 2026-07-10 (liveness triage): lumensforcharity.tech unregistered; only footprint is SCF Round 3 material from January 2020 (galactictalk.org); no activity since.",
 	},
 	mimoto: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: its only footprint,
+		// github.com/nkoorty/mimoto, is deleted, and no site, release or listing
+		// was found (the other GitHub repos named mimoto are unrelated).
+		wasLive: false,
 		note: "Confirmed defunct 2026-07-10 (liveness triage): Only recorded footprint github.com/nkoorty/mimoto returns 404 and is absent from the owner's repo list; search found no footprint anywhere else.",
 	},
 	mxlet: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: xlet.io's one capture (Wayback
+		// 2020-10-28) says 'We are building open source software' for the wallet,
+		// its other host is a parking page, and MattPearce/xlet stopped in
+		// 2020-06.
+		wasLive: false,
 		note: "Confirmed defunct 2026-07-10 (liveness triage): xlet.io no longer resolves and the wallet repo github.com/MattPearce/xlet last pushed 2020-06; the author's 2026 GitHub activity is entirely unrelated projects.",
 	},
 	opensolar: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: MIT DCI's project page shows a 1kW
+		// array built in Aibonito with payments only simulated on a test network,
+		// and openx.solar's other hosts are docs, a demo, a dev site and builds
+		// (Wayback 2020-08 to 2025-07). No investor funds moved on Stellar.
+		wasLive: false,
 		note: "Confirmed defunct 2026-07-10 (liveness triage): openx.solar NXDOMAIN, YaleOpenLab repos untouched since Jan 2023, Yale OpenLab's own page frames the effort as concluded/absorbed into Open Earth Foundation \u2014 the Stellar crowdfunding platform no l\u2026",
 	},
 	pactta: {
-		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
+		// Flip Live→Inactive applied 2026-07-10;
 		// rewritten from==to as a source fill (gap-matrix sourced pool
 		// 2026-09-14, see comet). https://pactta.com/ is retracted (and now a
 		// stranger's parking stub), so the registry record is the source.
 		from: "Inactive",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: pactta.com's only capture on any host
+		// (Wayback 2024-08-30) is a Sedo parking page, the SCF listing describes
+		// an API still planned, and no repository, live API or partner was found.
+		wasLive: false,
 		asOf: "2026-09-14",
 		sourceUrl: "https://rdap.verisign.com/com/v1/domain/pactta.com",
 		basis: "human-verified",
@@ -2347,6 +2609,9 @@ export const STATUS_FIX: Record<
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): paygocrypto.io unregistered (no NS/A records); no current footprint found via searches \u2014 only unrelated or archival results.",
 	},
+	// 2026-11-12, owner call (wasLive left as stored): quidroo.com (Wayback
+	// 2021-12-22 to 2025-02-18) offered invoice payouts within 72 hours, with
+	// sign-up at web.quidroo.com. It launched; no Stellar tie was found.
 	quidroo: {
 		from: "Live",
 		to: "Inactive",
@@ -2357,6 +2622,9 @@ export const STATUS_FIX: Record<
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): rigel.link has no DNS record; only footprint is the ~2019 SCF #5 listing/forum thread; recent 'Rigel' hits are an unrelated affiliate tool.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): the public sheet served
+	// 2,700 flagged domains, with entries dated through 2023-12-22 (this
+	// entry's note, read 2026-09-14).
 	"scam-flagging-system": {
 		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
 		// rewritten from==to as a source fill (gap-matrix sourced pool
@@ -2378,8 +2646,15 @@ export const STATUS_FIX: Record<
 	snnac: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: snnac.me's one capture on any host
+		// (Wayback 2023-03-29) is a project outline that still reads 'Add More
+		// Content Here', and no device or app was found.
+		wasLive: false,
 		note: "Confirmed defunct 2026-07-10 (liveness triage): snnac.me unregistered, BlockShangerous GitHub org last push 2022-11, only 2022-era SCF#11 material found; no relaunch.",
 	},
+	// 2026-11-12, launch on record (wasLive kept):
+	// soroban-assistant.herokuapp.com served its Soroban chatbot (Wayback
+	// 2024-05-28, 2025-03-24).
 	"soroban-assistant": {
 		from: "Live",
 		to: "Inactive",
@@ -2388,6 +2663,10 @@ export const STATUS_FIX: Record<
 	sorobanide: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: no host of sorobanide.com was ever
+		// captured, omeganetwork-tech/sorobanide is deleted, and no other
+		// repository was found.
+		wasLive: false,
 		note: "Confirmed defunct 2026-07-10 (liveness triage): sorobanide.com unresolvable and the only traced repo (omeganetwork-tech/sorobanide) also deleted (GitHub API 404); no other footprint via search.",
 	},
 	sorobuilder: {
@@ -2398,23 +2677,40 @@ export const STATUS_FIX: Record<
 	sorosorcerer: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: sorosorcerer.com's only captures
+		// (Wayback 2025-05-31, no other host) are a parking page, and no
+		// repository was found.
+		wasLive: false,
 		note: "Confirmed defunct 2026-07-10 (liveness triage): sorosorcerer.com NXDOMAIN, org has no sorosorcerer repo (recent pushes unrelated), only dated footprint is a 2023 SDF community-tooling blog mention; no relaunch.",
 	},
+	// 2026-11-12, could not check (wasLive left as stored): docs.sorscan.org
+	// (Wayback 2024-06-19) lists a Pubnet UI at sorscan.org with API, analytics
+	// and node hosts, but every host captured from 2024-09 on is a parking
+	// page.
 	sorscan: {
 		from: "Live",
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): sorscan.org/.com/.io all unresolvable, no GitHub presence, nothing newer than the SCF #20 (2023) listing at communityfund.stellar.org/project/sorscan-svd.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): stellarupdate.com published
+	// Stellar news from 2020-07 to 2022-10 (Wayback).
 	"stellar-update": {
 		from: "Live",
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): Domain taken over by an unrelated party \u2014 stellarupdate.com now serves a Chinese admin system ('\u667a\u7acb\u65b9\u7ba1\u7406\u7cfb\u7edf', verified via curl) \u2014 and no trace of the Stellar blog operating elsewhere.",
 	},
+	// 2026-11-12, could not check (wasLive left as stored): stellarstrides.xyz
+	// only read 'Under construction' (Wayback 2024-06-18), but a marketing
+	// agency of a near-identical name, StellarStride (stellarstride.net, repo
+	// created 2024-09), may be the same team.
 	stellarstrides: {
 		from: "Live",
 		to: "Inactive",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): stellarstrides.xyz has no DNS record; only footprint is the SCF #22 recap on medium.com/stellar-community \u2014 no site, socials, or repos anywhere newer.",
 	},
+	// 2026-11-12, owner call (wasLive left as stored): typiqo.it (Wayback
+	// 2022-04-23) served a live food delivery shop. It launched; no Stellar tie
+	// was found.
 	typiqo: {
 		from: "Live",
 		to: "Inactive",
@@ -2429,6 +2725,9 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		note: "Confirmed defunct 2026-07-10 (liveness triage): vitreous.co unregistered (NXDOMAIN re-confirmed 2026-08-29; last live Wayback capture 2024-05-11); only footprint is a years-old SCF profile piece on stellar.org/blog.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): coinqvest.com served its
+	// payment processor with API docs, SDKs and store plugins (Wayback
+	// 2020-11-01, 2022-07-24), and whalestack.com its successor (2023-12-02).
 	whalestack: {
 		from: "Live",
 		to: "Inactive",
@@ -2440,6 +2739,11 @@ export const STATUS_FIX: Record<
 	centaurus: {
 		from: "Live",
 		to: "Inactive",
+		// 2026-11-12: no record of a launch: centaurus-project released v0.0.1 and
+		// v0.0.2 binaries (2020-12-02) of the layer-two software, but no public
+		// constellation, site or operator was found; the 2014 Android wallet of
+		// the same name (TbLtzk/Centaurus) is a different project.
+		wasLive: false,
 		asOf: "2026-07-13",
 		sourceUrl: "https://github.com/centaurus-project/centaurus",
 		basis: "human-verified",
@@ -2453,6 +2757,9 @@ export const STATUS_FIX: Record<
 	// list (marked Jul 2 + Jul 5) but that script writes status without
 	// registering ownership here, so the nightly lumenloop sync flipped it back
 	// to Live every time. This row makes `status` curated-owned for the slug.
+	// 2026-11-12, launch on record (wasLive kept): Keybase's built-in Stellar
+	// wallet received SDF's 2019 spacedrop to Keybase users
+	// (stellar.org/blog/keybase-stellar-lumens-spacedrop).
 	keybase: {
 		from: "Live",
 		to: "Inactive",
@@ -2790,6 +3097,9 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://trygrip.co/",
 		note: "trygrip.co redirects to unrelated sites (persadaposnews.id on 2026-11-07), and Grip's iOS app is delisted: no product of its own answers.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): Horizon counts 1,192
+	// trustlines to TRUMP (GAP4Z7QQ..., home domain xlmeme.com, 2026-11-12),
+	// and xlmeme.com sold its MEME token on Stellar (Wayback 2024-05-09).
 	xlmeme: {
 		from: "Live",
 		to: "Inactive",
@@ -2818,6 +3128,10 @@ export const STATUS_FIX: Record<
 		wasLive: false,
 		note: "Cables' FAQ says \"Cables will launch on Ethereum mainnet to start.\", and Horizon holds no asset from Cables Finance (its one CABLES asset is an unrelated issuer's; read 2026-11-07): the Soroban DEX its audits page lists is not live on Stellar.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): Horizon counts 8,526
+	// trustlines to its BTC token and 1,944 to its DOGE (issuer GCNSGHUC...,
+	// 2026-11-12), and interstellar.exchange served the wallet and DEX from
+	// 2018-03 (Wayback).
 	interstellar: {
 		from: "Live",
 		to: "Inactive",
@@ -2831,6 +3145,8 @@ export const STATUS_FIX: Record<
 	// still move; the issuer's statement outranks a probe. The same facts
 	// retire them from the stablecoin registry and mark their RWA rows
 	// discontinued (src/data/rwa-registry.ts).
+	// 2026-11-12, launch on record (wasLive kept): the GYEN token (GDF6VOEG...)
+	// holds 544 holders and 1.78M trades on mainnet (row onchain, 2026-11-03).
 	gyen: {
 		from: "Live",
 		to: "Inactive",
@@ -2839,6 +3155,8 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://stablecoin.z.com/.well-known/stellar.toml",
 		note: "GMO-Z.com Trust Company's stellar.toml (read 2026-11-11) says issuance of GYEN has been wound down, with the initial 1:1 redemption period with GMO Trust running from 15 May to 11 November 2026.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): the ZUSD token (GDF6VOEG...)
+	// holds 242 holders and 1.66M trades on mainnet (row onchain, 2026-11-03).
 	zusd: {
 		from: "Live",
 		to: "Inactive",
@@ -2847,6 +3165,9 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://stablecoin.z.com/.well-known/stellar.toml",
 		note: "GMO-Z.com Trust Company's stellar.toml (read 2026-11-11) says issuance of ZUSD has been wound down, with the initial 1:1 redemption period with GMO Trust running from 15 May to 11 November 2026.",
 	},
+	// 2026-11-12, launch on record (wasLive kept): the VEUR token (GDXLSLCO...)
+	// holds 13 holders and 727 trades on mainnet (row onchain, 2026-11-03), and
+	// VNX ran exchange services for it until 2026-05-22.
 	veur: {
 		from: "Live",
 		to: "Inactive",
