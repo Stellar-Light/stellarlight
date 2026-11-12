@@ -6941,7 +6941,7 @@ export const spec: OpenAPISpec = {
 																		nullable: true,
 																		enum: [...CODE_SCAN_STATES],
 																		description:
-																			"Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself, so the code facts here describe something no longer reachable; such rows are excluded from searchRepos and builder code evidence. null = never stamped.",
+																			"Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself, so the code facts here describe something no longer reachable; such rows are excluded from searchRepos, from the repos listed on searchProjects and getLeaderboard rows and from builder code evidence. null = never stamped.",
 																	},
 																	scannedAt: {
 																		type: "string",
@@ -7366,7 +7366,7 @@ export const spec: OpenAPISpec = {
 															nullable: true,
 															enum: [...CODE_SCAN_STATES],
 															description:
-																"Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself; such rows are excluded from searchRepos and builder code evidence. null = never stamped.",
+																"Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself; such rows are excluded from searchRepos, from the repos listed on searchProjects and getLeaderboard rows and from builder code evidence. null = never stamped.",
 														},
 														scannedAt: { type: "string", nullable: true },
 														stellarProof: { type: "string", nullable: true },
@@ -12117,7 +12117,7 @@ export const spec: OpenAPISpec = {
 					repos: {
 						type: "array",
 						description:
-							"This project\u2019s top indexed GitHub repos, surfaced inline (same shape as /api/repos/search items). Cite as the project\u2019s code references.",
+							"This project\u2019s top indexed GitHub repos, surfaced inline (same shape as /api/repos/search items). Cite as the project\u2019s code references. A repo marked gone (GitHub answered 404 to the gone-repos probe; scanState `gone` on /api/repos/trust) is left out, as on /api/repos/search, and still counts toward lastActivityAt, since a repo going private is not the project stopping. A repo that went 404 after the probe last marked rows is still listed until it is marked.",
 						items: { $ref: "#/components/schemas/Repo" },
 					},
 					lastActivityAt: {
@@ -13657,13 +13657,19 @@ export const spec: OpenAPISpec = {
 							repoCount: {
 								type: "integer",
 								description:
-									"Indexed repos attributed to the project: our index's coverage, not the project's total GitHub footprint.",
+									"Indexed repos attributed to the project, the ones in goneRepos included: our index's coverage, not the project's total GitHub footprint.",
 							},
 							repos: {
 								type: "array",
 								items: { type: "string" },
 								description:
-									"The exact repositories (owner/name) the stats above aggregate over; repoCount === repos.length, sorted. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column.",
+									"The repositories (owner/name) the stats above aggregate over, minus any marked gone, sorted; repoCount === repos.length + goneRepos.length. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column.",
+							},
+							goneRepos: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Aggregated repositories (owner/name) marked gone: GitHub answered 404 to the gone-repos probe (scanState `gone` on /api/repos/trust), which it does for a private repo and a deleted one alike. Counted in every number above, since a repo going private is not the project stopping, and never listed in repos. [] = none marked. Sorted; also the CSV's last column, gone_repos.",
 							},
 						},
 					},

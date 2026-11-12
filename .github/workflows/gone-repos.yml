@@ -1,7 +1,8 @@
 name: gone repos
 
 # Repos we serve that no longer exist on GitHub. Reads every row at
-# codeScanState error/gone from the PUBLIC repos API, asks GitHub once per
+# codeScanState error/gone, and every project-linked row enrich-repos has not
+# refreshed for 8 days, from the PUBLIC repos API, asks GitHub once per
 # repo, and classifies from the HTTP status — 404 gone / 200 alive (size 0
 # empty) / anything else unchecked. A row the run could not check is never
 # reported as gone, and a run more than half blind exits 2 having written
@@ -25,7 +26,7 @@ on:
         default: false
       limit:
         description: "How many rows to probe (unknown state first)"
-        default: "600"
+        default: "900"
 
 permissions:
   contents: write
@@ -57,7 +58,7 @@ jobs:
           # `inputs`, so it never gets --execute and never needs these.
           DATABASE_URI: ${{ inputs.execute && secrets.DATABASE_URI || '' }}
           PAYLOAD_SECRET: ${{ inputs.execute && secrets.PAYLOAD_SECRET || '' }}
-        run: pnpm exec tsx scripts/check-gone-repos.ts --limit=${{ inputs.limit || 600 }} ${{ inputs.execute && '--execute' || '' }}
+        run: pnpm exec tsx scripts/check-gone-repos.ts --limit=${{ inputs.limit || 900 }} ${{ inputs.execute && '--execute' || '' }}
       # Only after the probe actually ran — an artifact committed by a skipped
       # probe is the stale-evidence trap (a quiet detector reads like a clean
       # one). Runs on the red too: a finding is exactly what must be recorded.

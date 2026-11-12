@@ -124,12 +124,25 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    finding stale once it has been open more than 30 days (`STALE_DAYS` in
    `src/lib/improvement-ledger.ts`); the oldest open gone-repos finding was
    first seen 2026-09-27T10:59Z, so the first turns stale at
-   2026-10-27T10:59Z.
-   State: the execute would mark the 56 `gone` (out of search and builder
-   results; a lookup by name still answers, marked gone) and set the 2 back
-   to `error` for a rescan, reading every row back; it has not run.
+   2026-10-27T10:59Z. A 2026-11-12 sweep of the 2,542 repos linked to the
+   1,020 listed projects (public API plus one GitHub read each) found 82 that
+   GitHub answers 404 for, on 47 projects, 55 of them in a row's top five
+   `repos` on 37 projects; 56 of the 82 sat at `scanned`, outside the probe's
+   pool, and the per-project join did not drop the 24 already at `gone`.
+   State: lane r1112-dq2-repos stops listing `gone` rows as a project's repos
+   on searchProjects, getLeaderboard (moved to `goneRepos`) and the project
+   page; every aggregate still counts them. It also adds to the probe's pool every
+   project-linked row enrich-repos has not refreshed for 8 days (pool 774,
+   holding 79 of the 82). The execute would mark the newly gone rows `gone`
+   and set the ones that came back to `error` for a rescan, reading every row
+   back; it has not run.
    Done when: the execute ran (dry run read first) and its read-back
    passed.
+   Open beside it: enrich-repos only ever sets a row's projectSlug, so a row
+   whose repo was renamed (16, 6 with a twin row under the new name), moved
+   to another project's org (theahaco/attest-contract, now
+   stellar-registry/actions, still cited by the-aha-company) or dropped from
+   a project's links stays linked; nothing unlinks it.
 
 7. **"Recent mainnet upgrade" leads with an upgrade not yet on mainnet.**
    Probe: in `/api/research?q=recent mainnet upgrade&limit=5`, no row

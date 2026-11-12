@@ -64,14 +64,15 @@ describe("getLeaderboard dates every TVL figure it ranks", () => {
 		)
 			.trim()
 			.split("\n");
-		expect(header.endsWith(",short_description,tvl_as_of,tvl_stale")).toBe(
-			true,
-		);
+		// Appended after short_description; later columns (gone_repos,
+		// 2026-11-12) append after these, so every older position holds.
+		expect(header).toContain(",short_description,tvl_as_of,tvl_stale");
+		const at = header.split(",").indexOf("tvl_as_of");
 		const cells = (slug: string) =>
 			lines
 				.find((l) => l.split(",")[2] === slug)
 				?.split(",")
-				.slice(-2);
+				.slice(at, at + 2);
 		expect(cells("spiko")).toEqual(["2026-09-14T10:30:21.591Z", "true"]);
 		expect(cells("blend")).toEqual(["2026-11-02T13:19:15.688Z", "false"]);
 		expect(cells("lobstr")).toEqual(["", ""]);

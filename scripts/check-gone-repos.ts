@@ -13,7 +13,12 @@
  *   pnpm exec tsx scripts/check-gone-repos.ts --execute     # + write the state
  *
  * Reads candidates from the PUBLIC repos API (no store credentials), asks
- * GitHub once per repo, and classifies from the HTTP STATUS:
+ * GitHub once per repo, and classifies from the HTTP STATUS. The pool is every
+ * row at error/gone plus every project-linked row enrich-repos stopped
+ * refreshing (goneRepoCandidateQuery, src/lib/project-repos.ts): measured
+ * 2026-11-12, 56 of the 82 project-linked 404s sat at `scanned`, outside the
+ * old pool, and project rows cited them.
+ *
  *
  *   gone       404 — deleted, renamed with no redirect, or now private
  *   empty      200 and size 0 KB (unborn HEAD; the trees API 409s on these)
@@ -44,6 +49,10 @@ import { strict as assert } from "node:assert";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { type RepoExistence, repoExistence } from "../src/lib/github";
+import {
+	ENRICH_STALE_DAYS,
+	goneRepoCandidateQuery,
+} from "../src/lib/project-repos";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
@@ -54,7 +63,7 @@ const OUT = join(process.cwd(), "improvements/audits/gone-repos-latest.json");
 const EXECUTE = process.argv.includes("--execute");
 const JSON_OUT = process.argv.includes("--json");
 const LIMIT = Number(
-	process.argv.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? 600,
+	process.argv.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? 900,
 );
 const GH_TOKEN =
 	process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim() || "";
@@ -63,7 +72,8 @@ const CONCURRENCY = 4;
 
 /** States worth asking GitHub about. `error` is the population the defect was
  *  measured in; `gone` rides along so a repo that comes BACK (restored, or a
- *  rename that grew a redirect) is un-hidden instead of hidden forever. */
+ *  rename that grew a redirect) is un-hidden instead of hidden forever. The
+ *  query adds project-linked rows whose lastEnrichedAt went stale. */
 const CANDIDATE_STATES = ["error", "gone"] as const;
 
 interface RepoRow {
@@ -87,9 +97,7 @@ export interface GoneRow {
 /** Page the public repos API. null = it did not answer (blind, never empty). */
 async function fetchCandidates(): Promise<RepoRow[] | null> {
 	const rows: RepoRow[] = [];
-	const where = CANDIDATE_STATES.map(
-		(s, i) => `where[or][${i}][codeScanState][equals]=${s}`,
-	).join("&");
+	const where = goneRepoCandidateQuery(new Date());
 	for (let p = 1; p < 40; p++) {
 		try {
 			const res = await fetch(
@@ -284,12 +292,13 @@ async function main(): Promise<number> {
 	const batch = pool.slice(0, LIMIT);
 	const truncated = batch.length < pool.length;
 	console.log(
-		`gone-repos — ${EXECUTE ? "EXECUTE" : "REPORT ONLY"} · pool ${pool.length} row(s) at ${CANDIDATE_STATES.join("/")} · probing ${batch.length}`,
+		`gone-repos — ${EXECUTE ? "EXECUTE" : "REPORT ONLY"} · pool ${pool.length} row(s) at ${CANDIDATE_STATES.join("/")} or project-linked and not refreshed by enrich for ${ENRICH_STALE_DAYS} days · probing ${batch.length}`,
 	);
 	// ponytail: a capped run reports only what it asked. The rows it skipped are
 	// absent from the artifact, which the ledger would read as resolved — so a
 	// truncated run SAYS so, in the artifact and on stdout. Raise --limit (the
-	// whole pool was 425 on 2026-09-14) rather than letting this become normal.
+	// whole pool was 425 on 2026-09-14, and 774 on 2026-11-12 once stale
+	// project-linked rows joined it) rather than letting this become normal.
 	if (truncated)
 		console.warn(
 			`  ! TRUNCATED: ${pool.length - batch.length} row(s) of the pool were not probed this run — their absence from this artifact is not a clean verdict.`,
@@ -341,7 +350,7 @@ async function main(): Promise<number> {
 	const report = {
 		generatedAt: new Date().toISOString(),
 		source: "scripts/check-gone-repos.ts",
-		rule: "Every repos row at codeScanState error/gone gets ONE GitHub read. The verdict comes from the HTTP status, never the body: 404 = gone, 200 = alive (size 0 = empty), anything else = unchecked. An unchecked row is never reported as gone, and a run more than half blind writes nothing and exits 2.",
+		rule: "Every repos row at codeScanState error/gone, and every project-linked row whose lastEnrichedAt is older than ENRICH_STALE_DAYS, gets ONE GitHub read. The verdict comes from the HTTP status, never the body: 404 = gone, 200 = alive (size 0 = empty), anything else = unchecked. An unchecked row is never reported as gone, and a run more than half blind writes nothing and exits 2.",
 		mode: EXECUTE ? "execute" : "report-only",
 		blind,
 		truncated,
