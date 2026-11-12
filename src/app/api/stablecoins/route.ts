@@ -5,7 +5,7 @@
  *   GET /api/stablecoins?peg=USD             → only USD-pegged
  *   GET /api/stablecoins?sort=holders        → by trustline holders
  *   GET /api/stablecoins?limit=5             → top N
- *   GET /api/stablecoins?assetType=none      → rows with no assetType recorded
+ *   GET /api/stablecoins?assetType=Fiat-Backed → one class (see the spec)
  *
  * Served from OUR OWN `stablecoins` collection (measured every 6h by
  * scripts/refresh-stablecoins.ts from Horizon, Stellar Expert, and live peg
@@ -38,6 +38,7 @@ import {
 	assetTypeFilter,
 	filterByAssetType,
 	rankStablecoins,
+	retirementOf,
 	STABLECOIN_ASSET_TYPE_FILTERS,
 	STABLECOIN_QUERY_PARAMS,
 	STABLECOIN_SORTS,
@@ -98,7 +99,7 @@ export async function GET(req: NextRequest) {
 			{
 				error: `Invalid assetType '${assetTypeRaw}'.`,
 				validAssetTypes: STABLECOIN_ASSET_TYPE_FILTERS,
-				hint: "Case-insensitive. none selects the rows with no assetType recorded: unclassified, not a verified plain peg.",
+				hint: "Case-insensitive. Classes are defined on Stablecoin.assetType in the spec. Unclassified selects the rows whose issuer states no backing we could read; none is an alias of Unclassified, kept for compatibility.",
 			},
 			{ status: 400 },
 		);
@@ -151,8 +152,9 @@ export async function GET(req: NextRequest) {
 
 	let rows = (found.docs as StoreRow[])
 		// A retired row is one we stopped tracking; it is not part of the
-		// current inventory (and is still not a claim the issuer stopped).
-		.filter((d) => !d.retiredAt)
+		// current inventory. Retired from deploy when the registry records it,
+		// not only once the refresh stamps retiredAt.
+		.filter((d) => !retirementOf(d))
 		.map(storeRowToApi)
 		.filter((r) => r.ticker);
 
@@ -232,7 +234,7 @@ export async function GET(req: NextRequest) {
 					note: "Rows are a hand-curated registry of verified (code, issuer) pairs, measured every 6h. Absence from this list means the asset is not tracked here: NOT proof it is not issued on Stellar; verify against Horizon before asserting non-existence. Asset identity is (code, issuer): two assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on ticker alone.",
 				},
 				methodology:
-					"marketCapUSD = circulating supply × priceUSD. It is the ONLY cross-row-comparable size metric; `supply` is raw units in each asset's own `peg` and comparable only within a peg. Default sort=marketcap. null on any metric = not measured, never 'zero'. Every row carries `basis`: live = measured this cycle; curated-static = hand-checked figures for an asset no public API reports reliably; unmeasured = the fetch failed and the row is retained so its absence is never read as a delisting. `updatedAt` dates the figures (when they were measured, internally `measuredAt`): cite it. `logoUrl` is the issuer's own mark when one resolves, null otherwise; `logoSource` says where it came from. `priceBasis` says how each unit was priced: assumed-peg = the peg's live FX rate and peg deviation is NOT measured; measured-market = the unit's own market price, used where the unit is not 1:1 with its peg (USDY accrues, USDM1 is a bond above par). `company` is the brand; `issuerOfRecord` is the ORG_NAME the issuer's own stellar.toml names (at the issuer account's home_domain), read every 6h with its toml URL and date, null until read. `assetType` is recorded only where the unit is not 1:1 with its peg; null = unclassified, not a verified plain peg.",
+					"marketCapUSD = circulating supply × priceUSD. It is the ONLY cross-row-comparable size metric; `supply` is raw units in each asset's own `peg` and comparable only within a peg. Default sort=marketcap. null on any metric = not measured, never 'zero'. Every row carries `basis`: live = measured this cycle; curated-static = hand-checked figures for an asset no public API reports reliably; unmeasured = the fetch failed and the row is retained so its absence is never read as a delisting. `updatedAt` dates the figures (when they were measured, internally `measuredAt`): cite it. `logoUrl` is the issuer's own mark when one resolves, null otherwise; `logoSource` says where it came from. `priceBasis` says how each unit was priced: assumed-peg = the peg's live FX rate and peg deviation is NOT measured; measured-market = the unit's own market price, used where the unit is not 1:1 with its peg (USDY accrues, USDM1 is a bond above par). `company` is the brand; `issuerOfRecord` is the ORG_NAME the issuer's own stellar.toml names (at the issuer account's home_domain), read every 6h with its toml URL and date, null until read. `assetType` is never null: what backs the unit as its issuer states it (Fiat-Backed, Crypto-Backed, Multi-Asset-Backed, Treasury-Backed, Yield Stablecoin), with the issuer's page in `assetTypeSourceUrl` and the day it was read in `assetTypeAsOf`; Unclassified where no issuer statement could be read, and `assetTypeNote` says what was checked. A class is the issuer's claim, not an audit.",
 			},
 			stablecoins: rows,
 		},

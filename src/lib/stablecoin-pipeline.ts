@@ -58,6 +58,7 @@ import {
 	type IssuerOfRecordCheck,
 	namedIssuingParty,
 	type PriceBasis,
+	type StablecoinAssetType,
 	sameParty,
 } from "./stablecoins";
 import { looksLikeStellarToml, parseStellarToml } from "./stellar-toml";
@@ -113,7 +114,12 @@ export interface MeasuredStablecoin {
 	website: string;
 	peg: string;
 	country: string;
-	assetType: string | null;
+	/** The registry's class for the row and the issuer statement it rests on
+	 *  (StablecoinAsset.assetTypeSource), written as they are. */
+	assetType: StablecoinAssetType;
+	assetTypeSourceUrl: string | null;
+	assetTypeAsOf: string;
+	assetTypeNote: string;
 	/** Circulating units in the asset's OWN peg — not comparable across pegs. */
 	supply: number | null;
 	/** supply × priceUSD. The only cross-asset comparable size metric. */
@@ -680,7 +686,7 @@ async function readIssuerOfRecordOnce(
 			outcome: "not-named",
 			at: at(),
 			sourceUrl: null,
-			why: "the issuer account sets no home_domain",
+			why: NO_HOME_DOMAIN,
 		};
 	// The account holder sets home_domain; fetch it only as a plain host.
 	if (typeof home !== "string" || !/^[a-z0-9.-]+$/i.test(home))
@@ -718,6 +724,9 @@ async function readIssuerOfRecordOnce(
 		note: r.note,
 	};
 }
+
+/** The not-named reason for an issuer account with no home_domain. */
+export const NO_HOME_DOMAIN = "the issuer account sets no home_domain";
 
 /** A stored field as an ISO string or null (Payload may hand back a Date). */
 function storedText(v: unknown): string | null {
@@ -786,6 +795,52 @@ export function issuerOfRecordPatch(
 	writeOn: boolean,
 ): Partial<IssuerOfRecordFields> {
 	return writeOn ? carryIssuerOfRecord(read, prev) : {};
+}
+
+/**
+ * What the refresh writes about who and what a row is; the measured figures
+ * are the writer's. `company` is always the registry's brand, and the issuer
+ * of record comes only from this run's read of the issuer's own toml, and
+ * only while the write is on. The class and its source are the registry's,
+ * written every run.
+ */
+export function rowIdentity(
+	m: MeasuredStablecoin,
+	prev: Record<string, unknown> | null | undefined,
+	writeIssuerOfRecord: boolean,
+) {
+	return {
+		assetId: m.id,
+		code: m.code,
+		issuer: m.issuer,
+		name: m.name,
+		company: m.company,
+		...issuerOfRecordPatch(m.issuerOfRecordRead, prev, writeIssuerOfRecord),
+		domain: m.domain,
+		website: m.website,
+		peg: m.peg,
+		country: m.country,
+		assetType: m.assetType,
+		assetTypeSourceUrl: m.assetTypeSourceUrl,
+		assetTypeAsOf: m.assetTypeAsOf,
+		assetTypeNote: m.assetTypeNote,
+	};
+}
+
+/**
+ * The stored rows the refresh retires: rows of assets the registry no longer
+ * lists (`listedIds`, its stablecoinId values) and not retired already. The
+ * refresh stamps their `retiredAt` and the API stops serving them; the
+ * series keeps their history. Dropping an entry from the registry, with a
+ * dated comment saying why, is how an asset leaves (BRL, UAH).
+ */
+export function rowsToRetire<
+	T extends { assetId?: string | null; retiredAt?: string | null },
+>(stored: T[], listedIds: Iterable<string>): T[] {
+	const listed = new Set(listedIds);
+	return stored.filter(
+		(d) => d.assetId && !listed.has(d.assetId) && !d.retiredAt,
+	);
 }
 
 /**
@@ -919,7 +974,22 @@ export async function measureStablecoin(
 	const now = new Date().toISOString();
 	// Read for every row, whatever happens to its metrics below: who issues
 	// an asset does not depend on whether its supply could be measured.
-	const issuerOfRecordRead = await readIssuerOfRecord(asset);
+	const read = await readIssuerOfRecord(asset);
+	// A row whose account sets no home_domain can carry a curated note on
+	// what that leaves unconfirmed (USDT0); it is the served reason only
+	// while the account still sets none.
+	const issuerOfRecordRead =
+		read.outcome === "not-named" &&
+		read.why === NO_HOME_DOMAIN &&
+		asset.noHomeDomainNote
+			? { ...read, why: `${read.why}: ${asset.noHomeDomainNote}` }
+			: read;
+	// The curated caveat rides after an urgent measurement note, never
+	// instead of it: a reader sees what went wrong first, and the caveat too.
+	const withCaveat = (urgent: string) =>
+		asset.note
+			? `${urgent}${/[.!?]$/.test(urgent) ? "" : "."} ${asset.note}`
+			: urgent;
 	const base = {
 		issuerOfRecordRead,
 		id: stablecoinId(asset),
@@ -931,12 +1001,13 @@ export async function measureStablecoin(
 		website: `https://${asset.domain}`,
 		peg: asset.peg,
 		country: PEG_COUNTRY[asset.peg] ?? "Global",
-		assetType: asset.assetType ?? null,
+		assetType: asset.assetType,
+		assetTypeSourceUrl: asset.assetTypeSource.url,
+		assetTypeAsOf: asset.assetTypeSource.checkedOn,
+		assetTypeNote: asset.assetTypeSource.note,
 		measuredAt: now,
-		// A curated caveat straight from the operator's own words, e.g. "not a
-		// stablecoin, not tradable" — overridden below by an urgent measurement
-		// note (unmeasured / rate-limited / hand-checked), which a reader needs
-		// to see first, but otherwise carried straight to the row.
+		// A curated caveat (USDM1's terms, BRLT's unreachable home_domain),
+		// carried to the row; an urgent measurement note below goes first.
 		note: asset.note,
 	};
 
@@ -992,7 +1063,9 @@ export async function measureStablecoin(
 			logoUrl,
 			logoSource,
 			basis: "curated-static",
-			note: `Figures hand-checked ${asset.hardcodedData.checkedAt}; no public API reports this asset reliably. Treat as an as-of estimate, not a live measurement.`,
+			note: withCaveat(
+				`Figures hand-checked ${asset.hardcodedData.checkedAt}; no public API reports this asset reliably. Treat as an as-of estimate, not a live measurement.`,
+			),
 		};
 	}
 
@@ -1012,7 +1085,9 @@ export async function measureStablecoin(
 					logoUrl,
 					logoSource,
 					basis: "unmeasured",
-					note: "Not confirmed on Horizon at measurement time. This is a lookup failure, not a claim the asset was retired; the row stays so its absence is never read as delisting.",
+					note: withCaveat(
+						"Not confirmed on Horizon at measurement time. This is a lookup failure, not a claim the asset was retired; the row stays so its absence is never read as delisting.",
+					),
 				};
 			}
 		}
@@ -1047,13 +1122,15 @@ export async function measureStablecoin(
 			logoSource,
 			basis: supply == null ? "unmeasured" : "live",
 			// Urgent first: a missing supply outranks a fallen-back price, and
-			// either outranks the curated caveat already on `base`.
+			// either goes before the curated caveat already on `base`.
 			...(supply == null
 				? {
-						note: "Supply unavailable from Stellar Expert at measurement time.",
+						note: withCaveat(
+							"Supply unavailable from Stellar Expert at measurement time.",
+						),
 					}
 				: priceNote
-					? { note: priceNote }
+					? { note: withCaveat(priceNote) }
 					: {}),
 		};
 	} catch (err) {
@@ -1069,7 +1146,9 @@ export async function measureStablecoin(
 			logoUrl,
 			logoSource,
 			basis: "unmeasured",
-			note: `Measurement failed: ${String((err as Error).message).slice(0, 120)}`,
+			note: withCaveat(
+				`Measurement failed: ${String((err as Error).message).slice(0, 120)}`,
+			),
 		};
 	}
 }

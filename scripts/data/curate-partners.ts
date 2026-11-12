@@ -20,6 +20,7 @@
 import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
+import { PARTNER_DESCRIPTION_FIXES } from "./curation-maps";
 
 const EXECUTE = process.argv.includes("--execute");
 
@@ -176,6 +177,9 @@ const TYPE_CORRECTIONS: Record<string, string> = {
 	// Own tagline: "GMO-Z.com Trust Company is building financial-grade
 	// digital assets. The first regulated digital JPY, GYEN. A trusted digital
 	// USD, ZUSD." Own stellar.toml fetched 2026-08-12: seps:[], no rampTypes.
+	// 2026-11-11: that toml now says issuance of GYEN and ZUSD has been wound
+	// down, the initial 1:1 redemption period ending 11 November 2026; the
+	// stored description is corrected by PARTNER_DESCRIPTION_FIXES.
 	"gmo-zcom-trust": "asset-issuer",
 	// Own tagline: "Australia's fast, stable, secure fiat-backed stablecoin.
 	// Get AUDD today..." — issues AUDD + NZDSC. Own stellar.toml fetched
@@ -414,6 +418,7 @@ async function main() {
 		PILOT_SLUGS.length === 0 &&
 		Object.keys(PARTNER_ENRICH).length === 0 &&
 		Object.keys(URL_CORRECTIONS).length === 0 &&
+		Object.keys(PARTNER_DESCRIPTION_FIXES).length === 0 &&
 		Object.keys(TYPE_CORRECTIONS).length === 0 &&
 		Object.keys(FOUNDED_YEARS).length === 0 &&
 		Object.keys(RAMP_ENRICH).length === 0
@@ -629,6 +634,36 @@ async function main() {
 			slug,
 			data: { tagline },
 			note: "tagline backfill",
+		});
+	}
+
+	console.log(
+		"\n── Description corrections (OVERWRITE, from-guarded: only our own stale seed text) ──",
+	);
+	for (const [slug, fix] of Object.entries(PARTNER_DESCRIPTION_FIXES)) {
+		const d = bySlug.get(slug);
+		if (!d) {
+			console.log(`  WARN: no partner with slug "${slug}"; skipped`);
+			continue;
+		}
+		if (d.description === fix.to) {
+			console.log(`  ${d.name} (${slug}): already corrected, no-op`);
+			continue;
+		}
+		if (d.description !== fix.from) {
+			console.log(
+				`  ${d.name} (${slug}): description is no longer our seed text, left as is (from-guard)`,
+			);
+			continue;
+		}
+		console.log(`  ${d.name} (${slug}): description`);
+		console.log(`    old: ${fix.from}`);
+		console.log(`    new: ${fix.to}`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { description: fix.to },
+			note: `description fix (${fix.sourceUrl}, read ${fix.asOf})`,
 		});
 	}
 

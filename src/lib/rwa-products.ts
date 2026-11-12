@@ -79,13 +79,16 @@ function toProduct(r: RwaAsset): ProductRecord {
 		name: r.name,
 		kind: r.productKind,
 		network: r.network,
-		status: "live",
+		// The issuer's own word that it no longer offers the product outranks
+		// the chain: the token still exists, the product is retired.
+		status: r.discontinued ? "retired" : "live",
 		contractId:
 			r.contract ?? (r.code && r.issuer ? `${r.code}-${r.issuer}` : null),
 		evidenceUrl: r.evidenceUrl,
 		asOf: r.verifiedAt,
-		note:
-			r.tomlStatus === "private"
+		note: r.discontinued
+			? `${r.discontinued.note} (${r.discontinued.sourceUrl}, read ${r.discontinued.asOf})`
+			: r.tomlStatus === "private"
 				? "issuer toml status=private: a restricted offering (KYC-gated platform accounts, not publicly tradable per the issuer); minted and held, but not a public market"
 				: r.state === "issued-single-holder"
 					? "minted; exactly one holder (the issuer or its custodian); no secondary activity"

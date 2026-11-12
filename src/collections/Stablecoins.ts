@@ -1,5 +1,9 @@
 import type { CollectionConfig } from "payload";
-import { ISSUER_OF_RECORD_CHECKS, PRICE_BASES } from "@/lib/stablecoins";
+import {
+	ISSUER_OF_RECORD_CHECKS,
+	PRICE_BASES,
+	STABLECOIN_ASSET_TYPES,
+} from "@/lib/stablecoins";
 import { adminOnly } from "./access";
 
 /**
@@ -122,12 +126,38 @@ export const Stablecoins: CollectionConfig = {
 			admin: { description: "Fiat the asset claims parity with (USD, EUR, …)" },
 		},
 		{ name: "country", type: "text" },
+		// The class, from the issuer's own statement as the registry records
+		// it, with that statement's URL, read date and gist; written every run
+		// by refresh-stablecoins.ts. Empty = not written yet (served as
+		// Unclassified).
 		{
 			name: "assetType",
+			type: "select",
+			options: [...STABLECOIN_ASSET_TYPES],
+			admin: {
+				description:
+					"What backs the unit as its issuer states it (Fiat-Backed for USDC, Yield Stablecoin for USDY); Unclassified where no issuer statement was found",
+			},
+		},
+		{
+			name: "assetTypeSourceUrl",
 			type: "text",
 			admin: {
 				description:
-					"Qualifier where the asset is not a pure peg (e.g. 'Yield Stablecoin' for USDY)",
+					"The issuer's own page the class rests on; empty for Unclassified",
+			},
+		},
+		{
+			name: "assetTypeAsOf",
+			type: "date",
+			admin: { description: "The day that page was read" },
+		},
+		{
+			name: "assetTypeNote",
+			type: "text",
+			admin: {
+				description:
+					"What the page states, in short; for Unclassified, what was checked",
 			},
 		},
 

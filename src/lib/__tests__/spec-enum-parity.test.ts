@@ -409,6 +409,31 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 		expect(spread("STABLECOIN_ASSET_TYPE_FILTERS")).toBe(1);
 	});
 
+	it("Stablecoin.assetType is never null: Unclassified is a class in its enum, and the field is not nullable (sls-107)", () => {
+		const assetType = S.components.schemas.Stablecoin.properties.assetType;
+		expect(assetType.enum).toContain("Unclassified");
+		expect(assetType.nullable).not.toBe(true);
+		const p = S.paths["/api/stablecoins"].get.parameters.find(
+			(x: Param) => x.name === "assetType",
+		) as Param;
+		expect(p.schema.enum).toEqual(
+			expect.arrayContaining(["Unclassified", "none"]),
+		);
+	});
+
+	it("every class has a written definition in Stablecoin.assetType, and the collection stores the same list (sls-107)", () => {
+		const d: string =
+			S.components.schemas.Stablecoin.properties.assetType.description;
+		for (const c of STABLECOIN_ASSET_TYPES) expect(d, c).toContain(`${c} = `);
+		const collection = readFileSync(
+			resolve(__dirname, "../../collections/Stablecoins.ts"),
+			"utf8",
+		);
+		expect(collection).toMatch(
+			/name:\s*"assetType",[\s\S]*?options:\s*\[\.\.\.STABLECOIN_ASSET_TYPES\]/,
+		);
+	});
+
 	it("Stablecoin.issuerOfRecordCheck is ISSUER_OF_RECORD_CHECKS, in the spec and in the collection that stores it", () => {
 		expect(
 			sorted(

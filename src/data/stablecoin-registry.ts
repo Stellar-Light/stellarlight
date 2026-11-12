@@ -65,17 +65,36 @@ export interface StablecoinAsset {
 	preferFallbackLogo?: boolean;
 	/** Use the peg's country flag instead of a logo. */
 	useCountryFlag?: boolean;
-	/** Extra qualifier: USDY is yield-bearing, not a pure peg. Leave
-	 *  it off only to mean "not classified": the API serves its absence as
-	 *  unknown, never as a verified plain peg. */
-	assetType?: StablecoinAssetType;
 	/**
-	 * A caveat the operator states about itself, carried verbatim from their
-	 * own toml/docs — never our inference. Surfaces on the row's `note` field
-	 * alongside (not instead of) a measurement problem, which still wins if
-	 * the fetch itself failed.
+	 * The row's class (the closed vocabulary Stablecoin.assetType defines in
+	 * the spec), read by hand from the issuer's own statement of what backs
+	 * the unit. Unclassified only where no such statement could be found.
+	 * Never taken from a toml's anchor fields: read 2026-11-11, they disagree
+	 * with the issuers' own words (C1 declares is_asset_anchored false, USDZ
+	 * declares crypto, YLDS declares fiat).
+	 */
+	assetType: StablecoinAssetType;
+	/**
+	 * What the class rests on, served beside it: the issuer's own page or
+	 * document (`url`), the day it was read (`checkedOn`), and what it states
+	 * in short (`note`). For an Unclassified row `url` is null and `note`
+	 * says what was checked and why it names no class.
+	 */
+	assetTypeSource: { url: string | null; checkedOn: string; note: string };
+	/**
+	 * A standing caveat, dated where it is our check: the operator's own
+	 * words, or what we found when its sources could not be read (BRLT).
+	 * Surfaces on the row's `note` field after (never instead of) an urgent
+	 * measurement note.
 	 */
 	note?: string;
+	/**
+	 * Served as the issuer-of-record reason, after "the issuer account sets
+	 * no home_domain", while that is why no issuer of record is named: what
+	 * the account's missing home_domain leaves unconfirmed, with the URL and
+	 * day checked (USDT0). Never an issuer of record itself.
+	 */
+	noHomeDomainNote?: string;
 	/**
 	 * Horizon's /assets index omits a few live assets. Skipping validation
 	 * keeps a real asset in the list rather than dropping it on a false
@@ -90,10 +109,10 @@ export interface StablecoinAsset {
 	 * WRONG for a unit whose value accrues or trades away from par — Ondo's
 	 * USDY is a share of a Treasury portfolio that was $1.14 on 2026-09-09,
 	 * and pricing it at $1.00 understated the asset by ~$65M (14%) on our own
-	 * dashboard. Set this on any row whose unit is not 1:1 with its peg (in
-	 * practice: every row carrying an `assetType` — a test enforces that), and
-	 * the pipeline prices from the market instead, marking the row
-	 * `priceBasis: "measured-market"`.
+	 * dashboard. Set this on any row whose unit is not 1:1 with its peg (a
+	 * test requires it on every Treasury-Backed and Yield Stablecoin row whose
+	 * issuer does not redeem the unit 1:1 at par), and the pipeline prices
+	 * from the market instead, marking the row `priceBasis: "measured-market"`.
 	 *
 	 * `id` is the CoinGecko coin id. The price is the TOKEN's, not one chain's
 	 * venue print: these are multi-chain issuances of one claim (USDY on 8
@@ -133,6 +152,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "mgusd.moneygram.com",
 		company: "MoneyGram",
 		peg: "USD",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://mgusd.moneygram.com/.well-known/stellar.toml",
+			checkedOn: "2026-11-11",
+			note: "The issuer's stellar.toml calls MGUSD a USD-backed stablecoin issued by Bridge on behalf of MoneyGram. Its product page, mgusd.moneygram.com, refused automated reads (HTTP 403).",
+		},
 	},
 	// Currency One (toml ORG_NAME "Kinesis Money Panama S.A.", currency.one) —
 	// eight fiat tokens declared in one toml, each issuer's home_domain
@@ -145,6 +170,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "currency.one",
 		company: "Currency One",
 		peg: "USD",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://currency.one/documents/C1Suite_Whitepaper.pdf",
+			checkedOn: "2026-11-11",
+			note: "The C1Suite whitepaper, linked from currency.one, says each token is backed by a reserve of cash and cash equivalents held apart from the issuer's funds, redeemable for its fiat currency under the suite's terms.",
+		},
 	},
 	{
 		code: "C1GBP",
@@ -152,6 +183,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "currency.one",
 		company: "Currency One",
 		peg: "GBP",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://currency.one/documents/C1Suite_Whitepaper.pdf",
+			checkedOn: "2026-11-11",
+			note: "The C1Suite whitepaper, linked from currency.one, says each token is backed by a reserve of cash and cash equivalents held apart from the issuer's funds, redeemable for its fiat currency under the suite's terms.",
+		},
 	},
 	{
 		code: "C1EUR",
@@ -159,6 +196,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "currency.one",
 		company: "Currency One",
 		peg: "EUR",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://currency.one/documents/C1Suite_Whitepaper.pdf",
+			checkedOn: "2026-11-11",
+			note: "The C1Suite whitepaper, linked from currency.one, says each token is backed by a reserve of cash and cash equivalents held apart from the issuer's funds, redeemable for its fiat currency under the suite's terms.",
+		},
 	},
 	{
 		code: "C1AUD",
@@ -166,6 +209,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "currency.one",
 		company: "Currency One",
 		peg: "AUD",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://currency.one/documents/C1Suite_Whitepaper.pdf",
+			checkedOn: "2026-11-11",
+			note: "The C1Suite whitepaper, linked from currency.one, says each token is backed by a reserve of cash and cash equivalents held apart from the issuer's funds, redeemable for its fiat currency under the suite's terms.",
+		},
 	},
 	{
 		code: "C1CAD",
@@ -173,6 +222,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "currency.one",
 		company: "Currency One",
 		peg: "CAD",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://currency.one/documents/C1Suite_Whitepaper.pdf",
+			checkedOn: "2026-11-11",
+			note: "The C1Suite whitepaper, linked from currency.one, says each token is backed by a reserve of cash and cash equivalents held apart from the issuer's funds, redeemable for its fiat currency under the suite's terms.",
+		},
 	},
 	{
 		code: "C1CHF",
@@ -180,6 +235,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "currency.one",
 		company: "Currency One",
 		peg: "CHF",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://currency.one/documents/C1Suite_Whitepaper.pdf",
+			checkedOn: "2026-11-11",
+			note: "The C1Suite whitepaper, linked from currency.one, says each token is backed by a reserve of cash and cash equivalents held apart from the issuer's funds, redeemable for its fiat currency under the suite's terms.",
+		},
 	},
 	{
 		code: "C1AED",
@@ -187,6 +248,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "currency.one",
 		company: "Currency One",
 		peg: "AED",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://currency.one/documents/C1Suite_Whitepaper.pdf",
+			checkedOn: "2026-11-11",
+			note: "The C1Suite whitepaper, linked from currency.one, says each token is backed by a reserve of cash and cash equivalents held apart from the issuer's funds, redeemable for its fiat currency under the suite's terms.",
+		},
 	},
 	{
 		code: "C1SGD",
@@ -194,6 +261,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "currency.one",
 		company: "Currency One",
 		peg: "SGD",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://currency.one/documents/C1Suite_Whitepaper.pdf",
+			checkedOn: "2026-11-11",
+			note: "The C1Suite whitepaper, linked from currency.one, says each token is backed by a reserve of cash and cash equivalents held apart from the issuer's funds, redeemable for its fiat currency under the suite's terms.",
+		},
 	},
 	{
 		code: "USDC",
@@ -201,6 +274,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "circle.com",
 		company: "Circle",
 		peg: "USD",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://www.circle.com/usdc",
+			checkedOn: "2026-11-11",
+			note: "Circle states USDC is backed 100% by highly liquid cash and cash-equivalent assets and redeemable 1:1 for US dollars; most of the reserve is in the Circle Reserve Fund, a government money market fund.",
+		},
 		// Circle's toml serves no usable currency image, so the API served
 		// logoUrl: null for the biggest coin on the page. The explorer already
 		// covers it client-side with a bundled mark; this pins the same mark so
@@ -221,6 +300,14 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "usdt0.to",
 		company: "Tether (USDT0)",
 		peg: "USD",
+		assetType: "Crypto-Backed",
+		assetTypeSource: {
+			url: "https://docs.usdt0.to",
+			checkedOn: "2026-11-11",
+			note: "The USDT0 documentation says each USDT0 is minted 1:1 against USDT locked on Ethereum and redeemed by burning it to unlock that USDT.",
+		},
+		noHomeDomainNote:
+			"usdt0.to's stellar.toml (https://usdt0.to/.well-known/stellar.toml, read 2026-11-11) names ORG_NAME Everdawn Labs Limited and lists this account as the USDT0 issuer, but the account sets no home_domain pointing to it, so the link cannot be confirmed from the account side",
 		// The toml's CURRENCIES image is an ipfs.io gateway URL that does not load
 		// reliably in browsers; the 512×512 mark below is the official asset mark.
 		fallbackImageUrl: "https://stellarlight.xyz/stablecoins/logos/usdt0.png",
@@ -232,6 +319,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "paxos.com",
 		company: "PayPal / Paxos",
 		peg: "USD",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://www.paxos.com/assets/pyusd",
+			checkedOn: "2026-11-11",
+			note: "Paxos states PYUSD reserves are held 100% in US dollar deposits, US Treasuries and cash equivalents, available for 1:1 redemption with Paxos.",
+		},
 		fallbackImageUrl:
 			"https://stellar.myfilebase.com/ipfs/QmaUjqTKqqzmQB1M2XDycVBcerzNYGQjoG2UUnbLdm1vgB",
 	},
@@ -241,32 +334,40 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "circle.com",
 		company: "Circle",
 		peg: "EUR",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://www.circle.com/eurc",
+			checkedOn: "2026-11-11",
+			note: "Circle states EURC is backed 100% by euro held at regulated financial institutions in the EEA and redeemable 1:1 for euro.",
+		},
 		// Circle's toml serves no usable currency image, so the API served
 		// logoUrl: null for the biggest coin on the page. The explorer already
 		// covers it client-side with a bundled mark; this pins the same mark so
 		// API consumers get it too. Verified 200 image/png.
 		fallbackImageUrl: "https://stellarlight.xyz/stablecoins/logos/eurc.png",
 	},
-	{
-		code: "ZUSD",
-		issuer: "GDF6VOEGRWLOZ64PQQGKD2IYWA22RLT37GJKS2EJXZHT2VLAGWLC5TOB",
-		domain: "stablecoin.z.com",
-		company: "GMO Trust",
-		peg: "USD",
-	},
-	{
-		code: "GYEN",
-		issuer: "GDF6VOEGRWLOZ64PQQGKD2IYWA22RLT37GJKS2EJXZHT2VLAGWLC5TOB",
-		domain: "stablecoin.z.com",
-		company: "GMO Trust",
-		peg: "JPY",
-	},
+	// ZUSD and GYEN (GMO-Z.com Trust Company): REMOVED 2026-11-11, on the
+	// issuer's own notice. Its stellar.toml (stablecoin.z.com, read
+	// 2026-11-11) says issuance of each "has been wound down" and that the
+	// initial 1:1 redemption period with GMO Trust "runs from 15 May to 11
+	// November 2026", with the terms at support.stablecoin.z.com (article
+	// 57881757618969). A stablecoin its own issuer has wound down, its
+	// initial redemption period ending on 11 November 2026, is not one this
+	// registry should carry: the rule that retired BRL and UAH. Dropping
+	// the entries stops the measurement; the next refresh stamps
+	// `retiredAt`, which keeps the history.
 	{
 		code: "EURS",
 		issuer: "GC5FGCDEOGOGSNWCCNKS3OMEVDHTE3Q5A5FEQWQKV3AXA7N6KDQ2CUZJ",
 		domain: "stasis.net",
 		company: "Stasis",
 		peg: "EUR",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://stasis.net/transparency",
+			checkedOn: "2026-11-11",
+			note: "STASIS states EURS is backed by 100% EUR liquid balances held in central bank accounts.",
+		},
 	},
 	{
 		code: "AUDD",
@@ -278,6 +379,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "audd.digital",
 		company: "Novatti Group",
 		peg: "AUD",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://www.audd.digital",
+			checkedOn: "2026-11-11",
+			note: "AUDC states AUDD is 1:1 backed by Australian dollars, through cash or cash equivalents, held in Australian financial institution accounts.",
+		},
 		skipHorizonValidation: true,
 		// Carried from the Replit service. Approximate + undated there; dated
 		// here so a consumer can see how old the human check is.
@@ -289,21 +396,43 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "glodollar.org",
 		company: "Glo Foundation",
 		peg: "USD",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://brale.xyz/assets/reports/USDGLO-Glo-Dollar-Reserve-Attestation-Report-09-2026.pdf",
+			checkedOn: "2026-11-11",
+			note: "Brale's USDGLO reserve report for 30 September 2026, linked from the reserve page the Glo Dollar toml names (brale.xyz/stablecoins/USDGLO), lists $923,605 in cash and cash equivalents and $64,451 in US government backed debt against 988,057 USDGLO issued; it is Brale management's assertion. That page says USDGLO is always redeemable 1:1 for US dollars.",
+		},
 		fallbackImageUrl: "https://app.glodollar.org/glo-logo.png",
 	},
-	{
-		code: "VEUR",
-		issuer: "GDXLSLCOPPHTWOQXLLKSVN4VN3G67WD2ENU7UMVAROEYVJLSPSEWXIZN",
-		domain: "vnx.li",
-		company: "VNX",
-		peg: "EUR",
-	},
+	// VEUR (VNX): REMOVED 2026-11-11. What VNX's own statements support, read
+	// 2026-11-11 (vnx.li/blog, one page of expandable posts with no
+	// per-post links): VNX no longer offers exchange services for VEUR and
+	// no longer lists it among its stablecoins. VNX Commodities AG's notice
+	// of 2026-04-22 says "exchange services of VEUR by VNX Commodities AG
+	// will be fully discontinued", holders to settle "by May 22nd, 2026".
+	// VNX's platform notice of 2026-06-19 suspends exchange operations from
+	// 30 June 2026 and names VNXAU, VCHF and VGBP, not VEUR, for later
+	// withdrawals. VNX Global Ltd., the ORG_NAME of the issuing account's
+	// toml, lists only VCHF and VGBP on its stablecoins page and does not
+	// declare VEUR in that toml. A notice of 2026-05-11 still called VEUR
+	// "currently live on 14 blockchains": a statement about network support
+	// made before the settlement date, not an offer to redeem. No VNX
+	// entity offers to exchange or redeem VEUR now, so the BRL and UAH rule
+	// holds. Dropping the entry stops the measurement; the next refresh
+	// stamps `retiredAt`, which keeps the history. (VCHF, issued from the
+	// same account, stays.)
 	{
 		code: "VCHF",
 		issuer: "GDXLSLCOPPHTWOQXLLKSVN4VN3G67WD2ENU7UMVAROEYVJLSPSEWXIZN",
 		domain: "vnx.li",
 		company: "VNX",
 		peg: "CHF",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://vnx.gitbook.io/vnx-global/institutional/products/stablecoins",
+			checkedOn: "2026-11-11",
+			note: "VNX states VCHF is fully backed by fiat in segregated fiduciary accounts and redeemable 1:1 for Swiss francs. VNX's platform notice of 2026-06-19 suspended exchange operations on vnx.li from 30 June 2026.",
+		},
 	},
 	{
 		code: "BRLT",
@@ -311,6 +440,13 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "settlenetwork.com",
 		company: "Settle Network",
 		peg: "BRL",
+		assetType: "Unclassified",
+		assetTypeSource: {
+			url: null,
+			checkedOn: "2026-11-11",
+			note: "Checked 2026-11-11: the issuer account's home_domain, sep.stablex.cloud, does not resolve, so its stellar.toml cannot be read, and Settle Network's site names BRLT without saying what backs it.",
+		},
+		note: "The issuer account's home_domain, sep.stablex.cloud, did not resolve when checked on 2026-11-11, so its stellar.toml cannot be read: neither the issuer of record nor the toml's listing of the account can be checked.",
 		useCountryFlag: true,
 	},
 	{
@@ -319,6 +455,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "settlenetwork.com",
 		company: "Settle Network",
 		peg: "ARS",
+		assetType: "Unclassified",
+		assetTypeSource: {
+			url: null,
+			checkedOn: "2026-11-11",
+			note: "Checked 2026-11-11: the issuer's stellar.toml says ARST displays transactions in Argentine pesos and names no backing, the reserve audit it links (anchors.relay.vision/audits/ARST-Audit-No-1.pdf) redirects to itself and cannot be read, and Settle Network's site names ARST without saying what backs it.",
+		},
 		useCountryFlag: true,
 	},
 	{
@@ -327,6 +469,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "mesh.trade",
 		company: "Mesh Trade",
 		peg: "ZAR",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://mzar.co.za/",
+			checkedOn: "2026-11-11",
+			note: "Mesh states mZAR is backed by South African rand, minted 1:1 against ZAR held in a segregated account at its partner bank, with monthly third-party audits.",
+		},
 		// Was a Replit-local /attached_assets path — dead once that host is
 		// gone. Falls through to the domain's TOML logo instead.
 	},
@@ -336,6 +484,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "brale.xyz",
 		company: "Brale",
 		peg: "USD",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://brale.xyz/stablecoins/SBC",
+			checkedOn: "2026-11-11",
+			note: "Brale states SBC is fully backed by cash, cash equivalents and short-duration US Treasuries and always redeemable 1:1 for US dollars.",
+		},
 	},
 	{
 		code: "MXNe",
@@ -343,6 +497,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "brale.xyz",
 		company: "Brale",
 		peg: "MXN",
+		assetType: "Unclassified",
+		assetTypeSource: {
+			url: null,
+			checkedOn: "2026-11-11",
+			note: "Checked 2026-11-11: Brale's MXNe page (brale.xyz/stablecoins/MXNe) speaks of decentralized pegging and names MXN as the reserve currency without saying what the reserve holds, and its launch post (brale.xyz/blog/introducing-mxne) says MXNe is minted and redeemed 1:1 against USDC or USDP.",
+		},
 	},
 	{
 		// Same ticker as Circle's EURC, different issuer — they are DIFFERENT
@@ -352,6 +512,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "mykobo.co",
 		company: "MyKobo",
 		peg: "EUR",
+		assetType: "Unclassified",
+		assetTypeSource: {
+			url: null,
+			checkedOn: "2026-11-11",
+			note: "Checked 2026-11-11: the issuer's stellar.toml calls it an asset-backed token pegged 1:1 to the euro without naming the asset, the attestations page it links (www.mykobo.co/attestations/) answers 404, and mykobo.co describes euro ramps, not this token's reserve.",
+		},
 	},
 	{
 		code: "PEN",
@@ -359,6 +525,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "anclap.com",
 		company: "Anclap",
 		peg: "PEN",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://home.anclap.com/",
+			checkedOn: "2026-11-11",
+			note: "Anclap states its tokens are backed 1 to 1 with the local currency, one unit of it deposited in a financial institution for each token in circulation.",
+		},
 	},
 	{
 		code: "ARS",
@@ -366,6 +538,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "anclap.com",
 		company: "Anclap",
 		peg: "ARS",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://home.anclap.com/",
+			checkedOn: "2026-11-11",
+			note: "Anclap states its tokens are backed 1 to 1 with the local currency, one unit of it deposited in a financial institution for each token in circulation.",
+		},
 	},
 	{
 		code: "NGNC",
@@ -373,6 +551,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "ngnc.online",
 		company: "LINK.IO LTD.",
 		peg: "NGN",
+		assetType: "Unclassified",
+		assetTypeSource: {
+			url: null,
+			checkedOn: "2026-11-11",
+			note: "Checked 2026-11-11: the issuer's stellar.toml calls NGNC an asset-backed token pegged 1:1 to the naira without naming the asset, www.linkio.africa failed its TLS handshake, and ngnc.online served an app shell with no text.",
+		},
 		fallbackImageUrl:
 			"https://stellar.myfilebase.com/ipfs/QmWcALoB3itEx487drMWRjseqKR837NLhSsQcMAGBVeBxt",
 	},
@@ -396,6 +580,11 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		company: "Figure Certificate Company",
 		peg: "USD",
 		assetType: "Yield Stablecoin",
+		assetTypeSource: {
+			url: "https://www.ylds.com",
+			checkedOn: "2026-11-11",
+			note: "Figure states YLDS is a yield-bearing stablecoin that accrues a variable yield daily.",
+		},
 		// The mark the owner chose (2026-09-03) is the same one the toml
 		// declares — Figure's purple circle icon. The toml path resolves it
 		// locally, but the first live refresh served no logo for this row, so
@@ -416,6 +605,11 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		company: "Ondo Finance",
 		peg: "USD",
 		assetType: "Yield Stablecoin",
+		assetTypeSource: {
+			url: "https://ondo.finance/usdy",
+			checkedOn: "2026-11-11",
+			note: "Ondo states USDY is a yield-bearing token secured by US Treasuries that accrues yield daily.",
+		},
 		// Accrual token: one unit buys into a Treasury portfolio and its NAV
 		// climbs. $1.14 on 2026-09-09 — pricing it at the peg was a 14% miss.
 		marketPrice: { source: "coingecko", id: "ondo-us-dollar-yield" },
@@ -450,15 +644,26 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		// verified anchor. Second, it is small and concentrated: ~1.11M issued
 		// across 28 trustlines, with a single account holding ~995k of it
 		// (90%). Both facts stay true of the row until re-measured.
+		//
+		// The first no longer holds: on 2026-10-22 the issuer account set its
+		// home_domain to usdm1.com, whose stellar.toml (read 2026-11-11) lists
+		// the account under ORG_NAME "Republic of the Marshall Islands". The
+		// issuer of record is read from there like every other row's, and the
+		// note below no longer says the toml is missing.
 		code: "USDM1",
 		issuer: "GDM5QWWXCMDTQMZAKMYTCI52LA7FWBHAZMU5NJLMIFHDJISJRP2ZWPKC",
 		domain: "usdm1.com",
 		company: "Republic of the Marshall Islands",
 		peg: "USD",
 		assetType: "Treasury-Backed",
+		assetTypeSource: {
+			url: "https://usdm1.com",
+			checkedOn: "2026-11-11",
+			note: "The issuer's site describes USDM1 as a sovereign US dollar bond secured 1:1 by US Treasury instruments in bankruptcy-remote custody, with par redemption and a sovereign coupon, and says it is not a stablecoin.",
+		},
 		fallbackImageUrl:
 			"https://cdn.prod.website-files.com/68d09a463613af43eb102966/6a69289f7e793aeb116fdd79_usdm1-brandmark-avatar.png",
-		note: "Sovereign token for a basic-income programme, backed by short-dated US Treasuries; its own site calls it a sovereign Brady-style bond under New York law, not a fiat-redemption claim. The issuer publishes no home_domain and usdm1.com serves no stellar.toml, so identity rests on SDF's launch announcement; ~1.11M issued across 28 trustlines with one account holding ~90% (verified 2026-09-02).",
+		note: "Sovereign token for a basic-income programme, backed by short-dated US Treasuries; its own site calls it a sovereign Brady-style bond under New York law, not a fiat-redemption claim. ~1.11M issued across 28 trustlines with one account holding ~90% (verified 2026-09-02).",
 		// A bond issued at par, not a redemption-at-$1 claim; it trades above
 		// par as it accrues ($1.016 on 2026-09-09).
 		marketPrice: { source: "coingecko", id: "usdm1" },
@@ -497,7 +702,7 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 	// token — a regex false positive from "COP" matching inside "SCOP", not
 	// a fiat peg.
 	{
-		// Zeam's USD sibling to the ZARZ/GBPZ rows already here. toml status
+		// Zeam's USD sibling to the ZARZ row already here. toml status
 		// "live"; redeemable for fiat USD via the Zeam app (checked
 		// 2026-09-02: 181,060 trustlines, ~310,000 issued).
 		code: "USDZ",
@@ -505,6 +710,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "zeam.money",
 		company: "Zeam",
 		peg: "USD",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://zeam.money/.well-known/stellar.toml",
+			checkedOn: "2026-11-11",
+			note: "Zeam's stellar.toml says USDZ is 1:1 backed by fiat and redeemable for fiat USD from the Zeam app. Its transparency page, zeam.money/transparency, refused automated reads (HTTP 403), and the toml's anchor fields, which say crypto, are not used.",
+		},
 	},
 	{
 		// 100%-reserve EUR token; MTL Foundation undertakes 1:1 redemption to
@@ -515,6 +726,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "mtl.montelibero.org",
 		company: "Montelibero",
 		peg: "EUR",
+		assetType: "Multi-Asset-Backed",
+		assetTypeSource: {
+			url: "https://montelibero.org/eurmtl_offer/",
+			checkedOn: "2026-11-11",
+			note: "The EURMTL offer says the issuer holds reserves of at least 150% of issuance in euro cash, cryptocurrencies and other liquid assets, and exchanges EURMTL 1:1 for euro cash in Montenegro within 48 hours.",
+		},
 	},
 	{
 		// Montelibero's USD stablecoin — issuer commits to redeem 1:1 for
@@ -527,6 +744,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "mtl.montelibero.org",
 		company: "Montelibero",
 		peg: "USD",
+		assetType: "Yield Stablecoin",
+		assetTypeSource: {
+			url: "https://montelibero.org/2023/05/12/usdm_token_public_offer/",
+			checkedOn: "2026-11-11",
+			note: "The USDM public offer says the issuer exchanges USDM 1:1 for Circle's USDC on Stellar and invests the proceeds in short-term projects, paying part of the income to holders at least monthly.",
+		},
 	},
 	{
 		// Permissioned reserve-backed USD token for institutions; toml
@@ -539,6 +762,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "valtorum.com",
 		company: "Valtorum",
 		peg: "USD",
+		assetType: "Multi-Asset-Backed",
+		assetTypeSource: {
+			url: "https://valtorum.com/",
+			checkedOn: "2026-11-11",
+			note: "Valtorum calls USDV a synthetic stable dollar backed by a diversified reserve of stablecoins, gold, government bonds, tokenized Treasuries and crypto collateral.",
+		},
 	},
 	// ── Coverage audit 2026-08-22 ──────────────────────────────────────────
 	// Found by checking Horizon, CoinGecko's stablecoin category and every
@@ -585,6 +814,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "zeam.money",
 		company: "Zeam",
 		peg: "ZAR",
+		assetType: "Fiat-Backed",
+		assetTypeSource: {
+			url: "https://zeam.money/.well-known/stellar.toml",
+			checkedOn: "2026-11-11",
+			note: "Zeam's stellar.toml says ZARZ is a 1:1 fiat-backed rand stablecoin redeemable for fiat ZAR from the Zeam app. Its transparency page, zeam.money/transparency, refused automated reads (HTTP 403).",
+		},
 	},
 	{
 		// 5,795 holders · 14,389,575 CLPX authorized (Horizon, 2026-08-22).
@@ -594,6 +829,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "clpx.finance",
 		company: "CLPX",
 		peg: "CLP",
+		assetType: "Crypto-Backed",
+		assetTypeSource: {
+			url: "https://clpx.finance",
+			checkedOn: "2026-11-11",
+			note: "CLPX states it is backed 1 to 1 by the dollar stablecoin USDC. Its page also says 'Trade with stable tokens and earn daily interest on your balance'. It names no rate, payer or mechanism and does not say the interest accrues to or is paid on CLPX, which it pegs 1 to 1 to the Chilean peso, so the class records the backing, not yield.",
+		},
 	},
 	// BRL (nTokens) — REMOVED 2026-09-03, on the issuer's own notice. Their
 	// site now leads with "Critical Information: BRL Discontinued": per terms
@@ -613,6 +854,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "aps.money",
 		company: "APS Money",
 		peg: "USD",
+		assetType: "Unclassified",
+		assetTypeSource: {
+			url: null,
+			checkedOn: "2026-11-11",
+			note: "Checked 2026-11-11: the issuer's stellar.toml calls it fully collateralized without naming the collateral, and aps.money says nothing about what backs it.",
+		},
 	},
 	{
 		// 362 holders · 27,885,917 APSEURM authorized (Horizon, 2026-08-22).
@@ -622,6 +869,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "aps.money",
 		company: "APS Money",
 		peg: "EUR",
+		assetType: "Unclassified",
+		assetTypeSource: {
+			url: null,
+			checkedOn: "2026-11-11",
+			note: "Checked 2026-11-11: the issuer's stellar.toml calls it fully collateralized without naming the collateral, and aps.money says nothing about what backs it.",
+		},
 	},
 	// UAH — REMOVED 2026-09-02 (owner decision), and the reason is the
 	// operator's own words rather than our judgement. Transparent Network's
@@ -633,16 +886,61 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 	// synthetics and bonds. Dropping it here stops the measurement; the next
 	// refresh stamps `retiredAt` on the stored row, which preserves its
 	// history and never claims the issuer stopped issuing it.
-	{
-		// 69 holders · 98,859 GBPZ authorized (Horizon, 2026-08-22).
-		// Issuer from zeam-money's own stellar.toml.
-		code: "GBPZ",
-		issuer: "GCTG4YT2ZTYRODK5JCXFJ6V7P6HMQ62L27PPG5UGK57VUFDJ7DFDGBPZ",
-		domain: "zeam.money",
-		company: "Zeam",
-		peg: "GBP",
-	},
+	// GBPZ (Zeam): REMOVED 2026-11-11, on the issuer's own words. Zeam's
+	// stellar.toml (zeam.money, read 2026-11-11) calls it a "Zeam Pound
+	// Stirling Derivative" and says "GBPZ is not redeemable for fiat": a
+	// synthetic with no redemption claim, which this registry keeps out
+	// (sUSD, 2026-09-02; UAH). Dropping the entry stops the measurement; the
+	// next refresh stamps `retiredAt`, which keeps the history.
 ];
+
+/**
+ * Why each asset the registry stopped tracking left it, keyed by
+ * stablecoinId: the issuer's own words in short, where they were read and
+ * the day the entry was dropped. The refresh stamps `retiredAt` on the
+ * stored row; the API stops serving it from deploy, and its page says why.
+ */
+export const STABLECOIN_RETIREMENTS: Record<
+	string,
+	{ retiredOn: string; reason: string; sourceUrl: string }
+> = {
+	"UAH-GCJI3CP2": {
+		retiredOn: "2026-09-02",
+		reason:
+			"Its issuer's stellar.toml says UAH is not a stablecoin, is not tradable and is available only to authorized accounts of participating financial institutions.",
+		sourceUrl: "https://dcm.systems/.well-known/stellar.toml",
+	},
+	"BRL-GDVKY2GU": {
+		retiredOn: "2026-09-03",
+		reason:
+			"Its issuer's site announced BRL discontinued: withdrawal to fiat reais is not ensured after 1 January 2026.",
+		sourceUrl: "https://ntokens.com",
+	},
+	"ZUSD-GDF6VOEG": {
+		retiredOn: "2026-11-11",
+		reason:
+			"Its issuer, GMO-Z.com Trust Company, has wound down issuance; its stellar.toml says the initial 1:1 redemption period ran from 15 May to 11 November 2026.",
+		sourceUrl: "https://stablecoin.z.com/.well-known/stellar.toml",
+	},
+	"GYEN-GDF6VOEG": {
+		retiredOn: "2026-11-11",
+		reason:
+			"Its issuer, GMO-Z.com Trust Company, has wound down issuance; its stellar.toml says the initial 1:1 redemption period ran from 15 May to 11 November 2026.",
+		sourceUrl: "https://stablecoin.z.com/.well-known/stellar.toml",
+	},
+	"VEUR-GDXLSLCO": {
+		retiredOn: "2026-11-11",
+		reason:
+			"VNX no longer offers exchange services for VEUR and no longer lists it among its stablecoins: VNX Commodities AG's notice of 2026-04-22 said its exchange services of VEUR 'will be fully discontinued', with holders to settle by 22 May 2026, and VNX's stablecoins page (read 2026-11-11) lists only VCHF and VGBP.",
+		sourceUrl: "https://vnx.li/blog",
+	},
+	"GBPZ-GCTG4YT2": {
+		retiredOn: "2026-11-11",
+		reason:
+			"Its issuer's stellar.toml calls GBPZ a pound sterling derivative that is not redeemable for fiat, a synthetic this registry does not carry.",
+		sourceUrl: "https://zeam.money/.well-known/stellar.toml",
+	},
+};
 
 /** Stable identity for an asset: code + first 8 of the issuer. */
 export function stablecoinId(a: Pick<StablecoinAsset, "code" | "issuer">) {

@@ -19,11 +19,18 @@ export interface RwaMeasured {
 export function mergeMeasured(
 	row: RwaAsset,
 	doc: Partial<RwaMeasured> | null | undefined,
-): RwaAsset & { measured: RwaMeasured | null } {
+): Omit<RwaAsset, "discontinued"> & {
+	discontinued: NonNullable<RwaAsset["discontinued"]> | null;
+	measured: RwaMeasured | null;
+} {
+	// Every served row carries `discontinued`: null where no issuer statement
+	// was found, so the key is never absent on some rows and present on others.
+	const discontinued = row.discontinued ?? null;
 	if (!doc || !doc.measuredAt || !doc.measureBasis)
-		return { ...row, measured: null };
+		return { ...row, discontinued, measured: null };
 	return {
 		...row,
+		discontinued,
 		measured: {
 			supply: doc.supply ?? null,
 			holders: doc.holders ?? null,

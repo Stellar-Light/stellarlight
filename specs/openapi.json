@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.9.130",
+		"version": "1.9.131",
 		"summary": "Agent-native data layer for the Stellar ecosystem: projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]); counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose (category/product enumerations, synonym chains, example question phrasings) lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nRate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice); compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility; those flat fields are DEPRECATED, read `meta.counts`. `searchRepos` ranks a capped candidate window (the top 200 rows by repoScore for a browse with no q, the top 600 for a search): when `meta.counts.truncated` is true, `total` counts that window and paging ends there, and `meta.counts.eligible` gives the number of rows the filters admit (null where only ranking every row could count them).\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all; the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it; matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0-1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -15328,6 +15328,10 @@
 															"type": "integer",
 															"description": "Served rows that carry a `measured` reading from the six-hour lane."
 														},
+														"discontinued": {
+															"type": "integer",
+															"description": "Registry rows whose issuer has said it no longer offers the product (`discontinued` set). They keep state live while the tokens are minted and held, so subtract them from byState.live to count live products."
+														},
 														"byLevel": {
 															"type": "object",
 															"additionalProperties": {
@@ -15429,7 +15433,8 @@
 															"issued-single-holder",
 															"deployed-no-supply",
 															"not-found"
-														]
+														],
+														"description": "What is minted on chain: live (at least two holders), issued-single-holder, deployed-no-supply or not-found. It is an on-chain fact, not a product status: a row whose issuer has discontinued the product (`discontinued` set) keeps state live while its tokens are minted and held."
 													},
 													"launchedAt": {
 														"type": "string",
@@ -15520,6 +15525,22 @@
 														],
 														"description": "Where controls came from; null when controls is null."
 													},
+													"discontinued": {
+														"type": "object",
+														"nullable": true,
+														"description": "The issuer's own dated statement that it no longer offers this product (issuance wound down, exchange services ended): `note` says what it states, `sourceUrl` where, `asOf` the day it was read. The row stays, since the token still exists on chain and `state` says what is minted; the project row serves the product with status retired and this note. null = no such statement found, never a verified 'still offered'.",
+														"properties": {
+															"note": {
+																"type": "string"
+															},
+															"sourceUrl": {
+																"type": "string"
+															},
+															"asOf": {
+																"type": "string"
+															}
+														}
+													},
 													"measured": {
 														"type": "object",
 														"nullable": true,
@@ -15575,7 +15596,7 @@
 					"Ecosystem"
 				],
 				"summary": "Stellar stablecoins ranked by USD market cap",
-				"description": "Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; GYEN supply is yen, ARST is pesos), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.",
+				"description": "Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; ARST supply is pesos, mZAR is rand), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.",
 				"x-routing": {
 					"purpose": "Authoritative USD-comparable stablecoin ranking. Answers 'biggest stablecoin', 'largest issuer', 'total stablecoin market cap' with USD market cap, NOT raw supply, which is denominated in each asset's own peg and not comparable across rows.",
 					"keywords": [
@@ -15591,7 +15612,6 @@
 						"ondo",
 						"pyusd",
 						"eurc",
-						"gyen",
 						"issuer",
 						"peg",
 						"holders"
@@ -15640,12 +15660,16 @@
 					{
 						"name": "assetType",
 						"in": "query",
-						"description": "Filter on the row's assetType, case-insensitive: Yield Stablecoin (e.g. USDY), Treasury-Backed (e.g. USDM1), or none for the rows with no assetType recorded. A qualifier is recorded only where the unit is not 1:1 with its peg and a row without one was not classified, so assetType=none leaves out the known yield and Treasury products but does not certify every row left as par. Unrecognized values return 400 with the valid set.",
+						"description": "Filter on the row's assetType, case-insensitive: one class (defined on Stablecoin.assetType), e.g. Fiat-Backed for the coins whose issuer states cash or cash-equivalent reserves in the peg currency. Unclassified returns the rows whose issuer states no backing we could read; none is an alias of Unclassified, kept for compatibility, and returns the same rows. Unrecognized values return 400 with the valid set.",
 						"schema": {
 							"type": "string",
 							"enum": [
-								"Yield Stablecoin",
+								"Fiat-Backed",
+								"Crypto-Backed",
+								"Multi-Asset-Backed",
 								"Treasury-Backed",
+								"Yield Stablecoin",
+								"Unclassified",
 								"none"
 							]
 						}
@@ -17134,7 +17158,7 @@
 					"products": {
 						"type": "array",
 						"nullable": true,
-						"description": "Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
+						"description": "Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. A registry product whose issuer has said it no longer offers it (getRwaAssets `discontinued`) is served as retired, with that statement in note.",
 						"items": {
 							"type": "object",
 							"properties": {
@@ -20280,7 +20304,7 @@
 					},
 					"ticker": {
 						"type": "string",
-						"description": "Asset code (USDC, USDY, GYEN, …). NOT unique on its own: see assetId."
+						"description": "Asset code (USDC, USDY, ARST, …). NOT unique on its own: see assetId."
 					},
 					"name": {
 						"type": "string",
@@ -20313,7 +20337,7 @@
 							"named",
 							"not-named"
 						],
-						"description": "What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account sets no home_domain, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made changes nothing, so the stored check and its date stay as they were: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body). A toml read that cannot answer changes nothing either: an ORG_NAME in a form the parser cannot read, or an account the toml does not list where it holds a listing the parser cannot read (a currency linked to its own toml, a code it cannot read)."
+						"description": "What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account is not on Horizon, sets no home_domain or one that is not a plain host name, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made changes nothing, so the stored check and its date stay as they were: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body). A toml read that cannot answer changes nothing either: an ORG_NAME in a form the parser cannot read, or an account the toml does not list where it holds a listing the parser cannot read (a currency linked to its own toml, a code it cannot read)."
 					},
 					"issuerOfRecordSourceUrl": {
 						"type": "string",
@@ -20329,7 +20353,7 @@
 					"issuerOfRecordNote": {
 						"type": "string",
 						"nullable": true,
-						"description": "On a named check: that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'), else null. On a not-named check: why no issuer of record was named."
+						"description": "On a named check: that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'), else null. On a not-named check: why no issuer of record was named, with what that leaves unconfirmed where the registry has checked it (USDT0: the toml at usdt0.to names Everdawn Labs Limited and lists the account, but the account sets no home_domain pointing there, so the link is not confirmed from the account side)."
 					},
 					"website": {
 						"type": "string",
@@ -20347,12 +20371,31 @@
 					},
 					"assetType": {
 						"type": "string",
-						"nullable": true,
 						"enum": [
+							"Fiat-Backed",
+							"Crypto-Backed",
+							"Multi-Asset-Backed",
+							"Treasury-Backed",
 							"Yield Stablecoin",
-							"Treasury-Backed"
+							"Unclassified"
 						],
-						"description": "Recorded only where the registry found the unit is not 1:1 with its peg; such rows are priced from their own market where it can be read (priceBasis). Yield Stablecoin = yield accrues to or is paid on the unit (Ondo's USDY); Treasury-Backed = a Treasury-backed bond (USDM1). Null = no qualifier recorded: the row was not classified, so null is unknown, NOT a verified plain peg and NOT 'not yield-bearing'. Filter with ?assetType=."
+						"description": "What backs the unit as its issuer states it, never null; read by hand from the issuer's own page (assetTypeSourceUrl, read on assetTypeAsOf), never from a stellar.toml's anchor fields. Fiat-Backed = backed by its peg currency in cash, deposits or cash equivalents (short-dated government debt, government money market funds). Crypto-Backed = backed by crypto it holds or locks, another stablecoin included (USDT0: USDT locked on Ethereum). Multi-Asset-Backed = a reserve mixing asset types, fiat with crypto, gold or bonds (USDV, EURMTL). Treasury-Backed = a bond secured by US Treasuries, with par redemption and a coupon (USDM1); a bond takes this class though it pays yield. Yield Stablecoin = a stablecoin on which yield accrues or is paid, whatever backs it (USDY). Unclassified = no issuer statement of the backing could be read; assetTypeNote says what was checked. A class is the issuer's claim, not an audit. Filter with ?assetType=."
+					},
+					"assetTypeSourceUrl": {
+						"type": "string",
+						"nullable": true,
+						"description": "The issuer's own page or document the class rests on (a reserve, attestation or product page, a whitepaper or token terms, or its stellar.toml's description); re-verify there. Null for an Unclassified row. Served from the registry until the six-hourly refresh stores it, then as stored."
+					},
+					"assetTypeAsOf": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true,
+						"description": "The day assetTypeSourceUrl was read, or for an Unclassified row the day the sources in assetTypeNote were checked."
+					},
+					"assetTypeNote": {
+						"type": "string",
+						"nullable": true,
+						"description": "What the issuer's page states about the backing, in short, and anything that qualifies it (a suspended platform, a page that refused automated reads); for an Unclassified row, what was checked and why it names no class."
 					},
 					"supply": {
 						"type": "number",
@@ -20411,7 +20454,7 @@
 					"note": {
 						"type": "string",
 						"nullable": true,
-						"description": "Plain-words reason a row is curated-static or unmeasured. Null for live rows."
+						"description": "Plain-words reason a row is curated-static or unmeasured, followed by any standing caveat the registry carries for the row (USDM1's bond terms; BRLT's home_domain, which did not resolve when checked). Null when there is neither."
 					},
 					"logoUrl": {
 						"type": "string",

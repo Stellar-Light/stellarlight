@@ -151,6 +151,15 @@ export interface RwaAsset {
 		clawbackEnabled: boolean;
 	} | null;
 	controlsBasis: "horizon-issuer-flags" | null;
+	/**
+	 * The issuer's own dated statement that it no longer offers the product
+	 * (issuance wound down, exchange services ended): what it says, where,
+	 * and the day it was read. The row stays (the token still exists on
+	 * chain, and `state` says what is minted); the project row serves the
+	 * product with status `retired` and this note. Absent = no such
+	 * statement found, never a verified "still offered".
+	 */
+	discontinued?: { note: string; sourceUrl: string; asOf: string };
 }
 
 /** The most recent verifiedAt in the registry — the date it was last reconciled. Rows keep their own verifiedAt. */
@@ -1866,6 +1875,11 @@ export const RWA_REGISTRY: RwaAsset[] = [
 			clawbackEnabled: true,
 		},
 		controlsBasis: "horizon-issuer-flags",
+		discontinued: {
+			note: "GMO-Z.com Trust Company has wound down issuance of GYEN: its stellar.toml says the initial 1:1 redemption period with GMO Trust ran from 15 May to 11 November 2026.",
+			sourceUrl: "https://stablecoin.z.com/.well-known/stellar.toml",
+			asOf: "2026-11-11",
+		},
 	},
 	{
 		id: "CDV6U7OEVY6KUEJ4WNS63AYB6RFU3BAE7AZJOQ7LPH447C6NWUXEZZSO",
@@ -3635,6 +3649,11 @@ export const RWA_REGISTRY: RwaAsset[] = [
 			clawbackEnabled: true,
 		},
 		controlsBasis: "horizon-issuer-flags",
+		discontinued: {
+			note: "VNX no longer offers exchange services for VEUR and no longer lists it among its stablecoins: VNX Commodities AG's notice of 2026-04-22 said its exchange services of VEUR 'will be fully discontinued', with holders to settle by 22 May 2026, and VNX's stablecoins page (read 2026-11-11) lists only VCHF and VGBP.",
+			sourceUrl: "https://vnx.li/blog",
+			asOf: "2026-11-11",
+		},
 	},
 	{
 		id: "GOLD-GCK75CK3VX5L4ZLSD7HHNVA4L3LKGIAYWLCZO2IBNGOFTBV3HJBE2MPJ",
@@ -4018,6 +4037,11 @@ export const RWA_REGISTRY: RwaAsset[] = [
 			clawbackEnabled: true,
 		},
 		controlsBasis: "horizon-issuer-flags",
+		discontinued: {
+			note: "GMO-Z.com Trust Company has wound down issuance of ZUSD: its stellar.toml says the initial 1:1 redemption period with GMO Trust ran from 15 May to 11 November 2026.",
+			sourceUrl: "https://stablecoin.z.com/.well-known/stellar.toml",
+			asOf: "2026-11-11",
+		},
 	},
 ];
 
