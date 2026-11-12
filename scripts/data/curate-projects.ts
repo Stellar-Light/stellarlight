@@ -46,6 +46,7 @@ import {
 	SUPPORTED_NETWORKS,
 	statusFixHold,
 	statusFixNote,
+	statusFixWasLive,
 	TWITTER_LINK_FIX,
 	TYPE_ADD,
 	TYPES_ADD,
@@ -1863,13 +1864,16 @@ async function main() {
 			// when the stored note lags the verdict (fill-if-empty left the earlier
 			// Live packet note on five rows retired or downgraded on 2026-09-06),
 			// refresh the note alone. Status, basis and dates are not touched.
-			// The entry itself proves the row was once Live: `from: "Live"` is a
-			// statement that we observed it Live before retiring it. That is the
-			// wasLive flag, and it was set on 1 of 99 Inactive rows while 90 were
-			// provably Live — so a consumer asking "was this ever real?" got
-			// silence about a product that shipped and died.
-			const provesWasLive = fix.from === "Live" && fix.to !== "Live";
-			const needsWasLive = provesWasLive && !d.lifecycle?.wasLive;
+			// The entry also owns lifecycle.wasLive (statusFixWasLive): retiring
+			// a row from Live to Inactive records that it ran, and correcting a
+			// Live label to Development or Pre-Release leaves no record of a
+			// launch. Reading every `from: "Live"` as a launch left 21 pre-launch
+			// rows saying "used to be live" (2026-11-12).
+			const wasLive = statusFixWasLive(fix, {
+				status: d.status,
+				wasLive: d.lifecycle?.wasLive,
+			});
+			const needsWasLive = wasLive !== null;
 			const needsNote =
 				fix.from !== fix.to &&
 				d.status === fix.to &&
@@ -1878,7 +1882,11 @@ async function main() {
 			if (needsNote || needsWasLive) {
 				const parts = [
 					needsNote ? "lifecycle note refreshed to the verdict" : null,
-					needsWasLive ? "wasLive set (the entry retired it FROM Live)" : null,
+					wasLive === true
+						? "wasLive set (the entry retired it FROM Live)"
+						: wasLive === false
+							? `wasLive cleared (${fix.to}${fix.asOf ? ` as of ${fix.asOf}` : ""}: no record of a launch)`
+							: null,
 				].filter(Boolean);
 				console.log(`  ${slug}: already ${fix.to} — ${parts.join("; ")}`);
 				writes.push({
@@ -1888,7 +1896,7 @@ async function main() {
 						lifecycle: {
 							...(d.lifecycle ?? {}),
 							...(needsNote ? { note: fix.note } : {}),
-							...(needsWasLive ? { wasLive: true } : {}),
+							...(needsWasLive ? { wasLive } : {}),
 						},
 					},
 				});
@@ -1944,15 +1952,14 @@ async function main() {
 		// A status MOVE is a verdict: its note replaces whatever was there. A
 		// stamp (from === to) only fills an empty note, unless replaceNote.
 		if (note) data.lifecycle = { ...(d.lifecycle ?? {}), note };
-		// Retiring a row FROM Live is itself the proof it was once Live — the
-		// flag a consumer needs to hear "this used to be a real product" rather
-		// than silence. Rides the same write, never guessed.
-		if (fix.from === "Live" && fix.to !== "Live")
-			data.lifecycle = {
-				...(d.lifecycle ?? {}),
-				...data.lifecycle,
-				wasLive: true,
-			};
+		// lifecycle.wasLive rides the same write, as the entry's verdict
+		// (statusFixWasLive), judged against the status this write sets.
+		const wasLive = statusFixWasLive(fix, {
+			status: fix.to,
+			wasLive: d.lifecycle?.wasLive,
+		});
+		if (wasLive !== null)
+			data.lifecycle = { ...(d.lifecycle ?? {}), ...data.lifecycle, wasLive };
 		// sls-024: date + source + kind-of-evidence ride the same write, so the
 		// served label stops being an unprovenanced bare string.
 		if (fix.asOf) data.statusAsOf = fix.asOf;

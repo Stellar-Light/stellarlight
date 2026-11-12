@@ -643,9 +643,9 @@ function pickLinks(
 	return Object.keys(out).length ? out : undefined;
 }
 
-// Historical-archive block. Only surfaced when it carries real history, so live
-// projects stay clean (null) and a consumer that sees `lifecycle` knows the
-// record is a defunct/changed one worth narrating ("used to be live").
+// Historical-archive block. Only surfaced when it carries a note or a launch
+// record, so other rows stay clean (null). A note alone is dated context;
+// "used to be live" is the narration only when wasLive is true.
 function pickLifecycle(
 	// biome-ignore lint/suspicious/noExplicitAny: payload lifecycle group shape
 	lc: any,

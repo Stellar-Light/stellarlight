@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-12",
 		surfaces: ["api"],
+		version: "spec@1.9.137",
+		type: "fixed",
+		summary:
+			"`lifecycle.wasLive` is true only for a product that once reached Live: operating for users, not on testnet only. Once the curation lane runs, 24 searchProjects rows stop claiming it: 21 Development or Pre-Release rows whose Live label had been corrected, none with a record of a launch (Noether, Laina, AXIS and XCCY run on testnet only), and ICHI, Wombat and Cables, whose own notes say their Stellar products never shipped. A lifecycle note alone now reads as dated context, not a launch.",
+		detail:
+			"The curation pass took every entry that moved a row off a Live label as proof the product had launched, so correcting a wrong Live label to Development or Pre-Release wrote wasLive true. A sweep of all 1,020 listed rows on 2026-11-12 found 21 such rows. 18 carry a lifecycle note: 17 say the product runs on testnet only or is not on mainnet, sits behind a waitlist, has a network that has not launched, or has no Stellar product, and The Give Hub's says its app serves no campaigns or donations. The other three carry no note and rest on their curation entries' evidence: Helix's site says it is live on Canton Network, WarpDrive's own repository describes its milestone as preparation for bringing WarpDrive to Stellar, and DTCC's announcement expects its Stellar connection in H1 2027. A correction from Live to Development or Pre-Release now clears the flag and retiring a row from Live to Inactive still sets it, each written only while the row sits at the entry's status; any other entry leaves the stored value. An entry can state its own verdict, as the three Inactive entries now do and as a project that really launched and returned to development would. Helix, WarpDrive and DTCC carry no lifecycle note, so their `lifecycle` becomes null. No Live row carries wasLive true, so no status changes. The description of `lifecycle` said to narrate any record carrying it as used to be live, which also covered rows that only carry a note; it now says to narrate that only when wasLive is true.",
+	},
+	{
+		date: "2026-11-12",
+		surfaces: ["api"],
 		version: "spec@1.9.136",
 		type: "changed",
 		summary:

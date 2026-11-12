@@ -16,6 +16,7 @@ import {
 	STATUS_SOURCE_RETRACT,
 	statusFixHold,
 	statusFixNote,
+	statusFixWasLive,
 	TYPE_ADD,
 	TYPES_ADD,
 	TYPES_SET,
@@ -50,6 +51,117 @@ describe("a STATUS_FIX stamp's note (statusFixNote)", () => {
 			statusFixNote({ from: "Live", to: "Inactive", note: "x" }, "y"),
 		).toBe("x");
 		expect(statusFixNote({ from: "Live", to: "Live" }, "y")).toBeNull();
+	});
+});
+
+describe("lifecycle.wasLive records a launch, never a label that once read Live", () => {
+	// 21 Development and Pre-Release rows carried wasLive true on 2026-11-12:
+	// the writer read `from: "Live"` on an entry that corrected a wrong Live
+	// label as proof the product had launched.
+	const preLaunch = ["Development", "Pre-Release"];
+	it("a move to Development or Pre-Release clears a stored flag", () => {
+		for (const to of preLaunch)
+			expect(
+				statusFixWasLive({ from: "Live", to }, { status: to, wasLive: true }),
+			).toBe(false);
+	});
+	it("and never sets one", () => {
+		for (const to of preLaunch)
+			expect(
+				statusFixWasLive({ from: "Live", to }, { status: to, wasLive: false }),
+			).toBeNull();
+	});
+	it("retiring a row from Live to Inactive still records that it ran", () => {
+		expect(
+			statusFixWasLive({ from: "Live", to: "Inactive" }, { status: "Inactive" }),
+		).toBe(true);
+		expect(
+			statusFixWasLive(
+				{ from: "Live", to: "Inactive" },
+				{ status: "Inactive", wasLive: true },
+			),
+		).toBeNull();
+	});
+	it("unless the entry records that the product never launched", () => {
+		expect(
+			statusFixWasLive(
+				{ from: "Live", to: "Inactive", wasLive: false },
+				{ status: "Inactive", wasLive: true },
+			),
+		).toBe(false);
+	});
+	it("a clear is the entry's verdict only while the row sits where it put it", () => {
+		expect(
+			statusFixWasLive(
+				{ from: "Live", to: "Pre-Release" },
+				{ status: "Inactive", wasLive: true },
+			),
+		).toBeNull();
+	});
+	it("a stamp, a launch or a duplicate park says nothing about it", () => {
+		for (const [from, to] of [
+			["Live", "Live"],
+			["Pre-Release", "Live"],
+			["Live", "Draft"],
+		])
+			expect(
+				statusFixWasLive({ from, to }, { status: to, wasLive: true }),
+			).toBeNull();
+	});
+	it("a set is the entry's verdict only while the row sits where it put it", () => {
+		// A Live to Inactive entry whose row later moved to Development must not
+		// write a launch onto a Development row.
+		expect(
+			statusFixWasLive(
+				{ from: "Live", to: "Inactive" },
+				{ status: "Development", wasLive: false },
+			),
+		).toBeNull();
+	});
+	it("only a correction from a Live label clears by default", () => {
+		// A stamp or a revival says nothing about a launch a person or
+		// backfill-lifecycle recorded.
+		for (const from of ["Development", "Inactive", "Pre-Release"])
+			expect(
+				statusFixWasLive(
+					{ from, to: "Development" },
+					{ status: "Development", wasLive: true },
+				),
+				from,
+			).toBeNull();
+	});
+	it("a project that really launched keeps it through a relaunch", () => {
+		expect(
+			statusFixWasLive(
+				{ from: "Live", to: "Development", wasLive: true },
+				{ status: "Development", wasLive: true },
+			),
+		).toBeNull();
+		expect(
+			statusFixWasLive(
+				{ from: "Live", to: "Development", wasLive: true },
+				{ status: "Development", wasLive: false },
+			),
+		).toBe(true);
+	});
+	it("no entry claims a launch for a row it holds at a pre-launch status", () => {
+		for (const [slug, fix] of Object.entries(STATUS_FIX)) {
+			if (!preLaunch.includes(fix.to)) continue;
+			const got = statusFixWasLive(fix, { status: fix.to, wasLive: true });
+			expect(got, slug).not.toBe(true);
+			if (fix.from === "Live" && fix.wasLive === undefined)
+				expect(got, slug).toBe(false);
+		}
+	});
+	it("the Stellar products of ichi, wombat and cables never launched", () => {
+		for (const slug of ["ichi", "wombat", "cables"])
+			expect(
+				statusFixWasLive(STATUS_FIX[slug], {
+					status: "Inactive",
+					wasLive: true,
+				}),
+				slug,
+			).toBe(false);
 	});
 });
 

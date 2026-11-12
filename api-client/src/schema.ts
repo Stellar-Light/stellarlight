@@ -1524,8 +1524,9 @@ export interface components {
                 renamedAt?: string | null;
                 sourceUrl?: string | null;
             } | null;
-            /** @description Historical-archive context, present only when a record carries real history (e.g. a defunct project that used to be live); narrate as 'used to be live', not as a current offering. Null for ordinary live records. */
+            /** @description Historical-archive context, present when a record carries a lifecycle note or wasLive is true; null otherwise. A note is dated context and implies no launch. Narrate as 'used to be live' only when wasLive is true, never as a current offering. */
             lifecycle?: {
+                /** @description True when the product once reached Live: operating for users, not on testnet only. False means no record of a launch, not proof it never ran. A correction from a mistaken Live label to Development or Pre-Release clears it; a project that really launched keeps it. */
                 wasLive?: boolean;
                 note?: string | null;
             } | null;

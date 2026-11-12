@@ -55,6 +55,11 @@ export const STATUS_FIX: Record<
 		 *  note states something that is no longer true (a redirect that has
 		 *  since reversed): this entry's note then replaces it. */
 		replaceNote?: boolean;
+		/** lifecycle.wasLive as this entry's verdict, when the default rule
+		 *  (statusFixWasLive) would get it wrong: false for a row retired from
+		 *  a Live label its product never earned, true for a product that
+		 *  really launched and returned to development. */
+		wasLive?: boolean;
 	}
 > = {
 	// 2026-09-23: seeded as a new record from the i³ intake before noticing the
@@ -937,6 +942,9 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		asOf: "2026-11-07",
 		sourceUrl: "https://docs.ichi.org/home/contract-addresses",
+		// 2026-11-12: the Live label this entry retired was read off ICHI's
+		// EVM vaults; the Stellar port never shipped, so it never launched here.
+		wasLive: false,
 		note: "ICHI's site and docs are EVM only: its contract addresses page lists Ethereum, Polygon, Arbitrum, Base and other EVM deployments and nothing on Stellar (read 2026-11-07). The Stellar port its SCF #26 award funded never shipped; ichi.org's TVL is its EVM vaults.",
 	},
 	alterscope: {
@@ -1983,6 +1991,9 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		asOf: "2026-11-07",
 		sourceUrl: "https://docs.wombat.exchange/roadmap.md",
+		// 2026-11-12: the Live label was a page answering for the EVM product;
+		// Stellar is still an unchecked roadmap item, so it never launched here.
+		wasLive: false,
 		note: 'Wombat\'s own roadmap lists "Stellar?" as an unchecked item, and its docs and app serve EVM chains only (read 2026-11-07): the Stellar exchange its SCF #18 entry described is not live. wombat.exchange answering is the EVM product.',
 	},
 	// Same refresh class: vesseo's row asserted basis source-inherited with
@@ -2769,6 +2780,9 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		asOf: "2026-11-07",
 		sourceUrl: "https://docs.cables.finance/support/faq",
+		// 2026-11-12: Cables launches on Ethereum first and holds no asset on
+		// Stellar; the Live label it was retired from never meant a launch.
+		wasLive: false,
 		note: "Cables' FAQ says \"Cables will launch on Ethereum mainnet to start.\", and Horizon holds no asset from Cables Finance (its one CABLES asset is an unrelated issuer's; read 2026-11-07): the Soroban DEX its audits page lists is not live on Stellar.",
 	},
 	interstellar: {
@@ -7710,6 +7724,37 @@ export function statusFixHold(
 	)
 		return "stronger-basis";
 	return null;
+}
+
+/** The lifecycle.wasLive a STATUS_FIX entry writes, or null to leave the
+ * stored value. wasLive says the product reached Live (operating for users);
+ * a Live LABEL is not that. By default only an entry FROM Live speaks: a
+ * correction from Live to Development or Pre-Release says the Live label was a
+ * mistake, so a stored true is cleared (21 such rows carried true on
+ * 2026-11-12 because `from: "Live"` was read as proof of a launch), and
+ * retiring a row from Live to Inactive records that it ran. Any other entry (a
+ * stamp, a revival) leaves a value a person or backfill-lifecycle set. An
+ * entry overrides the default either way: false for a row retired from a
+ * label its product never earned, true for a product that really launched
+ * and returned to development. Either value is written only while the row
+ * sits at the entry's status; `row.status` is the status after this pass. */
+export function statusFixWasLive(
+	fix: { from: string; to: string; wasLive?: boolean },
+	row: { status?: string | null; wasLive?: unknown },
+): boolean | null {
+	const verdict =
+		typeof fix.wasLive === "boolean"
+			? fix.wasLive
+			: fix.from !== "Live"
+				? null
+				: fix.to === "Inactive"
+					? true
+					: fix.to === "Development" || fix.to === "Pre-Release"
+						? false
+						: null;
+	if (verdict === null || verdict === (row.wasLive === true)) return null;
+	if (row.status !== fix.to) return null;
+	return verdict;
 }
 
 export function curatedFieldsFor(slug: string): Set<string> {
