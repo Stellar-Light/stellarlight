@@ -47,7 +47,11 @@ import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
 import { RESEARCH_MODES } from "./match-mode";
 import { SOURCE_CHECK_STATES } from "./note-pins";
 import { PARTNER_TYPES } from "./partner-match";
-import { DEPLOYMENT_NETWORKS } from "./project-deployment";
+import {
+	DEPLOYMENT_BASES,
+	DEPLOYMENT_NETWORKS,
+	NETWORKS_BASES,
+} from "./project-deployment";
 import { PROJECT_MATCH_MODES } from "./project-search-match";
 import {
 	PROJECT_STATUSES,
@@ -88,6 +92,7 @@ import {
 	CHECK_RESULTS,
 	ONCHAIN_USE_TYPES,
 	STATUS_CHECKS,
+	TVL_FRESH_DAYS,
 } from "./status-checks";
 import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
@@ -11391,7 +11396,7 @@ export const spec: OpenAPISpec = {
 					deployment: {
 						type: "object",
 						description:
-							"Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). This is a PROJECT-level fact: mainnet means at least one of the project's products is minted on mainnet, not that every product is; read `products` for per-product state. Populated only from evidence: a verified mainnet contract join, an on-chain activity reading, a minted product in the verified RWA registry (basis rwa-registry, sls-023), or a human-verified operator artifact. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'.",
+							"Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). This is a PROJECT-level fact: mainnet means at least one of the project's products is minted on mainnet, not that every product is; read `products` for per-product state. Populated only from evidence, kept apart from status and repository activity (sls-024): a Live status or an active repository alone never sets a network. The deployment pass writes mainnet or testnet only together with its basis, sourceUrl and asOf, and a nightly check reports any served value that lacks one. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'; its basis, sourceUrl and asOf are null.",
 						properties: {
 							network: {
 								type: "string",
@@ -11400,11 +11405,21 @@ export const spec: OpenAPISpec = {
 							basis: {
 								type: "string",
 								nullable: true,
-								description:
-									"Evidence class: mainnet-contract-join | onchain-activity | stablecoin-issuance | rwa-registry | human-verified. rwa-registry = a live product in the verified RWA registry (/api/rwa) proves mainnet deployment; sourceUrl is that product's own evidence (the issuer's stellar.toml, or the contract on stellar.expert). Null when network is unknown.",
+								enum: [...DEPLOYMENT_BASES],
+								description: `The evidence class behind a mainnet or testnet value. 'human-verified' = a curator checked a source that names the network (the operator's docs, a stellar.toml, an app bundle, Stellar's developer docs or an explorer page); sourceUrl is that source. 'onchain-activity' = a contract, asset, account or transaction the record holds, observed on that network's ledger; sourceUrl is its explorer page. 'mainnet-contract-join' = a repository of the project publishes a contract id that the mainnet ledger holds; sourceUrl is the repository. 'defillama-tvl' = DefiLlama tracks the protocol on Stellar (a reading at most ${TVL_FRESH_DAYS} days old when the value was written); sourceUrl is the DefiLlama page. 'rwa-registry' = a minted product in the verified RWA registry (/api/rwa); sourceUrl is that product's own evidence. 'operator-toml' = the project's own stellar.toml declares an asset that Horizon holds and whose issuer names the project's domain back; sourceUrl is the toml. Null when network is unknown.`,
 							},
-							sourceUrl: { type: "string", nullable: true },
-							asOf: { type: "string", nullable: true },
+							sourceUrl: {
+								type: "string",
+								nullable: true,
+								description:
+									"Where a reader re-checks the mainnet or testnet value: the page the basis names. Null when network is unknown.",
+							},
+							asOf: {
+								type: "string",
+								nullable: true,
+								description:
+									"When the evidence behind the value was observed (ISO 8601): the date the ledger or source was read, or the date the registry or DefiLlama reading carries. Null when network is unknown.",
+							},
 						},
 					},
 					statusAsOf: {
@@ -11698,15 +11713,9 @@ export const spec: OpenAPISpec = {
 					networksBasis: {
 						type: "string",
 						nullable: true,
-						enum: [
-							"curated",
-							"onchain-activity",
-							"defillama-tvl",
-							"anchor-coverage",
-							"scf-award",
-						],
+						enum: [...NETWORKS_BASES],
 						description:
-							"What evidence stands behind supportedNetworks, and therefore whether the list is exhaustive. 'curated' = curator-maintained from the project's own docs; the list is intended to be complete, so an absent chain is informative. The rest are DERIVED proofs that the project operates on Stellar, strongest first: 'onchain-activity' (contract records observed on Stellar), 'defillama-tvl' (DefiLlama tracks its Stellar TVL), 'anchor-coverage' (SEP/corridor rails), 'scf-award' (the Stellar Community Fund funds only Stellar work). A derived basis yields exactly ['stellar'] and is NOT exhaustive; other chains are unknown, not excluded. NULL = no basis, which pairs with a null supportedNetworks.",
+							"What evidence stands behind supportedNetworks, and therefore whether the list is exhaustive. 'curated' = curator-maintained from the project's own docs; the list is intended to be complete, so an absent chain is informative. The rest are DERIVED proofs that the project operates on Stellar, strongest first: 'onchain-activity' (contract records observed on Stellar), 'defillama-tvl' (DefiLlama tracks its Stellar TVL), 'anchor-coverage' (SEP/corridor rails), 'scf-award' (the Stellar Community Fund funds only Stellar work). 'deployment' is read last: the record's own mainnet or testnet deployment value with its sourceUrl (sls-024), so a sourced deployment never sits beside a null list. A derived basis yields exactly ['stellar'] and is NOT exhaustive; other chains are unknown, not excluded. NULL = no basis, which pairs with a null supportedNetworks.",
 					},
 					routes: {
 						type: "array",

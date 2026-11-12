@@ -27,6 +27,11 @@
  *      every venue count without a word. Search honours type=DEX with
  *      status=Live (2026-11-07: 38 of 47 DEX rows), and the check reads both
  *      fields again on every row.
+ *   S5 deployment provenance: every mainnet or testnet deployment value
+ *      carries its own sourceUrl, a known basis, an asOf, a source on the
+ *      claimed network, and stellar in supportedNetworks (sls-024). An
+ *      unknown with null fields is the documented unknown state, never a gap.
+ *      (2026-11-11: 105 claims, 56 with no sourceUrl, 35 with no network list.)
  *   S6 wallet coverage: every Wallet row carries a productKind or a dated
  *      reason in PRODUCT_KIND_UNRESOLVED, and availability rows or a dated
  *      availabilityCheck (sls-033). Searching type=Wallet is exact (74 rows on
@@ -39,6 +44,7 @@
  * into nightly-health.yml.
  */
 
+import { deploymentGaps } from "../src/lib/project-deployment";
 import { tvlCitationGaps } from "../src/lib/status-checks";
 import { unclassifiedLiveDexRows } from "../src/lib/venue-role-coverage";
 import { walletCoverageGaps } from "../src/lib/wallet-coverage";
@@ -198,6 +204,7 @@ async function main() {
 		"Anchor",
 		"Asset",
 		"Infrastructure",
+		"Partner%20Integration",
 		"Protocol%2FContract",
 		"Tooling",
 		"User-Facing%20App",
@@ -309,6 +316,40 @@ async function main() {
 			});
 		}
 		if (unclassified.length) failures++;
+	}
+
+	// ── S5: every positive deployment claim carries its provenance (sls-024) ──
+	// Reuses S2's sweep of all seven categories. The rule is deploymentGaps,
+	// unit-tested in src/lib/__tests__/project-deployment.test.ts.
+	const claims = swept.filter(
+		(p) =>
+			p.deployment?.network === "mainnet" ||
+			p.deployment?.network === "testnet",
+	);
+	if (claims.length === 0) {
+		console.error(
+			"✗ S5 found 0 mainnet or testnet claims in the sweep: an outage or a dropped field, not a clean pass",
+		);
+		failRows.push({
+			probe: "S5 sweep outage",
+			note: "0 mainnet or testnet deployment claims in the sweep",
+		});
+		failures++;
+	} else {
+		const gaps = claims
+			.map((p) => ({ slug: String(p.slug), gaps: deploymentGaps(p) }))
+			.filter((g) => g.gaps.length);
+		console.log(
+			`S5 deployment provenance: ${claims.length} mainnet or testnet claim(s) · ${gaps.length} missing provenance`,
+		);
+		for (const g of gaps) {
+			console.log(`  ✗ ${g.slug}: ${g.gaps.join("; ")}`);
+			failRows.push({
+				probe: `deployment provenance: ${g.slug}`,
+				note: `${g.gaps.join("; ")}. Record the evidence (scripts/data/backfill-deployment.ts) or retract the claim with a dated reason in DEPLOYMENT_VERIFIED (scripts/data/curation-maps.ts)`,
+			});
+		}
+		if (gaps.length) failures++;
 	}
 
 	// ── S6: every Wallet row has a recorded state for both wallet facts (sls-033) ──

@@ -22,6 +22,8 @@ export interface OnchainSeed {
 		address: string;
 		/** Human label from the project's own naming (manifest key, README). */
 		label: string;
+		/** Primary source for this address when it is not the seed's source. */
+		source?: string;
 	}>;
 	asset?: { code: string; issuer: string };
 	/** Primary source the addresses were read from. */
@@ -29,6 +31,29 @@ export interface OnchainSeed {
 }
 
 export const ONCHAIN_SEEDS: OnchainSeed[] = [
+	{
+		// Circle's CCTP contracts on Stellar mainnet (its own reference page,
+		// read 2026-11-11; getLedgerEntries finds all three live). READMEs that
+		// route USDC through CCTP cite them: lightsail-network's
+		// crossmesh-ingress-contracts names the CctpForwarder, and a citation
+		// is not a deployment of the citing project.
+		slug: "circle-cctp-cross-chain-transfer-protocol",
+		contracts: [
+			{
+				address: "CAE2G5Z77UP7GYPYGFOWFGW7C7J6I4YP2AFGSADRKQY62SYUFLPNFTXL",
+				label: "TokenMessengerMinter",
+			},
+			{
+				address: "CACMENFFJPJMSDAJQLX4R7K3SFZIW2LJSE3R2UMLGSWHFHS353FVXAZV",
+				label: "MessageTransmitter",
+			},
+			{
+				address: "CBZL2IH7F6BIDAA3WBNXYKIXSATJGMSW7K5P5MJ6STX5RXN47TZJDF5T",
+				label: "CctpForwarder",
+			},
+		],
+		source: "https://developers.circle.com/cctp/references/stellar-contracts",
+	},
 	{
 		// kalepail/KALE-sc README "Network | MAINNET" table (verified 2026-09-05):
 		// farm contract CDL74…, asset KALE:GBDVX4…, SAC CB23…. stellar.expert
@@ -104,8 +129,29 @@ export const ONCHAIN_SEEDS: OnchainSeed[] = [
 				label: "price oracle",
 			},
 			{
+				// A Stellar Asset Contract, not an oracle: getLedgerEntries
+				// (2026-11-11) reads a stellar-asset executable whose metadata is
+				// XRF:GCHI6I3X62ND5XUMWINNNKXS2HPYZWKFQBZZYBSMHJ4MIP2XJXSZTXRF, the
+				// token the README's paid access burns (issuer home_domain
+				// reflector.network).
 				address: "CBLLEW7HD2RWATVSMLAGWM4G3WCHSHDJ25ALP4DI6LULV5TU35N2CIZA",
-				label: "price oracle",
+				label: "XRF token (SAC)",
+			},
+			// Reflector's two other public mainnet oracles (2026-11-11): its
+			// orchestrator config (network pubnet) lists them as type oracle with
+			// dataSource pubnet and forex, Stellar's oracle-providers page names
+			// them Stellar Mainnet DEX and fiat exchange rates, and
+			// getLedgerEntries finds both live, running the same wasm as
+			// CAFJZQWS.
+			{
+				address: "CALI2BYU2JE6WVRUFYTS6MSBNEHGJ35P4AVCZYF3B6QOE3QKOB2PLE6M",
+				label: "price oracle (Stellar DEX)",
+				source: "https://orchestrator.reflector.network/config",
+			},
+			{
+				address: "CBKGPWGKSKZF52CFHMTRR23TBWTPMRDIYZ4O2P5VS65BMHYH4DXMCJZC",
+				label: "price oracle (fiat FX rates)",
+				source: "https://orchestrator.reflector.network/config",
 			},
 		],
 		source:

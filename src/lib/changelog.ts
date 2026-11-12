@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-11",
 		surfaces: ["api"],
+		version: "spec@1.9.133",
+		type: "fixed",
+		summary:
+			'A mainnet or testnet `deployment` is written only with its own provenance, apart from status and repository activity (stellar-raven sls-024): `deployment.basis` is an enum of six evidence classes, each defined in the spec, `sourceUrl` is where the value is re-checked, and `asOf` dates the evidence. `networksBasis` gains `deployment`, read last, so a deployment with a source no longer sits beside a null `supportedNetworks`, and `supportedNetworks` is served lowercase, as documented (20 curated rows served "Stellar"). On 2026-11-11, 56 of 105 mainnet or testnet values had no source and 35 had no network list. Those values were written before this release and keep their gaps until the deployment pass runs again; after it, 99 values are mainnet or testnet, each with a source and a network list, and seven read unknown.',
+		detail:
+			"The deployment pass checks the ledger itself (Soroban RPC getLedgerEntries, Horizon), never stellar.expert's paid API. Of the 56 values without a source: 35 will cite the explorer page of a contract or asset the row holds that the ledger has (Allbridge's main bridge contract among them), and an asset counts only when its issuer's home_domain names the row's own website; 5 will cite the explorer link their status already gives, checked on the network it names (RenderGate and CleverCon stay testnet); 6 will cite their DefiLlama page as basis defillama-tvl, which counts only while DefiLlama holds more than zero on Stellar for them in a reading at most 14 days old; Spiko and Benji will cite their RWA registry product; Stellar 8004 its contract repository; Velo its own stellar.toml; and Band, Lightecho, Excellar, MBRL, VCHF and VEUR curated sources that name their contracts or issuers. Reclaim, Axelar, Stellars Finance, Lumenswap and Xlmeme get live sources for sources that stopped showing the evidence, and Normal cites its own nUSDC savings vault, since its stellar.toml now marks every currency dead. Pyth becomes mainnet from its own contract-addresses page. Seven values become unknown: Lightsail, Stellar Indexer, SimplyTokenized, Estrela, WebSoroban IDE and Soroban Timelock Contract each rested on another project's contract or stellar.toml, and DIA's one documented contract is a testnet contract the current testnet does not hold. The pass never retracts a value by itself, and a check that could not run leaves a value as stored. A nightly sweep reports any served mainnet or testnet value that lacks a source, a known basis, a date, a source on the same network, or stellar in `supportedNetworks`; unknown with null fields is the documented unknown state and is never reported.",
+	},
+	{
+		date: "2026-11-11",
+		surfaces: ["api"],
 		version: "spec@1.9.132",
 		type: "fixed",
 		summary:

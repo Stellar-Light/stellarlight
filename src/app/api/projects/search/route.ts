@@ -41,7 +41,11 @@ import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { ANCHOR_PROFILE_SELECT, anchorProfileOf } from "@/lib/partner-public";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { pickDeployment } from "@/lib/project-deployment";
+import {
+	deriveNetworks,
+	type NetworksBasis,
+	pickDeployment,
+} from "@/lib/project-deployment";
 import {
 	anchorIdentityHit,
 	anchorTokens,
@@ -656,92 +660,6 @@ function pickCoverage(
 	const asOf = typeof c.asOf === "string" && c.asOf ? c.asOf : null;
 	if (!countries.length && !currencies.length && !seps.length) return null;
 	return { countries, currencies, seps, asOf };
-}
-
-// sls-017: chains this project supports — and, just as importantly, an honest
-// admission when we do not know.
-//
-// This used to serialize a missing value as `[]`, which is not the absence of
-// a claim but a POSITIVE claim of emptiness: 916 of 1,010 projects were
-// telling every caller they support no blockchain at all, Stellar included.
-// For a directory of Stellar projects that is not merely unhelpful, it is the
-// exact failure the field was added to prevent — "omission must not read as
-// negation" — inverted into the API contract.
-//
-// Null is the honest encoding, and it is the one `routes` and `coverage`
-// already use for the same situation: we hold no curation, so we say nothing
-// rather than assert nothing-is-supported. Search is unaffected — it reads the
-// stored doc, and chainCorridorHit already falls back to prose when the field
-// is unenriched rather than treating empty as proof of absence.
-function pickNetworks(v: unknown): string[] | null {
-	if (!Array.isArray(v)) return null;
-	const nets = v.filter(
-		(x): x is string => typeof x === "string" && !!x.trim(),
-	);
-	return nets.length ? nets : null;
-}
-
-/** What kind of evidence stands behind supportedNetworks. Not exported —
- * a route module may export only handlers and segment config. */
-type NetworksBasis =
-	| "curated"
-	| "onchain-activity"
-	| "defillama-tvl"
-	| "anchor-coverage"
-	| "scf-award";
-
-/**
- * sls-017: derive Stellar membership from evidence we already hold, so the
- * field stops being null for half the directory.
- *
- * Curation only ever reached 94 of 1,010 projects, and the honest null we now
- * serve for the rest is still an answer nobody can use. But four signals on
- * the row are PROOF that a project operates on Stellar, not inference:
- *
- *   - onchain.contracts — contract records observed on Stellar
- *   - tvlUSD            — DefiLlama tracks its Stellar TVL
- *   - coverage          — SEP/corridor rails, which are Stellar rails
- *   - scf.awarded       — the Stellar Community Fund only funds Stellar work
- *
- * Ordered strongest-first, and each reported by name so a caller can weigh a
- * deployed contract differently from a grant.
- *
- * WHY THIS CANNOT REPEAT THE DTCC ERROR: DTCC sits at Development and
- * announces Stellar availability for H1 2027, and it carries none of these
- * four — no award, no TVL, no contracts. Announcing a future deployment
- * leaves no evidence behind, which is exactly the property that makes these
- * signals safe. Status is deliberately NOT a factor: an SCF award proves the
- * project targets Stellar whether or not it runs today, which is what this
- * field asks. Whether it currently RUNS is `status`.
- *
- * THE DERIVED LIST IS NOT EXHAUSTIVE, and `networksBasis` is what says so.
- * Evidence of Stellar is not evidence about XRPL, so a derived ["stellar"]
- * must never be read the way a curated ["stellar","xrpl"] can be. Without the
- * basis field this would trade one false negative (null everywhere) for a
- * worse one (every derived row implying Stellar-only).
- */
-function deriveNetworks(
-	// biome-ignore lint/suspicious/noExplicitAny: payload project doc shape
-	p: any,
-): { supportedNetworks: string[] | null; networksBasis: NetworksBasis | null } {
-	const curated = pickNetworks(p?.supportedNetworks);
-	if (curated) return { supportedNetworks: curated, networksBasis: "curated" };
-
-	const cov = p?.coverage;
-	const basis: NetworksBasis | null = p?.onchain?.contracts?.length
-		? "onchain-activity"
-		: typeof p?.tvlUSD === "number" && p.tvlUSD > 0
-			? "defillama-tvl"
-			: cov &&
-					(cov.countries?.length || cov.currencies?.length || cov.seps?.length)
-				? "anchor-coverage"
-				: p?.scf?.awarded
-					? "scf-award"
-					: null;
-
-	return basis
-		? { supportedNetworks: ["stellar"], networksBasis: basis }
-		: { supportedNetworks: null, networksBasis: null };
 }
 
 // sls-032 (#516): a served route-level bridge fact. A Bridge-typed project

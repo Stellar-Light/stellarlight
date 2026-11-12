@@ -1,13 +1,12 @@
 {
 	"$comment": "Type errors in scripts/ that predate the guard. A ratchet: entries may be REMOVED (in the PR that fixes them) and never added. Regenerate: pnpm exec tsx scripts/check-scripts-types.ts --update",
-	"updatedAt": "2026-11-12T00:05:10.524Z",
-	"count": 26,
+	"updatedAt": "2026-11-12T01:26:59.002Z",
+	"count": 25,
 	"errors": [
 		"scripts/apply-status-batch.ts :: error TS2769 :: No overload matches this call.",
 		"scripts/backfill-code-tier.ts :: error TS2769 :: No overload matches this call.",
 		"scripts/data/award-import.ts :: error TS2322 :: Type '{ slug: { equals: string; }; status?: undefined; } | { status: { equals: string; }; slug?: undefined; }' is not assignable to type 'Where | undefined'.",
 		"scripts/data/award-test-setup.ts :: error TS2322 :: Type 'string | number' is not assignable to type 'string | AwardRound | undefined'.",
-		"scripts/data/backfill-deployment.ts :: error TS2769 :: No overload matches this call.",
 		"scripts/data/seed-i3-mock.ts :: error TS2345 :: Argument of type '{ collection: \"award-rounds\"; data: { slug: string; title: string; status: \"open\"; ballotMode: \"one-per-category\"; categories: { key: string; name: string; tagline: string; }[]; opensAt: string; closesAt: string; }; overrideAccess: true; }' is not assignable to parameter of type 'Options<\"award-rounds\", AwardRoundsSelect<false> | AwardRoundsSelect<true>>'.",
 		"scripts/data/seed-summit-sp-winners.ts :: error TS2322 :: Type '{ name: string; slug: string; description: string; startDate: string; endDate: string; externalUrl: string; status: string; }' is not assignable to type '(Omit<Hackathon, \"createdAt\" | \"deletedAt\" | \"id\" | \"sizes\" | \"updatedAt\"> & Partial<Pick<Hackathon, \"createdAt\" | \"deletedAt\" | \"id\" | \"sizes\" | \"updatedAt\">>) | Partial<...>'.",
 		"scripts/data/seed-summit-sp-winners.ts :: error TS2345 :: Argument of type '{ collection: \"projects\"; data: { name: string; slug: string; category: \"Protocol/Contract\"; shortDescription: string; status: \"Development\"; statusBasis: \"source-inherited\"; statusAsOf: string; ... N more ...; provenance: { ...; }; }; }' is not assignable to parameter of type 'Options<\"projects\", ProjectsSelect<false> | ProjectsSelect<true>>'.",
@@ -35,7 +34,6 @@
 		"scripts/backfill-code-tier.ts :: error TS2769 :: No overload matches this call.": 1,
 		"scripts/data/award-import.ts :: error TS2322 :: Type '{ slug: { equals: string; }; status?: undefined; } | { status: { equals: string; }; slug?: undefined; }' is not assignable to type 'Where | undefined'.": 1,
 		"scripts/data/award-test-setup.ts :: error TS2322 :: Type 'string | number' is not assignable to type 'string | AwardRound | undefined'.": 1,
-		"scripts/data/backfill-deployment.ts :: error TS2769 :: No overload matches this call.": 1,
 		"scripts/data/seed-i3-mock.ts :: error TS2345 :: Argument of type '{ collection: \"award-rounds\"; data: { slug: string; title: string; status: \"open\"; ballotMode: \"one-per-category\"; categories: { key: string; name: string; tagline: string; }[]; opensAt: string; closesAt: string; }; overrideAccess: true; }' is not assignable to parameter of type 'Options<\"award-rounds\", AwardRoundsSelect<false> | AwardRoundsSelect<true>>'.": 1,
 		"scripts/data/seed-summit-sp-winners.ts :: error TS2322 :: Type '{ name: string; slug: string; description: string; startDate: string; endDate: string; externalUrl: string; status: string; }' is not assignable to type '(Omit<Hackathon, \"createdAt\" | \"deletedAt\" | \"id\" | \"sizes\" | \"updatedAt\"> & Partial<Pick<Hackathon, \"createdAt\" | \"deletedAt\" | \"id\" | \"sizes\" | \"updatedAt\">>) | Partial<...>'.": 1,
 		"scripts/data/seed-summit-sp-winners.ts :: error TS2345 :: Argument of type '{ collection: \"projects\"; data: { name: string; slug: string; category: \"Protocol/Contract\"; shortDescription: string; status: \"Development\"; statusBasis: \"source-inherited\"; statusAsOf: string; ... N more ...; provenance: { ...; }; }; }' is not assignable to parameter of type 'Options<\"projects\", ProjectsSelect<false> | ProjectsSelect<true>>'.": 1,

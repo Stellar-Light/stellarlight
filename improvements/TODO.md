@@ -263,6 +263,51 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 
 ## Next
 
+Found by the sls-024 deployment-provenance lane on 2026-11-11 (branch
+lane/r1111-deploy-provenance). Lifecycle and record items it found and did
+not change; each probe is a read-only request.
+
+- stellars-finance is Pre-Release on a parked domain: `curl -sI
+  https://stellars.finance/` answers `server: Parking/1.0`, the statusSourceUrl
+  bundle (`/assets/index-3HEaNhUX.js`) answers 440, and
+  `/api/projects/search?q=stellars%20finance&limit=1` still serves
+  Pre-Release, human-verified. Its testnet vault is still on the testnet
+  ledger; whether the product lives is the open question.
+- xycloans is Live on statusBasis product-integration whose statusSourceUrl
+  (`main.xycloans.app/_next/static/chunks/eef1a047-8f44bfe5d78759e9.js`) holds
+  both network passphrases and no contract id (0 C addresses, read
+  2026-11-11); stellar-raven sls-024 notes the repo was last pushed
+  2024-12-09. An SDK in a bundle shows integration, not that the product runs.
+- Rows whose records cite another product: soroban-timelock-contract (a
+  timelock contract template) serves statusSourceUrl
+  github.com/57blocks/agentsmith-x402 and has the AgentSmith repo
+  57blocks/agentsmith-contracts attributed to it; websoroban-ide (the browser
+  IDE) has WebSoroban/payloop, a separate USDC subscriptions product,
+  attributed to it. Their deployment claims were retracted on this branch;
+  the status source and the repo attribution were not touched.
+- stellar-vrf and vrf-soroban are two rows for one repo (NibrasD/Stellar-VRF)
+  and one mainnet contract (CAW6KECQMHRTX2GS3JVHWBMOB5JNNOHNOCE635RQS4SWJ72YF56EUPRX),
+  one Live and one Development: a duplicate with no canonical pointer
+  (bug class 9).
+- S0 in scripts/check-record-completeness.ts has checked nothing: it sweeps
+  `/api/projects/search?limit=100` with no q or category, which answers
+  no_query with 0 projects, and it reads `/api/audits` rows from a
+  `projects` key the audits body does not have, so 0 audits. Run on
+  2026-11-11 it printed "0 projects + 0 audits, 0 dangling references" and
+  passed. Done when S0 sweeps every category, reads the audits body's own
+  key, and a zero-row sweep fails as S1 and S2 do.
+- `/api/verify` serves `subjectCard.supportedNetworks` from the stored list
+  as it is: `[]` for a row with no curated list (an empty array asserting no
+  networks) and "Stellar" for the 20 rows stored capitalised; it does not
+  use deriveNetworks, which searchProjects now serves lowercase.
+- The curate-projects Idempotence step re-plans only curate-projects.ts. Add
+  the deployment pass: after an execute, `backfill-deployment.ts` without
+  --execute must plan 0 rows.
+- A Payload save-time rule on `deployment`: mainnet or testnet only with
+  basis, sourceUrl and asOf. Add it once the S5 sweep is green; before
+  that, validation on any update would reject other lanes' writes to rows
+  that still lack a source.
+
 Found on 2026-11-11 in the audit of the sls-115 lane (pinned knowledge-note
 values checked against the code scan):
 

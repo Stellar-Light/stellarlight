@@ -7731,10 +7731,23 @@ export function curatedSlugs(): string[] {
 /** sls-079: verified DEPLOYMENT facts, separate from lifecycle status.
  * Only entries a human (or a cited operator artifact) actually evidences.
  * network "testnet" here means the operator's OWN configuration shows no
- * mainnet deployment — the strongest honest reading available. */
+ * mainnet deployment, the strongest honest reading available.
+ *
+ * sls-024 (2026-11-11): a positive entry must carry the sourceUrl a reader
+ * re-checks it at, and checkedAt (when the curator read it) dates the claim;
+ * without checkedAt the pass dates it by its own clock. network "unknown"
+ * RETRACTS a claim: backfill-deployment never retracts on its own, so a claim
+ * whose only evidence turned out to be another project's artifact is retracted
+ * here, with the reason and the day it was checked. */
 export const DEPLOYMENT_VERIFIED: Record<
 	string,
-	{ network: "mainnet" | "testnet"; sourceUrl: string; note: string }
+	| {
+			network: "mainnet" | "testnet";
+			sourceUrl: string;
+			note: string;
+			checkedAt?: string;
+	  }
+	| { network: "unknown"; note: string; checkedAt: string }
 > = {
 	// sls-079 (2026-08-28, verified in-session byte-for-byte): the operator
 	// bundle defines {local, testnet, mainnet} network configs; testnet holds
@@ -7769,10 +7782,15 @@ export const DEPLOYMENT_VERIFIED: Record<
 			"https://stellar.expert/explorer/public/asset/USDGLO-GBBS25EGYQPGEZCGCFBKG4OAGFXU6DSOQBGTHELLJT3HZXZJ34HWS6XV",
 		note: "issuer account's own home_domain = app.glodollar.org (reverse-verified); 624 holders",
 	},
+	// 2026-11-11: the docs page this cited now redirects to a chains page that
+	// no longer lists the Stellar contracts; the operator's own deployment
+	// config names them.
 	axelar: {
 		network: "mainnet",
-		sourceUrl: "https://docs.axelar.dev/resources/contract-addresses/mainnet/",
-		note: "Axelar's mainnet reference lists Stellar gateway CD6VSKXB4HY2DWU7EP2PUIYTBJBJ36LDJXEZN4NSXFYF5YP37DDFX6NF; contract live on public since 2025-03",
+		sourceUrl:
+			"https://github.com/axelarnetwork/axelar-contract-deployments/blob/main/axelar-chains-config/info/mainnet.json",
+		note: "Axelar's deployment config lists chain stellar (networkType mainnet) with AxelarGateway CD6VSKXB4HY2DWU7EP2PUIYTBJBJ36LDJXEZN4NSXFYF5YP37DDFX6NF and InterchainTokenService CBDBMIOFHGWUFRYH3D3STI2DHBOWGDDBCRKQEUB4RGQEBVG74SEED6C6; getLedgerEntries found the gateway on mainnet",
+		checkedAt: "2026-11-11",
 	},
 	"circle-cctp-cross-chain-transfer-protocol": {
 		network: "mainnet",
@@ -7785,10 +7803,15 @@ export const DEPLOYMENT_VERIFIED: Record<
 		sourceUrl: "https://stellarterm.com/",
 		note: "self-custodial client of the native Stellar DEX on the PUBLIC network - it deploys no contracts; 'mainnet' here means the product operates against mainnet, which is its entire function",
 	},
+	// 2026-11-11: the bundle this cited is gone and stellars.finance is a
+	// parked domain; the testnet vault that bundle named is still on the
+	// testnet ledger (receipt: improvements/receipts/stellars-finance-2026-08-28.json).
 	"stellars-finance": {
 		network: "testnet",
-		sourceUrl: "https://stellars.finance/assets/index-3HEaNhUX.js",
-		note: 'mainnet config present but empty (4x address:""); testnet fully populated',
+		sourceUrl:
+			"https://stellar.expert/explorer/testnet/contract/CAX5JF7U7WFQDSX7CNEV6DDAQ5J5Q655NLATEUPU5D5GWIWT7T6SGYVO",
+		note: 'the operator bundle (2026-08-28) held a mainnet config with four empty addresses (address:"") and a populated testnet one; getLedgerEntries finds its testnet vault CAX5JF7U7WFQDSX7CNEV6DDAQ5J5Q655NLATEUPU5D5GWIWT7T6SGYVO, archived',
+		checkedAt: "2026-11-11",
 	},
 	// ── 2026-08-29 gap-matrix pass: the 6-row deployment pool. Two evidenced,
 	// four stay honestly unknown (receipts improvements/receipts/<slug>-2026-08-29.json):
@@ -7796,11 +7819,14 @@ export const DEPLOYMENT_VERIFIED: Record<
 	// (stellar.expert by their real domains returns only lookalike-farm squats:
 	// wisdomtree.co.com, lumenvaultx.org, stellarxlm.online — never cite those);
 	// spacewalk — bridge operates from Pendulum; no Stellar-side artifact located.
+	// 2026-11-11 (sls-024, one rule for every claim: its cited artifact must be
+	// found): the testnet claim stood on a documented contract the current
+	// testnet does not hold; the 2025-12-17 testnet reset closed its earliest
+	// ledger. The 2026-08-29 receipt is improvements/receipts/dia-2026-08-29.json.
 	dia: {
-		network: "testnet",
-		sourceUrl:
-			"https://developers.stellar.org/docs/data/oracles/oracle-providers",
-		note: "Stellar's own oracle-providers reference lists DIA with a TESTNET contract only (CAEDPEZD…); no mainnet address documented anywhere",
+		network: "unknown",
+		note: "Stellar's oracle-providers reference and DIA's own Stellar guide (diadata.org/docs/guides/chain-specific-guide/stellar) list one DIA contract, testnet CAEDPEZDRCEJCF73ASC5JGNKCIJDV2QJQSW6DJ6B74MYALBNKCJ5IFP4; getLedgerEntries on soroban-testnet does not find it (the testnet's earliest ledger closed 2025-12-17), and neither page names a mainnet contract",
+		checkedAt: "2026-11-11",
 	},
 	"redstone-finance": {
 		network: "mainnet",
@@ -7829,6 +7855,140 @@ export const DEPLOYMENT_VERIFIED: Record<
 		network: "mainnet",
 		sourceUrl: "https://docs.chain.link/data-feeds/stellar",
 		note: "Curator attestation, 2026-11-04 (not a chain check this lane runs): Chainlink's Stellar docs list the Stellar Mainnet (Pubnet) Data Feeds proxy CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ (testnet proxy CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4); a stellar.expert read that day showed the mainnet proxy created 2026-09-14 with 11 invocations",
+	},
+	// sls-024 (2026-11-11): mainnet claims that carried no deployment source.
+	// Their status links were a docs page and a repo, which evidence nothing
+	// on their own; each source below names the contract, and Soroban RPC
+	// getLedgerEntries (mainnet.sorobanrpc.com) found it that day.
+	band: {
+		network: "mainnet",
+		sourceUrl:
+			"https://developers.stellar.org/docs/data/oracles/oracle-providers",
+		note: "Stellar's oracle-providers reference lists Band's mainnet contract CCQXWMZVM3KRTXTUPTN53YHL272QGKF32L7XEDNZ2S6OSUFK3NFBGG5M (testnet CBRV5ZEQSSCQ4FFO64OF46I3UASBVEJNE5C2MCFWVIXL4Z7DMD7PJJMF); getLedgerEntries found the mainnet instance live",
+		checkedAt: "2026-11-11",
+	},
+	lightecho: {
+		network: "mainnet",
+		sourceUrl: "https://github.com/bp-ventures/lightecho-stellar-oracle",
+		note: "the operator's README lists the PRODUCTION base XLM contract CDOR3QD27WAAF4TK4MO33TGQXR6RPNANNVLOY277W2XVV6ZVJ6X6X42T; getLedgerEntries found it live on mainnet",
+		checkedAt: "2026-11-11",
+	},
+	// Unknown until 2026-11-11: the operator's contract-addresses page lists a
+	// Pyth Pro contract per Stellar network.
+	pyth: {
+		network: "mainnet",
+		sourceUrl: "https://docs.pyth.network/pro/contract-addresses",
+		note: "Pyth's contract-addresses page lists the Pyth Pro contract on Stellar Mainnet CACZ3GBAKUPIAFRILUFO27J5RUH5GJ2VSJ46LP6GJYSKGDRTQ5MS3HCH and Stellar Testnet CAYFT5JE3UQTKT4Q6ZOZK4FXVYVT6RE3MFC7STA4UB6WAEGBT65MRU52; getLedgerEntries found each live on its network",
+		checkedAt: "2026-11-11",
+	},
+	// The join cited reclaimprotocol/zkfetch-stellar-example, which GitHub now
+	// answers 404 for; the operator's own integration README names the same id.
+	reclaim: {
+		network: "mainnet",
+		sourceUrl:
+			"https://github.com/reclaimprotocol/stellar-sdk-onchain-integration",
+		note: "the operator's README lists the mainnet contract CD4M2KHW3ESOV3RUT7KCTC6BX37PIL2Z3BEK47IA74KIMFIFUI3JJDMO (testnet CA3EMXR6...); getLedgerEntries found it on mainnet, archived",
+		checkedAt: "2026-11-11",
+	},
+	// The operator-toml chain stamped these from their own stellar.toml; on
+	// 2026-11-11 lumenswap.io serves its app's HTML at that path and xlmeme.com
+	// answers 521, so the chain no longer re-derives them. The asset each toml
+	// declared is still on Horizon and its issuer still names the domain back.
+	lumenswap: {
+		network: "mainnet",
+		sourceUrl:
+			"https://stellar.expert/explorer/public/asset/LSP-GAB7STHVD5BDH3EEYXPI3OM7PCS4V443PYB5FNT6CFGJVPDLMKDM24WK",
+		note: "Horizon holds LSP by GAB7STHVD5BDH3EEYXPI3OM7PCS4V443PYB5FNT6CFGJVPDLMKDM24WK (19,487 trustlines on 2026-11-11), and the issuer's home_domain is lumenswap.io",
+		checkedAt: "2026-11-11",
+	},
+	xlmeme: {
+		network: "mainnet",
+		sourceUrl:
+			"https://stellar.expert/explorer/public/asset/TRUMP-GAP4Z7QQ62O6JKNBUEXMBXDVHT7B6DBB6JJQF3OOXCOJSNZC7TNRVD6F",
+		note: "the toml chain matched TRUMP by GAP4Z7QQ62O6JKNBUEXMBXDVHT7B6DBB6JJQF3OOXCOJSNZC7TNRVD6F on 2026-09-07; Horizon holds it (1,192 trustlines on 2026-11-11) and the issuer's home_domain is xlmeme.com",
+		checkedAt: "2026-11-11",
+	},
+	// Held assets whose issuer's home_domain is not the row's website domain,
+	// so the pass no longer takes them as evidence on its own (2026-11-11);
+	// each was traced to the operator by hand.
+	vchf: {
+		network: "mainnet",
+		sourceUrl: "https://vnx.io/.well-known/stellar.toml",
+		note: "VNX's stellar.toml at vnx.io (the domain vnx.li links to) declares VCHF by GDXLSLCOPPHTWOQXLLKSVN4VN3G67WD2ENU7UMVAROEYVJLSPSEWXIZN and lists that issuer in ACCOUNTS; the issuer's home_domain is vnx.io and Horizon holds the asset",
+		checkedAt: "2026-11-11",
+	},
+	veur: {
+		network: "mainnet",
+		sourceUrl:
+			"https://stellar.expert/explorer/public/asset/VEUR-GDXLSLCOPPHTWOQXLLKSVN4VN3G67WD2ENU7UMVAROEYVJLSPSEWXIZN",
+		note: "Horizon holds VEUR by GDXLSLCOPPHTWOQXLLKSVN4VN3G67WD2ENU7UMVAROEYVJLSPSEWXIZN, the VNX issuer whose home_domain is vnx.io and which vnx.io's stellar.toml lists in ACCOUNTS; that toml declares VCHF only, not VEUR",
+		checkedAt: "2026-11-11",
+	},
+	mbrl: {
+		network: "mainnet",
+		sourceUrl:
+			"https://stellar.expert/explorer/public/asset/MBRL-GDLS4RCNECY46KKA4OGU2MMJILUK3I372CUFISWM4HKCV7265RY2NJ4Z",
+		note: "Horizon holds MBRL by GDLS4RCNECY46KKA4OGU2MMJILUK3I372CUFISWM4HKCV7265RY2NJ4Z (19 trustlines); its home_domain mbrl.com.br redirects to mercadobitcoin.com.br/mbrl, the row's website; mbrl.com.br's stellar.toml answered 522",
+		checkedAt: "2026-11-11",
+	},
+	// Its only status evidence is a DefiLlama page reading $0; the issuer of
+	// its own USDXLR names excellar.finance, whose toml path answers a 308 to
+	// www.excellar.finance, which answers 404. A second USDXLR issuer names
+	// global-stellarmint.com and is not Excellar's.
+	excellar: {
+		network: "mainnet",
+		sourceUrl:
+			"https://stellar.expert/explorer/public/asset/USDXLR-GBMAAGRUMXBRG3IG6BPG5LCO7FTE5VIRA3VF64BFII3LXC27GSEYLHKU",
+		note: "Horizon holds USDXLR by GBMAAGRUMXBRG3IG6BPG5LCO7FTE5VIRA3VF64BFII3LXC27GSEYLHKU (20 trustlines), whose home_domain is excellar.finance, the row's website, which names USDXLR",
+		checkedAt: "2026-11-11",
+	},
+	// The toml chain stamped Normal from normalfinance.io's stellar.toml, which
+	// now marks every currency dead, so the chain no longer re-derives it. Its
+	// own vault is the evidence, recorded in its status entry (2026-09-06).
+	normal: {
+		network: "mainnet",
+		sourceUrl:
+			"https://stellar.expert/explorer/public/contract/CAWM7NKSYG2ITJW2MYYJWJ5ULGCJLDB6MXZIWPL3VPRG5TDVLJ66IMWR",
+		note: "Normal's USDC savings vault: getLedgerEntries finds CAWM7NKSYG2ITJW2MYYJWJ5ULGCJLDB6MXZIWPL3VPRG5TDVLJ66IMWR live, with metadata name DeFindex-Vault-NormalUSDC, symbol nUSDC and non-zero TotalSupply; the row's status source is a 2026-09-02 transaction invoking withdraw on it. The stellar.toml currencies (nBTC and the rest) are all marked dead and are not this evidence",
+		checkedAt: "2026-11-11",
+	},
+	// Retractions (sls-024, 2026-11-11): each claim's only evidence was another
+	// project's artifact. A Live organization or a repo that cites a contract
+	// does not establish a mainnet product.
+	// Re-checked after review (2026-11-11): Lightsail's second contract repo,
+	// crossmesh-ingress-contracts, names CBZL2IH7... as "Circle's CctpForwarder"
+	// on mainnet, and Circle's own reference lists that id as its mainnet
+	// CctpForwarder (now seeded to circle-cctp). Cross Mesh's own deposit
+	// contracts are EVM CREATE2 contracts, not Stellar ones.
+	lightsail: {
+		network: "unknown",
+		note: "neither contract cited for Lightsail is its own: CDOAW6D7NXAPOCO7TFAWZNJHK62E3IYRGNRVX3VOXNKNVOXCLLPJXQCF is the example target of the stellar-contract-bindings CLI README, and CBZL2IH7F6BIDAA3WBNXYKIXSATJGMSW7K5P5MJ6STX5RXN47TZJDF5T, cited by crossmesh-ingress-contracts, is Circle's CctpForwarder (developers.circle.com/cctp/references/stellar-contracts); Cross Mesh deploys its deposit contracts on EVM chains, and no Lightsail contract on Stellar was located",
+		checkedAt: "2026-11-11",
+	},
+	"stellar-indexer": {
+		network: "unknown",
+		note: "the joined id CAJJZSGMMM3PD7N33TAPHGBUGTB43OC73HVIK2L2G6BNGGGYOSSYBXBD is Blend's Fixed V2 pool (blend-utils mainnet.contracts.json), the fetchContractData example in the SDK README; the indexer is an off-chain service in token-gated beta",
+		checkedAt: "2026-11-11",
+	},
+	simplytokenized: {
+		network: "unknown",
+		note: "the only mainnet id in the contracts README, CALI2BYU2JE6WVRUFYTS6MSBNEHGJ35P4AVCZYF3B6QOE3QKOB2PLE6M, is the Reflector oracle it reads prices from (same wasm as Reflector's oracle); simplytokenized.com serves no stellar.toml (404) and no SimplyTokenized contract was located",
+		checkedAt: "2026-11-11",
+	},
+	estrela: {
+		network: "unknown",
+		note: "the operator-toml chain read allbridge.io's stellar.toml, which declares Allbridge Classic's wrapped assets (issuer GALLBRBQHAPW5FOVXXHYWR6J4ZDAQ35BMSNADYGBW25VOUHUYRZM4XIL); Estrela is Allbridge's separate Soroban stablecoin AMM (SCF estrela-mrf), whose contracts repo documents a testnet setup only",
+		checkedAt: "2026-11-11",
+	},
+	"websoroban-ide": {
+		network: "unknown",
+		note: "the joined contract CDQ6I65CP3JHLNGMEHWE4BP2OMLWOUMZ77U53JPAURFZPZBVH6PYEXPN is PayLoop's (WebSoroban/payloop: USDC subscriptions), a separate product; the browser IDE has no deployment of its own",
+		checkedAt: "2026-11-11",
+	},
+	"soroban-timelock-contract": {
+		network: "unknown",
+		note: "the joined contract CCV4RALFBEE2QLKPK6H5ZX24CYMKIFN3723J5J4TMDEFWAFLELGYODNI is the AgentSmith x402 settlement kernel (57blocks/agentsmith-contracts); the timelock repo (57blocks/stellar-timelock-contract) documents no deployment",
+		checkedAt: "2026-11-11",
 	},
 };
 
