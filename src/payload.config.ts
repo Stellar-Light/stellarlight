@@ -26,6 +26,7 @@ import { Hackathons } from "./collections/Hackathons";
 import { IdeaSubmissions } from "./collections/IdeaSubmissions";
 import { LinkChecks } from "./collections/LinkChecks";
 import { Media } from "./collections/Media";
+import { OracleReadings } from "./collections/OracleReadings";
 import { PartnerLeads } from "./collections/PartnerLeads";
 import { Partners } from "./collections/Partners";
 import { Projects } from "./collections/Projects";
@@ -97,6 +98,7 @@ export default buildConfig({
 		Stablecoins,
 		StablecoinSnapshots,
 		RwaAssets,
+		OracleReadings,
 		HackathonBuilds,
 		HackathonEvents,
 		AwardRounds,

@@ -228,7 +228,7 @@ function buildExplicitPlans(): Map<string, Plan> {
 		// README documents the deployed mainnet contract
 		// CDOR3QD27WAAF4TK4MO33TGQXR6RPNANNVLOY277W2XVV6ZVJ6X6X42T.
 		sourceUrl: "https://github.com/bp-ventures/lightecho-stellar-oracle",
-		note: "Mainnet oracle contract is deployed (on-chain evidence); the observed price state was ~4 months stale as of 2026-07-10 (sls-029 probe). Deployment evidence, not feed freshness.",
+		note: "Deployment evidence: the README's production contract CDOR3QD27WAAF4TK4MO33TGQXR6RPNANNVLOY277W2XVV6ZVJ6X6X42T held a contract instance on mainnet on 2026-11-11. This note makes no freshness claim: per-feed freshness is served only in this row's oracle-feed products (observation, null until a check has run).",
 		requireStatus: ["Live"],
 	});
 
@@ -256,7 +256,7 @@ function buildExplicitPlans(): Map<string, Plan> {
 		// curated claim = human-verified; feed-level liveness not yet
 		// independently re-confirmed.
 		sourceUrl: "https://stellarsecurityportal.com/report/68",
-		note: "Stellar connector audited by Veridise (Oct 2025). Mainnet launch (Mar 2026, 10 feeds) per curated launch coverage; current feed-level liveness not independently re-confirmed (sls-029/#494 residual).",
+		note: "Stellar connector audited by Veridise and Zenith (Stellar's oracle-providers page); mainnet launch announced 2026-03-04. Deployment evidence: RedStone's relayer manifests list its Stellar adapters and SEP-40 contracts, each holding a contract instance on 2026-11-11. This note makes no freshness claim: per-feed freshness is served only in this row's oracle-feed products (observation, null until a check has run).",
 		requireStatus: ["Live"],
 	});
 	// R2c — sls-029 recheck (user 2026-07-15): reflector was Live with a null
@@ -272,7 +272,7 @@ function buildExplicitPlans(): Map<string, Plan> {
 		asOf: "2026-07-15",
 		sourceUrl:
 			"https://developers.stellar.org/docs/data/oracles/oracle-providers",
-		note: "Live on mainnet per the official oracle-providers page with 3 deployed Soroban oracle contracts (DEX / External CEXs & DEXs / Fiat FX). Deployment evidence, not per-feed freshness.",
+		note: "Deployment evidence: Reflector's orchestrator config lists four mainnet oracle contracts (three of type oracle, also on Stellar's oracle-providers page, and one of type oracle_beam), each holding a contract instance on 2026-11-11. This note makes no freshness claim: per-feed freshness is served only in this row's oracle-feed products (observation, null until a check has run).",
 		requireStatus: ["Live"],
 	});
 

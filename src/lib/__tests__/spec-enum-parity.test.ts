@@ -2,6 +2,10 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+	ORACLE_ADDRESS_TIERS,
+	ORACLE_READ_METHODS,
+} from "@/data/oracle-registry";
+import {
 	RWA_KINDS,
 	RWA_PRODUCT_KINDS,
 	RWA_STATES,
@@ -12,6 +16,12 @@ import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "../http-params";
 import { RESEARCH_MODES } from "../match-mode";
 import { SOURCE_CHECK_STATES } from "../note-pins";
 import { spec } from "../openapi-spec";
+import {
+	ORACLE_CONTRACT_STATES,
+	ORACLE_FEED_LIST_BASES,
+	ORACLE_FEED_STATES,
+	ORACLE_OBSERVATION_TIERS,
+} from "../oracle-products";
 import { PARTNER_TYPES } from "../partner-match";
 import { DEPLOYMENT_NETWORKS } from "../project-deployment";
 import { PROJECT_MATCH_MODES } from "../project-search-match";
@@ -691,5 +701,48 @@ describe("locateSource enums are the code's lists", () => {
 			"utf8",
 		);
 		expect(src).toContain("options: [...LOCATOR_KINDS]");
+	});
+});
+
+describe("oracle records (sls-029): the spec serves the code's vocabularies", () => {
+	const item = S.components.schemas.Project.properties.products.items;
+	const obs = item.properties.observation;
+	it("addressTier, contract, method, tier, list basis and feed state are spread from code", () => {
+		expect(item.properties.addressTier.enum).toEqual([...ORACLE_ADDRESS_TIERS]);
+		expect(obs.properties.tier.enum).toEqual([...ORACLE_OBSERVATION_TIERS]);
+		expect(obs.properties.feedList.properties.basis.enum).toEqual([
+			...ORACLE_FEED_LIST_BASES,
+		]);
+		expect(obs.nullable).toBe(true);
+		expect(obs.properties.contract.enum).toEqual([...ORACLE_CONTRACT_STATES]);
+		expect(obs.properties.method.enum).toEqual([...ORACLE_READ_METHODS]);
+		expect(obs.properties.feeds.items.properties.state.enum).toEqual([
+			...ORACLE_FEED_STATES,
+		]);
+	});
+	it("every method and state is defined in its own description", () => {
+		for (const m of ORACLE_READ_METHODS)
+			expect(obs.properties.method.description, m).toContain(m);
+		for (const t of ORACLE_OBSERVATION_TIERS)
+			expect(obs.properties.tier.description, t).toContain(`${t} =`);
+		for (const t of ORACLE_ADDRESS_TIERS)
+			expect(item.properties.addressTier.description, t).toContain(`${t} =`);
+		for (const b of ORACLE_FEED_LIST_BASES)
+			expect(obs.properties.feedList.properties.basis.description, b).toContain(
+				`${b} =`,
+			);
+		for (const v of ORACLE_FEED_STATES)
+			expect(
+				obs.properties.feeds.items.properties.state.description,
+				v,
+			).toContain(`${v} =`);
+	});
+	it("the readings collection stores the same contract states and methods", () => {
+		const src = readFileSync(
+			resolve(__dirname, "../../collections/OracleReadings.ts"),
+			"utf8",
+		);
+		expect(src).toContain("options: [...ORACLE_CONTRACT_STATES]");
+		expect(src).toContain("options: [...ORACLE_READ_METHODS]");
 	});
 });

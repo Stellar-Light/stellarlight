@@ -1,9 +1,11 @@
+import type { OracleAddressTier } from "@/data/oracle-registry";
 import {
 	RWA_DEPLOYER_COVERAGE,
 	RWA_ISSUER_COVERAGE,
 	RWA_REGISTRY,
 	type RwaAsset,
 } from "@/data/rwa-registry";
+import { type OracleObservation, oracleProducts } from "./oracle-products";
 
 /**
  * The per-product record served on a project row (`products`).
@@ -39,6 +41,9 @@ export interface ProductRecord {
 		authImmutable: boolean;
 		clawbackEnabled: boolean;
 	} | null;
+	/** Oracle records only (src/lib/oracle-products.ts). */
+	addressTier?: OracleAddressTier;
+	observation?: OracleObservation | null;
 }
 
 /** States that mean the asset is minted on mainnet. */
@@ -104,20 +109,26 @@ function toProduct(r: RwaAsset): ProductRecord {
 }
 
 /**
- * Merge stored (curated) product rows with the registry's, de-duplicated on
- * contractId. Null — never [] — when neither holds anything: an unmodelled
- * dimension is UNKNOWN, and "[]" is a positive claim that the project ships
- * no products on Stellar.
+ * Merge stored (curated) product rows with the RWA and oracle registries',
+ * de-duplicated on contractId. Null, never [], when none holds anything: an
+ * unmodelled dimension is UNKNOWN, and "[]" is a positive claim that the
+ * project ships no products on Stellar. For a provider in the oracle registry
+ * the registry is the one writer of its oracle-feed records, so a stored copy
+ * is not served beside it.
  */
 export function mergeProducts(
 	stored: ProductRecord[] | null,
 	slug: string | null | undefined,
 ): ProductRecord[] | null {
 	const fromRegistry = registryProducts(slug);
-	if (!stored?.length && !fromRegistry.length) return null;
+	const fromOracles: ProductRecord[] = oracleProducts(slug);
+	const kept = fromOracles.length
+		? (stored ?? []).filter((p) => p.kind !== "oracle-feed")
+		: (stored ?? []);
+	if (!kept.length && !fromRegistry.length && !fromOracles.length) return null;
 	const seen = new Set<string>();
 	const out: ProductRecord[] = [];
-	for (const p of [...(stored ?? []), ...fromRegistry]) {
+	for (const p of [...kept, ...fromOracles, ...fromRegistry]) {
 		const key = p.contractId ?? `${p.name}|${p.network}`;
 		if (seen.has(key)) continue;
 		seen.add(key);
