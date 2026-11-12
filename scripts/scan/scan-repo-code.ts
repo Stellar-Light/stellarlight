@@ -37,6 +37,7 @@ import {
 import { routeCodeDepth } from "../../src/lib/depth-route";
 import { isKnownInfraNotDeployable } from "../../src/lib/known-infra";
 import { isAllowlisted } from "../../src/lib/repo-allowlist";
+import { notePinsFor } from "../../src/lib/repo-knowledge";
 import { extractStellarDeps } from "../../src/lib/stellar-deps";
 import {
 	formatMismatches,
@@ -49,8 +50,14 @@ import {
 	fetchRepoCode,
 	keepStoredContract,
 	RateLimitError,
+	readPinnedValues,
 } from "./fetch-repo-code";
-import { poolWarning, SCANNED_POOL_CAP } from "./scan-repo-code-pool";
+import {
+	PIN_DUE_CAP,
+	pinDueWave,
+	poolWarning,
+	SCANNED_POOL_CAP,
+} from "./scan-repo-code-pool";
 import { errorToWrite, signalsToWrite } from "./write-shape";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -68,6 +75,9 @@ const VERIFIED_FIELDS = [
 	"codeScanNote",
 	"codeScanError",
 	"mainnetContractId",
+	// Not a scalar, but explainRepo serves its answer from it (sls-115), so
+	// it is read back too; the comparison is deep.
+	"pinnedValues",
 ] as const;
 const RESCAN = process.argv.includes("--rescan");
 /**
@@ -431,6 +441,25 @@ async function main() {
 				`re-scan pool: ${stale.length} scanned repos pushed since their scan`,
 			);
 	}
+	// sls-115: a repo holding a pinned note whose reading at scannedRef is
+	// missing, could not be read, or predates the last push leads the wave, so
+	// a pin on a quiet repo does not answer unknown until a push that may never
+	// come. Bounded by PIN_DUE_CAP and a day's cooldown, and scanned in the
+	// loop below, so the call budget counts it. --only and the retry wave keep
+	// their own selection.
+	if (!ONLY && !RETRY_EXCLUDED) {
+		const wave = await pinDueWave((q) => payload.find(q), docs, {
+			lang: LANG,
+			limit: LIMIT,
+			now: Date.now(),
+		});
+		if (wave.due.length) {
+			docs = wave.docs;
+			console.log(
+				`pin-due: ${wave.due.length} repo(s) with a pinned note that has no usable reading at scannedRef or predates the last push lead this wave (cap ${PIN_DUE_CAP}): ${wave.due.join(", ")}`,
+			);
+		}
+	}
 	console.log(
 		`eligible: ${eligible} · this wave: ${docs.length}${skippedTriaged ? ` · skipped ${skippedTriaged} triaged` : ""}${STALE_FIRST ? " · mode=stale-first (pushed since last scan)" : ""}\n`,
 	);
@@ -561,6 +590,18 @@ async function main() {
 					contractRepos++;
 					if (contractInterface.length > 0) contractReposWithIface++;
 				}
+				// sls-115: each symbol a curated note pins, read at the same
+				// commit as every other fact this update writes, so a note's
+				// value is checked against the scan that serves beside it.
+				const pins =
+					r.outcome === "ok" && r.scannedRef ? notePinsFor(full) : [];
+				const pinnedValues =
+					r.scannedRef && pins.length
+						? {
+								ref: r.scannedRef,
+								reads: await readPinnedValues(full, r.scannedRef, pins),
+							}
+						: null;
 				const farm =
 					r.outcome === "ok"
 						? computeFarmScore({
@@ -589,6 +630,7 @@ async function main() {
 						sdkCapabilities,
 						codeDomains,
 						scannedRef: r.scannedRef,
+						pinnedValues,
 						mainnetContractId: r.depthInput.scalars.mainnetContractId ?? null,
 						mainnetContractBasis:
 							r.depthInput.scalars.mainnetContractBasis ?? null,
@@ -624,7 +666,7 @@ async function main() {
 					const planned = r.depthInput.scalars.mainnetContractId ?? null;
 					const held = doc.mainnetContractId ?? null;
 					const contract = `contract=${planned ? `${planned.slice(0, 8)}/${r.depthInput.scalars.mainnetContractBasis ?? "?"}` : "none"}${r.mainnetContractUnread ? " (check did not run: stored kept)" : planned !== held ? ` was=${held ? held.slice(0, 8) : "none"}` : ""}`;
-					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} via=${(route?.route ?? "-").padEnd(5)} farm=${farm.score} syms=${symbols.length} iface=${contractInterface.length} ${contract}`;
+					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} via=${(route?.route ?? "-").padEnd(5)} farm=${farm.score} syms=${symbols.length} iface=${contractInterface.length} ${contract}${pinnedValues ? ` pinned=${pinnedValues.reads.map((p) => `${p.path}#${p.symbol}:${p.state === "read" ? p.value : `${p.state} (${p.why})`}`).join(",")}` : ""}`;
 				} else {
 					if (r.outcome === "incomplete") incomplete++;
 					else errored++;

@@ -10,6 +10,7 @@
  *   derived:audit — the repo's owning project has verified security-audit
  *              reports in our registry (EXACT projectSlug join, never fuzzy).
  */
+import { type NotePin, pinOf } from "./note-pins";
 
 export interface KnowledgeNote {
 	note: string;
@@ -35,6 +36,17 @@ export interface KnowledgeNote {
 	 * — never a phrase some other question about the repo would contain.
 	 */
 	triggers?: string[];
+	/**
+	 * Where a value the note states was read (sls-115): the commit, the file
+	 * and the declared symbol. A note that states a value the source can
+	 * change carries one, so the code scan can re-read the symbol at every
+	 * scannedRef and explainRepo can tell a still-current value from one the
+	 * source has since changed. Without it the note can only be dated, never
+	 * checked. A pin whose commit is not the repo's scannedRef serves as
+	 * unknown until a scan reads it: the next scan after a push does, or the
+	 * scan lane dispatched with `--only owner/name` does at once.
+	 */
+	pin?: NotePin;
 }
 
 /**
@@ -3218,6 +3230,15 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 				"maximum supported protocol version",
 				"highest supported protocol version",
 			],
+			// sls-115: the scan re-reads this symbol at every scannedRef, so a
+			// later protocol bump is served as a conflict with the scanned
+			// value, never as this dated 29. The note stays the dated record.
+			pin: {
+				commit: "430a28e79b3b43c213840e45523519ca11251c0a",
+				path: "internal/ingest/main.go",
+				symbol: "MaxSupportedProtocolVersion",
+				value: "29",
+			},
 			source: "curated",
 			asOf: "2026-10-08",
 		},
@@ -9654,6 +9675,48 @@ const NOTES_BY_LOWER_KEY: Map<string, KnowledgeNote[]> = new Map(
 
 export function curatedNotesFor(fullName: string): KnowledgeNote[] | undefined {
 	return NOTES_BY_LOWER_KEY.get(fullName.toLowerCase());
+}
+
+/**
+ * What the backfill compares between a row's stored notes and the registry:
+ * every STORED subfield, not the text alone, so a visibility flip or a
+ * re-dated curated fact (asOf) reaches the row. `triggers` are not a stored
+ * subfield (Payload drops them) and derived notes carry a fresh asOf every
+ * run; comparing either would churn every row daily. The pin is stored with
+ * its note (sls-115): a newly pinned or re-pinned note must reach the row, or
+ * search and verify check a stale pair.
+ */
+export function storedNoteShape(n: {
+	note?: string;
+	source?: string;
+	asOf?: string | null;
+	visibility?: string | null;
+	pin?: unknown;
+}): unknown[] {
+	const pin = n.source === "curated" ? pinOf(n.pin) : undefined;
+	return [
+		n.note,
+		n.source,
+		n.source === "curated" ? (n.asOf ?? null) : null,
+		n.visibility ?? "public",
+		pin ? [pin.commit, pin.path, pin.symbol, pin.value] : null,
+	];
+}
+
+/** The registry keys whose public notes pin a value, as written. */
+export function pinnedRepos(): string[] {
+	return Object.keys(REPO_KNOWLEDGE_NOTES).filter(
+		(k) => notePinsFor(k).length > 0,
+	);
+}
+
+/** The distinct pins the public notes of one repo carry. */
+export function notePinsFor(fullName: string): NotePin[] {
+	const pins = new Map<string, NotePin>();
+	for (const n of curatedNotesFor(fullName) ?? [])
+		if (n.pin && n.visibility !== "internal")
+			pins.set(JSON.stringify(n.pin), n.pin);
+	return [...pins.values()];
 }
 
 export function buildKnowledgeNotes(

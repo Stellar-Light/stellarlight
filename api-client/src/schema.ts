@@ -2043,11 +2043,37 @@ export interface components {
             } | null;
             /** @description view=compact rows only: how many entries the left-out `knowledgeNotes` list has (0 = none on record). Null = not known. Absent on full rows, which carry `knowledgeNotes` itself. */
             knowledgeNotesCount?: number | null;
-            /** @description Dated FACTS about this repo with named sources: curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record. */
+            /** @description Dated FACTS about this repo with named sources: curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record. A note that pins its value carries sourceCheck, checked against this row's codeVerified.scannedRef, once the stored note holds its pin (until the nightly knowledge-notes backfill stamps it, sourceCheck is null); unless its state is verified, read the note as the value on its asOf date, not the current one. */
             knowledgeNotes?: {
-                note?: string;
-                source?: string;
-                asOf?: string | null;
+                note: string;
+                source: string;
+                asOf: string | null;
+                /** @description A curated note that pins its value to a commit, file and symbol, checked against StellarLight's own code scan of its repo at scannedRef (the repo's codeVerified.scannedRef, where the response serves one), where every scan re-reads each pinned symbol. verified: the value at scannedRef is the note's. conflict: it is scannedValue, not the note's notedValue, so the note is a dated record of its own commit and not the current value. missing: the scan read scannedRef and found the file gone or no declaration of the symbol in it, so the current value is unknown. unknown: no usable reading at scannedRef (none stored yet, one taken at another commit, a read that failed, no code scan, or a scan that does not find the note's own value at the note's own commit, so its reading is not comparable), never a match. null when the note pins no value, so there is nothing to check, and, on searchRepos rows (codeReferences too) and verifyClaim evidence, also while the stored note has not yet been stamped with its pin: the nightly knowledge-notes backfill stamps it. */
+                sourceCheck: {
+                    /** @enum {string} */
+                    state: "verified" | "conflict" | "missing" | "unknown";
+                    /** @description The declared name the note states a value for. */
+                    symbol: string;
+                    /** @description Repo-relative path of the file that declares it. */
+                    path: string;
+                    /** @description The value the note states, as the source wrote it. */
+                    notedValue: string;
+                    /** @description Full commit SHA the note's value was verified at. */
+                    notedRef: string;
+                    /** @description YYYY-MM-DD the note was verified; null when the stored note carries no date. */
+                    notedAsOf: string | null;
+                    /** @description The value at scannedRef; null unless state is verified or conflict. */
+                    scannedValue: string | null;
+                    /** @description The commit checked, codeVerified.scannedRef; null when the repo has no code scan. */
+                    scannedRef: string | null;
+                    /**
+                     * Format: date-time
+                     * @description When that scan ran.
+                     */
+                    scannedAt: string | null;
+                    /** @description One sentence on how the state was reached. */
+                    reason: string;
+                } | null;
             }[];
             /** @description The curated project this repo is linked to, if any. */
             project?: {
@@ -3127,7 +3153,7 @@ export interface operations {
                         verdict?: "supported" | "contradicted" | "unsupported" | "unresolved";
                         /** @description One-sentence verdict with dates and denominators, safe to relay verbatim. */
                         statement?: string;
-                        /** @description Typed evidence rows; discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source); status-check = a check of a Live label that hit (note, source, asOf), the same check searchProjects serves in statusChecks: the verdict stays supported, the statement carries the caveat and confidence is halved. */
+                        /** @description Typed evidence rows; discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source) with its repo and its sourceCheck, or a stablecoin registry row (neither); status-check = a check of a Live label that hit (note, source, asOf), the same check searchProjects serves in statusChecks: the verdict stays supported, the statement carries the caveat and confidence is halved. */
                         evidence?: {
                             /** @enum {string} */
                             kind?: "audit-report" | "status-record" | "code-activity" | "curated-note" | "status-check";
@@ -3152,6 +3178,32 @@ export interface operations {
                             note?: string;
                             source?: string;
                             asOf?: string | null;
+                            /** @description curated-note rows from a repo's knowledgeNotes only: the note's pinned value checked against StellarLight's own code scan of that repo at its scannedRef. Unless state is verified, the note is the value on its asOf date, not the current one. null when the note pins no value, or while the stored note has not yet been stamped with its pin (the nightly knowledge-notes backfill stamps it); absent on other kinds and on stablecoin registry rows. */
+                            sourceCheck?: {
+                                /** @enum {string} */
+                                state: "verified" | "conflict" | "missing" | "unknown";
+                                /** @description The declared name the note states a value for. */
+                                symbol: string;
+                                /** @description Repo-relative path of the file that declares it. */
+                                path: string;
+                                /** @description The value the note states, as the source wrote it. */
+                                notedValue: string;
+                                /** @description Full commit SHA the note's value was verified at. */
+                                notedRef: string;
+                                /** @description YYYY-MM-DD the note was verified; null when the stored note carries no date. */
+                                notedAsOf: string | null;
+                                /** @description The value at scannedRef; null unless state is verified or conflict. */
+                                scannedValue: string | null;
+                                /** @description The commit checked, codeVerified.scannedRef; null when the repo has no code scan. */
+                                scannedRef: string | null;
+                                /**
+                                 * Format: date-time
+                                 * @description When that scan ran.
+                                 */
+                                scannedAt: string | null;
+                                /** @description One sentence on how the state was reached. */
+                                reason: string;
+                            } | null;
                         }[];
                         /** @description factConfidence over the newest evidence (basis × freshness). null when there is no evidence to score. */
                         confidence?: {
@@ -3597,7 +3649,7 @@ export interface operations {
                             /** Format: date-time */
                             generatedAt?: string;
                             note?: string;
-                            /** @description THIS OPERATION ONLY: present on deepwiki-grounded answers, carrying the answer-dating disclaimer (answerAsOf is null; scannedAt/scannedRef/lastCommitAt date OUR SOURCE SCAN, not the answer). Unlike the shared Meta.warnings (ignored-query-param disclosure), it says nothing about your request parameters. */
+                            /** @description THIS OPERATION ONLY: how to read the answer. On a deepwiki-grounded answer, the answer-dating disclaimer (answerAsOf is null; scannedAt/scannedRef/lastCommitAt date OUR SOURCE SCAN, not the answer). On a knowledge-note answer, the note's precedence over the walkthrough; when sourceCheck.state is unknown or missing, instead that the note is the value on answerAsOf and says nothing about the current source, which the walkthrough cannot settle either. On an answer from the scan's reading after a sourceCheck conflict, why that reading answers instead of the note. Unlike the shared Meta.warnings (ignored-query-param disclosure), it says nothing about your request parameters. */
                             warnings?: string[];
                         };
                         q?: string;
@@ -3671,22 +3723,74 @@ export interface operations {
                             mainnetContractId?: string | null;
                             sdkCapabilities?: string[];
                         } | null;
-                        /** @description DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned). */
+                        /** @description The answer text: answerSource states its grounding and answerAsOf its date. null when no grounded answer was produced (the routed repo is still returned). */
                         answer?: string | null;
-                        /** @description Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced; cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it; where they disagree, the dated fact wins. */
+                        /** @description Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced; cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it; where they disagree, the dated fact wins. When sourceCheck.state is unknown or missing, the note answers only as the value on answerAsOf, and the answer says the current value is unknown. 'stellarlight-code-scan' also answers when such a note pins its value and the scan read a different value at codeVerified.scannedRef (sourceCheck.state conflict): the answer is the scanned value, and the note stays in knowledgeNotes as a dated record. */
                         answerSource?: string | null;
                         /**
                          * Format: date-time
-                         * @description When the answer was true. NULL WHENEVER answerSource is 'deepwiki'. DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf: day-granular, serialized as that day's 00:00:00Z; such notes now LEAD answers that name the exact identifier, precisely the reported class) and 'stellarlight-code-scan' (the answer IS the scan; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.
+                         * @description When the answer was true. NULL WHENEVER answerSource is 'deepwiki'. DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf: day-granular, serialized as that day's 00:00:00Z; such notes now LEAD answers that name the exact identifier, precisely the reported class, unless sourceCheck.state is conflict) and 'stellarlight-code-scan' (the answer IS the scan, a conflict's scanned value included; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.
                          */
                         answerAsOf?: string | null;
-                        /** @description Every public, curated, dated, source-cited fact StellarLight holds for the routed repo: deprecations, renames and moved paths, registry identity (npm / PyPI / crates / Maven names), release trains, security advisories, whether or not one of them led the answer. Empty when none are curated. Read these even when answerSource is 'deepwiki': a walkthrough describes mechanism; it never says the package is deprecated or the path moved. Each note cites its own source URL and carries its verification date. */
+                        /** @description The curated note that names what was asked, when it pins its value to a commit, file and symbol, checked against StellarLight's own code scan at codeVerified.scannedRef. conflict: the answer is scannedValue (answerSource stellarlight-code-scan) and the note's notedValue is a dated record of notedRef, not the current value. unknown or missing: the note answers only as the value on notedAsOf, and the answer says the current value is unknown. verified: the note leads as the value at scannedRef too. null when no curated note names what was asked, or it pins no value. */
+                        sourceCheck?: {
+                            /** @enum {string} */
+                            state: "verified" | "conflict" | "missing" | "unknown";
+                            /** @description The declared name the note states a value for. */
+                            symbol: string;
+                            /** @description Repo-relative path of the file that declares it. */
+                            path: string;
+                            /** @description The value the note states, as the source wrote it. */
+                            notedValue: string;
+                            /** @description Full commit SHA the note's value was verified at. */
+                            notedRef: string;
+                            /** @description YYYY-MM-DD the note was verified; null when the stored note carries no date. */
+                            notedAsOf: string | null;
+                            /** @description The value at scannedRef; null unless state is verified or conflict. */
+                            scannedValue: string | null;
+                            /** @description The commit checked, codeVerified.scannedRef; null when the repo has no code scan. */
+                            scannedRef: string | null;
+                            /**
+                             * Format: date-time
+                             * @description When that scan ran.
+                             */
+                            scannedAt: string | null;
+                            /** @description One sentence on how the state was reached. */
+                            reason: string;
+                        } | null;
+                        /** @description Every public, curated, dated, source-cited fact StellarLight holds for the routed repo: deprecations, renames and moved paths, registry identity (npm / PyPI / crates / Maven names), release trains, security advisories, whether or not one of them led the answer. Empty when none are curated. Read these even when answerSource is 'deepwiki': a walkthrough describes mechanism; it never says the package is deprecated or the path moved. Each note cites its own source URL and carries its verification date. A note that pins its value carries sourceCheck; unless its state is verified, read the note as the value on its asOf date, not the current one. */
                         knowledgeNotes?: {
                             note: string;
                             /** @description 'curated' (hand-verified) or 'derived:audit'. */
                             source: string;
                             /** @description YYYY-MM-DD the fact was verified. */
                             asOf: string;
+                            /** @description A curated note that pins its value to a commit, file and symbol, checked against StellarLight's own code scan of its repo at scannedRef (the repo's codeVerified.scannedRef, where the response serves one), where every scan re-reads each pinned symbol. verified: the value at scannedRef is the note's. conflict: it is scannedValue, not the note's notedValue, so the note is a dated record of its own commit and not the current value. missing: the scan read scannedRef and found the file gone or no declaration of the symbol in it, so the current value is unknown. unknown: no usable reading at scannedRef (none stored yet, one taken at another commit, a read that failed, no code scan, or a scan that does not find the note's own value at the note's own commit, so its reading is not comparable), never a match. null when the note pins no value, so there is nothing to check, and, on searchRepos rows (codeReferences too) and verifyClaim evidence, also while the stored note has not yet been stamped with its pin: the nightly knowledge-notes backfill stamps it. */
+                            sourceCheck: {
+                                /** @enum {string} */
+                                state: "verified" | "conflict" | "missing" | "unknown";
+                                /** @description The declared name the note states a value for. */
+                                symbol: string;
+                                /** @description Repo-relative path of the file that declares it. */
+                                path: string;
+                                /** @description The value the note states, as the source wrote it. */
+                                notedValue: string;
+                                /** @description Full commit SHA the note's value was verified at. */
+                                notedRef: string;
+                                /** @description YYYY-MM-DD the note was verified; null when the stored note carries no date. */
+                                notedAsOf: string | null;
+                                /** @description The value at scannedRef; null unless state is verified or conflict. */
+                                scannedValue: string | null;
+                                /** @description The commit checked, codeVerified.scannedRef; null when the repo has no code scan. */
+                                scannedRef: string | null;
+                                /**
+                                 * Format: date-time
+                                 * @description When that scan ran.
+                                 */
+                                scannedAt: string | null;
+                                /** @description One sentence on how the state was reached. */
+                                reason: string;
+                            } | null;
                         }[];
                         /** @description Always present, including when routedVia is null (then false). */
                         answered?: boolean;

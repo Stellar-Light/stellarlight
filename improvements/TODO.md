@@ -263,6 +263,22 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 
 ## Next
 
+Found on 2026-11-11 in the audit of the sls-115 lane (pinned knowledge-note
+values checked against the code scan):
+
+- A pinned note whose reading stays `unread` (the reader does not find the
+  note's value at the note's commit, or the file keeps failing to arrive)
+  serves `sourceCheck.state: unknown` and is re-picked by the pin-due pass
+  once a day, at most 25 repos a wave, with no signal that it never
+  resolves. The pass also skips the notTriaged filter and the routine
+  error and incomplete exclusions, which is bounded but silent. Wanted: a
+  guard that counts pins whose reading has been `unread` for more than N
+  days (pinnedValues on the repo row, codeScannedAt as the clock) and files
+  each as a finding for curation. Probe: GET
+  /api/repos/explain?repo=<owner/name>&q=<the note's trigger> and read
+  `sourceCheck.reason` for each pinned repo (notePinsFor in
+  src/lib/repo-knowledge.ts lists them).
+
 Found on 2026-11-07 while measuring contract evidence for hackathon builds:
 stellar.expert's API went paid between 07:19Z and 19:39Z on 2026-11-06 and
 answers 402 (refresh-rwa's first red run is 19:39Z).

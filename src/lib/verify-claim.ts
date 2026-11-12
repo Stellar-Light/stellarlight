@@ -19,6 +19,7 @@
  * Pure module — the route supplies rows; everything here is unit-testable.
  */
 import { factConfidence } from "./fact-confidence";
+import type { SourceCheck } from "./note-pins";
 import { namedIssuingParty, partyWords, sameParty } from "./stablecoins";
 import { statusChecksFor } from "./status-checks";
 
@@ -168,9 +169,16 @@ export type EvidenceItem =
 	| {
 			/** repo-intel knowledgeNotes: dated facts with sources, curated. */
 			kind: "curated-note";
+			/** A repo note's repo; absent on the stablecoin registry's rows. */
+			repo?: string;
 			note: string;
 			source: string;
 			asOf: string | null;
+			/** A repo note's pinned value checked against the repo's
+			 * scannedRef (sls-115); null when the note pins no value, or while
+			 * the stored note has not yet been stamped with its pin; absent
+			 * on the stablecoin registry's rows. */
+			sourceCheck?: SourceCheck | null;
 	  }
 	| {
 			/** A status check that hit (src/lib/status-checks.ts): a stored fact
@@ -365,7 +373,12 @@ export interface RepoFacts {
 	isArchived: boolean;
 	stars: number | null;
 	repoScoreLabel: string | null;
-	knowledgeNotes?: Array<{ note: string; source: string; asOf: string | null }>;
+	knowledgeNotes?: Array<{
+		note: string;
+		source: string;
+		asOf: string | null;
+		sourceCheck?: SourceCheck | null;
+	}>;
 }
 
 /** "is X maintained" — answered from indexed code activity plus the repos'
@@ -392,9 +405,11 @@ export function maintainedVerdict(
 		for (const n of r.knowledgeNotes ?? [])
 			ev.push({
 				kind: "curated-note",
+				repo: r.fullName,
 				note: n.note,
 				source: n.source,
 				asOf: n.asOf,
+				sourceCheck: n.sourceCheck ?? null,
 			});
 	if (!repos.length)
 		return {

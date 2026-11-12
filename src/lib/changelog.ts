@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-11",
+		surfaces: ["api", "mcp", "skill"],
+		version: "spec@1.9.129",
+		type: "fixed",
+		summary:
+			"explainRepo, searchRepos and verifyClaim check a curated note that pins its value to a commit, file and symbol against StellarLight's own code scan of its repo. For stellar/stellar-horizon, explainRepo answered MaxSupportedProtocolVersion = 29 from a note dated 2026-10-08 while the source at its own `codeVerified.scannedRef` defined 30. Each scan now re-reads every pinned symbol at its `scannedRef`: a different value is a conflict, and explainRepo answers with the scanned value (`answerSource` stellarlight-code-scan); a symbol not read there, or no longer declared there, leaves the current value unknown, and the note answers only as the value on its date. The note stays in `knowledgeNotes` as a dated record.",
+		detail:
+			"`sourceCheck` carries `state` (verified, conflict, missing or unknown), `symbol`, `path`, `notedValue`, `notedRef`, `notedAsOf`, `scannedValue`, `scannedRef`, `scannedAt` and `reason`; it is null when the note pins no value. explainRepo serves it at the root for the note that names what was asked and on each `knowledgeNotes` entry; searchRepos (and the `codeReferences` of searchProjects) on each `knowledgeNotes` entry of a row, against that row's `codeVerified.scannedRef`; verifyClaim on each `curated-note` evidence row from a repo, which now also names its `repo`. The check uses the reading the scan stored in the same write as `scannedRef`, so nothing is fetched at answer time, and a reading taken at any other commit is never used. The scan also reads each pinned symbol at the note's own commit, and its reading counts only when it finds the note's value there, so a declaration it misreads reads unknown, never conflict; a stored reading always decides, so a note pinned at the scanned commit itself verifies only while the scan holds no reading of it. The reader ignores line and block comments and reads CRLF files as LF. Routine scan waves now also pick, first and at most 25 a wave, a repo holding a pinned note with no usable reading at its `scannedRef` or one older than its last push, once a day at most, so a pin on a quiet repo does not stay unknown. On a conflict, a DeepWiki walkthrough does not displace the scanned value; on an unknown or missing note, the single warning says the note is the value on its date. explainRepo now finds notes for registry keys in any casing: 274 of the 1,233 keys are written in GitHub's casing, and the 253 among them with public notes served none there before. The Horizon ceiling note is the first pinned note: commit 430a28e, internal/ingest/main.go, MaxSupportedProtocolVersion, 29. searchRepos and verifyClaim serve its check once the knowledge-notes backfill has stored the pin with the note. The explain_repo MCP tool description says so from its next release.",
+	},
+	{
+		date: "2026-11-11",
 		surfaces: ["api"],
 		version: "spec@1.9.128",
 		type: "fixed",

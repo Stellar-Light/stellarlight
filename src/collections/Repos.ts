@@ -201,6 +201,18 @@ export const Repos: CollectionConfig = {
 					options: ["public", "internal"],
 					defaultValue: "public",
 				},
+				{
+					// sls-115: where a curated note's value was read (the
+					// registry's NotePin), stored beside the text it belongs to,
+					// so every reader of stored notes checks the note as served
+					// against the scan's pinnedValues. Written with the note.
+					name: "pin",
+					type: "json",
+					admin: {
+						description:
+							"Curated notes only: { commit, path, symbol, value } where the note's value was read; null when it pins no value",
+					},
+				},
 			],
 		},
 		{ name: "homepageUrl", type: "text" },
@@ -537,6 +549,20 @@ export const Repos: CollectionConfig = {
 				position: "sidebar",
 				description:
 					"Commit SHA of the default branch the code facts were computed at: provenance pin (github.com/<fullName>/tree/<scannedRef>)",
+			},
+		},
+		{
+			// sls-115: the scan's reading, at scannedRef, of every symbol a
+			// curated knowledge note pins (repo-knowledge.ts NotePin). Only the
+			// scanner writes it, in the same update as scannedRef, so the two
+			// always describe one commit; explainRepo checks each pinned note's
+			// value against it.
+			name: "pinnedValues",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				description:
+					"Scanner: { ref, reads[] }, each pinned note symbol read at scannedRef (read, missing or unread); null when no note pins a value",
 			},
 		},
 		{

@@ -41,6 +41,18 @@ const okInput: SignalsInput = {
 	sdkCapabilities: ["tx-building", "x402"],
 	codeDomains: ["payments-x402"],
 	scannedRef: "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+	pinnedValues: {
+		ref: "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+		reads: [
+			{
+				path: "src/lib.rs",
+				symbol: "MAX_ENTRIES",
+				noteRef: "b1c2d3e4f5a60718293a4b5c6d7e8f9012345678",
+				state: "read",
+				value: "64",
+			},
+		],
+	},
 	mainnetContractId: "CAC5SKP5FJT2ZZ7YLV4UCOM6Z5SQCCVPZWHLLLVQNQG2RWWOOSP3IYRL",
 };
 
@@ -65,6 +77,8 @@ describe("write-shape — the signals-only write gate", () => {
 		// every new scan signal asserts its write-through here.
 		expect(w.codeDomains).toEqual(["payments-x402"]);
 		expect(w.scannedRef).toBe("a1b2c3d4e5f60718293a4b5c6d7e8f9012345678");
+		// sls-115: pinned note symbols, read at scannedRef, written with it
+		expect(w.pinnedValues).toEqual(okInput.pinnedValues);
 		expect(w.mainnetContractId).toBe(
 			"CAC5SKP5FJT2ZZ7YLV4UCOM6Z5SQCCVPZWHLLLVQNQG2RWWOOSP3IYRL",
 		);

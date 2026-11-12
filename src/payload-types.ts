@@ -919,6 +919,18 @@ export interface Repo {
 				source: string;
 				asOf?: string | null;
 				visibility?: ("public" | "internal") | null;
+				/**
+				 * Curated notes only: { commit, path, symbol, value } where the note's value was read; null when it pins no value
+				 */
+				pin?:
+					| {
+							[k: string]: unknown;
+					  }
+					| unknown[]
+					| string
+					| number
+					| boolean
+					| null;
 				id?: string | null;
 		  }[]
 		| null;
@@ -1122,6 +1134,18 @@ export interface Repo {
 	 * Commit SHA of the default branch the code facts were computed at — provenance pin (github.com/<fullName>/tree/<scannedRef>)
 	 */
 	scannedRef?: string | null;
+	/**
+	 * Scanner: { ref, reads[] }, each pinned note symbol read at scannedRef (read, missing or unread); null when no note pins a value
+	 */
+	pinnedValues?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
 	/**
 	 * README contract id confirmed on Stellar mainnet by an RPC read of its contract instance, with shared token contracts and contracts attested to other repos excluded (scanner)
 	 */
@@ -3691,6 +3715,7 @@ export interface ReposSelect<T extends boolean = true> {
 				source?: T;
 				asOf?: T;
 				visibility?: T;
+				pin?: T;
 				id?: T;
 		  };
 	homepageUrl?: T;
@@ -3743,6 +3768,7 @@ export interface ReposSelect<T extends boolean = true> {
 	sdkCapabilities?: T;
 	codeDomains?: T;
 	scannedRef?: T;
+	pinnedValues?: T;
 	mainnetContractId?: T;
 	mainnetContractBasis?: T;
 	unverifiedStellar?: T;

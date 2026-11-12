@@ -27,6 +27,11 @@ import {
 	readLedgerEntries,
 	sourceRepo,
 } from "../../src/lib/contract-ownership";
+import {
+	type NotePin,
+	type PinRead,
+	readDeclaredValue,
+} from "../../src/lib/note-pins";
 import { TEMPLATE_NAME_RE } from "../../src/lib/repo-grade";
 import { type DepBlob, extractStellarDeps } from "../../src/lib/stellar-deps";
 
@@ -150,6 +155,88 @@ async function fetchBlob(
 	} catch {
 		return null;
 	}
+}
+
+/**
+ * Read each symbol a curated note pins (repo-knowledge.ts NotePin) at the
+ * scanned commit, so the note's value can be checked against the code the
+ * scan describes (sls-115). The symbol is read at the note's own commit
+ * first: a reading counts only when it finds the note's value there, so a
+ * declaration the reader misreads is unread, never a change.
+ * raw.githubusercontent.com only, off the REST pool, one fetch per file and
+ * commit. A 404 at scannedRef, a commit the scan just resolved, is a file that
+ * is not there (missing); any other failure is unread, never a value.
+ */
+export async function readPinnedValues(
+	full: string,
+	ref: string,
+	pins: NotePin[],
+	get: typeof fetch = fetch,
+): Promise<PinRead[]> {
+	const [owner, name] = full.split("/");
+	type Read =
+		| { state: "read"; value: string }
+		| { state: "missing" | "unread"; why: string };
+	const readFile = async (
+		commit: string,
+		path: string,
+	): Promise<{ text: string } | Read> => {
+		try {
+			const res = await get(rawUrl(owner, name, commit, path), {
+				headers: { "user-agent": "sl-code-scan" },
+				signal: AbortSignal.timeout(20_000),
+			});
+			if (res.status === 404)
+				return { state: "missing", why: "the file is not at that commit" };
+			if (!res.ok)
+				return {
+					state: "unread",
+					why: `raw.githubusercontent.com answered ${res.status}`,
+				};
+			if (Number(res.headers.get("content-length") ?? 0) > 400_000)
+				return { state: "unread", why: "the file is larger than 400 KB" };
+			return { text: await res.text() };
+		} catch (e) {
+			return {
+				state: "unread",
+				why: `the file did not arrive (${String((e as Error).message).slice(0, 80)})`,
+			};
+		}
+	};
+	const files = new Map<string, { text: string } | Read>();
+	const valueAt = async (
+		commit: string,
+		path: string,
+		symbol: string,
+	): Promise<Read> => {
+		const key = `${commit}:${path}`;
+		let file = files.get(key);
+		if (!file) {
+			file = await readFile(commit, path);
+			files.set(key, file);
+		}
+		return "text" in file ? readDeclaredValue(file.text, symbol) : file;
+	};
+	const reads: PinRead[] = [];
+	for (const pin of pins) {
+		const at = { path: pin.path, symbol: pin.symbol, noteRef: pin.commit };
+		const then = await valueAt(pin.commit, pin.path, pin.symbol);
+		if (then.state !== "read" || then.value !== pin.value) {
+			reads.push({
+				...at,
+				state: "unread",
+				why: `at the note's own commit the scan reads ${then.state === "read" ? then.value : `no value (${then.why})`} where the note states ${pin.value}, so the two readings cannot be compared`,
+			});
+			continue;
+		}
+		const now = await valueAt(ref, pin.path, pin.symbol);
+		reads.push(
+			now.state === "read"
+				? { ...at, state: "read", value: now.value }
+				: { ...at, state: now.state, why: now.why },
+		);
+	}
+	return reads;
 }
 
 /** Dirs whose manifests are read LAST under the manifest budget. */

@@ -19,6 +19,7 @@ import { currentRepo, renamedTo, repoSupersession } from "@/lib/repo-relations";
 import { CAP_REGISTRY } from "../data/cap-registry";
 import { interfacePathsOf, symbolsHaystack } from "./code-symbols";
 import { isKnownInfraNotDeployable } from "./known-infra";
+import { noteScanOf, noteSourceCheck, type SourceCheck } from "./note-pins";
 import {
 	activityStateOf,
 	isFirstParty,
@@ -78,6 +79,8 @@ interface RepoDoc {
 	codeScanState?: string | null;
 	codeScannedAt?: string | null;
 	scannedRef?: unknown;
+	/** The scan's reading of each pinned note symbol at scannedRef (sls-115). */
+	pinnedValues?: unknown;
 	codeSymbols?: unknown;
 	contractInterface?: unknown;
 	contractInterfacePaths?: unknown;
@@ -96,6 +99,8 @@ interface RepoDoc {
 		note?: string | null;
 		source?: string | null;
 		asOf?: string | null;
+		/** Where a curated note's value was read (note-pins.ts NotePin). */
+		pin?: unknown;
 	}> | null;
 	codeInUse?: {
 		contracts?: number | null;
@@ -169,7 +174,15 @@ export interface RepoResult {
 	} | null;
 	/** Dated facts with sources (curated + derived:audit) — see the repo-intel
 	 * knowledge discipline; [] when none. Facts, never summaries. */
-	knowledgeNotes: Array<{ note: string; source: string; asOf: string | null }>;
+	knowledgeNotes: Array<{
+		note: string;
+		source: string;
+		asOf: string | null;
+		/** The note's pinned value checked against codeVerified.scannedRef
+		 * (sls-115); null when the note pins no value, or while the stored
+		 * note has not yet been stamped with its pin by the backfill. */
+		sourceCheck: SourceCheck | null;
+	}>;
 	/** Mainnet usage rollup for contracts attributed to this repo (weekly,
 	 * stellar.expert). Lifetime events/subinvocations + deltas since the prior
 	 * snapshot (null until one exists). null = no verified contract joined —
@@ -1983,6 +1996,7 @@ export async function searchRepos(
 								note: String(n.note),
 								source: typeof n.source === "string" ? n.source : "curated",
 								asOf: n.asOf ?? null,
+								sourceCheck: noteSourceCheck(n, noteScanOf(r)),
 							}))
 					: [],
 				project: r.projectSlug
