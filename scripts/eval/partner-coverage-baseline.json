@@ -1,0 +1,1263 @@
+{
+	"$comment": "Partner coverage ratchet: the state of every fixture partner and question at the last reviewed run. scripts/eval/partner-coverage.ts fails on any worse state and prints better ones. Rewrite only with --update-baseline after reviewing the change.",
+	"generatedAt": "2026-11-12T00:47:47.817Z",
+	"apiVersion": "1.9.129",
+	"partners": {
+		"Chainlink": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "pass",
+				"resolve": "pass"
+			}
+		},
+		"Pyth": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"RedStone": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "pass",
+				"resolve": "fail"
+			}
+		},
+		"Band Protocol": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "pass",
+				"resolve": "pass"
+			}
+		},
+		"Reflector": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "pass",
+				"resolve": "pass"
+			}
+		},
+		"DIA": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "pass",
+				"resolve": "pass"
+			}
+		},
+		"LayerZero": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Axelar": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Circle CCTP": {
+			"cls": "well",
+			"rank": 4,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "fail"
+			}
+		},
+		"Allbridge": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"NEAR Intents": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Wormhole": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Rhino.fi": {
+			"cls": "missing",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"SODAX": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"LI.FI": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Alchemy": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"QuickNode": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"Blockdaemon": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Ankr": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"Validation Cloud": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"Chainstack": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"GetBlock": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"OnFinality": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"NowNodes": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"Gateway.fm": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"Obsrvr": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"InfStones": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"Nodies": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Lightsail Network": {
+			"cls": "wrong",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "fail",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "fail"
+			}
+		},
+		"Uniblock": {
+			"cls": "wrong",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "fail",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"Exaion": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"node101": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Mercury": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Goldsky": {
+			"cls": "wrong",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "fail",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"The Graph": {
+			"cls": "wrong",
+			"rank": 3,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "fail",
+				"network": "n/a",
+				"resolve": "fail"
+			}
+		},
+		"Allium": {
+			"cls": "missing",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"SubQuery": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "unknown",
+				"resolve": "pass"
+			}
+		},
+		"Space and Time": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Stellar Index": {
+			"cls": "missing",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Dune": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Hubble": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Fireblocks": {
+			"cls": "missing",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"BitGo": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Anchorage Digital": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Taurus": {
+			"cls": "wrong",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "fail",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Copper": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Utila": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Ledger": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Trezor": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"MetaMask": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"WalletConnect": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Varial": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"LOBSTR": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Arculus": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Tala": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Coinbase": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Circle": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"PayPal": {
+			"cls": "well",
+			"rank": 3,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Tether (USDT0)": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Paxos": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"SG-FORGE": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Figure": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"AllUnity": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Brale": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Novatti": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"U.S. Bank": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Franklin Templeton": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Ondo": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"WisdomTree": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"State Street / Galaxy": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Centrifuge": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Janus Henderson": {
+			"cls": "missing",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"Archax": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Securitize": {
+			"cls": "wrong",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "fail",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Etherfuse": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Spiko": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Mercado Bitcoin": {
+			"cls": "missing",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"DTCC": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"21X": {
+			"cls": "missing",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"MoneyGram": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Wirex": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"BVNK": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Airtm": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Yellow Card": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Movantis": {
+			"cls": "research-only",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		},
+		"OpenZeppelin": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Range": {
+			"cls": "well",
+			"rank": 1,
+			"checks": {
+				"rank": "pass",
+				"types": "pass",
+				"status": "pass",
+				"website": "pass",
+				"network": "n/a",
+				"resolve": "pass"
+			}
+		},
+		"Curve": {
+			"cls": "missing",
+			"rank": null,
+			"checks": {
+				"rank": "fail",
+				"types": "n/a",
+				"status": "n/a",
+				"website": "n/a",
+				"network": "n/a",
+				"resolve": "n/a"
+			}
+		}
+	},
+	"questions": {
+		"q1": {
+			"q": {
+				"recall": 1,
+				"found": [
+					"Band Protocol",
+					"Chainlink",
+					"DIA",
+					"Pyth",
+					"RedStone",
+					"Reflector"
+				]
+			},
+			"q+type": {
+				"recall": 1,
+				"found": [
+					"Band Protocol",
+					"Chainlink",
+					"DIA",
+					"Pyth",
+					"RedStone",
+					"Reflector"
+				]
+			}
+		},
+		"q2": {
+			"q": {
+				"recall": 0.5294117647058824,
+				"found": [
+					"Alchemy",
+					"Blockdaemon",
+					"Gateway.fm",
+					"GetBlock",
+					"InfStones",
+					"Nodies",
+					"NowNodes",
+					"QuickNode",
+					"Validation Cloud"
+				]
+			},
+			"q+type": {
+				"recall": 0.5294117647058824,
+				"found": [
+					"Alchemy",
+					"Blockdaemon",
+					"Gateway.fm",
+					"GetBlock",
+					"InfStones",
+					"Nodies",
+					"NowNodes",
+					"QuickNode",
+					"Validation Cloud"
+				]
+			}
+		},
+		"q3": {
+			"q": {
+				"recall": 0.16666666666666666,
+				"found": ["BitGo"]
+			}
+		},
+		"q4": {
+			"q": {
+				"recall": 0.375,
+				"found": ["Allbridge", "Axelar", "Circle CCTP"]
+			},
+			"q+type": {
+				"recall": 0.375,
+				"found": ["Allbridge", "Axelar", "Circle CCTP"]
+			}
+		},
+		"q5": {
+			"q": {
+				"recall": 1,
+				"found": ["Pyth"]
+			}
+		},
+		"q6": {
+			"q": {
+				"recall": 0,
+				"found": []
+			}
+		},
+		"q7": {
+			"q": {
+				"recall": 1,
+				"found": ["Alchemy"]
+			}
+		},
+		"q8": {
+			"q": {
+				"recall": 0,
+				"found": []
+			}
+		},
+		"q9": {
+			"q": {
+				"recall": 0,
+				"found": []
+			}
+		},
+		"q10": {
+			"q": {
+				"recall": 0.3333333333333333,
+				"found": ["Franklin Templeton", "Spiko", "WisdomTree"]
+			},
+			"q+type": {
+				"recall": 0.5555555555555556,
+				"found": [
+					"Etherfuse",
+					"Franklin Templeton",
+					"Ondo",
+					"Spiko",
+					"WisdomTree"
+				]
+			}
+		},
+		"q11": {
+			"q": {
+				"recall": 0.42857142857142855,
+				"found": ["AllUnity", "Novatti", "PayPal"]
+			},
+			"q+type": {
+				"recall": 0.42857142857142855,
+				"found": ["AllUnity", "Novatti", "PayPal"]
+			}
+		},
+		"q12": {
+			"q": {
+				"recall": 0.6363636363636364,
+				"found": [
+					"Alchemy",
+					"Hubble",
+					"Mercury",
+					"Obsrvr",
+					"Space and Time",
+					"SubQuery",
+					"The Graph"
+				]
+			},
+			"q+type": {
+				"recall": 0.6363636363636364,
+				"found": [
+					"Alchemy",
+					"Hubble",
+					"Mercury",
+					"Obsrvr",
+					"Space and Time",
+					"SubQuery",
+					"The Graph"
+				]
+			}
+		},
+		"q13": {
+			"q": {
+				"recall": 0.3333333333333333,
+				"found": ["Ledger", "Trezor"]
+			},
+			"q+type": {
+				"recall": 0.3333333333333333,
+				"found": ["Ledger", "Trezor"]
+			}
+		},
+		"q14": {
+			"q": {
+				"recall": 0.2,
+				"found": ["Circle CCTP"]
+			},
+			"q+type": {
+				"recall": 0.4,
+				"found": ["Allbridge", "Circle CCTP"]
+			}
+		},
+		"q15": {
+			"q": {
+				"recall": 0.16666666666666666,
+				"found": ["Yellow Card"]
+			},
+			"q+type": {
+				"recall": 0.16666666666666666,
+				"found": ["Yellow Card"]
+			}
+		},
+		"q16": {
+			"q": {
+				"recall": 0,
+				"found": []
+			}
+		},
+		"q17": {
+			"q": {
+				"recall": 0.2,
+				"found": ["Range"]
+			},
+			"q+type": {
+				"recall": 0,
+				"found": []
+			}
+		}
+	}
+}
