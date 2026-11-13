@@ -37,6 +37,7 @@
 
 import "../load-env";
 import { getPayload } from "payload";
+import { isStrongStatusBasis } from "../../src/lib/project-status";
 import { llamaCitationFor } from "../../src/lib/status-checks";
 import configPromise from "../../src/payload.config";
 
@@ -44,7 +45,6 @@ const EXECUTE = process.argv.includes("--execute");
 const MAX_MOVEMENT_AGE_DAYS = 45; // enrich-onchain runs weekly; 45d = generous but current
 const MAX_TVL_AGE_DAYS = 14; // the DeFiLlama refresh is scheduled ~daily
 
-const WEAK = new Set(["site-liveness", "source-inherited", "unverified"]);
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const days = (iso: string) => (Date.now() - Date.parse(iso)) / 86_400_000;
 
@@ -265,7 +265,9 @@ async function main() {
 		},
 	});
 	const rows = all.docs as unknown as Row[];
-	const weak = rows.filter((r) => !r.statusBasis || WEAK.has(r.statusBasis));
+	// Weak = not on the one canonical strong list (operator-announcement is
+	// weak, an owner decision of 2026-11-12, as basis-from-onchain reads it).
+	const weak = rows.filter((r) => !isStrongStatusBasis(r.statusBasis));
 	const plan: Array<{
 		r: Row;
 		ev: { kind: string; asOf: string; url: string; note: string };

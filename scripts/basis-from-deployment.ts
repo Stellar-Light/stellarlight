@@ -73,42 +73,35 @@
 import "./load-env";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { STATUS_BASES, STRONG_STATUS_BASES } from "../src/lib/project-status";
 import type { Project } from "../src/payload-types";
 
 const EXECUTE = process.argv.includes("--execute");
 
-/** The board's strong tiers (STRONG_BASES in build-quality-artifact.ts), plus
- *  the DEPLOYMENT-side labels that translate onto one of them.
+/** A strong status basis someone else earned: never re-written. The one
+ *  canonical list; this lane's own copy once lacked package-release. */
+export const NEVER_OVERWRITE: ReadonlySet<string> = new Set(
+	STRONG_STATUS_BASES,
+);
+
+/** A deployment.basis strong enough to propagate: the canonical strong
+ *  tiers, plus the DEPLOYMENT-side labels that are not status tiers.
  *
  *  operator-toml is the case: it is a strong deployment artifact and not a
  *  board tier, so without it here the five rows carrying one were skipped as
- *  "unchanged" before the translation below ever ran — the lane reported a
- *  clean pass over rows it had decided not to look at. See BASIS_TRANSLATION. */
-const STRONG = new Set([
-	"human-verified",
-	"onchain-activity",
+ *  "unchanged" before the translation below ever ran; the lane reported a
+ *  clean pass over rows it had decided not to look at. See BASIS_TRANSLATION.
+ *  official-record is a deployment-side label too, and never a status tier. */
+const STRONG = new Set<string>([
+	...STRONG_STATUS_BASES,
 	"official-record",
-	"product-integration",
-	"repo-activity",
 	"operator-toml",
 ]);
-/** What the statusBasis select will actually accept. The board's strong list
- *  is NOT a subset of it — official-record is scored as strong and is not an
- *  enum option — so a value has to clear both gates. `satisfies` against the
- *  generated type makes tsc, not a comment, keep this list honest. */
+/** What the statusBasis select will actually accept: STATUS_BASES, which a
+ *  test holds equal to the collection's options. */
 type StatusBasis = NonNullable<Project["statusBasis"]>;
-const STATUS_BASIS_OPTIONS = [
-	"operator-announcement",
-	"site-liveness",
-	"repo-activity",
-	"product-integration",
-	"onchain-activity",
-	"human-verified",
-	"source-inherited",
-	"unverified",
-] as const satisfies readonly StatusBasis[];
 const isStatusBasis = (v: string): v is StatusBasis =>
-	(STATUS_BASIS_OPTIONS as readonly string[]).includes(v);
+	(STATUS_BASES as readonly string[]).includes(v);
 
 /** The kinds of artifact this lane accepts, and the tiers each one can back.
  *  Payments observed on-chain are onchain-activity and nothing else; a citation
@@ -303,7 +296,7 @@ async function main() {
 			!served ||
 			d.status !== "Live" ||
 			!STRONG.has(depBasis) ||
-			STRONG.has(statusBasis)
+			NEVER_OVERWRITE.has(statusBasis)
 		) {
 			unchanged++;
 			continue;

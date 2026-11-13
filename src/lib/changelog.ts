@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-12",
 		surfaces: ["api"],
+		version: "spec@1.9.145",
+		type: "fixed",
+		summary:
+			"One strong-basis list everywhere. /api/lifecycle's live-on-strong-evidence count (liveOnStrongEvidence; an internal route, not in the spec) no longer counts operator-announcement as strong evidence: read against the 2026-11-12 snapshot it is 387 of 937 launched, not 401 (SCF 235, not 246; non-SCF 152, not 155), because 14 Live rows rest only on the team's own announcement. The served report changes on the snapshot lane's next run, and its definition text no longer names an operator announcement. /api/quality's `rowQuality.strongBases` now serves all five strong bases; package-release was missing from it.",
+		detail:
+			"The strong bases are human-verified, onchain-activity, product-integration, repo-activity and package-release, the list `basisStrength` already described. The /quality gap matrix row for strongBasis said an operator announcement closes it; it now names the five strong bases and says an operator announcement does not (the artifact refreshes on the quality lane's next run). Every lane that awards a status basis now reads the same list. basis-from-repo did not protect package-release, so its scheduled run would have replaced kedgeway's package-release basis with repo-activity; basis-from-product did not protect repo-activity or package-release; basis-from-deployment did not protect package-release. basis-from-onchain still replaces repo-activity, package-release and product-integration with onchain-activity, and re-dates its own award, because the statusBasis description ranks onchain-activity above those three; it never touches human-verified. upgrade-basis-onchain now treats operator-announcement as weak, as basis-from-onchain already did, so a Live row resting on an announcement can earn onchain-activity from observed payments or TVL.",
+	},
+	{
+		date: "2026-11-12",
+		surfaces: ["api"],
 		version: "spec@1.9.144",
 		type: "fixed",
 		summary:

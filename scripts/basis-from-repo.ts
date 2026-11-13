@@ -18,8 +18,7 @@
  * Dry-run by default; --execute writes.
  */
 import "./load-env";
-import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
+import { STRONG_STATUS_BASES } from "../src/lib/project-status";
 
 const EXECUTE = process.argv.includes("--execute");
 /** Outer bound on how old a commit may be and still evidence liveness NOW.
@@ -37,15 +36,19 @@ const LIBRARY_TYPES = new Set([
 	"Education",
 	"Faucet",
 ]);
-/** Stronger evidence, or a person — never replaced by a commit date. */
-const NEVER_OVERWRITE = new Set([
-	"human-verified",
-	"onchain-activity",
-	"product-integration",
-	"repo-activity",
-]);
+/** Every strong basis (the one canonical list), so a commit date never
+ *  replaces evidence another lane or a person earned. package-release was
+ *  missing from a local copy here: the 2026-11-12 dry run would have
+ *  overwritten a curated package-release row with repo-activity. */
+export const NEVER_OVERWRITE: ReadonlySet<string> = new Set(
+	STRONG_STATUS_BASES,
+);
 
-(async () => {
+async function main() {
+	// Imported here, not at module scope, so a unit test can import this
+	// lane's protected set without booting Payload or opening a DB connection.
+	const { getPayload } = await import("payload");
+	const configPromise = (await import("../src/payload.config")).default;
 	const payload = await getPayload({ config: await configPromise });
 	const projects = await payload.find({
 		collection: "projects",
@@ -123,4 +126,6 @@ const NEVER_OVERWRITE = new Set([
 		`\nawarded ${t.awarded} | no indexed repo ${t.noRepo} | commit older than ${MAX_COMMIT_AGE_DAYS}d ${t.tooOld}`,
 	);
 	process.exit(0);
-})();
+}
+
+if (process.argv[1]?.includes("basis-from-repo")) main();

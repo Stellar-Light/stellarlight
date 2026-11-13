@@ -1109,7 +1109,7 @@ const byRepoScore = <T extends { repoScore?: number | null }>(rows: T[]) =>
 			},
 			whyItMatters: `site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, ${projects.filter((p) => !isStrongBasis(p.statusBasis) && p.hasOnchainFootprint).length} hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other ${projects.filter((p) => !isStrongBasis(p.statusBasis) && !p.hasOnchainFootprint).length} are app-only and can only move through human verification — the ceiling of this row is people, not lanes.`,
 			closedBy:
-				"Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
+				"Any strong basis: human verification with a receipt, an on-chain activity reading, an observed product integration, or, for a library, recent repo activity or a recent package release. An operator announcement is weak and does not close it.",
 		}),
 		gapRow({
 			entity: "project",
