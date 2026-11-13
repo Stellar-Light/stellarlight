@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-11-13T01:21:56.478Z",
+	"asOf": "2026-11-13T03:05:18.400Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 109,
 	"healthy": 101,
@@ -42,7 +42,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "68 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "69 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -315,10 +315,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-13T01:19:20Z",
+			"lastSuccessAt": "2026-11-13T01:21:33Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -337,7 +337,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-13T01:19:20Z",
+			"lastSuccessAt": "2026-11-13T03:02:40Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -414,10 +414,10 @@
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T18:18:46Z",
+			"lastSuccessAt": "2026-11-13T01:21:33Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -509,15 +509,15 @@
 			"why": "last green 0d ago"
 		},
 		{
-			"file": "enrich-repos.yml",
-			"name": "Enrich repos (code-reference index)",
-			"cron": "0 8 * * 1",
+			"file": "enrich-scf.yml",
+			"name": "Enrich SCF data (manual)",
+			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-13T00:35:04Z",
+			"lastSuccessAt": "2026-11-13T01:44:35Z",
 			"ageDays": 0,
-			"graceDays": 21,
+			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 0d ago"
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "enrich-tvl.yml",
@@ -569,10 +569,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-14T03:00:41Z",
-			"ageDays": 151,
+			"ageDays": 152,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 151d ago (manual tool — age not judged)"
+			"why": "last green 152d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "import-replit-stablecoin-history.yml",
@@ -580,10 +580,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-22T02:25:42Z",
-			"ageDays": 82,
+			"ageDays": 83,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 82d ago (manual tool — age not judged)"
+			"why": "last green 83d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "ingest-dora-evals.yml",
@@ -656,7 +656,7 @@
 			"name": "Live canary",
 			"cron": "41 * * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T20:26:59Z",
+			"lastSuccessAt": "2026-11-13T01:28:25Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -722,7 +722,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-13T01:05:33Z",
+			"lastSuccessAt": "2026-11-13T01:21:33Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 91,
@@ -733,7 +733,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-13T01:19:20Z",
+			"lastSuccessAt": "2026-11-13T03:02:40Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -777,7 +777,7 @@
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-13T01:19:20Z",
+			"lastSuccessAt": "2026-11-13T03:02:40Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -788,11 +788,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-13T00:42:40Z",
+			"lastSuccessAt": "2026-11-13T01:19:20Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 80,
-			"why": "last green 0d ago"
+			"runs": 81,
+			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -964,7 +964,7 @@
 			"name": "Secret scan",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-13T01:19:20Z",
+			"lastSuccessAt": "2026-11-13T03:02:40Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1151,10 +1151,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-13T01:19:20Z",
+			"lastSuccessAt": "2026-11-13T03:02:40Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1243,7 +1243,7 @@
 			"ageDays": 58,
 			"graceDays": 21,
 			"runs": 93,
-			"why": "68 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "69 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
