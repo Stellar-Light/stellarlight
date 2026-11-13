@@ -1,12 +1,12 @@
 {
  "lane": "operator-toml",
- "generatedAt": "2026-11-12T16:10:06.303Z",
+ "generatedAt": "2026-11-13T15:37:41.933Z",
  "stage": 1,
  "cleanWeeks": 0,
  "stageEntryThresholdWeeks": 2,
  "lastRun": {
-  "id": 43150007119,
-  "at": "2026-11-12T03:42:40Z",
+  "id": 43356801619,
+  "at": "2026-11-13T03:07:17Z",
   "event": "workflow_dispatch",
   "conclusion": "success"
  },
@@ -33,17 +33,7 @@
    "network": "mainnet"
   }
  ],
- "upgrades": [
-  "lumenswap",
-  "normal",
-  "xlmeme"
- ],
- "corrections": [
-  {
-   "slug": "estrela",
-   "was": "operator-toml/mainnet",
-   "now": "(no deployment)"
-  }
- ],
+ "upgrades": [],
+ "corrections": [],
  "note": "QUALITY.md §3: Stage 2 (auto-merge for bounded work) opens at 2 consecutive intervention-free weeks. A correction (stamp removed or network changed by a human) resets the counter; an upgrade to human-verified on the same network does not. Only successful SCHEDULED runs advance the counter — the weekly cadence is the clock."
 }

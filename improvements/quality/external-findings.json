@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-13T00:43:54.136Z",
+ "generatedAt": "2026-11-13T15:37:40.586Z",
  "consumer": "stellar-experimental/stellar-raven",
  "definition": "Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours. Status is whatever THEIR record says, never our opinion of it. records = the records in their active folder. retired = the records that left it with a receipt in their improvements/resolved.json, the ledger their own process appends to when a distinct reviewer re-checks the fix; each gives the receipt date and the commit or PR that deleted it.",
  "counts": {
