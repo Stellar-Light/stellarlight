@@ -32,7 +32,12 @@ const JSON_OUT = process.argv.includes("--json");
 const LIMIT = Number(
 	process.argv.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? 60,
 );
-/** site-liveness is weak but honest; these are the tiers a fresh look can move. */
+/** PROBE SCOPE, not a strength list: the bases this sweep re-probes, because
+ *  a fresh look at the product can move them. site-liveness is weak but
+ *  honest. operator-announcement is weak too (STRONG_STATUS_BASES in
+ *  src/lib/project-status.ts is the one strength list) but is left out here:
+ *  it rests on the team's own statement, which re-probing the site does not
+ *  test. */
 const WEAK = new Set(["site-liveness", "source-inherited", "unverified"]);
 const DORMANT_DAYS = 365;
 const CONCURRENCY = 4;
@@ -67,9 +72,10 @@ async function main() {
 	const projects = await page<Project>(
 		"/api/projects?where%5Bstatus%5D%5Bequals%5D=Live",
 	);
-	const repos = await page<{ projectSlug?: string | null; lastCommitAt?: string | null }>(
-		"/api/repos?where%5BprojectSlug%5D%5Bexists%5D=true",
-	);
+	const repos = await page<{
+		projectSlug?: string | null;
+		lastCommitAt?: string | null;
+	}>("/api/repos?where%5BprojectSlug%5D%5Bexists%5D=true");
 	if (!projects || !repos) {
 		console.error(
 			"INCONCLUSIVE: the projects or repos API did not answer — no artifact written, no verdict.",
@@ -95,7 +101,9 @@ async function main() {
 	// Oldest evidence first, so a capped run always spends its budget on the
 	// softest claims rather than a random slice.
 	pool.sort(
-		(a, b) => Date.parse(newest.get(a.slug) ?? "") - Date.parse(newest.get(b.slug) ?? ""),
+		(a, b) =>
+			Date.parse(newest.get(a.slug) ?? "") -
+			Date.parse(newest.get(b.slug) ?? ""),
 	);
 	const batch = pool.slice(0, LIMIT).filter((p) => p.links?.website);
 

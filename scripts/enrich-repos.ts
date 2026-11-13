@@ -45,6 +45,7 @@ import {
 } from "../src/lib/repo-unlink";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
+import { findRepoDoc as findRepoDocShared } from "./lib/repo-doc";
 
 const EXECUTE = process.argv.includes("--execute");
 const LIMIT = Number(process.env.ENRICH_LIMIT || "0") || 0; // 0 = all
@@ -546,32 +547,7 @@ async function main() {
 		// case-variant source lists used to CREATE twin docs; the lookup falls
 		// back to a case-insensitive match. (`like` is substring-insensitive —
 		// the JS filter makes it exact; see the contains-substring trap.)
-		const findRepoDoc = async (key: string): Promise<Doc | undefined> => {
-			const exact = (
-				await payload.find({
-					collection: "repos",
-					where: { fullName: { equals: key } },
-					limit: 1,
-					depth: 0,
-					// Held repos too: a lookup that misses one creates a second,
-					// unheld row for it.
-					context: { includeSecurityHeld: true },
-				})
-			).docs[0] as Doc | undefined;
-			if (exact) return exact;
-			const near = await payload.find({
-				collection: "repos",
-				where: { fullName: { like: key } },
-				limit: 5,
-				depth: 0,
-				context: { includeSecurityHeld: true },
-			});
-			return (near.docs as Doc[]).find(
-				(d) =>
-					String((d as { fullName?: string }).fullName ?? "").toLowerCase() ===
-					key.toLowerCase(),
-			);
-		};
+		const findRepoDoc = (key: string) => findRepoDocShared(payload, key);
 		let existing = await findRepoDoc(full);
 		// Rename loop (#843's lookup-side twin, found via the 2026-08-28 census:
 		// 381 duplicate rows, some repos stored 20×). When a project record

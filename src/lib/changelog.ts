@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-12",
 		surfaces: ["api"],
+		version: "spec@1.9.147",
+		type: "fixed",
+		summary:
+			"getQualityReport's `consumerFindings` counts the findings stellar-raven retired. Their improvements folder is an active queue: a record they retire is deleted from it, with a receipt in their improvements/resolved.json, and only the folder was read, so the report listed 4 records where Raven had filed 114 against us. Read on 2026-11-12: 110 retired, 3 reported-upstream, 1 declined-upstream; the report built from that reading ships with this release and is refreshed daily by the quality lane. A new `retired` array lists each retired record compactly (`id`, `retired`: the date on their receipt, `retiredBy`: the PR or commit in their repository that deleted it), `counts.retired` is its length, and `total` includes it. The status comes only from their receipt, never from our side. `records` keeps the active records, and `ourResponse` is scored over those only.",
+		detail:
+			"The retired list is compact because this report is served whole: with each retired record's title and source URL, `consumerFindings` grew from 3,029 to 74,109 bytes and the response from 128,895 to 199,975; compact, they are 18,501 and 144,370 (measured through the route on 2026-11-12). A report built before this release has no `retired` and no `counts.retired`. The north-star series gains its 2026-11-08 point (2,280 of 2,280), appended by the fixed path: the append now runs in the weekly evidence job right after it commits the run it reads, where it used to run about two hours earlier and read the previous week's run; a date already in the series is never appended again. The SCF coverage row is refreshed weekly instead of monthly, inside its 10-day window. The consumption, scripts types and answer dating rows, last measured by hand on 2026-09-14, are measured on Monday and Thursday: their `cadence` is the new value twice-weekly, which goes stale after 7 days. A run that could not measure commits nothing, so its row ages to stale rather than passing.",
+	},
+	{
+		date: "2026-11-12",
+		surfaces: ["api"],
 		version: "spec@1.9.146",
 		type: "fixed",
 		summary:

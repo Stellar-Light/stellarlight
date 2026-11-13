@@ -1,0 +1,123 @@
+# The /quality artifacts of the three ratchet guards, refreshed on a schedule.
+#
+# check-consumption, check-scripts-types and check-answer-dating gate pull
+# requests (consumption-guard.yml, contract-gate.yml) but never with --json,
+# so their artifacts were last written by hand on 2026-09-14 (#1581) and read
+# stale against the board's window. This lane measures and commits those
+# three files, and nothing else.
+#
+# Twice a week, so one missed run still lands inside the window. All three
+# read only the checkout, no network: a few seconds each.
+#
+# Each measuring step records its guard's exit code. Exit 1 = the guard found
+# something (a new dead field, a new type error, a new undated value, or a
+# baseline to shrink): the artifact is committed, the board shows the breach,
+# and the step goes red as a declared signal. Exit 2 = the guard could not
+# measure: that artifact is NOT committed, so the row ages to stale instead
+# of showing a reading that measured nothing, and the run fails at "Could not
+# measure", which is outside the signal list, so it reads as the lane broken.
+# workflow-health: signal-steps: ^(Consumption|Scripts types|Answer dating)$
+name: quality-ratchets
+
+on:
+  schedule:
+    - cron: "17 5 * * 1,4" # Mon and Thu 05:17 UTC
+  workflow_dispatch: {}
+
+concurrency:
+  group: quality-ratchets
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # --json prints the artifact to stdout; copy it only when it parses, so
+      # a crash cannot leave the board importing an empty file. Output that
+      # does not parse is a run that could not measure, whatever the exit.
+      - name: Consumption
+        id: consumption
+        shell: bash
+        run: |
+          set +e
+          pnpm exec tsx scripts/check-consumption.ts --json > /tmp/consumption.json
+          code=$?
+          if [ "$code" -le 1 ]; then
+            if python3 -c "import json; json.load(open('/tmp/consumption.json'))"; then
+              cp /tmp/consumption.json improvements/audits/consumption-latest.json
+            else
+              code=2
+            fi
+          fi
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          [ "$code" -eq 1 ] && exit 1
+          exit 0
+      - name: Scripts types
+        id: types
+        if: '!cancelled()'
+        shell: bash
+        run: |
+          set +e
+          pnpm exec tsx scripts/check-scripts-types.ts --json
+          code=$?
+          [ "$code" -ge 2 ] && git checkout -- improvements/audits/scripts-types-latest.json
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          [ "$code" -eq 1 ] && exit 1
+          exit 0
+      # This guard writes its artifact before its own could-not-measure check.
+      - name: Answer dating
+        id: dating
+        if: '!cancelled()'
+        shell: bash
+        run: |
+          set +e
+          pnpm exec tsx scripts/check-answer-dating.ts --json
+          code=$?
+          [ "$code" -ge 2 ] && git checkout -- improvements/audits/answer-dating-latest.json
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          [ "$code" -eq 1 ] && exit 1
+          exit 0
+      - name: Commit the artifacts
+        if: '!cancelled()'
+        shell: bash
+        run: |
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add improvements/audits/consumption-latest.json \
+            improvements/audits/scripts-types-latest.json \
+            improvements/audits/answer-dating-latest.json
+          git diff --cached --quiet && { echo "no change"; exit 0; }
+          git commit -m "data(quality): ratchet guard artifacts [skip ci]"
+          # Push first; on rejection rebase keeping THIS run's measurement.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash -X theirs origin "${GITHUB_REF_NAME:-main}" || git rebase --abort
+          done
+          git push
+      - name: Could not measure
+        if: '!cancelled()'
+        shell: bash
+        env:
+          CONSUMPTION: ${{ steps.consumption.outputs.code }}
+          TYPES: ${{ steps.types.outputs.code }}
+          DATING: ${{ steps.dating.outputs.code }}
+        run: |
+          blind=""
+          [ "${CONSUMPTION:-2}" -ge 2 ] && blind="$blind consumption"
+          [ "${TYPES:-2}" -ge 2 ] && blind="$blind scripts-types"
+          [ "${DATING:-2}" -ge 2 ] && blind="$blind answer-dating"
+          if [ -n "$blind" ]; then
+            echo "COULD NOT MEASURE:$blind. Those artifacts were not committed."
+            exit 1
+          fi
+          echo "all three guards measured"

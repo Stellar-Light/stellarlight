@@ -1921,7 +1921,7 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													additionalProperties: { type: "integer" },
 													description:
-														"THEIR status vocabulary -> count, verbatim from their records.",
+														"THEIR status vocabulary -> count, verbatim from their active records, plus retired: the length of `retired`. Never set from our side.",
 												},
 												ourResponse: {
 													type: "object",
@@ -1938,7 +1938,34 @@ export const spec: OpenAPISpec = {
 														note: { type: "string" },
 													},
 												},
-												total: { type: "integer" },
+												total: {
+													type: "integer",
+													description:
+														"Every record they filed against us: the active records plus the retired ones.",
+												},
+												retired: {
+													type: "array",
+													description:
+														"Records they retired: each left their active folder with a receipt in their improvements/resolved.json, the only source of this status. Compact on purpose; the record's text is in their ledger. Absent from an artifact written before retirements were read.",
+													items: {
+														type: "object",
+														properties: {
+															id: { type: "string" },
+															retired: {
+																type: "string",
+																nullable: true,
+																description:
+																	"The resolved date on their receipt.",
+															},
+															retiredBy: {
+																type: "string",
+																nullable: true,
+																description:
+																	"The PR, or the commit when its subject names no PR, in their repository that deleted the record. null = their history could not be read.",
+															},
+														},
+													},
+												},
 												records: {
 													type: "array",
 													items: {
@@ -2383,7 +2410,12 @@ export const spec: OpenAPISpec = {
 													ageDays: { type: "integer" },
 													cadence: {
 														type: "string",
-														enum: ["weekly", "on-deploy", "baseline"],
+														enum: [
+															"weekly",
+															"twice-weekly",
+															"on-deploy",
+															"baseline",
+														],
 													},
 													freshnessDays: { type: "integer" },
 													details: {

@@ -171,6 +171,7 @@ jobs:
           RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
         run: pnpm exec tsx scripts/raven-loop.ts
       - name: Commit weekly evidence to improvements/engine/weekly/
+        id: evidence
         # The /quality scoreboard renders ONLY committed artifacts — a CI
         # artifact that expires in 30 days can't back a public number. Each
         # eval's JSON is committed at a FIXED `<name>-latest.json` path
@@ -226,6 +227,25 @@ jobs:
           # a commit per run is the point, not noise.
           git commit -m "chore(engine): weekly evidence $(date -u +%Y-%m-%d) (${copied}/8 evals) [skip ci]"
           git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+          git push
+      # The north-star point is appended HERE, after the evidence it reads
+      # is committed. It ran in generated-recall about two hours before this
+      # job finished, so each append read the previous week's run and the
+      # newest week was missing (2026-11-08). One point per date: a re-run,
+      # or a week whose Engine A output was invalid, appends nothing.
+      - name: Append to the north-star series
+        if: always() && steps.evidence.outcome == 'success'
+        run: |
+          set -euo pipefail
+          pnpm exec tsx scripts/quality/append-north-star.ts --execute
+          git add improvements/audits/north-star-series.json
+          git diff --cached --quiet && { echo "no new point"; exit 0; }
+          git commit -m "data(quality): north-star point from Engine A [skip ci]"
+          # Push first; on rejection rebase keeping THIS run's point.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash -X theirs origin "${GITHUB_REF_NAME:-main}" || git rebase --abort
+          done
           git push
       - name: Fail run on floor breach
         if: env.A_RED == '1' || env.C_RED == '1'

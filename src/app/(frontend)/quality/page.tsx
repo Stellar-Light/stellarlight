@@ -36,6 +36,14 @@ import {
 	getTrendHistory,
 } from "@/lib/quality-artifacts";
 
+/** A record Raven retired, as scripts/quality/build-external-findings.ts
+ *  writes it: compact, because /api/quality serves the same file. */
+type RetiredRecord = {
+	id: string;
+	retired: string | null;
+	retiredBy: string | null;
+};
+
 /**
  * /quality, the public quality scoreboard (idea-scale-model deliverable 1).
  *
@@ -234,6 +242,21 @@ export default function QualityPage() {
 	const funnel = getMissFunnel();
 	const progress = getProgress();
 	const external = getExternalFindings();
+	// Retired records left Raven's active folder with a receipt in their
+	// resolved.json; the newest few are listed, the rest are counted. An
+	// artifact written before retirements were read has no counts.retired,
+	// and then the panel says nothing about them rather than "0 retired".
+	const retiredCount = (external.counts as Record<string, number | undefined>)
+		.retired;
+	const retired = [
+		...(((external as { retired?: RetiredRecord[] }).retired ??
+			[]) as RetiredRecord[]),
+	].sort(
+		(a, b) =>
+			(b.retired ?? "").localeCompare(a.retired ?? "") ||
+			a.id.localeCompare(b.id),
+	);
+	const retiredLatest = retired.slice(0, 5);
 	const laneAutonomy = getLaneAutonomy();
 
 	return (
@@ -987,8 +1010,8 @@ export default function QualityPage() {
 					<Metric
 						label="Their answer key"
 						value={`${(external.counts as Record<string, number>)["reported-upstream"] ?? 0} open`}
-						sub={`${(external.counts as Record<string, number>)["declined-upstream"] ?? 0} declined by them`}
-						explain="Status as THEIR records state it. A record stays reported-upstream until their re-verification runs; we never mark their findings closed."
+						sub={`${retiredCount === undefined ? "" : `${retiredCount} retired, `}${(external.counts as Record<string, number>)["declined-upstream"] ?? 0} declined by them`}
+						explain="Status as THEIR records state it. A record stays reported-upstream until their re-verification runs; it is retired when it leaves their active folder with a receipt in their resolved.json. We never mark their findings closed."
 					/>
 					<Metric
 						label="Fix shipped (our side)"
@@ -1007,8 +1030,13 @@ export default function QualityPage() {
 						total={external.total}
 						order={[
 							{
+								key: "retired",
+								label: "retired by them",
+								color: "#ddd6fe",
+							},
+							{
 								key: "verified",
-								label: "verified by them",
+								label: "confirmed by them, not yet filed",
 								color: "#c4b5fd",
 							},
 							{
@@ -1058,8 +1086,25 @@ export default function QualityPage() {
 							/>
 						);
 					})}
+					{retiredLatest.map((r) => {
+						const pr = /\/pull\/(\d+)$/.exec(r.retiredBy ?? "")?.[1];
+						return (
+							<QueueRow
+								key={r.id}
+								href={
+									r.retiredBy ??
+									"https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/resolved.json"
+								}
+								primary={r.id.toUpperCase()}
+								secondary={pr ? `retired in #${pr}` : undefined}
+								trailing={`Retired by them ${r.retired ?? ""}`}
+							/>
+						);
+					})}
 				</div>
 				<p className="text-[11px] text-muted-foreground leading-relaxed mt-3">
+					{retired.length > retiredLatest.length &&
+						`The ${retiredLatest.length} most recently retired of ${retired.length} are listed; every retired record carries a receipt in their improvements/resolved.json. `}
 					{external.ourResponse.note}
 				</p>
 			</Card>

@@ -252,8 +252,9 @@ worked example — it exists to sweep a different pool, and it calls
   on the weakest honest bases (site-liveness, source-inherited). P3 proved
   one bounded lane (operator-toml); P4 runs the basis-upgrade lanes across
   the population — operator-toml wherever a toml exists, onchain-activity
-  from Horizon for issuer/contract rows, dated operator announcements
-  where a human already verified one — and pays the 59 untyped rows to
+  from Horizon for issuer/contract rows (an operator announcement is a
+  weak basis, owner decision 2026-11-12, so it is not an upgrade path) and
+  pays the 59 untyped rows to
   zero so exact type enumerations see the whole population. A machine
   stamp never impersonates a human one: basis labels stay honest per the
   P3 lane rule.

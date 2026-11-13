@@ -44,6 +44,7 @@ import { isDenied } from "../src/lib/repo-allowlist";
 import { STELLAR_SIGNAL } from "../src/lib/repo-org-attribution";
 import { deriveTriageTags } from "../src/lib/repo-triage";
 import configPromise from "../src/payload.config";
+import { findRepoDoc, takeUnknown } from "./lib/repo-doc";
 
 const EXECUTE = process.argv.includes("--execute");
 const onlyIdx = process.argv.indexOf("--only");
@@ -252,12 +253,16 @@ async function main() {
 		);
 		filteredOut += repos.length - signal.length;
 		const keep = signal.slice(0, PER_BUILDER_CAP);
-		const fresh = keep.filter(
-			(r) =>
-				VALID_IDENT.test(r.name) &&
-				!isDenied(`${login}/${r.name}`) &&
-				!known.has(`${login}/${r.name}`.toLowerCase()),
-		);
+		// takeUnknown adds each repo it takes to `known`, so one repo reached
+		// twice in a run (two spellings of an owner, two of a name) is queued
+		// once.
+		const byName = new Map(keep.map((r) => [`${login}/${r.name}`, r]));
+		const fresh = takeUnknown(
+			known,
+			[...byName.keys()].filter(
+				(f) => VALID_IDENT.test(f.split("/")[1]) && !isDenied(f),
+			),
+		).map((f) => byName.get(f) as OwnerRepo);
 		if (fresh.length) {
 			console.log(
 				`  ${login.padEnd(24)} ${repos.length} repos · ${signal.length} stellar · ${fresh.length} new`,
@@ -294,14 +299,9 @@ async function main() {
 	// guarantee the two passes eventually disagree.
 	let wrote = 0;
 	for (const a of add) {
-		const existing = await payload.find({
-			collection: "repos",
-			where: { fullName: { equals: a.fullName } },
-			limit: 1,
-			depth: 0,
-			context: { includeSecurityHeld: true },
-		});
-		if (existing.docs.length > 0) continue;
+		// Case-insensitive: an exact-case guard let a second spelling of a
+		// stored repo through as a new row.
+		if (await findRepoDoc(payload, a.fullName)) continue;
 		await payload.create({
 			collection: "repos",
 			data: {

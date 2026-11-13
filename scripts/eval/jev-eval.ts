@@ -76,7 +76,10 @@ const BASE = process.env.SCOUT_BASE ?? "https://stellarlight.xyz";
 const UA =
 	"StellarLightLinkChecker/1.0 (+https://stellarlight.xyz; admin@stellarlight.xyz)";
 const STATUSES = ["Live", "Inactive", "Development", "Pre-Release"];
-/** The bases a Live status can rest on without anyone having looked. */
+/** PROBE SCOPE, not a strength list: the bases a Live status can rest on
+ *  without anyone having looked. operator-announcement is weak too
+ *  (STRONG_STATUS_BASES in src/lib/project-status.ts is the one strength
+ *  list), but someone read the team's statement, so it is not in this scope. */
 const WEAK_BASES = new Set(["site-liveness", "source-inherited", "unverified"]);
 /** A retirement note that is about the SITE, so the page itself is the label. */
 const SITE_REASON =
