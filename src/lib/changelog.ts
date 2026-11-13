@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-12",
 		surfaces: ["api"],
+		version: "spec@1.9.148",
+		type: "fixed",
+		summary:
+			"The repo pass no longer follows a GitHub redirect into another owner's empty repo and serves it as a project's code. Three claimed paths now redirect to repos in other accounts, created after the projects' work and holding no code: scalemote/flow (Planet Pay) to Moon-Launch/flow, yk-labs-dev/soroban-cli-gui (Sora) to web3-antivirus/soroban-cli-gui and orbit-cdp/hermes (the Hermes row folded into Zenex) to Moon-Launch/hermes. Web3 Antivirus's GitHub link, github.com/web3-antivirus, now reaches a personal account holding none of its code. Once the curation and prune lanes run, the four projects stop linking those paths and the 10 repo rows that came through them (Moon-Launch/flow, orbit-cdp/hermes and the 8 web3-antivirus repos) leave searchRepos, explainRepo, the trust report and searchProjects' `repos`. No schema change.",
+		detail:
+			"A redirect to a different owner is refused when the repo it lands on has no language GitHub detects and at most 5 commits on its default branch; a transfer or rename keeps a repo's files and history. Measured on 2026-11-12 over 1,731 claimed paths (project claims, stored repo rows and hackathon build links) and the 2,421 repos of that day's repo pass, org fan-out included: 74 redirect to another owner, and the rule refuses the 3 above and follows the other 71, among them a move with no detected language and 26 commits and ten with 5 commits or fewer that hold code. A refused claim writes nothing, is listed at the end of each run until curation removes it, and does not count as a claim on the row it led to, so the unlink pass (spec 1.9.144) lists that row as unclaimed and an opt-in unlink dispatch clears its project link even before the prune. A redirect to another owner whose language or commit count GitHub left out of its answer is not judged: the claim is skipped for that run with nothing written and counted as could-not-check, and the unlink pass abstains for the run. Each run lists its refusals in the run's summary and annotations; each executed full run also records them in improvements/audits/repo-redirects-latest.json, which the improvement ledger reads, carrying forward a refusal whose claim that run could not read so an unread claim never closes a finding. The repo pass also skips a repo on the denied list under its claimed or its new name. No replacement repo is linked for any of the four projects.",
+	},
+	{
+		date: "2026-11-12",
+		surfaces: ["api"],
 		version: "spec@1.9.147",
 		type: "fixed",
 		summary:

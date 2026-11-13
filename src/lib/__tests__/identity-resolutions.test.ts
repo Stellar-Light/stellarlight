@@ -26,7 +26,9 @@ import {
 	statusFixHold,
 	TWITTER_LINK_FIX,
 	WEBSITE_FIXES,
+	WEBSITE_REMOVE,
 } from "../../../scripts/data/curation-maps";
+import { isDenied } from "../repo-allowlist";
 
 // biome-ignore lint/suspicious/noExplicitAny: fake Payload rows
 type Row = Record<string, any>;
@@ -540,5 +542,99 @@ describe("gate lows", () => {
 			(s) => s in GITHUB_REPOS_ADD,
 		);
 		expect(both).toEqual([]);
+	});
+});
+
+describe("claims on taken-over GitHub paths are removed (2026-11-12)", () => {
+	/** [slug, stored links.github, stored github group]. */
+	const TAKEN: Array<[string, string, Row]> = [
+		[
+			"planet-pay",
+			"https://github.com/scalemote/flow",
+			{ orgLogin: "scalemote", repos: [{ owner: "scalemote", name: "flow" }] },
+		],
+		[
+			"web3-antivirus",
+			"https://github.com/web3-antivirus",
+			{
+				orgLogin: "web3-antivirus",
+				repos: [{ owner: "web3-antivirus", name: "chrome-extension" }],
+			},
+		],
+		[
+			"sora",
+			"https://github.com/yk-labs-dev/soroban-cli-gui",
+			{
+				orgLogin: "yk-labs-dev",
+				repos: [{ owner: "yk-labs-dev", name: "soroban-cli-gui" }],
+			},
+		],
+		[
+			"hermes",
+			"https://github.com/orbit-cdp/hermes",
+			{
+				orgLogin: "orbit-cdp",
+				repos: [{ owner: "orbit-cdp", name: "hermes" }],
+			},
+		],
+	];
+	const stored = () =>
+		TAKEN.map(([slug, github, group]) =>
+			row(slug, {
+				links: {
+					github,
+					website: slug === "hermes" ? github : null,
+				},
+				github: group,
+			}),
+		);
+
+	it("each row ends with no link, no group and nothing to fan out", () => {
+		for (const [slug, github] of TAKEN) {
+			expect(endLink(slug, github), slug).toBeNull();
+			expect(GITHUB_REPOS_SET[slug], slug).toEqual({
+				orgLogin: null,
+				repos: [],
+			});
+			expect(curatedFieldsFor(slug), slug).toContain("links.github");
+		}
+		expect(WEBSITE_REMOVE.hermes).toBe("https://github.com/orbit-cdp/hermes");
+	});
+
+	it("the dry run plans each removal", async () => {
+		const lines = await curate(stored(), false);
+		for (const [slug, github, group] of TAKEN) {
+			expect(lines).toContain(`  ${slug}: github REMOVED (was ${github})`);
+			expect(lines).toContain(
+				`  ${slug}: github {orgLogin ${group.orgLogin}, repos ${group.repos[0].owner}/${group.repos[0].name}} → {orgLogin (none), repos (none)}`,
+			);
+		}
+		expect(lines).toContain(
+			"  hermes: website REMOVED (was https://github.com/orbit-cdp/hermes)",
+		);
+	});
+
+	it("a row relinked since is left alone", async () => {
+		const lines = await curate(
+			[row("planet-pay", { links: { github: "https://github.com/a/b" } })],
+			false,
+		);
+		expect(lines).toContain(
+			"  planet-pay: github is https://github.com/a/b, not the recorded dead value — skip (relinked since)",
+		);
+	});
+
+	it("the rows already serving those repos are denied, so a prune removes them", () => {
+		for (const name of [
+			"Moon-Launch/flow",
+			"orbit-cdp/hermes",
+			"Moon-Launch/hermes",
+			"web3-antivirus/soroban-cli-gui",
+			"web3-antivirus/FADA",
+		])
+			expect(isDenied(name), name).toBe(true);
+		// The paths' honest neighbours stay indexable.
+		expect(isDenied("zenith-protocols/hermes")).toBe(false);
+		expect(isDenied("tolgayayci/sora")).toBe(false);
 	});
 });

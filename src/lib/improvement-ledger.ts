@@ -529,6 +529,9 @@ const KIND_OF: Record<string, FindingKind> = {
 	"sdk-facts|sdk-withdrawn-changed": "world",
 	"sdk-facts|sdk-idiom-review": "world",
 	"sdk-facts|sdk-also-affects-changed": "world",
+	// enrich-repos' redirect check: a claimed path now leads into another
+	// owner's empty repo, so the claim needs curation.
+	"repo-redirects|redirect-taken": "world",
 	// ── instrument: our measurement or serving broke ──
 	"golden-eval|golden-fail": "instrument",
 	"engine-a-recall|recall-miss": "instrument",
@@ -555,6 +558,7 @@ const KIND_OF: Record<string, FindingKind> = {
 	"raven-routing|demand-routing-miss": "instrument",
 	"raven-drift|op-missing-from-catalog": "instrument",
 	"raven-drift|could-not-check": "instrument", // the drift guard could not look
+	"repo-redirects|redirect-unjudged": "instrument", // our read of the redirect came back partial
 };
 
 export const isKindMapped = (source: string, failureMode: string): boolean =>

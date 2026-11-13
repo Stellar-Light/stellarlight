@@ -21,6 +21,7 @@ const REPO_FRAGMENT = `
       isArchived
       issues(states: OPEN) { totalCount }
       stargazerCount
+      createdAt
       pushedAt
       primaryLanguage { name }
       repositoryTopics(first: 25) { nodes { topic { name } } }
@@ -33,6 +34,7 @@ const REPO_FRAGMENT = `
           ... on Commit {
             committedDate
             recent: history(since: $since) { totalCount }
+            history { totalCount }
           }
         }
       }
@@ -275,7 +277,7 @@ export async function fetchRepoInfo(owner: string, name: string) {
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: GraphQL node shape
-export function normalizeRepoNode(r: any) {
+export function normalizeRepoNode(r: any, unread: readonly string[] = []) {
 	const stargazerCount =
 		typeof r.stargazerCount === "number"
 			? r.stargazerCount
@@ -319,6 +321,21 @@ export function normalizeRepoNode(r: any) {
 		commits90d: (r.defaultBranchRef?.target?.recent?.totalCount ?? null) as
 			| number
 			| null,
+		// What src/lib/repo-takeover.ts judges a redirect on. Kept off the end
+		// of this object: the scripts type baseline quotes its last member.
+		createdAt: (r.createdAt ?? null) as string | null,
+		// 0 only for a repo with no default branch (an empty repo); null when
+		// the branch or its history was not read, which is not the same as 0.
+		commitCount: (unread.some((p) => p.split(".")[0] === "defaultBranchRef")
+			? null
+			: r.defaultBranchRef === null
+				? 0
+				: (r.defaultBranchRef?.target?.history?.totalCount ?? null)) as
+			| number
+			| null,
+		/** Fields GitHub answered with an error for under this repo, as dotted
+		 * paths (a batched read keeps the repo and nulls the field). */
+		unread: [...unread],
 		lastReleaseAt: (r.latestRelease?.publishedAt ?? null) as string | null,
 		releaseTag: (r.latestRelease?.tagName ?? null) as string | null,
 		openPRs: (r.pullRequests?.totalCount ?? null) as number | null,
@@ -435,12 +452,24 @@ export async function fetchRepoInfoBatch(
 		gqlBatchRepos += valid.length;
 		// biome-ignore lint/suspicious/noExplicitAny: GraphQL error shape
 		const errByAlias = new Map<string, any>();
+		/** Errors under a field of an alias: the repo node can still come
+		 * back, with that field null. */
+		const unreadByAlias = new Map<string, string[]>();
 		for (const e of data.errors ?? [])
-			if (typeof e.path?.[0] === "string") errByAlias.set(e.path[0], e);
+			if (typeof e.path?.[0] === "string") {
+				errByAlias.set(e.path[0], e);
+				if (e.path.length > 1)
+					unreadByAlias.set(e.path[0], [
+						...(unreadByAlias.get(e.path[0]) ?? []),
+						e.path.slice(1).join("."),
+					]);
+			}
 		valid.forEach(({ idx }, i) => {
 			const node = data.data?.[`r${i}`];
 			if (node) {
-				out[idx] = { info: normalizeRepoNode(node) };
+				out[idx] = {
+					info: normalizeRepoNode(node, unreadByAlias.get(`r${i}`)),
+				};
 				return;
 			}
 			// Only GitHub's own NOT_FOUND or FORBIDDEN is an answer about the
