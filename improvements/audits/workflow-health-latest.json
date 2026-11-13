@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-11-12T23:46:55.784Z",
+	"asOf": "2026-11-13T01:05:28.971Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 112,
 	"healthy": 104,
@@ -42,7 +42,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "66 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "67 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -74,10 +74,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-15T00:01:17Z",
-			"ageDays": 150,
+			"ageDays": 151,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 150d ago (manual tool — age not judged)"
+			"why": "last green 151d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "apply-status-batch.yml",
@@ -315,10 +315,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T23:39:33Z",
+			"lastSuccessAt": "2026-11-13T01:02:35Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -337,7 +337,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T23:44:22Z",
+			"lastSuccessAt": "2026-11-13T01:02:35Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -370,10 +370,10 @@
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T23:06:57Z",
+			"lastSuccessAt": "2026-11-12T23:48:47Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 47,
+			"runs": 49,
 			"why": "last green 0d ago"
 		},
 		{
@@ -531,15 +531,15 @@
 			"why": "last green 0d ago"
 		},
 		{
-			"file": "enrich-scf.yml",
-			"name": "Enrich SCF data (manual)",
-			"cron": null,
+			"file": "enrich-repos.yml",
+			"name": "Enrich repos (code-reference index)",
+			"cron": "0 8 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T03:59:04Z",
+			"lastSuccessAt": "2026-11-13T00:35:04Z",
 			"ageDays": 0,
-			"graceDays": 45,
+			"graceDays": 21,
 			"runs": 2,
-			"why": "last green 0d ago (manual tool — age not judged)"
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "enrich-tvl.yml",
@@ -547,10 +547,10 @@
 			"cron": "0 5 * * 1",
 			"state": "ok",
 			"lastSuccessAt": "2026-11-12T00:56:44Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 8,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "fix-dev-docs-titles.yml",
@@ -723,10 +723,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-20T00:15:54Z",
-			"ageDays": 145,
+			"ageDays": 146,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 145d ago (manual tool — age not judged)"
+			"why": "last green 146d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "mark-inactive-projects.yml",
@@ -755,7 +755,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T23:39:33Z",
+			"lastSuccessAt": "2026-11-13T00:50:24Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 91,
@@ -766,7 +766,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T23:44:22Z",
+			"lastSuccessAt": "2026-11-13T01:02:35Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -800,17 +800,17 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-14T00:20:04Z",
-			"ageDays": 151,
+			"ageDays": 152,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 151d ago (manual tool — age not judged)"
+			"why": "last green 152d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "pg-atlas.yml",
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T23:44:22Z",
+			"lastSuccessAt": "2026-11-13T01:02:35Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -821,7 +821,7 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T18:56:38Z",
+			"lastSuccessAt": "2026-11-13T00:42:40Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 81,
@@ -833,10 +833,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-21T23:56:47Z",
-			"ageDays": 82,
+			"ageDays": 83,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 82d ago (manual tool — age not judged)"
+			"why": "last green 83d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "publish-packages.yml",
@@ -909,10 +909,10 @@
 			"name": "Refresh oracle feeds",
 			"cron": "47 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T15:38:13Z",
+			"lastSuccessAt": "2026-11-12T23:54:25Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 3,
+			"runs": 4,
 			"why": "last green 0d ago"
 		},
 		{
@@ -997,7 +997,7 @@
 			"name": "Secret scan",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T23:44:22Z",
+			"lastSuccessAt": "2026-11-13T01:02:35Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1020,10 +1020,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-01T00:17:01Z",
-			"ageDays": 134,
+			"ageDays": 135,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 134d ago (manual tool — age not judged)"
+			"why": "last green 135d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "seed-summit-sp-winners.yml",
@@ -1064,10 +1064,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-15T00:02:29Z",
-			"ageDays": 150,
+			"ageDays": 151,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 150d ago (manual tool — age not judged)"
+			"why": "last green 151d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "set-types.yml",
@@ -1075,10 +1075,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-15T00:33:30Z",
-			"ageDays": 150,
+			"ageDays": 151,
 			"graceDays": 45,
 			"runs": 7,
-			"why": "last green 150d ago (manual tool — age not judged)"
+			"why": "last green 151d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "snapshot-project-status.yml",
@@ -1184,7 +1184,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T23:44:22Z",
+			"lastSuccessAt": "2026-11-13T01:02:35Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1276,7 +1276,7 @@
 			"ageDays": 58,
 			"graceDays": 21,
 			"runs": 93,
-			"why": "66 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "67 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
