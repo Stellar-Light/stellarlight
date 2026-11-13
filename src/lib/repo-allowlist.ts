@@ -110,11 +110,40 @@ export function isProtected(sig: ProtectionSignals): boolean {
 	return false;
 }
 
+const W3A_ACCOUNT =
+	"In the personal account now named web3-antivirus, reached only through Web3 Antivirus's old account link after that product's own repo there was gone (2026-11-12). Not Web3 Antivirus's code or any project's.";
+
 /**
  * Repos that must never be indexed, whatever pass finds them. Each entry
  * names why — a denylist without reasons becomes folklore. Keys lowercase.
  */
 export const DENIED_REPOS: ReadonlyMap<string, string> = new Map([
+	// Taken-over paths (2026-11-12, src/lib/repo-takeover.ts and
+	// GITHUB_LINK_REMOVE in scripts/data/curation-maps.ts): repos in accounts
+	// that took names their owners gave up, served as projects' code.
+	[
+		"moon-launch/flow",
+		"Where scalemote/flow, Planet Pay's claimed repo, redirects since that account name changed hands. Created 2024-10-23 with 2 commits and no code.",
+	],
+	[
+		"moon-launch/hermes",
+		"Where orbit-cdp/hermes redirects since that account name changed hands. Created 2026-02-07 with 1 commit and no code. Zenex's code is zenith-protocols/hermes.",
+	],
+	[
+		"orbit-cdp/hermes",
+		"The stored name of the row serving Moon-Launch/hermes: no account answers to orbit-cdp now, and the path redirects there. Zenex's code is zenith-protocols/hermes.",
+	],
+	[
+		"web3-antivirus/soroban-cli-gui",
+		`Where yk-labs-dev/soroban-cli-gui, Sora's claimed repo, redirects. Created 2025-10-11 with 2 commits and no code. ${W3A_ACCOUNT}`,
+	],
+	["web3-antivirus/bitcoin", W3A_ACCOUNT],
+	["web3-antivirus/bitcoin-development-grant-agreement", W3A_ACCOUNT],
+	["web3-antivirus/fada", W3A_ACCOUNT],
+	["web3-antivirus/forkmonitor", W3A_ACCOUNT],
+	["web3-antivirus/msc-compsci", W3A_ACCOUNT],
+	["web3-antivirus/nextfolio", W3A_ACCOUNT],
+	["web3-antivirus/samba", W3A_ACCOUNT],
 	[
 		"brunomlr/stellar-docs",
 		"2023 personal copy of the Stellar docs, no description; admitted by name-match alone on 2026-08-21. The docs are a first-class Raven source (stellarDocs.*), not an ecosystem project.",

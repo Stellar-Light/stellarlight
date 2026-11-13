@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       execute:
-        description: "Write? Leave false for a dry run."
+        description: "Write? Leave false for a dry run, which also records no redirect findings."
         type: boolean
         default: false
       only:
@@ -31,6 +31,9 @@ on:
 concurrency:
   group: enrich-repos
   cancel-in-progress: false
+# Read-only for the job that installs dependencies, reads third-party repo
+# data and holds DATABASE_URI. Only record-redirects, which installs and runs
+# nothing from the repo, may push.
 permissions: { contents: read }
 jobs:
   enrich:
@@ -40,6 +43,8 @@ jobs:
        github.event.workflow_run.event == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 55
+    outputs:
+      redirects: ${{ steps.redirects.outputs.wrote }}
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
@@ -47,6 +52,8 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: pnpm/action-setup@v4
         with: { version: 10 }
       - uses: actions/setup-node@v4
@@ -56,7 +63,11 @@ jobs:
       # manual dispatch stays dry-run unless the execute box is ticked.
       # Unlinking repos no project claims needs both boxes on a manual
       # dispatch: scheduled and chained runs only print the unlink plan.
-      - run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run' || inputs.execute) && '--execute' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }} ${{ github.event_name == 'workflow_dispatch' && inputs.execute && inputs.unlink && '--unlink' || '' }}
+      # An executed full run writes its redirect findings to the runner's
+      # temp directory (src/lib/repo-takeover.ts), never into the checkout.
+      - env:
+          REPO_REDIRECTS_ARTIFACT: ${{ runner.temp }}/repo-redirects-latest.json
+        run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run' || inputs.execute) && '--execute' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }} ${{ github.event_name == 'workflow_dispatch' && inputs.execute && inputs.unlink && '--unlink' || '' }}
       # The writer guards its own class: a lookup/write key mismatch in the
       # pass above creates one duplicate row per run and nothing else
       # red-lines (the 2026-08-28 census found 381 copies this way). Runs
@@ -65,3 +76,51 @@ jobs:
       - name: Guard — one row per repo
         if: always()
         run: pnpm exec tsx scripts/data/check-repo-dupes.ts
+      # Handed to record-redirects. Only an executed full run writes the
+      # file, so a dry or targeted run hands nothing on.
+      - name: Keep the redirect findings
+        id: redirects
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/repo-redirects-latest.json" ]; then
+            echo "wrote=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: always() && steps.redirects.outputs.wrote == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-redirects
+          path: ${{ runner.temp }}/repo-redirects-latest.json
+          retention-days: 14
+          # A re-run attempt uploads under the same name.
+          overwrite: true
+  # Commits the one file enrich left, for the improvement ledger. The only job
+  # with a write token, and it installs and runs nothing from the repo. Only
+  # a run on main records: a dispatch on another branch never pushes.
+  # always(): a run that failed after its loop still carries what it found.
+  record-redirects:
+    needs: enrich
+    if: always() && github.ref == 'refs/heads/main' && needs.enrich.outputs.redirects == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: repo-redirects
+          path: improvements/audits
+      - name: Commit the redirect findings
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/repo-redirects-latest.json
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "chore(quality): repo redirect findings [skip ci]"
+          # Push first; on a rejection keep THIS run's file (-X theirs is the
+          # commit being replayed) and stash anything else (check-links.yml).
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash -X theirs origin main || git rebase --abort
+          done
+          git push

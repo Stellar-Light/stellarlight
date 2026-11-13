@@ -13,6 +13,13 @@
  *   GITHUB_TOKEN=... DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/enrich-repos.ts [--execute] [--unlink]
  */
 import "./load-env";
+import {
+	appendFileSync,
+	existsSync,
+	readFileSync,
+	writeFileSync,
+} from "node:fs";
+import { fileURLToPath } from "node:url";
 import { getPayload } from "payload";
 import {
 	type BatchRepoResult,
@@ -22,6 +29,7 @@ import {
 	listOwnerRepos,
 	type OwnerRepo,
 } from "../src/lib/github";
+import { isDenied } from "../src/lib/repo-allowlist";
 import {
 	FIRST_PARTY_OWNERS,
 	isFirstParty,
@@ -35,6 +43,15 @@ import {
 import { repoNameOwner, STELLAR_SIGNAL } from "../src/lib/repo-org-attribution";
 import { REPO_SUCCESSIONS } from "../src/lib/repo-relations";
 import { CURATED_CANONICAL_REPOS } from "../src/lib/repo-search";
+import {
+	annotation,
+	carryForward,
+	judgeRedirect,
+	OVERRIDE,
+	REDIRECTS_ARTIFACT,
+	type RedirectRow,
+	redirectSummary,
+} from "../src/lib/repo-takeover";
 import { deriveTriageTags } from "../src/lib/repo-triage";
 import {
 	ANSWERED_FETCH_ERRORS,
@@ -359,6 +376,10 @@ async function main() {
 	const claimedIds = new Set<string>();
 	const claimedNames = new Set<string>();
 	const failures: string[] = [];
+	/** Claims GitHub gave no answer for this run (lowercased), and owner/
+	 * prefixes of org listings that failed: a refusal held for one of them
+	 * is carried forward, not closed (carryForward). */
+	const unreadClaims = new Set<string>();
 	for (const { login, project: p } of orgByLogin.values()) {
 		orgClaimants.set(
 			login.toLowerCase(),
@@ -373,6 +394,7 @@ async function main() {
 			repos = await listOwnerRepos(login);
 		} catch (e) {
 			failures.push(`org ${login}: ${e instanceof Error ? e.message : e}`);
+			unreadClaims.add(`${login.toLowerCase()}/`);
 			console.log(`  org ${login.padEnd(26)} ⚠ listing failed`);
 			continue;
 		}
@@ -513,6 +535,9 @@ async function main() {
 	const sentByRepo = new Map<string, Record<string, unknown>>();
 	/** doc id → human fullName, so mismatch output stays readable. */
 	const labelById = new Map<string, string>();
+	/** Claims not written: a denied repo, a redirect to a taken path, or a
+	 * redirect GitHub answered in part. */
+	const redirects: RedirectRow[] = [];
 	for (const { owner, name, full, project } of entries) {
 		let info: Awaited<ReturnType<typeof fetchRepoInfo>> | null = null;
 		let enrichError: string | null = null;
@@ -528,10 +553,46 @@ async function main() {
 		// index — only index references we could actually verify. Re-runs pick
 		// up anything transiently rate-limited.
 		if (!info) {
-			if (project.slug && !ANSWERED_FETCH_ERRORS.has(enrichError ?? ""))
-				failures.push(`${full}: ${enrichError ?? "no data"}`);
+			if (!ANSWERED_FETCH_ERRORS.has(enrichError ?? "")) {
+				unreadClaims.add(full.toLowerCase());
+				if (project.slug) failures.push(`${full}: ${enrichError ?? "no data"}`);
+			}
 			console.log(
 				`  skip   ${full.padEnd(42)} ⚠ ${enrichError?.slice(0, 50) ?? "no data"}`,
+			);
+			continue;
+		}
+		// Never adopt a redirect to another owner's empty repo, or a denied
+		// name under either path (src/lib/repo-takeover.ts, repo-allowlist.ts).
+		// Ahead of the row lookups: a claim skipped here adds no id or name
+		// to the unlink planner.
+		// A takeover is named as one even when its target is also denied; a
+		// denied name needs no full read to be skipped.
+		const denied = [full, info.nameWithOwner].find(isDenied);
+		const judged = judgeRedirect(full, info);
+		const row = (verdict: RedirectRow["verdict"], reason: string) => ({
+			verdict,
+			claimed: full,
+			to: info.nameWithOwner,
+			project: project.slug ?? null,
+			reason,
+		});
+		const skip: RedirectRow | null =
+			judged.verdict === "refuse"
+				? row("refuse", judged.reason)
+				: denied
+					? row("denied", `${denied} is on the denied list`)
+					: judged.verdict === "could-not-judge"
+						? row("could-not-judge", judged.reason)
+						: null;
+		if (skip) {
+			redirects.push(skip);
+			// A partial answer is a failed read: the claim set is partial, so
+			// the unlink planner abstains this run.
+			if (skip.verdict === "could-not-judge" && project.slug)
+				failures.push(`${full}: ${skip.reason}`);
+			console.log(
+				`  ${skip.verdict === "could-not-judge" ? "unjudged" : "refuse"} ${skip.reason}`,
 			);
 			continue;
 		}
@@ -906,6 +967,61 @@ async function main() {
 	console.log(
 		`\n${EXECUTE ? `DONE: ${created} created, ${updated} updated, ${unlinked} unlinked, ${failed} fetch-failed, ${writeFailed} write-failed, ${mismatchCount} did-not-persist.` : `DRY RUN — ${entries.length} repos, ${failed} would fail fetch, ${unlinkPlan.unlinks.length} would unlink.`}`,
 	);
+	// Not a failure: the claim stays until curation removes it, so each run
+	// refuses it again. Listed here, on the run's summary page and as
+	// annotations, and on a full run in the artifact the ledger reads.
+	const list = (rows: RedirectRow[]) =>
+		rows
+			.map((r) => `  ${r.reason} (claimed by ${r.project ?? "an org seed"})`)
+			.join("\n");
+	const refusedRows = redirects.filter((r) => r.verdict !== "could-not-judge");
+	const unjudged = redirects.filter((r) => r.verdict === "could-not-judge");
+	if (refusedRows.length)
+		console.log(
+			`\n${refusedRows.length} claim(s) refused, nothing written for them. ${OVERRIDE}\n${list(refusedRows)}`,
+		);
+	if (unjudged.length)
+		console.log(
+			`\n${unjudged.length} claim(s) could not be judged (could-not-check: GitHub's answer was partial), nothing written for them this run:\n${list(unjudged)}`,
+		);
+	if (process.env.GITHUB_ACTIONS === "true")
+		for (const r of redirects) {
+			const a = annotation(r);
+			if (a) console.log(a);
+		}
+	if (process.env.GITHUB_STEP_SUMMARY && redirects.length)
+		appendFileSync(process.env.GITHUB_STEP_SUMMARY, redirectSummary(redirects));
+	// Executed full runs only: scheduled and chained runs always execute, and
+	// a dry or targeted run must not move the ledger. The previous artifact
+	// is the one beside the repo unless this path already holds one.
+	if (EXECUTE && !ONLY && LIMIT === 0) {
+		const committed = fileURLToPath(
+			new URL(`../${REDIRECTS_ARTIFACT}`, import.meta.url),
+		);
+		// A test or the workflow points the write elsewhere.
+		const target = process.env.REPO_REDIRECTS_ARTIFACT || committed;
+		const prevPath = existsSync(target) ? target : committed;
+		let previous: unknown = null;
+		try {
+			previous = existsSync(prevPath)
+				? JSON.parse(readFileSync(prevPath, "utf8"))
+				: null;
+		} catch {
+			console.log(
+				`  previous ${REDIRECTS_ARTIFACT} unreadable; nothing carried`,
+			);
+		}
+		const rows = carryForward(redirects, previous, unreadClaims);
+		const carried = rows.length - redirects.length;
+		if (carried)
+			console.log(
+				`  ${carried} refusal(s) carried forward: their claims were not read this run`,
+			);
+		writeFileSync(
+			target,
+			`${JSON.stringify({ generatedAt: new Date().toISOString(), rows }, null, 2)}\n`,
+		);
+	}
 	if (writeFailed) process.exitCode = 1;
 	// Was `process.exit(0)` — which STOMPED the exitCode set above, so a wave
 	// with write failures reported GREEN. That is lessons class 20's archetype

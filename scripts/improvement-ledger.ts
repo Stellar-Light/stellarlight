@@ -37,6 +37,7 @@ import {
 	upsertFindings,
 	type WaveManifest,
 } from "../src/lib/improvement-ledger";
+import { ledgerMode } from "../src/lib/repo-takeover";
 import { isFabricatedProbe } from "./eval/battery-banks";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -701,6 +702,34 @@ const SDK_FACTS_SPEC: SourceSpec = {
 	],
 };
 
+// enrich-repos' redirect check (src/lib/repo-takeover.ts), written on each
+// full run. A claim whose path now redirects into another owner's empty repo
+// is curation: remove the claim, or claim the new path directly. A redirect
+// GitHub answered in part is our read failing. A denied row is a decision
+// already made and never a finding.
+const REPO_REDIRECTS_SPEC: SourceSpec = {
+	source: "repo-redirects",
+	file: "repo-redirects-latest.json",
+	dir: AUDITS,
+	arrays: [
+		{
+			key: "rows",
+			surface: (r) =>
+				ledgerMode(r) === "redirect-taken" ? "directory" : "code",
+			mode: (r) => ledgerMode(r) ?? "redirect-taken",
+			// A refusal already keeps the repo off the project; what is left is
+			// a stale claim. A redirect not judged is retried next run.
+			severity: (r) => (ledgerMode(r) === "redirect-taken" ? "medium" : "low"),
+			keep: (r) => ledgerMode(r) !== null,
+			probe: (r) => {
+				const claimed = str(r?.claimed);
+				const to = str(r?.to);
+				return claimed && to ? `${claimed} redirects to ${to}` : undefined;
+			},
+		},
+	],
+};
+
 function readJson(path: string): Row | null {
 	try {
 		return JSON.parse(readFileSync(path, "utf8"));
@@ -738,6 +767,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 		RAVEN_ROUTING_SPEC,
 		PACKET_STAMPS_SPEC,
 		SDK_FACTS_SPEC,
+		REPO_REDIRECTS_SPEC,
 	]) {
 		const path = join(spec.dir ?? WEEKLY, spec.file);
 		const data = readJson(path);

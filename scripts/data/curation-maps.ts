@@ -8230,6 +8230,15 @@ export const GITHUB_REPOS_SET: Record<
 		orgLogin: "trustek-io",
 		repos: [{ owner: "trustek-io", name: "wellspring-mvp-treasurymanagement" }],
 	},
+	// Taken-over paths (GITHUB_LINK_REMOVE says why for each): the stored
+	// group still claimed the path or its account.
+	"planet-pay": { orgLogin: null, repos: [] },
+	"web3-antivirus": { orgLogin: null, repos: [] },
+	// When the owner names Sora's repo (tolgayayci/sora is the candidate),
+	// edit this entry rather than adding a GITHUB_REPOS_ADD: the two maps
+	// never name the same row.
+	sora: { orgLogin: null, repos: [] },
+	hermes: { orgLogin: null, repos: [] },
 };
 
 export const TYPES_ADD: Record<string, string[]> = {
@@ -9115,6 +9124,9 @@ export const STATUS_SOURCE_RETRACT: Record<string, string> = {
  *  - ANOTHER PRODUCT'S CODE (2026-11-12): the repo answers, but it belongs
  *    to a different product, and the project publishes no repo of its own.
  *    GITHUB_REPOS_SET clears the same claim from the row's github group.
+ *  - TAKEN OVER (2026-11-12): the path now leads to an account outside the
+ *    project, which took the name after the project's account changed it or
+ *    gave it up. GitHub answers with that account's repo, not the project's.
  */
 export const GITHUB_LINK_REMOVE: Record<string, string> = {
 	// ── another product's code (2026-11-12) ──
@@ -9133,6 +9145,31 @@ export const GITHUB_LINK_REMOVE: Record<string, string> = {
 	// Lockb0x protocol, RelayForge and forks. A bare org link would fan out to
 	// all of them (enrich-repos expands an owner link), so the row links none.
 	pakananet: "https://github.com/lockb0x-llc/pakana-stellar-razor-components",
+	// ── taken over (2026-11-12) ──
+	// Each link below now leads into an account outside the project. The
+	// repo paths redirect to repos created after the project's work with no
+	// code in them: one or two commits and no language GitHub detects
+	// (src/lib/repo-takeover.ts). enrich-repos followed the redirects, and
+	// the bare account link, and served those repos as the projects' code.
+	// No replacement is linked: none of these projects links a current repo
+	// from its own pages.
+	// Planet Pay (SCF #14 and #21): scalemote/flow redirects to
+	// Moon-Launch/flow, created 2024-10-23. No GitHub account answers to
+	// scalemote now; SCF's page for it links that account.
+	"planet-pay": "https://github.com/scalemote/flow",
+	// Web3 Antivirus (SCF #28): the account named web3-antivirus is now a
+	// personal account holding 8 repos, none of them the browser extension,
+	// 6 of them empty shells made 2025-09-30 to 2026-01-24. The repo SCF's
+	// page and web3antivirus.io link, web3-antivirus/chrome-extension, is
+	// gone. The bare link fanned out to all 8.
+	"web3-antivirus": "https://github.com/web3-antivirus",
+	// Sora (Inactive): yk-labs-dev/soroban-cli-gui redirects into that same
+	// account, to web3-antivirus/soroban-cli-gui, created 2025-10-11.
+	sora: "https://github.com/yk-labs-dev/soroban-cli-gui",
+	// Hermes, folded into zenex: no GitHub account answers to orbit-cdp now,
+	// and orbit-cdp/hermes redirects to Moon-Launch/hermes, created
+	// 2026-02-07. Zenex's code is zenith-protocols/hermes, which zenex claims.
+	hermes: "https://github.com/orbit-cdp/hermes",
 	// ── not a GitHub path (real URL noted; the stored value 404s) ──
 	// real: https://gitlab.com/b4b-world
 	b4b: "https://github.com/gitlab.com/b4b-world",
@@ -9382,6 +9419,10 @@ export const WEBSITE_REMOVE: Record<string, string> = {
 	// 2026-09-01 owner call covers the domain, not the slug. Both rows point
 	// at diviandecor.com / casino spam now; neither should link out.
 	"blue-marble": "https://thebluemarble.io/",
+	// Taken over 2026-11-12: the folded hermes row's website is its old repo
+	// path, which now redirects to another account's empty repo
+	// (GITHUB_LINK_REMOVE hermes says why).
+	hermes: "https://github.com/orbit-cdp/hermes",
 	// ── Owner call 2026-09-02 ("fix those") on the no-check triage lists. Each
 	// link below is dead or no longer the project's: value-keyed to the exact
 	// stored URL so a later legitimate relink is never clobbered. Status is

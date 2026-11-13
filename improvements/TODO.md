@@ -308,15 +308,6 @@ Found by the repo-unlink lane on 2026-11-12 (branch lane/r1112-repo-unlink):
   manual dispatch with execute and unlink ticked; a clean dispatch is one
   whose dry run was read, whose unlinks all read back, and whose lines a
   later run did not re-link. Then pass --unlink on schedule too.
-- Two repo paths projects list now resolve, through GitHub's rename
-  redirect, to repos in a third party's account that carry its notes
-  instead of the project's code: scalemote/flow to Moon-Launch/flow
-  (planet-pay still serves it; the description is the third party's note)
-  and orbit-cdp/hermes to Moon-Launch/hermes (the folded hermes row; created
-  2026-02-07, the README is a vulnerability-report note). enrich-repos
-  follows the redirect and writes the row under the new owner, so a
-  project page can serve a repo its project never owned. Probe:
-  `gh api graphql -f query='{repository(owner:"scalemote",name:"flow"){nameWithOwner description}}'`.
 - Public REST accepts a where on repos.triageTags (internal triage verdicts)
   although the read hook strips them from the output, so a filter can still
   tell which repos carry a tag. projectUnlink got field read access for the
@@ -325,6 +316,49 @@ Found by the repo-unlink lane on 2026-11-12 (branch lane/r1112-repo-unlink):
   answers 200 with a totalDocs.
 - normal's github.repos lists normalfinance/normal-v1, which GitHub answers
   404 for (2026-11-12).
+
+Found by the repo takeover lane on 2026-11-12 (branch
+lane/r1112-repo-takeover), not changed there:
+
+- A bare owner link can reach an account that changed hands, and
+  enrich-repos fans it out to every repo there: github.com/web3-antivirus
+  put 8 repos of a personal account under Web3 Antivirus. The redirect
+  rule (src/lib/repo-takeover.ts) does not see it, since no redirect is
+  involved. Probe: `gh api graphql` on `repositoryOwner(login:
+  "web3-antivirus")` lists 8 repos, none the product's, while its SCF page
+  links web3-antivirus/chrome-extension, which answers not found. Of 355
+  bare owner links on 2026-11-12, 9 hold only repos with no code and 5
+  commits or fewer; web3-antivirus is the only one that is a personal
+  account with more than two repos.
+- The redirect rule's ceiling: a taker who pushes a code file, or six
+  commits, passes it, and the cheapest takeover re-registers a freed name
+  and creates the repo there with no redirect at all. Store GitHub's
+  `databaseId` (or the repo's `createdAt`, which never changes) on each repo
+  row, with enrich-repos its one writer, and refuse any read whose id
+  differs from the stored one, redirect or not; a mismatch writes nothing
+  and files a ledger row. It trusts the first read, so rows taken before
+  the backfill still rest on the hollow rule (src/lib/repo-takeover.ts).
+- Other code still follows a GitHub redirect without judging it or reading
+  DENIED_REPOS:
+  - `scripts/scan/fetch-repo-code.ts` (the batched read near line 355)
+    adopts the lowercased `nameWithOwner` as the row's name;
+  - `scripts/enrich-repo-activity.ts` writes activity from
+    `fetchRepoInfoBatch`, which answers through the redirect;
+  - `src/app/api/projects/[id]/github/route.ts` (line 64), a public route,
+    fetches each listed repo live through the redirect and serves its
+    stars, issues and last commit;
+  - ingest-dora-evals and ingest-ec-taxonomy create repo rows, and
+    ingest-dora-evals stores a redirected repo's new URL under the claimed
+    name (`scripts/ingest-dora-evals.ts`, the create call). Both are
+    manual dispatch.
+- A claim whose redirect GitHub answers in part every run is never judged,
+  and each such run puts it in `failures`, so the unlink pass abstains on
+  every run while it lasts. Bound it: after N unjudged runs, read that one
+  repo on its own, or leave it out of the claim-set check with its row kept
+  linked.
+- The ledger should show how old a carried redirect finding's evidence is
+  (`carriedFrom` on rows in improvements/audits/repo-redirects-latest.json),
+  so a refusal carried run after run does not read as freshly evidenced.
 
 Found by the identity lane on 2026-11-12 (branch lane/r1112-dq4-identity),
 not changed there:
@@ -949,6 +983,15 @@ Found 2026-10-23 in review of the smart wallet O2 ship
   `@stellar/stellar-sdk` ranges. Fails safe (never a false deprecated).
 
 ## Owner decisions (safe default in brackets)
+
+- Tell Planet Pay, Web3 Antivirus and the Sora maker that their linked
+  GitHub paths now lead to another account (Web3 Antivirus's own site and
+  SCF page still link it); and whether to report the redirect takeovers to
+  GitHub [no contact; our rows only].
+- Name a current repo for a project whose claim was removed as taken over:
+  Sora's SORA toolkit is tolgayayci/sora (README and thesora.app match the
+  row's description; STATUS_FIX sora already cites its releases) [none named
+  until the owner confirms].
 
 - An RWA registry row below toml-bidirectional (entity-toml, on-chain-home-domain,
   contract-metadata, on-chain-only) no longer lends a deployment, but still
