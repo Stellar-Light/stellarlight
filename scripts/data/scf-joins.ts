@@ -10,6 +10,7 @@ import {
 	stemSlugHash,
 } from "../../src/lib/identity";
 import { registrableDomain } from "../../src/lib/partner-project-identity";
+import { isThirdPartyLink } from "../eval/scf-official";
 
 /** Generate slug from name */
 export function toSlug(name: string): string {
@@ -118,7 +119,10 @@ export const SCF_SLUG_OVERRIDES: Record<string, string> = {
 	// title-prefix rule casualties, same-entity page-verified (2026-08-12):
 	// Greep pay = Greeppay; zkCrossDEX = zkCross's DEX; CashAbroad Smart
 	// Treasury = Cash Abroad's second submission.
-	"greep-pos-greep-pay-hfe": "greeppay",
+	// greep-pos-greep-pay-hfe, joined here until 2026-11-12, renders no
+	// record now; the page SCF serves is -mhp (pay.greep.io,
+	// github.com/GreepPay, the row's links).
+	"greep-pos-greep-pay-mhp": "greeppay",
 	"zkcrossdex-ipb": "zkcross",
 	"cashabroad-smart-treasury-wla": "cash-abroad",
 	// sls-111 (2026-11-04): a submission-named SCF #45 page whose own site,
@@ -176,6 +180,99 @@ export const SCF_SLUG_OVERRIDES: Record<string, string> = {
 	// Its site, beamable.com, and its GitHub org are the beamable row's, and
 	// its #38 $150,000 is the award that row carries with no page cited.
 	"onboard-game-devs-with-beamable-m5q": "beamable",
+	// sls-116 (2026-11-12): the award pages of rounds before #45 that no row
+	// carried, each read on 2026-11-12 beside the row it names. Listed pages
+	// the name matcher cannot reach; the comment names the link the page and
+	// the row share. Six rows stored the page already but no source, so the
+	// enrich never re-read them (hana by the 4-letter rule).
+	"hana-wallet-x9e": "hana", // hanawallet.io
+	"hyperledger-solang-dwa": "solang", // github.com/hyperledger-solang
+	"muwpay-qwa": "muwp", // muwpay.com
+	"stellar-attestation-service-lda": "attest", // github.com/daccred/attest.so
+	"soroban-rpc-sdk-dep": "cross-platform-soroban-rpc-sdk", // github.com/FrankSzendzielarz/SorobanRPCSDK
+	"stellar-integration-in-adamik-api-piy": "adamik", // github.com/AdamikHQ
+	"convexity-humanitarian-aid-transfer-solution-chats-bd8": "chats", // chats.cash
+	"bpv-stellarmesh-anchor-afq": "bp-ventures", // bpventures.us
+	"institutional-treasury-xlm-wyu": "arrel", // arreltech.com
+	"meta-contracts-in-stellar-p4c": "stellar-router-sdk", // jsr.io/@creit-tech/stellar-router-sdk, the row's site
+	"oz-accounts-policy-builder-by-gatewayfm-mqp": "gatewayfm", // gateway.fm; folds with gatewayfm-noq (#16)
+	"post-quantum-secure-wallets-for-stellar-97o": "soundness", // soundness.xyz
+	"sdk-for-stellar-qt-mab": "stellar-qt-sdk", // github.com/bnogalm
+	"soroban-and-stellar-content-g7j": "noticias-trading", // the row's description is the page's, and the same beacons.ai profile
+	"unstoppable-money-eii": "unstoppable-wallet", // unstoppable.money; folds with unstoppable-wallet-thi (#34)
+	"vanna-protocol-icb": "vanna-finance", // vanna.finance
+	"zkfetch-zktls-powered-oracle-solution-mfy": "reclaim", // reclaimprotocol.org
+	"flow-sbr": "obsrvr", // withobsrvr.com, three rows' site; the obsrvr row's description names Flow
+	// SCF record rechQd4T6SVeIF7gH: smilepay-global-7gh, the row's stored
+	// page, renders no record now; SCF retitled it PaySome.ai. Same record,
+	// same awards (#10, #37).
+	"paysomeai-7gh": "smilepay",
+	// Pages outside the listing that a name cannot join (the enrich finds
+	// them on SCF's round pages). A page with no link joins only where the
+	// row's description says what the page does (most rows were seeded from
+	// these pages), or the name is coined and Stellar-specific ("name").
+	"stellarpay-dy1": "stellarpay", // #2; Shopify merchants, as the row says (its #30 is Not Awarded)
+	"equilibreio-ok2": "equilibre", // a portfolio balancer for Stellar
+	"centaurus-i4z": "centaurus", // a second-layer payment network
+	"stellar-battle-hha": "stellar-battle", // community-funded prizes
+	"blue-orion-wpj": "blue-orion", // Stellar workshops
+	"lumens-for-charity-rui": "lumens-for-charity", // XLM donations to charities
+	"lumenaut-pool-0nd": "lumenaut", // the inflation pool
+	"getblockcardcom-afx": "getblockcard", // the title is the row's site
+	"sendit-ll9": "sendit", // the row's description cites its SCF round 4 award
+	"stellar-update-g85": "stellar-update", // a blog about Stellar
+	"rigel-yeo": "rigel", // monetized links
+	"opensolar-teb": "opensolar", // securitized solar financing
+	"lettuce-4zo": "lettuce", // a Stellar point of sale
+	"mxlet-mq9": "mxlet", // an open Stellar hardware wallet
+	"relax-rbc": "relax", // HR assets on Stellar
+	"crypto-link-2ej": "crypto-link", // a Discord payments bot
+	"vitreous-jdm": "vitreous", // transparent fundraising
+	"soroban-assistant-h9o": "soroban-assistant", // a Soroban AI assistant
+	"sorosorcerercom-x3s": "sorosorcerer", // a Soroban contract builder
+	"canfy-a2m": "canfy", // a Stellar developer copilot
+	"sorscan-svd": "sorscan", // a Soroban explorer
+	"aurapay-xkw": "aurapay", // remittances to Latin America
+	"localcoin-tdn": "localcoin", // incentives for social-good organisations
+	"gecko-fuzz-emh": "gecko-fuzz", // contract fuzzing
+	"paygo-crypto-ajc": "paygo-crypto", // PAYGO distributors
+	"skeeper-a-keeper-platform-8rf": "skeeper", // Soroban keepers
+	"stocken-capital-legaltech-wid": "stocken-capital", // legal governance platform
+	"forge-cxk": "forge", // Horizon and RPC node deployment
+	"mimoto-b9d": "mimoto", // ZK identity for payments
+	"chaincred-rk7": "chaincred", // company finances on Soroban
+	"prophe-okb": "prophe", // project management toolset
+	"grip-fuv": "grip", // one card over every account; x.com/trygripapp, trygrip.co
+	"sgf-solutions-tdi": "sgf-solutions", // USDC to ARS
+	"ea-kazi-1qp": "ea-kazi", // the same EA_KAZI_backend_ic repository
+	"swplug-pba": "swplug", // name
+	"stellarauth-nnk": "stellarauth", // name
+	"cosmiclink-kno": "cosmiclink", // name (cosmic-plus)
+	"cosmicvote-qlc": "cosmicvote", // name (cosmic-plus)
+	"nicetrade-qrp": "nicetrade", // name
+	"cryptocannoneer-tzl": "cryptocannoneer", // name
+	// Product pages whose site or GitHub owner is the row's (the row is the
+	// company or renamed product).
+	"azores-metaverse-e17": "bes-metaverse", // azores.group, github.com/BESMetaverse
+	"kometpay-raw": "puenta", // kometpay.com
+	"soroban-smart-option-contract-2ty": "block-time-financial", // github.com/blocktimefinancial
+	"formal-verso-i5m": "saw", // galois.com, github.com/GaloisInc
+	"bank2bit-s7u": "blox", // blox.global
+	"anchor-transparency-node-f6w": "usher", // usher.so, github.com/usherlabs
+	"stellar-talent-platform-p3z": "techfiesta", // github.com/Ekolance-Official
+	"infrastructure-support-liquify-x8y": "liquify", // liquify.com
+	"merkle-tree-airdrop-tooling-rlq": "sorodrop", // sorodrop.xyz
+	"oneclickfi-xgi": "one-click", // oneclick.fi
+	"stellar-time-machine-llg": "genie-ai", // genieai.tech
+	"fixed-rate-fixie-dxh": "polaris-lend", // jetprotocol.io (its title's quote was unreadable until sls-116)
+	// The page's one awarded submission (SCF #44, $95,000) is titled
+	// "SoroPass: Passkey SDK & UI Components". Its only link,
+	// github.com/justmert/passkey-ui, answers 404; the soropass row links
+	// github.com/justmert/soropass, "a minimal, composable passkey SDK and a
+	// small set of UI components for Stellar smart accounts" by the same
+	// owner, built to plug into stellar-wallets-kit, the gap the submission
+	// names (read 2026-11-12).
+	"passkey-ui-sj6": "soropass",
 	// Canonical-vs-dupe routing (sls-043 close-out): official "Band Protocol"
 	// exact-matches the band-protocol DUPE row by name; the CANONICAL slug is
 	// `band`, which otherwise matches nothing and would keep stale data.
@@ -259,4 +356,363 @@ export function foldLinkNote(
 		else return null;
 	}
 	return shared.size ? [...shared].join(", ") : null;
+}
+/**
+ * SCF pages outside the listing, joined to OUR row (our slug to page slug).
+ * /backend/projects serves 531 rows whatever it is asked, so a project
+ * outside it never reaches the name matcher. Since sls-116 the enrich finds
+ * those pages itself from SCF's round pages (every numbered round's awards,
+ * by project record id, read live on every run), and joins each by a
+ * reviewed entry here or in SCF_SLUG_OVERRIDES, or by a name a shared link
+ * confirms (joinOffListing). This map stays the reviewed list for the pages
+ * a name cannot join and for the awards SCF does not number (Liquidity,
+ * Public Goods), which no round page lists: those were found once, offline,
+ * from the Wayback CDX index of /project/*. Every entry: page parsed with
+ * parseRoundVerdicts, and the site, GitHub org or X handle on the page
+ * matched our row's links, or, where the page carries no links, the name is
+ * coined, Stellar-specific and unambiguous (marked "name").
+ * Left out on purpose: pages whose cards are all negative verdicts,
+ * Kickstart-only pages ("SCF Kickstart #N" cards are neutral to the
+ * parser), and pages already attached to another row: one page never joins
+ * two rows, and a fossil join is cleared first (pen and opengrants-fdb,
+ * SCF_FIX unlink, 2026-09-06). Amounts are the page's own budgets;
+ * "undisclosed" = award confirmed, no budget on the page (stored as
+ * amountUSD null, never 0).
+ */
+export const SCF_PAGES_BEYOND_CAP: Record<string, string> = {
+	accelar: "accelar-2td", // #26 $33,000 · site+github: accelar.io, github.com/accelar-labs
+	"art-club": "art-club-ia2", // #26 $40,000 · github: github.com/grmarkkes
+	artizen: "artizen-ngf", // #33 $130,000 · site+github: artizen.fund, github.com/artizen-fund
+	assetdesk: "assetdesk-kqx", // #19 $70,000 · site: assetdesk.xyz
+	astrocore: "astrocore-4xe", // #2 undisclosed · name: astroband's Stellar core port, SCF #2
+	astrograph: "astrograph-thf", // #1 undisclosed · name: astroband's Stellar GraphQL, SCF #1
+	autify: "autify-network-nxv", // #14 $15,000 · site: autifynetwork.com
+	"scaffold-stellar": "scaffold-stellar-ldy", // PG Q2 '26 undisclosed · github: github.com/theahaco; awarded=true was hand-patched with no page
+	blend: "blend-mfy", // Liquidity '24 Q1 $50,000 · site+github: blend.capital, github.com/blend-capital; awarded=true was hand-patched with no page; the page is not numbered-round listed (Wayback CDX only)
+	blockedenxyz: "blockedenxyz-6du", // #18 $139,999 · site+github: blockeden.xyz, github.com/blockedenhq
+	blocknify: "blocknify-5bv", // #6 $4,543.37 · #7 $131,973.75 · name: coined name
+	borderless: "borderless-u3x", // #20 $43,000 · #22 $82,500 · site+github: borderlesspayments.xyz, github.com/borderless-payments
+	bravepay: "bravepay-tze", // #11 $200,000 · site: bravepay.net
+	btq: "btq-jva", // #14 $10,000 · site: btq.com
+	cede: "cede-labs-fxy", // #31 $119,800 · site+github: cede.store, github.com/cedelabs
+	chaincerts: "chaincerts-u04", // #13 $75,000 · #18 $103,125 · site+github: chaincerts.co, github.com/kommitters
+	"chainlink-oracles-relayer": "chainlink-oracles-relayer-c5f", // #15 $38,400 · site+github: docs.relink.services, github.com/relinkservices
+	chef: "chef-c8c", // #22 $18,000 · site: github.io/stellar-chef, stellar-chef.github.io
+	chronospay: "chronospay-nrb", // #11 $65,000 · site: chronospay.io
+	"city-states": "city-states-medieval-70v", // #2 undisclosed · name: our host citystatesm = "City States: Medieval"
+	clear: "clear-4rw", // #26 $45,000 · site: borderlesspayments.xyz
+	"clickpesa-debt-fund": "clickpesa-debt-fund-ssc", // #26 $30,000 · #28 $95,000 · name: product-named, same company (ClickPesa)
+	clob: "clob-qoi", // #29 $72,019 · site: ideasoft.io
+	coinsender: "coinsender-f7q", // #24 $23,440 · site+github: coinsender.io, github.com/megadev-ou
+	constellation: "constellation-protocol-4uv", // #19 $110,000 · #23 $100,000 · github: github.com/constellation-protocol
+	copperx: "copperx-gateway-and-payout-yhf", // #29 $50,000 · site+github: copperx.io, github.com/copperxhq
+	dappradar: "dappradar-e06", // #27 $50,000 · #34 $95,000 · site: dappradar.com, x.com/dappradar
+	deb: "deb-sj5", // #6 $653.09 · site: demo.drivedeb.com, drivedeb.com
+	dropzey: "dropzey-in4", // #23 $38,500 · site+github: dropzey.com, github.com/zainh332
+	"elixir-stellar-sdk": "elixir-stellar-sdk-wib", // #10 $12,000 · github: github.com/kommitters
+	elsa: "elsa-wallet-banking-filipinos-hcg", // #11 $95,000 · site: elsa.care
+	emigro: "emigro-jp6", // #17 $46,400 · #20 $33,920 · #25 $90,000 · site+github: emigro.co, github.com/emigro
+	empowch: "empowch-eh9", // #11 $25,000 · site: empowch.com
+	fijicoin: "fijicoin-frq", // #8 $50,000 · site: mai.money
+	"flutter-stellar-sdk": "flutter-stellar-sdk-ilm", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/soneso
+	flux: "flux-yu0", // #22 $38,000 · site: iflux.app
+	"fx-swap": "fx-swap-by-hedgehog-unu", // #21 $42,450 · site: hedgeeffective.com
+	getpaid: "getpaid-z9y", // #9 $192,500 · site: getpaid.africa
+	"governance-modules-library": "governance-modules-library-nr4", // #22 $27,000 · #26 $74,000 · github: github.com/blockscience
+	handlpay: "handlpay-ah3", // #30 $60,000 · site+github: github.com/handlpay, handlpay.com
+	hiyield: "hiyield-0e4", // #18 $150,000 · site: hiyield.xyz
+	icanproveit: "icanproveit-proof-of-learning-icn", // #26 $50,000 · github: github.com/tuvalusoftware
+	idunu: "idunu-help-kids-thrive-3tm", // #21 $15,000 · #25 $15,000 · name: coined name
+	"infinity-wallet": "infinity-wallet-f7m", // #16 $130,000 · site+github: github.com/infinitywallet, infinitywallet.io
+	"ios-stellar-sdk": "ios-stellar-sdk-tdq", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/soneso
+	"java-stellar-sdk": "java-stellar-sdk-btq", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/lightsail-network
+	"js-worker-sdk": "js-worker-sdk-rjo", // #24 $12,500 · #27 $35,000 · github: github.com/cloudouble
+	katagames: "katagames-r2t", // #11 $25,000 · site: kata.games, x.com/createplayearn
+	keizai: "keizai-qfe", // #21 $43,000 · #28 $41,000 · github: github.com/keizai-tools
+	"kmac-state-machine-template": "kmac-state-machine-template-extension-jqw", // #20 $7,500 · github: github.com/huitemagico
+	"kotlin-stellar-sdk": "kotlin-stellar-sdk-fjl", // #9 $11,500 · github: github.com/rahimklaber
+	kript: "kript-pva", // #27 $35,000 · #32 $77,000 · site: kriptup.io
+	kunst21: "kunst21com-ray", // #9 undisclosed · name: SCF title is our host kunst21.com
+	"legacy-suite": "legacy-suite-on-stellar-zpd", // #24 $49,998 · site+github: github.com/avento-labs, legacysuite.com
+	lumenscan: "lumenscan-bwl", // #4 undisclosed · name: Lumen-specific name
+	mica: "mica-ckw", // #16 $138,700 · site+github: github.com/micatechnology, mica.rent
+	mojoflower: "mojoflower-mq4", // #7 $196,415 · #11 $47,500 · #17 $100,000 · github: github.com/mojoflower-garden
+	mystic: "mystic-finance-xp7", // #29 $47,000 · site: mysticfinance.xyz
+	"net-sdk": "net-sdk-cfe", // PG Q2 '26 undisclosed · PG Q4 '25 undisclosed · github: github.com/beans-bv
+	"nirvana-labs": "nirvana-labs-4eh", // #26 $36,000 · site: nirvanalabs.io
+	oinc: "oinc-kix", // #17 $105,000 · site: com.br, useoinc.com.br
+	okashi: "okashi-oee", // #13 $82,000 · #15 $124,800 · #20 $100,000 · #24 $100,000 · site+github: github.com/okashi-dev, okashi.dev
+	omnilumen: "omnilumen-dyk", // #28 $50,000 · github: github.com/omnilumen
+	// scf.awarded was true with $48,000 and no page anywhere: an uncited award.
+	// The page's own SCF #27 Legacy v5.0 Activation budget is $48,000, equal to
+	// the figure already on our row, and its links (orally.net,
+	// github.com/orally-network) match the product's name.
+	orally: "orally-network-76g", // #27 $48,000 · amount+name
+	"open-gamefi-sdk": "open-gamefi-sdk-ibv", // #28 $39,000 · github: github.com/yanis7774
+	opengrants: "opengrants-fdb", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · site+github: opengrants.net, github.com/metagov/daostar
+	ortege: "ortege-ai-tsm", // #18 $11,200 · #22 $40,000 · #26 $100,000 · github: github.com/ortege-xyz
+	paysapp: "paysapp-l02", // #3 undisclosed · name: coined name (kuyawa)
+	"planet-pay": "planet-pay-lxg", // #14 $49,500 · #21 $96,000 · github: github.com/scalemote
+	plutope: "plutope-merchant-app-zmh", // #27 $33,400 · github: github.com/plutopein, x.com/plutopeio
+	poma: "poma-protocol-s3f", // #29 $14,000 · github: github.com/poma-protocol, x.com/pomaprotocol
+	qolaq: "qolaq-wev", // #13 $150,000 · site: qolaq.org
+	qstn: "qstn-3rv", // #20 $2,500 · site: qstn.us
+	ramm: "ramm-global-retail-commerce-zbg", // #22 $38,500 · site+github: github.com/jamiels, ramm.ai
+	rarible: "rariblecom-stellar-ujd", // #30 $150,000 · site+github: github.com/rarible, rarible.com
+	sanctum: "sanctum-cfe", // #23 $50,000 · #25 $85,000 · github: github.com/zkbricks
+	securx: "securx-medical-prescriptions-xmt", // #27 $42,400 · site: securxtech.wixsite.com, wixsite.com/securx
+	silicore: "silicore-wrz", // #29 $31,000 · github: github.com/ilanklim
+	"simple-signer": "simple-signer-ei9", // #9 $10,000 · github: github.com/fsodano
+	solarkraft: "solarkraft-jdu", // #24 $50,000 · #29 $67,000 · github: github.com/freespek
+	"soroban-explorer": "soroban-explorer-rtb", // #19 $61,000 · #23 $100,000 · site: sorobanexp.com
+	"soroban-polygon-interop": "soroban-polygon-interop-3gz", // #27 $42,755 · site: entethalliance.github.io, github.io/crosschain-interoperability
+	"soroban-pre-order-contract": "soroban-pre-order-contract-ucp", // #12 $1,000 · github: github.com/aolieman
+	"soroban-react": "soroban-react-khv", // #20 $25,000 · github: github.com/paltalabs
+	sorobanmath: "sorobanmath-zuo", // #20 $40,000 · github: github.com/rahul-soshte
+	sorobuild: "sorobuild-zhc", // #22 $44,800 · name: Soroban-specific coined name
+	sorosan: "sorosan-twd", // #20 $29,000 · github: github.com/sorosan
+	// scf.slug soropg-zcg was hand-set, but the page is outside the 500-row
+	// listing, so no pass ever visited it: the row served awarded=true with an
+	// empty roundAwards and the page's -226 sentinel as its round. Its one
+	// award is a partial disbursement ("Awarded (50%)"), which only became
+	// readable with the status fix in the same batch.
+	soropg: "soropg-zcg", // PG Q2 '26 undisclosed · site+github: soropg.com, github.com/jamesbachini
+	sorosplits: "sorosplits-9w7", // #19 $59,700 · #23 $94,000 · site+github: github.com/findolor, sorosplits.xyz
+	sorostarter: "sorostarter-9b2", // #29 $47,175 · github: github.com/sorostarter, x.com/sorostarter
+	spacewalk: "spacewalk-sel", // #11 $100,000 · site+github: github.com/pendulum-chain, pendulumchain.org
+	spatium: "spatium-wallet-7ii", // #13 $148,000 · #22 $35,200 · name: coined wallet name, spatium.net on page
+	starloom: "starloom-ox2", // #26 $45,900 · site: starloom.io
+	"stellar-nest": "stellar-nest-thq", // #25 $14,800 · github: github.com/alkeops
+	"stellar-tip": "stellar-tip-pj5", // #4 undisclosed · name: Stellar-specific name
+	"stellar-token-launchpad": "stellar-token-launchpad-flp", // #24 $40,000 · site+github: github.com/cryptixag, tokenlaunchpad.eu
+	"stellar-tools": "stellar-tools-6qw", // #26 $18,700 · site+github: github.com/joaquinsoza, stellartools.xyz
+	stellarguard: "stellarguard-41d", // #1 undisclosed · name: Stellar-specific name
+	stellarmint: "stellarmint-ece", // #5 $51,277.94 · site: stellarmint.io
+	stellarport: "stellarport-gfe", // #2 undisclosed · name: Stellar-specific name
+	stellarprodev: "stellarprodev-z0n", // #17 $39,880 · #29 $26,000 · site+github: github.com/omeganetwork-tech, stellarpro.dev
+	stellarscamreport: "stellarscamreport-wir", // #6 $5,445 · site: stellarscam.report
+	stellot: "stellot-vp7", // #4 undisclosed · name: Stellar-specific coined name
+	"storehouse-gold": "storehouse-gold-to-stellar-nlz", // #26 $50,000 · name: distinctive product name
+	stroopyai: "stroopyai-e5a", // #20 $21,370 · site: stroopy.ai
+	tap4change: "tap4change-wgd", // #21 $73,280 · site: tap4change.org
+	taskio: "taskio-87z", // #7 $283,499 · site: task.io
+	teken: "teken-easy-multi-signatures-avi", // #28 $29,500 · github: github.com/moonbite-gmbh
+	"timed-transactions-api": "timed-transactions-api-shu", // #1 undisclosed · name: SCF #1 project, name unambiguous
+	tracee: "tracee-jnz", // #16 $128,925 · github: github.com/tracee1910
+	triiyo: "triiyo-5cf", // #22 $50,303 · site: triiyo.com
+	uils: "uils-yl5", // #17 $141,027.50 · name: coined name, uils.la on page, no links on our row
+	walletban: "walletban-n32", // #20 $20,000 · site: walletban.xyz
+	"web3-antivirus": "web3-antivirus-w3a-a37", // #28 $50,000 · github: github.com/web3-antivirus
+	xycloans: "xycloans-qqr", // #13 $31,800 · Liquidity '24 Q1 $50,000 · github: github.com/xycloo
+	zentra: "zentra-cxp", // #23 $18,200 · site+github: github.com/tosinshada, tide-soroban-contract-frontend.vercel.app
+	ziriz: "ziriz-my0", // #22 $48,000 · github: github.com/zirizapp
+};
+
+const BEYOND_CAP_BY_PAGE = new Map(
+	Object.entries(SCF_PAGES_BEYOND_CAP).map(([ours, page]) => [page, ours]),
+);
+
+/** Hosts that hold many projects: a site on one is no project's site. */
+const CODE_HOST =
+	/^(?:github\.com|gitlab\.com|github\.io|vercel\.app|netlify\.app|herokuapp\.com)$/;
+
+/** The GitHub owner a link names, lowercased (SCF writes an org as
+ * github.com/orgs/<owner>), or null. */
+const githubOwner = (u?: string | null) =>
+	u?.match(/github\.com\/(?:orgs\/)?([^/\s?#]+)/i)?.[1]?.toLowerCase() ?? null;
+
+/**
+ * The link an SCF page and a row share, or null: the registrable domain of
+ * their sites (never a code host or a third-party page such as a link-in-bio
+ * profile), else their GitHub owner. A name is a hypothesis; this is the
+ * evidence that the name is one project.
+ */
+export function sharedLink(
+	page: { website?: string | null; github?: string | null },
+	row: JoinRow,
+): string | null {
+	const site = registrableDomain(page.website);
+	if (
+		site &&
+		!CODE_HOST.test(site) &&
+		!isThirdPartyLink(String(page.website)) &&
+		site === registrableDomain(row.links?.website)
+	)
+		return `site ${site}`;
+	const owner = githubOwner(page.github) ?? githubOwner(page.website);
+	const ours =
+		githubOwner(row.links?.github) ?? githubOwner(row.links?.website);
+	return owner && owner === ours ? `github ${owner}` : null;
+}
+
+/**
+ * The row an SCF page outside the listing joins (sls-116): a reviewed entry
+ * (SCF_SLUG_OVERRIDES, SCF_PAGES_BEYOND_CAP), else the row the matcher joins
+ * by name when the two share a link. Old pages often carry no link and many
+ * names recur (SCF #2's StellarPay, Wally, Amber), so a name alone joins
+ * nothing: the reason, and the row a person should check, come back instead.
+ */
+export function joinOffListing<R extends JoinRow>(
+	page: {
+		slug: string;
+		title: string;
+		website?: string | null;
+		github?: string | null;
+	},
+	index: JoinIndex<R>,
+): { row: R; how: string } | { row?: undefined; why: string; candidate?: R } {
+	const reviewed =
+		SCF_SLUG_OVERRIDES[page.slug] ?? BEYOND_CAP_BY_PAGE.get(page.slug);
+	if (reviewed) {
+		const row = index.bySlug.get(reviewed);
+		return row
+			? { row, how: "reviewed entry" }
+			: { why: `its reviewed entry names ${reviewed}, which is no row` };
+	}
+	const named = matchListingRow(page, index);
+	if (!named) return { why: "no row of the page's name" };
+	const link = sharedLink(page, named);
+	return link
+		? { row: named, how: `name, ${link}` }
+		: {
+				why: "name only, no link the page and the row share",
+				candidate: named,
+			};
+}
+
+/**
+ * Rows whose stored SCF award was copied from a page another project joins
+ * this run (sls-116: one page, one row). The pre-2026-08-12 substring matcher
+ * wrote Arculus's page and its SCF #30 award onto StellarPay ("stellarpay"
+ * inside "Arculus x Stellar: Payments"); the arculus row carries that page,
+ * and nothing re-read StellarPay, because the enrich only writes rows a page
+ * joins. A row joined this run is rewritten from its own page instead, a
+ * lineage shadow shares its canonical row's page, a human-verified record is
+ * curate's, and a stored page no row joins stands, unread.
+ */
+export function strandedAwards<
+	R extends JoinRow & {
+		scf?: {
+			awarded?: boolean | null;
+			slug?: string | null;
+			basis?: string | null;
+			awardedRounds?: unknown[] | null;
+		} | null;
+	},
+>(
+	rows: readonly R[],
+	joinedPage: ReadonlyMap<string, unknown>,
+	joined: ReadonlySet<unknown>,
+	identityOf: (row: R) => unknown,
+): Array<{ row: R; page: string; owner: unknown }> {
+	const out: Array<{ row: R; page: string; owner: unknown }> = [];
+	for (const row of rows) {
+		const page = row.scf?.slug;
+		if (!page || row.scf?.basis === "human-verified") continue;
+		if (!row.scf?.awarded && !row.scf?.awardedRounds?.length) continue;
+		const id = identityOf(row);
+		const owner = joinedPage.get(page);
+		if (owner === undefined || owner === id || joined.has(id)) continue;
+		if (SCF_SHARED_CLAIMS[row.slug]?.page === page) continue;
+		out.push({ row, page, owner });
+	}
+	return out;
+}
+
+/**
+ * Rows that keep an SCF award copied from a page another row joins, by a
+ * reviewed decision (sls-116): the sync leaves both rows as they are, and the
+ * round-count check counts the page's award once, on the row the page joins.
+ */
+export const SCF_SHARED_CLAIMS: Record<
+	string,
+	{ page: string; joinedTo: string; why: string }
+> = {
+	// "Peer (by Honeycoin)" funds Peer, HoneyCoin's app, which is the peer
+	// row (usepeer.co); the page joins the company row, honey-coin
+	// (SCF_SLUG_OVERRIDES). Which row carries the award is the owner's call
+	// (improvements/TODO.md), so neither row changes until then.
+	peer: {
+		page: "peer-by-honeycoin-inz",
+		joinedTo: "honey-coin",
+		why: "product row or company row is an owner decision",
+	},
+};
+
+/** The round-count check's rows: a shared claim (SCF_SHARED_CLAIMS) is the
+ * same award as its page's own row, so it is not counted twice. */
+export function countedRows<
+	R extends {
+		slug?: unknown;
+		scf?: { slug?: string | null } | null;
+		scfSourceUrl?: unknown;
+	},
+>(rows: readonly R[]): R[] {
+	const PAGE = "https://communityfund.stellar.org/project/";
+	const pageOf = (r: R) =>
+		r.scf?.slug ??
+		(typeof r.scfSourceUrl === "string" && r.scfSourceUrl.startsWith(PAGE)
+			? r.scfSourceUrl.slice(PAGE.length)
+			: null);
+	// the claim holds only while the row stores the claim's page, as in
+	// strandedAwards: a page of its own makes it a row like any other
+	return rows.filter(
+		(r) => SCF_SHARED_CLAIMS[String(r.slug)]?.page !== pageOf(r),
+	);
+}
+
+/** Most stranded awards one run may remove without --allow-stranded. */
+export const STRANDED_CEILING = 5;
+
+/** Everything a sync run could not check: beyond-cap pages that did not
+ * parse, pages on the round path not read, and joined pages not read. */
+export function couldNotCheck(run: {
+	beyondCap: readonly string[];
+	roundPath: readonly string[];
+	joinedPages: readonly string[];
+}): string[] {
+	return [...run.beyondCap, ...run.roundPath, ...run.joinedPages];
+}
+
+/** The stranded-award removals a run writes: none when the run could not
+ * check something (a page it did not read may be the one that joins the row)
+ * or when there are more than the ceiling, which reads as a join gone wrong
+ * at scale (two were left on 2026-11-12), not as data. */
+export function strandedWrites<T>(
+	stranded: readonly T[],
+	opts: {
+		ceiling: number;
+		/** --allow-stranded: must equal the count this run found, which says
+		 *  the person read these removals and no others */
+		allow?: number;
+		couldNotCheck: readonly string[];
+	},
+): { write: T[]; refused: string | null } {
+	const n = stranded.length;
+	if (opts.couldNotCheck.length)
+		return {
+			write: [],
+			refused: `the run could not check ${opts.couldNotCheck.length} page(s)`,
+		};
+	if (!Number.isInteger(opts.ceiling) || opts.ceiling < 0)
+		return { write: [], refused: `the ceiling ${opts.ceiling} is not a count` };
+	if (opts.allow !== undefined) {
+		if (!Number.isInteger(opts.allow) || opts.allow < 0)
+			return {
+				write: [],
+				refused: `--allow-stranded ${opts.allow} is not a count`,
+			};
+		if (opts.allow !== n)
+			return {
+				write: [],
+				refused: `--allow-stranded ${opts.allow} names a different count from the ${n} this run found; read them and pass ${n}`,
+			};
+		return { write: [...stranded], refused: null };
+	}
+	if (n > opts.ceiling)
+		return {
+			write: [],
+			refused: `${n} removals is over the ceiling of ${opts.ceiling}; rerun with --allow-stranded ${n} after reading them`,
+		};
+	return { write: [...stranded], refused: null };
 }

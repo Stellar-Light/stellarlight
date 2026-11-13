@@ -513,57 +513,68 @@ here as #1900 to #1905; each issue carries its read-only probes.
   execute and then the enrich-scf execute, `pnpm exec tsx
   scripts/eval/scf-round-counts.ts` reads `SCF #45: SCF 40 (+1 undecided),
   ours 40`.
-- Intake of the earlier SCF rounds' awards: the same check, exact in every
-  round since it reads SCF's own round pages, finds 34 rounds before #45
-  short by 119 awards (2026-11-11, the state after the sls-111 executes).
-  They are the reviewed baseline the check ratchets against,
-  scripts/eval/scf-round-shortfalls.json, which names each round's 131
-  uncarried award pages; close a gap, then lower or remove its entry in the
-  same change. By round, short (SCF, ours; why): #44 3 (46, 43; 3 with no
-  row); #40 2 (24, 22; 2 no row); #38 2 (24, 22; 2 no row); #36 1 (23, 22;
-  2 no row); #35 1 (21, 20; 2 no row); #32 1 (17, 16; 3 no row); #29 6 (40,
-  34; 3 no row, 4 a row carries no award); #28 6 (30, 24; 2, 4); #27 6 (36,
-  30; 5, 1); #26 1 (43, 42; 1, 2); #25 3 (27, 24; 2, 1); #24 1 (27, 26; 0,
-  1); #23 5 (25, 20; 3, 3); #22 3 (33, 30; 1, 4); #21 6 (26, 20; 4, 2); #20
-  5 (33, 28; 3, 3); #19 2 (16, 14; 1, 1); #18 3 (15, 12; 2, 1); #17 3 (19,
-  16; 0, 3); #16 4 (21, 17; 0, 4); #15 4 (12, 8; 3, 1); #14 3 (12, 9; 2,
-  1); #13 3 (14, 11; 1, 2); #11 3 (20, 17; 1, 2); #10 5 (15, 10; 3, 3); #9
-  3 (14, 11; 0, 3); #8 3 (7, 4; 1, 2); #7 3 (8, 5; 2, 1); #6 3 (8, 5; 1, 2);
-  #5 8 (9, 1; 2, 6); #4 5 (8, 3; 2, 3); #3 4 (8, 4; 0, 4); #2 4 (8, 4; 0,
-  4); #1 4 (8, 4; 1, 3). Two remedies: 60 award pages have no row at all
-  (intake, as for SCF #45: SEEDS plus an SCF_SLUG_OVERRIDES join), and 71
-  sit outside SCF's 531-row listing beside a row of the page's name (64
-  rows, most of them Inactive, among them cosmicvote, mxlet, rigel,
-  stellarpay and the-blue-marble) that carries no award because the enrich
-  never reads the page: each needs an SCF_PAGES_BEYOND_CAP entry confirmed
-  by a link, since a name alone is not identity (Wally, Sendit, Relax, Grip
-  and Amber were left out of that map as collisions). Rounds that list more
-  pages than their net shortfall hold a row that claims the round with no
-  SCF page of its own: team-finance #36, muwp #35 and #26, attest #32 and
-  #29, cross-platform-soroban-rpc-sdk #32, unalivio #32, peer #26 and #22,
-  wagelink #24, solang #23 and #20, stbl #22, comet #18 and #13, sstream
-  #16. One page, fixed-rate-fixie-dxh (#21, our polaris-lend row), has a
-  double quote in its title, which readScfPage's record match does not
-  read, so it needs that reader fixed before it can be joined. The baseline
-  also records five swaps, rounds whose totals agree while an SCF award
-  page the check finds no row carrying is offset by a row it cannot tie to
-  a page. Three are a missing citation, not a wrong join: adamik (#37),
-  greeppay (#34) and solang (#33) already store the right page in scf.slug
-  (stellar-integration-in-adamik-api-piy, greep-pos-greep-pay-mhp,
-  hyperledger-solang-dwa) but no scf.sourceUrl, so the served scfSourceUrl
-  is null; a link-checked SCF_SLUG_OVERRIDES entry for each page lets
-  enrich-scf stamp it. #37's other page, paysomeai-7gh, is smilepay's
-  retitled record (the next item). Two are wrong joins: ankr stores IBIS's
-  page, ibis-stablecoin-neobank-ramp-api-infrastructure-g4c (which
-  SCF_SLUG_OVERRIDES gives the ibis row), and claims #42, while Unstoppable
-  Money (unstoppable-money-eii) has no row; stellarpay stores
-  arculus-x-stellar-payments-with-soroban-fpz and claims #30, while CHATS
-  (convexity-humanitarian-aid-transfer-solution-chats-bd8) has no row.
-  Check both rows against SCF and correct them (read 2026-11-11 through
-  GET /api/projects?where[slug][equals]=<slug>). Awards on pages outside
-  SCF's 531-row listing are not swap-checked: the round pages name them by
-  project record id, and the check holds no map from record id to page
-  slug (one built from the /project/<record id> pages would close it).
+- sls-116 (#1952): SCF awards before #45 that no row carried, and awards a
+  row carried from another project's page (StellarPay served Arculus's #30
+  and $148,400). Branch lane/r1112-sls116-scf-rounds makes the SCF sync read
+  SCF's round pages and every awardee page outside the 531-row listing,
+  joins each by a reviewed entry or a name a shared link confirms, and
+  removes an award copied from a page another row joins. Its plan
+  (2026-11-12, read-only over the public API, on the rows curate's execute
+  leaves): 82 rows gain an award (3 of them hidden Draft rows), 2 lose a
+  copied one (stbl, ankr), team-finance folds into trustswap (one project,
+  DUPE_MERGES), 102 round awards added and 4 removed, and the round-count
+  check goes from 34 rounds short by 119 with 5 swaps to 20 short by 27
+  with none. Done when,
+  after the curate-projects execute and then the enrich-scf execute, the
+  Round counts step passes against scripts/eval/scf-round-shortfalls.json
+  as committed (asOf 2026-11-12). The 27 left, each named in that file, need
+  an owner's call, not code:
+  - Hidden rows carry 5 of them: the-hub (#29), octo (#28), ramm (#22),
+    multiclique (#19) and elio-dao (#15) are Draft with no canonical row, so
+    their awards are joined but not served. Six more pages have only a Draft
+    candidate: chrysalis-nkf (raumfi), soroban-cli-cross-platform-gui-57v
+    (sora-cli), styx-a-soroban-cosmos-bridge-qw2 (styx), lumoscore-ckm
+    (lumosdao), instantdao-zce and free-voting-platform-0pp. Default: leave
+    them hidden.
+  - A row of the page's name and no link to confirm it: wally-ygy (#8),
+    answerly-omb (#9), amber-rwa-tokenization-on-stellar-sku (#20; the amber
+    row's site is Amber Group's) and soracleorg-posted-bdt (#22; both the
+    soracle and posted-app rows could be it). Default: unjoined.
+  - No row: soroban-contract-source-verification-service-bax (#44, $73,500,
+    an RFP award), mythforge-3tz (#10, #11), boss-money-former-leaf-global-hxt (#7;
+    two rows, boss-pay and boss-revolution, both list bossmoney.com: a
+    duplicate to resolve first), optionblox-yieldblox-4mn (#7, Script3's
+    2021 award; the yieldblox row is the later DAO), ayadee-trak-j7v (#6),
+    the-interstellar-platform-6rb (#5; the interstellar row is a guess),
+    apayio-lpa (#4) and stellar-community-forum-3om (#1). Default: no
+    intake; funding is not membership.
+  - SCF lists two awards with no project page: submission recjsi9sxCFtNeYwi
+    (#18) and rec52b54tNWXJ3tI3 (#15).
+  - Peer by HoneyCoin's page joins the honey-coin row (SCF_SLUG_OVERRIDES),
+    and the peer row, the product the award funded, keeps its uncited copy
+    of #22 and #26 (SCF_SHARED_CLAIMS in scripts/data/scf-joins.ts): the sync
+    changes neither row and the round-count check counts the award once.
+    Default: leave both; the owner decides which row carries the award.
+  - smilepay's SCF record is now titled PaySome.ai (paysomeai-7gh, joined to
+    the smilepay row by its record id). Default: the row keeps its name
+    until the owner decides on a rename.
+  - scripts/data/fix-scf-rounds.ts (fix-scf-rounds.yml, manual dispatch) is
+    the 2026-08-12 one-shot repair and still writes scf.awardedRounds
+    exactly for its list; dispatched again it would fight enrich-scf.
+    Default: leave it in place and do not dispatch it; retiring it is the
+    owner's call.
+  - The round-count check joins pages with the enrich's own joinOffListing
+    and SCF_SLUG_OVERRIDES, so a wrong reviewed join reads as carried in
+    both: only a person reading the page beside the row catches it (the
+    2026-11-12 independent audit sampled 71 joins and found none wrong).
+    No code change; review each new reviewed entry against its page.
+  - The quasar row keeps the Oracle type (TYPE_ADD in
+    scripts/data/curation-maps.ts, added for a "price feed oracle grid"
+    description), but SCF's page for Nebula and Quasar (nebula-egz, SCF #18)
+    calls Quasar a Soroban indexer, and the row links Eiger's repository
+    (github.com/equilibriumco/quasar); sls-116 corrected the same mistake on
+    nebula only. Fix its description and type from that repository and the
+    SCF page. Default: unchanged.
 - /api/verify serves a project's stored supportedNetworks raw, so a row
   whose curated list was cleared to let the API derive its networks
   (allbridge and estrela, and the nine 2026-09-15 SCF #45 seeds once
@@ -573,18 +584,6 @@ here as #1900 to #1905; each issue carries its read-only probes.
   /api/verify?type=live&subject=allbridge answers "supportedNetworks": []
   (2026-11-11). Serve the derived list and its basis, as search does.
   Found by the review of the sls-111 lane.
-- smilepay serves rounds [10, 37] from
-  https://communityfund.stellar.org/project/smilepay-global-7gh, but that
-  page no longer carries a project record (HTTP 200 with no record for the
-  slug, read 2026-11-11) and the SCF listing no longer lists it, so
-  enrich-scf can neither confirm nor update the row; the stored record
-  stands, unread. SCF retitled the record: project rechQd4T6SVeIF7gH is now
-  "PaySome.ai" at https://communityfund.stellar.org/project/paysomeai-7gh
-  (listed, lastAwardedRound 37; its #10 and #37 submissions Awarded, #31 and
-  #35 Not Awarded), and no row of ours joins that title. Confirm the page's
-  site against the row's, then add an SCF_SLUG_OVERRIDES entry
-  (paysomeai-7gh to smilepay) and an alias if PaySome.ai is the product's
-  current name. Found by the sls-111 lane's page re-read.
 - #1904: no row for Chainlink Data Feeds on Stellar or for MetaMask's
   native Stellar network.
 - #1905: `venueRole` is null on 31 of 38 Live DEX rows, and project search

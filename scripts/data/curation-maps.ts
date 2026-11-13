@@ -508,7 +508,7 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		asOf: "2026-09-06",
 		sourceUrl: "https://stellarpay.io/",
-		note: "Weak-basis sweep 2026-09-06: stellarpay.io no longer resolves (NXDOMAIN, checked from two paths). Newest linked repo commit 2019-10-07. Not to be confused with our own private stellar-pay work.",
+		note: "Weak-basis sweep 2026-09-06: stellarpay.io no longer resolves (NXDOMAIN, checked from two paths). Newest linked repo commit 2019-10-07. Its SCF record (communityfund.stellar.org/project/stellarpay-dy1, read 2026-11-12) shows SCF #2 Awarded and SCF #30 Not Awarded.",
 	},
 	"0xauth": {
 		from: "Live",
@@ -3943,7 +3943,6 @@ export const TYPE_ADD: Record<string, string[]> = {
 	"redstone-finance": ["Oracle"], // "Modular price oracle live on Stellar/Soroban mainnet"
 	pyth: ["Oracle"], // "decentralized oracle that delivers real-time price feeds"
 	quasar: ["Oracle"], // "price feed oracle grid for Stellar DeFi" (keeps SDK)
-	nebula: ["Oracle"], // same grid family, Inactive — type is identity, not liveness
 	orally: ["Oracle"], // "On-chain oracles with cross-chain capabilities"
 	"soroban-optimistic-oracle": ["Oracle"], // optimistic/arbitration oracle (keeps Infrastructure)
 	// Battery F-row rotation 2026-08-29: prominent row with types:[] — it is
@@ -7854,6 +7853,12 @@ export const PARTNER_DESCRIPTION_FIXES: Record<
 };
 
 export const DESCRIPTION_FIXES: Record<string, string> = {
+	// sls-116 (2026-11-12): the row described a "price feed oracle grid";
+	// its SCF page (communityfund.stellar.org/project/nebula-egz, SCF #18
+	// "Nebula and Quasar", $149,458) and its repository describe a Soroban
+	// contract library, and the repository is archived.
+	nebula:
+		"Nebula is Eiger's Soroban contract library: governance modules and ready-to-use contracts, with a wizard that generates contract code. SCF #18 funded it together with Quasar, a Soroban indexer. The repository (github.com/eigerco/nebula, now equilibriumco/nebula) is archived; its last release was v0.2.0 in November 2023 (read 2026-11-12).",
 	// 2026-11-12, identity lane: the row carried the Inference language's
 	// description word for word. It is Inferara's SCF #41 decompiler (see
 	// NAME_FIXES and GITHUB_LINK_FIX); this is its README, condensed.
@@ -8443,7 +8448,11 @@ export const TYPES_SET: Record<string, string[]> = {
 	defindex: ["Infrastructure", "SDK", "Yield"], // defindex.io (PaltaLabs): yield infrastructure — non-custodial tokenized vaults + SDK for wallets/neobanks (Yield added with spec 1.9.13).
 	xoxno: ["Lending"], // xoxno.com: "enterprise-grade decentralized lending protocol on Soroban" — Lending, not RWA.
 	// 2026-09-05: TYPES_SET is exact-sync and runs LAST in curate, so an Oracle tag appended by TYPE_ADD was stripped on every execute and the self-audit stayed red five days. The exact set must carry the whole truth itself.
-	nebula: ["SDK", "Oracle"], // eigerco/nebula: Soroban Rust contract library + code-gen wizard = SDK, and the row describes a "price feed oracle grid" = Oracle. Drops the unsupported Indexer tag. (Also defunct — see STATUS_FIX.)
+	// eigerco/nebula: a Soroban Rust contract library and code-generation
+	// wizard, so SDK. sls-116 (2026-11-12): not an oracle; the "price feed
+	// oracle grid" description that put Oracle here was never this product's
+	// (DESCRIPTION_FIXES nebula).
+	nebula: ["SDK"],
 	// Held-queue resolutions after a closer look (boxy 2026-07-15).
 	elsa: ["Wallet", "Payments"], // elsa.care: "a wallet for Filipinos to receive, spend and earn from remittances" — the verifier wrongly dropped Wallet; it IS a remittance wallet + payments.
 	legasi: ["Lending", "RWA"], // legasi.io: "on-chain Lombard LENDING infrastructure — collateralized borrowing against tokenized RWA" — Lending against RWA, not RWA alone.

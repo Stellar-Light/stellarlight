@@ -18,6 +18,10 @@
  * unchanged total), and a listed round whose shortfall shrank or closed (a
  * stale entry to lower or remove) each fail.
  *
+ * Awards outside SCF's listing (sls-116) are judged too: each record id a
+ * round page names and the listing lacks is read off its own page
+ * (/project/<record id>) for its slug, and joined the way the enrich joins it.
+ *
  * Exit 0 no finding, 1 a finding, 2 could-not-check (a side unread or
  * partial, or the baseline missing or unreadable). The basis of each count:
  * src/lib/scf-round-counts.ts.
@@ -32,10 +36,17 @@ import {
 	type ScfListingRow,
 	type ScfRound,
 } from "../../src/lib/scf-round-counts";
-import { type JoinRow, matchListingRow } from "../data/scf-joins";
 import {
-	readAwardRounds,
-	readRoundSubmissions,
+	countedRows,
+	type JoinRow,
+	joinOffListing,
+	matchListingRow,
+	SCF_SHARED_CLAIMS,
+} from "../data/scf-joins";
+import {
+	offListingAwardees,
+	readOffListingPages,
+	readScfRounds,
 	SCF,
 	uniqueNames,
 } from "./scf-official";
@@ -53,8 +64,6 @@ if (notBefore && Number.isNaN(notBefore.getTime())) {
 	console.log(`COULD NOT CHECK: --not-before ${notBeforeArg} is not a time`);
 	process.exit(2);
 }
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 async function text(url: string): Promise<string | null> {
 	try {
 		const res = await fetch(url, { headers: UA });
@@ -62,27 +71,6 @@ async function text(url: string): Promise<string | null> {
 	} catch {
 		return null;
 	}
-}
-
-/** The round index and every numbered round's own page. A page that could not
- * be read stays in the list with submissions null, so the comparison names it
- * instead of counting around it. */
-async function readRounds(): Promise<ScfRound[] | null> {
-	const index = await text(`${SCF}/awards`);
-	if (index === null) return null;
-	const listed = readAwardRounds(index);
-	if (listed === null) return null;
-	const rounds: ScfRound[] = [];
-	for (const r of listed) {
-		const page = await text(`${SCF}/awards/${r.id}`);
-		rounds.push({
-			round: r.round,
-			phase: r.phase,
-			submissions: page === null ? null : readRoundSubmissions(page, r.round),
-		});
-		await sleep(1000);
-	}
-	return rounds;
 }
 
 async function readListing(): Promise<ScfListingRow[] | null> {
@@ -141,14 +129,42 @@ async function main() {
 		console.log(`COULD NOT CHECK: ${BASELINE}: ${baseline.error}`);
 		process.exit(2);
 	}
-	const [rounds, listing, ours] = await Promise.all([
-		readRounds(),
-		readListing(),
-		readOurs(),
-	]);
+	const [rounds, listing, ours]: [
+		ScfRound[] | null,
+		ScfListingRow[] | null,
+		Awaited<ReturnType<typeof readOurs>>,
+	] = await Promise.all([readScfRounds(text, 1000), readListing(), readOurs()]);
+	// Each record outside the listing, read off its own page so its award is
+	// named and judged by slug; one not read stays named by its record id.
+	const off = await readOffListingPages(
+		offListingAwardees(
+			rounds ?? [],
+			new Set((listing ?? []).map((p) => String(p.id))),
+		),
+		text,
+		300,
+	);
+	const offPages = new Map(off.pages.map((p) => [p.slug, p.page]));
 	if ("reason" in ours) {
 		console.log(`COULD NOT CHECK: our awarded rows: ${ours.reason}`);
 		process.exit(2);
+	}
+	// A reviewed shared claim counts once only while the row stores the
+	// claim's page; search serves no stored page slug, so read it from the
+	// row itself.
+	for (const row of ours.rows as Array<
+		OurAwardedRow & { scf?: { slug?: string | null } }
+	>) {
+		const slug = String(row.slug ?? "");
+		if (!(slug in SCF_SHARED_CLAIMS)) continue;
+		const url = `${BASE}/api/projects?where[slug][equals]=${encodeURIComponent(slug)}&depth=0&select[scf]=true`;
+		const body = await text(url);
+		const doc = body === null ? null : JSON.parse(body)?.docs?.[0];
+		if (!doc) {
+			console.log(`COULD NOT CHECK: the stored SCF page of ${slug} (${url})`);
+			process.exit(2);
+		}
+		row.scf = { slug: doc.scf?.slug ?? null };
 	}
 	// The enrich's own join over our awarded rows: a page a row folds without
 	// citing it (a second SCF page, an SCF_SLUG_OVERRIDES entry) is carried.
@@ -178,19 +194,33 @@ async function main() {
 	const report = compareRoundCounts({
 		rounds,
 		listing,
-		ours: ours.rows,
+		// a reviewed shared claim (peer's copy of honey-coin's page) is the same
+		// award, counted once on the row the page joins
+		ours: countedRows(ours.rows),
 		joinedRow: (page) => {
-			const row = matchListingRow(page, index);
+			const detail = offPages.get(page.slug);
+			const row = detail
+				? joinOffListing(
+						{ ...page, website: detail.website, github: detail.github },
+						index,
+					).row
+				: matchListingRow(page, index);
 			return row ? String(identityOf(row)) : undefined;
 		},
 		expectRounds: baseline.rounds.map((e) => e.round),
+		offListing: off.pages.map((p) => ({
+			id: p.id,
+			slug: p.slug,
+			title: p.title,
+			lastAwardedRound: p.lastAwardedRound ?? 0,
+		})),
 	});
 	if (report.status === "could-not-check") {
 		console.log(`COULD NOT CHECK: ${report.reason}`);
 		process.exit(2);
 	}
 	console.log(
-		`SCF: ${rounds?.length} numbered rounds read from ${SCF}/awards, listing ${listing?.length} rows. Ours: ${ours.rows.length} awarded rows from ${BASE}, ${report.roundsUnread} with no rounds and no SCF page cited (rounds unknown).`,
+		`SCF: ${rounds?.length} numbered rounds read from ${SCF}/awards, listing ${listing?.length} rows, ${off.pages.length} records outside it read off their own pages (${off.unread.length} not read, named by record id). Ours: ${ours.rows.length} awarded rows from ${BASE} (${ours.rows.length - countedRows(ours.rows).length} counted once as a reviewed shared claim), ${report.roundsUnread} with no rounds and no SCF page cited (rounds unknown).`,
 	);
 	const { findings, notes } = judgeAgainstBaseline(report.rounds, baseline);
 	const failing = new Set(

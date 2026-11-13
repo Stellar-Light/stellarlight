@@ -104,6 +104,11 @@ export function compareRoundCounts(input: {
 	joinedRow?: (page: { slug: string; title: string }) => string | undefined;
 	/** The rounds the baseline lists: an index without one is a partial read. */
 	expectRounds?: number[];
+	/** Project records outside the listing, each read off its own page
+	 * (/project/<record id>, sls-116): their awards are named and judged by
+	 * slug like a listed page's, and their summaries pin like the listing's.
+	 * A record id the round pages name and no page resolved stays named by id. */
+	offListing?: ScfListingRow[];
 }): RoundCountReport {
 	const cannot = (reason: string): RoundCountReport => ({
 		status: "could-not-check",
@@ -148,7 +153,7 @@ export function compareRoundCounts(input: {
 		string,
 		{ slug: string; title: string; round: number }
 	>();
-	for (const p of listing) {
+	for (const p of [...listing, ...(input.offListing ?? [])]) {
 		const { id, slug, title, lastAwardedRound: round } = p;
 		if (
 			typeof id !== "string" ||

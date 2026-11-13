@@ -7,29 +7,75 @@
  * For matched projects with detail pages, scrapes additional data:
  * description, links (website, X, github), team info, funding amounts.
  *
+ * Pages outside the listing (sls-116): SCF's round pages name every numbered
+ * round's awards by project record id, so each run reads them and each record
+ * outside the listing off its own page, and joins it (joinOffListing).
+ *
  * Usage:
  *   npx tsx scripts/enrich-from-scf.ts                  # Dry run
  *   npx tsx scripts/enrich-from-scf.ts --execute        # Write to DB
+ *   npx tsx scripts/enrich-from-scf.ts --rows-from https://www.stellarlight.xyz
+ *     # Dry run over the rows the public API serves, no database: the plan
+ *     # anyone can reproduce before an execute
+ *   --plan-out <file>                                   # the planned writes as JSON
  */
 import "./load-env";
+import { writeFileSync } from "node:fs";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 import { curatedFieldsFor } from "./data/curation-maps";
 import {
+	couldNotCheck,
 	foldLinkNote,
+	joinOffListing,
 	matchListingRow,
+	SCF_PAGES_BEYOND_CAP,
+	SCF_SHARED_CLAIMS,
 	SCF_SLUG_OVERRIDES,
+	STRANDED_CEILING,
+	strandedAwards,
+	strandedWrites,
 } from "./data/scf-joins";
 import {
+	foldPageDetails,
+	offListingAwardees,
+	readOffListingPages,
 	readScfPage,
+	readScfRounds,
+	SCF,
 	type ScfPage,
 	scfHold,
 	showsAward,
+	storedLastRound,
+	storedTotal,
 	uniqueNames,
 } from "./eval/scf-official";
 
 const args = process.argv.slice(2);
 const dryRun = !args.includes("--execute");
+const flagValue = (name: string) => {
+	const i = args.indexOf(name);
+	return i >= 0 ? args[i + 1] : undefined;
+};
+const rowsFrom = flagValue("--rows-from")?.replace(/\/$/, "");
+const planOut = flagValue("--plan-out");
+// More stranded removals than STRANDED_CEILING are written only when this
+// names their count (read them in the dry run first).
+const allowStrandedArg = flagValue("--allow-stranded");
+if (allowStrandedArg !== undefined && !/^\d+$/.test(allowStrandedArg)) {
+	console.error(
+		`--allow-stranded takes the count of removals the dry run printed, not "${allowStrandedArg}"`,
+	);
+	process.exit(1);
+}
+const allowStranded =
+	allowStrandedArg === undefined ? undefined : Number(allowStrandedArg);
+if (rowsFrom && !dryRun) {
+	console.error(
+		"--rows-from reads the public API and only plans; it cannot --execute",
+	);
+	process.exit(1);
+}
 
 const stats = {
 	scfProjects: 0,
@@ -42,10 +88,15 @@ const stats = {
 	linksAdded: 0,
 	skipped: 0,
 	held: 0,
+	stranded: 0,
 	errors: 0,
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** Joined pages that could not be read this run (could not check). */
+const pagesUnread: string[] = [];
+/** Every write this run plans, for --plan-out. */
+const planned: Array<{ slug: string; data: Record<string, unknown> }> = [];
 
 /** Download image buffer */
 async function downloadImage(
@@ -80,36 +131,75 @@ function getExtension(ct: string): string {
 	return map[ct.split(";")[0]] || ".jpg";
 }
 
-/** Scrape project detail page for additional data */
-async function scrapeDetailPage(slug: string): Promise<ScfPage | null> {
-	try {
-		const res = await fetch(
-			`https://communityfund.stellar.org/project/${slug}`,
-			{
+/** One SCF page per slug per run: the round discovery reads some pages the
+ * beyond-cap map and the fold read again. */
+const pageMemo = new Map<string, ScfPage | null>();
+
+/** An SCF page's HTML, or null; one retry, since one dropped request of a
+ * few hundred would otherwise read as could-not-check. */
+async function scfText(url: string): Promise<string | null> {
+	for (let attempt = 0; attempt < 2; attempt++) {
+		try {
+			const res = await fetch(url, {
 				headers: {
 					"User-Agent":
 						"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
 					Accept: "text/html",
 				},
-			},
-		);
-		if (!res.ok) return null;
-		return readScfPage(await res.text(), slug);
-	} catch {
-		return null;
+			});
+			if (res.ok) return await res.text();
+			if (res.status === 404) return null;
+		} catch {
+			/* retried once below */
+		}
+		await sleep(2000);
 	}
+	return null;
 }
 
-/**
- * SCF encodes an award it does not number (Public Goods, Liquidity, RFP) as a
- * NEGATIVE lastAwardedRound code on the page — the award-detection below reads
- * those codes deliberately. They are not round numbers, so they must never
- * reach the stored field: six rows served `lastAwardedRound: -326` (and one
- * page carries -226), which reads as a real round to every consumer. Awards
- * without a number carry their own `awardName` in roundAwards instead.
- */
-const storedRound = (v: unknown): number | null =>
-	typeof v === "number" && v > 0 ? v : null;
+/** Scrape project detail page for additional data */
+async function scrapeDetailPage(slug: string): Promise<ScfPage | null> {
+	if (pageMemo.has(slug)) return pageMemo.get(slug) ?? null;
+	const html = await scfText(
+		`https://communityfund.stellar.org/project/${slug}`,
+	);
+	const page = html === null ? null : readScfPage(html, slug);
+	pageMemo.set(slug, page);
+	return page;
+}
+
+/** One page of rows as the public API serves them (--rows-from), in the
+ * shape payload.find returns: the fields this script reads. */
+async function publicRows(
+	base: string,
+	page: number,
+	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape, as payload.find
+): Promise<{ docs: any[]; hasNextPage: boolean; totalDocs: number }> {
+	const fields = [
+		"slug",
+		"name",
+		"canonicalSlug",
+		"scf",
+		"links",
+		"logo",
+		"shortDescription",
+	];
+	const url = `${base}/api/projects?limit=100&page=${page}&depth=0&${fields.map((f) => `select[${f}]=true`).join("&")}`;
+	const res = await fetch(url, { headers: { Accept: "application/json" } });
+	if (!res.ok) {
+		console.error(
+			`✗ ${url} answered HTTP ${res.status}; exiting 2 (could not check).`,
+		);
+		process.exit(2);
+	}
+	return res.json();
+}
+
+// SCF encodes an award it does not number (Public Goods, Liquidity, RFP) as
+// a NEGATIVE lastAwardedRound code on the page; the award detection below
+// reads those codes deliberately, and only storedLastRound (scf-official.ts)
+// turns the value into the stored round: six rows once served
+// `lastAwardedRound: -326`.
 
 async function main() {
 	console.log("=== Enrich Projects from Stellar Community Fund ===");
@@ -137,26 +227,44 @@ async function main() {
 		process.exit(1);
 	}
 
-	// 2. Connect to Payload
-	console.log("Connecting to database...");
-	const payload = await getPayload({ config: configPromise });
-	console.log("Connected.\n");
+	// 2. Connect to Payload (none with --rows-from: the plan reads the
+	// public API, which serves every row, Drafts included, with its scf group)
+	const payload = rowsFrom
+		? null
+		: await (async () => {
+				console.log("Connecting to database...");
+				const p = await getPayload({ config: configPromise });
+				console.log("Connected.\n");
+				return p;
+			})();
 
 	// 3. Build lookup of our projects by normalized name and slug
 	let page = 1;
 	const ourProjects: any[] = [];
 	while (true) {
-		const r = await payload.find({
-			collection: "projects",
-			limit: 100,
-			page,
-			depth: 0,
-		});
+		const r = payload
+			? await payload.find({
+					collection: "projects",
+					limit: 100,
+					page,
+					depth: 0,
+				})
+			: await publicRows(String(rowsFrom), page);
 		ourProjects.push(...r.docs);
-		if (!r.hasNextPage) break;
+		if (!r.hasNextPage) {
+			if (ourProjects.length !== r.totalDocs) {
+				console.error(
+					`✗ read ${ourProjects.length} rows of a total ${r.totalDocs}; exiting 2 (could not check).`,
+				);
+				process.exit(2);
+			}
+			break;
+		}
 		page++;
 	}
-	console.log(`Loaded ${ourProjects.length} projects from DB\n`);
+	console.log(
+		`Loaded ${ourProjects.length} projects from ${rowsFrom ? `${rowsFrom}/api/projects` : "DB"}\n`,
+	);
 
 	const bySlug = new Map<string, any>();
 	for (const p of ourProjects) bySlug.set(p.slug, p);
@@ -174,157 +282,7 @@ async function main() {
 
 	// 4. Match and enrich (SCF_SLUG_OVERRIDES: scripts/data/scf-joins.ts)
 
-	// Pages BEYOND the 500-row listing cap (2026-09-06). /backend/projects
-	// serves the same 500 rows whatever it is asked (search/round/page/offset/
-	// limit/sort all ignored), so an SCF project outside that page can never
-	// reach the name matcher above — Blend was patched by hand, Mystic
-	// Finance's r29 award sat unread. Discovery ran ONCE, offline: the official
-	// per-round pages (/awards/<recId>, 46 rounds, 3,195 submissions keyed by
-	// project record id; /project/<recId> resolves to the canonical page) for
-	// numbered rounds, plus the Wayback CDX index of /project/* for the awards
-	// SCF does not number (Liquidity, Public Goods). Every entry: page parsed
-	// with parseRoundVerdicts, and the site / GitHub org / X handle on the page
-	// matched our row's links — or, where the page carries no links, the name
-	// is coined / Stellar-specific and unambiguous (marked "name"). Keyed by
-	// OUR slug → SCF page slug: the reverse of SCF_SLUG_OVERRIDES, which only
-	// re-keys rows already IN the listing and can never reach these.
-	// Left out on purpose: pages whose cards are all negative verdicts,
-	// Kickstart-only pages ("SCF Kickstart #N" cards are neutral to the
-	// parser), and name collisions (SCF #2's 2018 "StellarPay" ≠ our x402
-	// row; Wally / Sendit / Relax / Grip / Amber carry no links to confirm),
-	// and pages already attached to another row — one page never joins two
-	// rows; a fossil join is cleared by curation first (pen ← opengrants-fdb,
-	// SCF_FIX unlink, 2026-09-06) and only then mapped here.
-	// Amounts are the page's own budgets; "undisclosed" = award confirmed,
-	// no budget on the page (stored as amountUSD null, never 0).
-	const SCF_PAGES_BEYOND_CAP: Record<string, string> = {
-		accelar: "accelar-2td", // #26 $33,000 · site+github: accelar.io, github.com/accelar-labs
-		"art-club": "art-club-ia2", // #26 $40,000 · github: github.com/grmarkkes
-		artizen: "artizen-ngf", // #33 $130,000 · site+github: artizen.fund, github.com/artizen-fund
-		assetdesk: "assetdesk-kqx", // #19 $70,000 · site: assetdesk.xyz
-		astrocore: "astrocore-4xe", // #2 undisclosed · name: astroband's Stellar core port, SCF #2
-		astrograph: "astrograph-thf", // #1 undisclosed · name: astroband's Stellar GraphQL, SCF #1
-		autify: "autify-network-nxv", // #14 $15,000 · site: autifynetwork.com
-		"scaffold-stellar": "scaffold-stellar-ldy", // PG Q2 '26 undisclosed · github: github.com/theahaco — awarded=true was hand-patched with no page
-		blend: "blend-mfy", // Liquidity '24 Q1 $50,000 · site+github: blend.capital, github.com/blend-capital — awarded=true was hand-patched with no page; the page is not numbered-round listed (Wayback CDX only)
-		blockedenxyz: "blockedenxyz-6du", // #18 $139,999 · site+github: blockeden.xyz, github.com/blockedenhq
-		blocknify: "blocknify-5bv", // #6 $4,543.37 · #7 $131,973.75 · name: coined name
-		borderless: "borderless-u3x", // #20 $43,000 · #22 $82,500 · site+github: borderlesspayments.xyz, github.com/borderless-payments
-		bravepay: "bravepay-tze", // #11 $200,000 · site: bravepay.net
-		btq: "btq-jva", // #14 $10,000 · site: btq.com
-		cede: "cede-labs-fxy", // #31 $119,800 · site+github: cede.store, github.com/cedelabs
-		chaincerts: "chaincerts-u04", // #13 $75,000 · #18 $103,125 · site+github: chaincerts.co, github.com/kommitters
-		"chainlink-oracles-relayer": "chainlink-oracles-relayer-c5f", // #15 $38,400 · site+github: docs.relink.services, github.com/relinkservices
-		chef: "chef-c8c", // #22 $18,000 · site: github.io/stellar-chef, stellar-chef.github.io
-		chronospay: "chronospay-nrb", // #11 $65,000 · site: chronospay.io
-		"city-states": "city-states-medieval-70v", // #2 undisclosed · name: our host citystatesm = "City States: Medieval"
-		clear: "clear-4rw", // #26 $45,000 · site: borderlesspayments.xyz
-		"clickpesa-debt-fund": "clickpesa-debt-fund-ssc", // #26 $30,000 · #28 $95,000 · name: product-named, same company (ClickPesa)
-		clob: "clob-qoi", // #29 $72,019 · site: ideasoft.io
-		coinsender: "coinsender-f7q", // #24 $23,440 · site+github: coinsender.io, github.com/megadev-ou
-		constellation: "constellation-protocol-4uv", // #19 $110,000 · #23 $100,000 · github: github.com/constellation-protocol
-		copperx: "copperx-gateway-and-payout-yhf", // #29 $50,000 · site+github: copperx.io, github.com/copperxhq
-		dappradar: "dappradar-e06", // #27 $50,000 · #34 $95,000 · site: dappradar.com, x.com/dappradar
-		deb: "deb-sj5", // #6 $653.09 · site: demo.drivedeb.com, drivedeb.com
-		dropzey: "dropzey-in4", // #23 $38,500 · site+github: dropzey.com, github.com/zainh332
-		"elixir-stellar-sdk": "elixir-stellar-sdk-wib", // #10 $12,000 · github: github.com/kommitters
-		elsa: "elsa-wallet-banking-filipinos-hcg", // #11 $95,000 · site: elsa.care
-		emigro: "emigro-jp6", // #17 $46,400 · #20 $33,920 · #25 $90,000 · site+github: emigro.co, github.com/emigro
-		empowch: "empowch-eh9", // #11 $25,000 · site: empowch.com
-		fijicoin: "fijicoin-frq", // #8 $50,000 · site: mai.money
-		"flutter-stellar-sdk": "flutter-stellar-sdk-ilm", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/soneso
-		flux: "flux-yu0", // #22 $38,000 · site: iflux.app
-		"fx-swap": "fx-swap-by-hedgehog-unu", // #21 $42,450 · site: hedgeeffective.com
-		getpaid: "getpaid-z9y", // #9 $192,500 · site: getpaid.africa
-		"governance-modules-library": "governance-modules-library-nr4", // #22 $27,000 · #26 $74,000 · github: github.com/blockscience
-		handlpay: "handlpay-ah3", // #30 $60,000 · site+github: github.com/handlpay, handlpay.com
-		hiyield: "hiyield-0e4", // #18 $150,000 · site: hiyield.xyz
-		icanproveit: "icanproveit-proof-of-learning-icn", // #26 $50,000 · github: github.com/tuvalusoftware
-		idunu: "idunu-help-kids-thrive-3tm", // #21 $15,000 · #25 $15,000 · name: coined name
-		"infinity-wallet": "infinity-wallet-f7m", // #16 $130,000 · site+github: github.com/infinitywallet, infinitywallet.io
-		"ios-stellar-sdk": "ios-stellar-sdk-tdq", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/soneso
-		"java-stellar-sdk": "java-stellar-sdk-btq", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/lightsail-network
-		"js-worker-sdk": "js-worker-sdk-rjo", // #24 $12,500 · #27 $35,000 · github: github.com/cloudouble
-		katagames: "katagames-r2t", // #11 $25,000 · site: kata.games, x.com/createplayearn
-		keizai: "keizai-qfe", // #21 $43,000 · #28 $41,000 · github: github.com/keizai-tools
-		"kmac-state-machine-template": "kmac-state-machine-template-extension-jqw", // #20 $7,500 · github: github.com/huitemagico
-		"kotlin-stellar-sdk": "kotlin-stellar-sdk-fjl", // #9 $11,500 · github: github.com/rahimklaber
-		kript: "kript-pva", // #27 $35,000 · #32 $77,000 · site: kriptup.io
-		kunst21: "kunst21com-ray", // #9 undisclosed · name: SCF title is our host kunst21.com
-		"legacy-suite": "legacy-suite-on-stellar-zpd", // #24 $49,998 · site+github: github.com/avento-labs, legacysuite.com
-		lumenscan: "lumenscan-bwl", // #4 undisclosed · name: Lumen-specific name
-		mica: "mica-ckw", // #16 $138,700 · site+github: github.com/micatechnology, mica.rent
-		mojoflower: "mojoflower-mq4", // #7 $196,415 · #11 $47,500 · #17 $100,000 · github: github.com/mojoflower-garden
-		mystic: "mystic-finance-xp7", // #29 $47,000 · site: mysticfinance.xyz
-		"net-sdk": "net-sdk-cfe", // PG Q2 '26 undisclosed · PG Q4 '25 undisclosed · github: github.com/beans-bv
-		"nirvana-labs": "nirvana-labs-4eh", // #26 $36,000 · site: nirvanalabs.io
-		oinc: "oinc-kix", // #17 $105,000 · site: com.br, useoinc.com.br
-		okashi: "okashi-oee", // #13 $82,000 · #15 $124,800 · #20 $100,000 · #24 $100,000 · site+github: github.com/okashi-dev, okashi.dev
-		omnilumen: "omnilumen-dyk", // #28 $50,000 · github: github.com/omnilumen
-		// scf.awarded was true with $48,000 and no page anywhere — an uncited award.
-		// The page's own SCF #27 Legacy v5.0 Activation budget is $48,000, equal to
-		// the figure already on our row, and its links (orally.net,
-		// github.com/orally-network) match the product's name.
-		orally: "orally-network-76g", // #27 $48,000 · amount+name
-		"open-gamefi-sdk": "open-gamefi-sdk-ibv", // #28 $39,000 · github: github.com/yanis7774
-		opengrants: "opengrants-fdb", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · site+github: opengrants.net, github.com/metagov/daostar
-		ortege: "ortege-ai-tsm", // #18 $11,200 · #22 $40,000 · #26 $100,000 · github: github.com/ortege-xyz
-		paysapp: "paysapp-l02", // #3 undisclosed · name: coined name (kuyawa)
-		"planet-pay": "planet-pay-lxg", // #14 $49,500 · #21 $96,000 · github: github.com/scalemote
-		plutope: "plutope-merchant-app-zmh", // #27 $33,400 · github: github.com/plutopein, x.com/plutopeio
-		poma: "poma-protocol-s3f", // #29 $14,000 · github: github.com/poma-protocol, x.com/pomaprotocol
-		qolaq: "qolaq-wev", // #13 $150,000 · site: qolaq.org
-		qstn: "qstn-3rv", // #20 $2,500 · site: qstn.us
-		ramm: "ramm-global-retail-commerce-zbg", // #22 $38,500 · site+github: github.com/jamiels, ramm.ai
-		rarible: "rariblecom-stellar-ujd", // #30 $150,000 · site+github: github.com/rarible, rarible.com
-		sanctum: "sanctum-cfe", // #23 $50,000 · #25 $85,000 · github: github.com/zkbricks
-		securx: "securx-medical-prescriptions-xmt", // #27 $42,400 · site: securxtech.wixsite.com, wixsite.com/securx
-		silicore: "silicore-wrz", // #29 $31,000 · github: github.com/ilanklim
-		"simple-signer": "simple-signer-ei9", // #9 $10,000 · github: github.com/fsodano
-		solarkraft: "solarkraft-jdu", // #24 $50,000 · #29 $67,000 · github: github.com/freespek
-		"soroban-explorer": "soroban-explorer-rtb", // #19 $61,000 · #23 $100,000 · site: sorobanexp.com
-		"soroban-polygon-interop": "soroban-polygon-interop-3gz", // #27 $42,755 · site: entethalliance.github.io, github.io/crosschain-interoperability
-		"soroban-pre-order-contract": "soroban-pre-order-contract-ucp", // #12 $1,000 · github: github.com/aolieman
-		"soroban-react": "soroban-react-khv", // #20 $25,000 · github: github.com/paltalabs
-		sorobanmath: "sorobanmath-zuo", // #20 $40,000 · github: github.com/rahul-soshte
-		sorobuild: "sorobuild-zhc", // #22 $44,800 · name: Soroban-specific coined name
-		sorosan: "sorosan-twd", // #20 $29,000 · github: github.com/sorosan
-		// scf.slug soropg-zcg was hand-set, but the page is outside the 500-row
-		// listing, so no pass ever visited it: the row served awarded=true with an
-		// empty roundAwards and the page's -226 sentinel as its round. Its one
-		// award is a partial disbursement ("Awarded (50%)"), which only became
-		// readable with the status fix in the same batch.
-		soropg: "soropg-zcg", // PG Q2 '26 undisclosed · site+github: soropg.com, github.com/jamesbachini
-		sorosplits: "sorosplits-9w7", // #19 $59,700 · #23 $94,000 · site+github: github.com/findolor, sorosplits.xyz
-		sorostarter: "sorostarter-9b2", // #29 $47,175 · github: github.com/sorostarter, x.com/sorostarter
-		spacewalk: "spacewalk-sel", // #11 $100,000 · site+github: github.com/pendulum-chain, pendulumchain.org
-		spatium: "spatium-wallet-7ii", // #13 $148,000 · #22 $35,200 · name: coined wallet name, spatium.net on page
-		starloom: "starloom-ox2", // #26 $45,900 · site: starloom.io
-		"stellar-nest": "stellar-nest-thq", // #25 $14,800 · github: github.com/alkeops
-		"stellar-tip": "stellar-tip-pj5", // #4 undisclosed · name: Stellar-specific name
-		"stellar-token-launchpad": "stellar-token-launchpad-flp", // #24 $40,000 · site+github: github.com/cryptixag, tokenlaunchpad.eu
-		"stellar-tools": "stellar-tools-6qw", // #26 $18,700 · site+github: github.com/joaquinsoza, stellartools.xyz
-		stellarguard: "stellarguard-41d", // #1 undisclosed · name: Stellar-specific name
-		stellarmint: "stellarmint-ece", // #5 $51,277.94 · site: stellarmint.io
-		stellarport: "stellarport-gfe", // #2 undisclosed · name: Stellar-specific name
-		stellarprodev: "stellarprodev-z0n", // #17 $39,880 · #29 $26,000 · site+github: github.com/omeganetwork-tech, stellarpro.dev
-		stellarscamreport: "stellarscamreport-wir", // #6 $5,445 · site: stellarscam.report
-		stellot: "stellot-vp7", // #4 undisclosed · name: Stellar-specific coined name
-		"storehouse-gold": "storehouse-gold-to-stellar-nlz", // #26 $50,000 · name: distinctive product name
-		stroopyai: "stroopyai-e5a", // #20 $21,370 · site: stroopy.ai
-		tap4change: "tap4change-wgd", // #21 $73,280 · site: tap4change.org
-		taskio: "taskio-87z", // #7 $283,499 · site: task.io
-		teken: "teken-easy-multi-signatures-avi", // #28 $29,500 · github: github.com/moonbite-gmbh
-		"timed-transactions-api": "timed-transactions-api-shu", // #1 undisclosed · name: SCF #1 project, name unambiguous
-		tracee: "tracee-jnz", // #16 $128,925 · github: github.com/tracee1910
-		triiyo: "triiyo-5cf", // #22 $50,303 · site: triiyo.com
-		uils: "uils-yl5", // #17 $141,027.50 · name: coined name, uils.la on page, no links on our row
-		walletban: "walletban-n32", // #20 $20,000 · site: walletban.xyz
-		"web3-antivirus": "web3-antivirus-w3a-a37", // #28 $50,000 · github: github.com/web3-antivirus
-		xycloans: "xycloans-qqr", // #13 $31,800 · Liquidity '24 Q1 $50,000 · github: github.com/xycloo
-		zentra: "zentra-cxp", // #23 $18,200 · site+github: github.com/tosinshada, tide-soroban-contract-frontend.vercel.app
-		ziriz: "ziriz-my0", // #22 $48,000 · github: github.com/zirizapp
-	};
+	// SCF_PAGES_BEYOND_CAP and SCF_SLUG_OVERRIDES: scripts/data/scf-joins.ts
 
 	const matched: { scf: any; ours: any }[] = [];
 	const unmatched: string[] = [];
@@ -414,7 +372,7 @@ async function main() {
 			scf: {
 				slug: scfSlug,
 				title: detail.title ?? ours.name,
-				// NOT storedRound() here: this value is the award SIGNAL that
+				// NOT storedLastRound() here: this value is the award SIGNAL that
 				// isAwarded reads below, and a non-numbered award is encoded as a
 				// negative code. Clamping it here flipped every Public Goods row
 				// (the four Stellar SDKs, opengrants, scaffold-stellar) to
@@ -429,6 +387,77 @@ async function main() {
 	console.log(
 		`Beyond-cap pages: ${beyondCap.queued.length} awarded (queued) · ${beyondCap.notAwarded.length} not awarded on page (no write) · ${beyondCap.unparseable.length} could not parse\n`,
 	);
+
+	// 4c. Pages outside the listing, found on SCF's round pages (sls-116).
+	// Each numbered round's page names its awards by project record id; a
+	// record the listing does not carry is read off its own page and joined
+	// by a reviewed entry or a name a shared link confirms (joinOffListing).
+	// A name alone joins nothing: it is printed for a person. Trinary like the
+	// beyond-cap pages: a round page or record page that cannot be read is
+	// could-not-check (exit 2), never "no award".
+	const offList = {
+		joined: [] as string[],
+		unjoined: [] as string[],
+		noAward: 0,
+		unread: [] as string[],
+	};
+	const rounds = await readScfRounds(scfText, 1000);
+	if (!rounds) offList.unread.push(`${SCF}/awards (the round index)`);
+	for (const r of rounds ?? [])
+		if (!r.submissions) offList.unread.push(`the SCF #${r.round} round page`);
+	const offIds = offListingAwardees(
+		rounds ?? [],
+		new Set(scfProjects.map((p) => String(p.id))),
+	);
+	const off = await readOffListingPages(offIds, scfText, 300);
+	for (const id of off.unread) offList.unread.push(`${SCF}/project/${id}`);
+	const queued = new Set(matched.map((m) => String(m.scf.slug)));
+	const joinIndex = { rows: ourProjects, bySlug, byNormName, identityOf };
+	for (const p of off.pages) {
+		pageMemo.set(p.slug, p.page);
+		if (queued.has(p.slug)) continue; // the beyond-cap map queued it above
+		if (!showsAward(p.page)) {
+			offList.noAward++;
+			continue;
+		}
+		const label = `#${(p.page.awardedRounds ?? []).join(" #") || " (an award SCF does not number)"}`;
+		const j = joinOffListing(
+			{
+				slug: p.slug,
+				title: p.title,
+				website: p.page.website,
+				github: p.page.github,
+			},
+			joinIndex,
+		);
+		if ("why" in j) {
+			offList.unjoined.push(
+				`${p.slug} ${label}: ${j.why}${j.candidate ? `; check ${j.candidate.slug}` : ""}`,
+			);
+			continue;
+		}
+		const ours =
+			j.row.canonicalSlug && bySlug.has(j.row.canonicalSlug)
+				? bySlug.get(j.row.canonicalSlug)
+				: j.row;
+		offList.joined.push(`${p.slug} ${label} -> ${ours.slug} (${j.how})`);
+		matched.push({
+			scf: {
+				slug: p.slug,
+				title: p.title,
+				// the award SIGNAL, unclamped (see the beyond-cap loop above)
+				lastAwardedRound: p.page.lastAwardedRound ?? null,
+				detail: p.page,
+			},
+			ours,
+		});
+	}
+	console.log(
+		`Off-listing pages (SCF's round pages): ${rounds?.length ?? 0} rounds read, ${offIds.length} records outside the listing, ${offList.joined.length} joined, ${offList.unjoined.length} not joined, ${offList.noAward} with no award on the page, ${offList.unread.length} could not read`,
+	);
+	for (const s of offList.joined) console.log(`  joined:     ${s}`);
+	for (const s of offList.unjoined) console.log(`  not joined: ${s}`);
+	console.log("");
 
 	// One row, several pages (2026-09-06). A project with a submission-named
 	// second page (ctx, untangled, lobster, coala-pay) was written once PER
@@ -495,39 +524,17 @@ async function main() {
 					: `  WARN ${ours.slug}: ${byName.length} pages joined by NAME alone (${names}), and no link confirms they are one project; confirm before trusting the fold`,
 			);
 		}
-		const details = pages.map((p) => p.detail).filter(Boolean);
-		const totals = details.map((d) => d.totalAwarded);
-		const seen = new Set<string>();
-		const detail = {
-			...(primary.detail ?? {}),
-			totalAwarded:
-				details.length === pages.length &&
-				totals.every((t) => typeof t === "number")
-					? totals.reduce((a, b) => a + b, 0)
-					: undefined,
-			awardedRounds: [
-				...new Set(details.flatMap((d) => d.awardedRounds ?? [])),
-			].sort((a, b) => a - b),
-			roundAwards: details
-				.flatMap((d) => d.roundAwards ?? [])
-				.filter((r) => {
-					const k = `${r.round ?? ""}|${r.awardName ?? ""}|${r.amountUSD ?? ""}`;
-					if (seen.has(k)) return false;
-					seen.add(k);
-					return true;
-				}),
-			verdictSubmissions: details.reduce(
-				(n, d) => n + (d.verdictSubmissions ?? 0),
-				0,
-			),
-			verdictAwardedAny: details.reduce(
-				(n, d) => n + (d.verdictAwardedAny ?? 0),
-				0,
-			),
-			notAwardedRounds: [
-				...new Set(details.flatMap((d) => d.notAwardedRounds ?? [])),
-			].sort((a, b) => a - b),
-		};
+		const detail = foldPageDetails(pages.map((p) => p.detail));
+		if (!detail) {
+			// one member page unread: an exact write of the rest would drop its
+			// awards, so the row keeps what it stores and the run exits 2
+			for (const p of pages)
+				if (!p.detail)
+					pagesUnread.push(
+						`${p.slug} (fold member of ${ours.slug}; the row is left as stored)`,
+					);
+			continue;
+		}
 		const lastAwardedRound =
 			Math.max(...pages.map((p) => Number(p.lastAwardedRound) || 0)) ||
 			primary.lastAwardedRound;
@@ -555,6 +562,9 @@ async function main() {
 		// Scrape detail page early so we can include totalAwarded in SCF data
 		const detail: Awaited<ReturnType<typeof scrapeDetailPage>> =
 			scf.detail ?? (await scrapeDetailPage(scf.slug));
+		// could not check: the row keeps what it stores, and the summary
+		// names the page, never "no award"
+		if (!detail) pagesUnread.push(`${scf.slug} (${ours.slug})`);
 
 		// The SCF API encodes special award types (Liquidity / Public Goods / RFP)
 		// as NEGATIVE lastAwardedRound codes — those ARE awards. The old
@@ -578,16 +588,20 @@ async function main() {
 			currentScf.sourceUrl !==
 				`https://communityfund.stellar.org/project/${scf.slug}` ||
 			currentScf.awarded !== isAwarded ||
-			// Compare like with like: the stored field is clamped by storedRound,
+			// Compare like with like: the stored field is clamped by storedLastRound,
 			// so testing it against the RAW page signal made every non-numbered
 			// award row differ forever — it wrote null, still saw -326, and
 			// re-planned on the next run. The Idempotence step caught exactly
 			// that: 6 rows (the four Stellar SDKs, opengrants, scaffold-stellar)
 			// still planned after the 2026-09-06 execute.
-			currentScf.lastAwardedRound !== storedRound(scf.lastAwardedRound) ||
+			currentScf.lastAwardedRound !==
+				storedLastRound(scf.lastAwardedRound, detail?.awardedRounds) ||
 			currentScf.slug !== scf.slug ||
-			(detail?.totalAwarded &&
-				currentScf.totalAwarded !== detail.totalAwarded) ||
+			// the page's total, cleared when the page discloses none (sls-116:
+			// StellarPay kept $148,400 beside a page whose total is 0)
+			(storedTotal(detail?.totalAwarded, detail?.roundAwards) !== undefined &&
+				(currentScf.totalAwarded ?? null) !==
+					storedTotal(detail?.totalAwarded, detail?.roundAwards)) ||
 			(detail?.awardedRounds &&
 				JSON.stringify(currentScf.awardedRounds) !==
 					JSON.stringify(detail.awardedRounds)) ||
@@ -666,7 +680,10 @@ async function main() {
 		} else if (hasNewData) {
 			updateData.scf = {
 				awarded: isAwarded,
-				lastAwardedRound: storedRound(scf.lastAwardedRound),
+				lastAwardedRound: storedLastRound(
+					scf.lastAwardedRound,
+					detail?.awardedRounds,
+				),
 				slug: scf.slug,
 				// provenance trio: parsed from the official page, dated, citable.
 				// human-verified (curate SCF_FIX) outranks the page and must survive
@@ -677,7 +694,14 @@ async function main() {
 						: "official-record",
 				asOf: new Date().toISOString().slice(0, 10),
 				sourceUrl: `https://communityfund.stellar.org/project/${scf.slug}`,
-				...(detail?.totalAwarded ? { totalAwarded: detail.totalAwarded } : {}),
+				...(storedTotal(detail?.totalAwarded, detail?.roundAwards) !== undefined
+					? {
+							totalAwarded: storedTotal(
+								detail?.totalAwarded,
+								detail?.roundAwards,
+							),
+						}
+					: {}),
 				...(detail?.awardedRounds
 					? { awardedRounds: detail.awardedRounds }
 					: {}),
@@ -698,7 +722,7 @@ async function main() {
 				scf.thumbnail.file?.thumbnails?.large?.url ||
 				scf.thumbnail.file?.url;
 			if (imgUrl) {
-				if (dryRun) {
+				if (dryRun || !payload) {
 					console.log(`    WOULD FETCH thumbnail: ${imgUrl.slice(0, 80)}...`);
 					stats.thumbnailsFetched++;
 				} else {
@@ -778,7 +802,8 @@ async function main() {
 
 		// --- Apply ---
 		if (Object.keys(updateData).length > 0) {
-			if (!dryRun) {
+			planned.push({ slug: ours.slug, data: updateData });
+			if (!dryRun && payload) {
 				try {
 					await payload.update({
 						collection: "projects",
@@ -802,6 +827,108 @@ async function main() {
 		await sleep(300); // Be respectful to SCF server
 	}
 
+	// 6. One page, one row (sls-116). A row whose stored award was copied
+	// from a page another project joins this run loses it (strandedAwards):
+	// StellarPay served Arculus's SCF #30 and $148,400 because nothing re-read
+	// a row no page joins. The cleared record is an unread one (basis null),
+	// not a finding that SCF never funded the row, so a page of its own can
+	// still join it later.
+	const joinedPage = new Map(
+		matched.map((m) => [String(m.scf.slug), identityOf(m.ours)]),
+	);
+	const joinedIds = new Set(folded.map((f) => identityOf(f.ours)));
+	// Folds join every member page even when the row was skipped for an
+	// unread one, so the row stays its pages' owner.
+	for (const list of byRow.values())
+		for (const m of list) joinedIds.add(identityOf(m.ours));
+	for (const [slug, c] of Object.entries(SCF_SHARED_CLAIMS))
+		if (bySlug.get(slug)?.scf?.slug === c.page)
+			console.log(
+				`  ${slug}: KEEP the SCF award from ${c.page}, which joins ${c.joinedTo} (reviewed shared claim: ${c.why})`,
+			);
+	const unchecked = couldNotCheck({
+		beyondCap: beyondCap.unparseable,
+		roundPath: offList.unread,
+		joinedPages: pagesUnread,
+	});
+	const stranded = strandedAwards(
+		ourProjects,
+		joinedPage,
+		joinedIds,
+		identityOf,
+	);
+	const { write: strandedToWrite, refused: strandedRefused } = strandedWrites(
+		stranded,
+		{
+			ceiling: STRANDED_CEILING,
+			allow: allowStranded,
+			couldNotCheck: unchecked,
+		},
+	);
+	if (strandedRefused) {
+		console.log(
+			`  STRANDED PASS SKIPPED (${strandedRefused}); nothing below is written:`,
+		);
+		for (const { row, page, owner } of stranded)
+			console.log(
+				`    ${row.slug}: would remove the SCF award copied from ${page}, which joins ${owner}`,
+			);
+	}
+	for (const { row, page, owner } of strandedToWrite) {
+		console.log(
+			`  ${row.name} (${row.slug}): REMOVE the SCF award copied from ${page}, which joins ${owner}: rounds [${(row.scf?.awardedRounds ?? []).join(", ")}], total ${row.scf?.totalAwarded ?? "none"}`,
+		);
+		const data = {
+			scf: {
+				awarded: false,
+				lastAwardedRound: null,
+				slug: null,
+				totalAwarded: null,
+				awardedRounds: [],
+				roundAwards: [],
+				basis: null,
+				asOf: null,
+				sourceUrl: null,
+			},
+		};
+		planned.push({ slug: row.slug, data });
+		if (!dryRun && payload) {
+			try {
+				await payload.update({ collection: "projects", id: row.id, data });
+			} catch (err) {
+				console.log(
+					`    UPDATE ERROR: ${err instanceof Error ? err.message : String(err)}`,
+				);
+				stats.errors++;
+				continue;
+			}
+		}
+		stats.stranded++;
+		stats.enriched++;
+	}
+	// A stored page that joins no row this run: the award stands, unread, so
+	// a person can join it (the six rows sls-116 found this way were missing
+	// joins, not wrong ones).
+	const unreadAwards = ourProjects.filter(
+		(r) =>
+			r.scf?.awarded &&
+			r.scf?.slug &&
+			r.scf?.basis !== "human-verified" &&
+			!joinedPage.has(String(r.scf.slug)) &&
+			!joinedIds.has(identityOf(r)),
+	);
+	for (const r of unreadAwards)
+		console.log(
+			`  ${r.slug}: its stored page ${r.scf.slug} joins no row this run; rounds [${(r.scf.awardedRounds ?? []).join(", ")}] stand, unread`,
+		);
+
+	if (planOut) {
+		writeFileSync(planOut, `${JSON.stringify(planned, null, 1)}\n`);
+		console.log(
+			`\nPlanned writes: ${planned.length} rows, written to ${planOut}`,
+		);
+	}
+
 	console.log("\n=== SUMMARY ===");
 	console.log(`Mode:               ${dryRun ? "DRY RUN" : "EXECUTED"}`);
 	console.log(`SCF projects:       ${stats.scfProjects}`);
@@ -814,6 +941,10 @@ async function main() {
 	console.log(`  Links:            ${stats.linksAdded}`);
 	console.log(`Skipped (no new):   ${stats.skipped}`);
 	console.log(`SCF held (scfHold): ${stats.held}`);
+	console.log(`Stranded removed:   ${stats.stranded}`);
+	console.log(`Stored page unread: ${unreadAwards.length}`);
+	console.log(`Joined page unread: ${pagesUnread.length}`);
+	for (const s of pagesUnread) console.log(`  could not read:      ${s}`);
 	console.log(`Errors:             ${stats.errors}`);
 	console.log(
 		`Beyond-cap pages:   ${beyondCap.queued.length} awarded · ${beyondCap.notAwarded.length} not awarded on page · ${beyondCap.unparseable.length} could not parse`,
@@ -822,6 +953,10 @@ async function main() {
 		console.log(`  not awarded on page: ${s}`);
 	for (const s of beyondCap.unparseable)
 		console.log(`  could not parse:     ${s}`);
+	console.log(
+		`Off-listing pages:  ${offList.joined.length} joined · ${offList.unjoined.length} not joined · ${offList.unread.length} could not read`,
+	);
+	for (const s of offList.unread) console.log(`  could not read:      ${s}`);
 
 	if (dryRun) {
 		console.log(
@@ -842,6 +977,12 @@ async function main() {
 	if (beyondCap.notAwarded.length > 0 || beyondCap.unparseable.length > 0) {
 		console.error(
 			`\n✗ ${beyondCap.notAwarded.length + beyondCap.unparseable.length} beyond-cap page(s) disagree with the map — exiting 2.`,
+		);
+		process.exit(2);
+	}
+	if (unchecked.length > 0 || strandedRefused) {
+		console.error(
+			`\n✗ ${unchecked.length} SCF page(s) could not be read, so their awards were not checked${strandedRefused ? `, and the stranded pass was skipped (${strandedRefused})` : ""}; exiting 2.`,
 		);
 		process.exit(2);
 	}

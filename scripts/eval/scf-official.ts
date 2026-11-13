@@ -16,6 +16,7 @@
  */
 
 import { findTitlePrefixMatch, normSpaceless } from "../../src/lib/identity";
+import type { ScfRound } from "../../src/lib/scf-round-counts";
 
 export const SCF = "https://communityfund.stellar.org";
 
@@ -787,11 +788,17 @@ export function readScfPage(html: string, slug: string): ScfPage | null {
 		})
 		.join("");
 	const txt = flight || html.replace(/\\"/g, '"');
+	// A title can carry an escaped quote (Fixed Rate "Fixie", SCF #21): read
+	// the JSON string whole, or the page reads as no page.
 	const pageRec = txt.match(
-		/"title":"([^"]*)","slug":"([a-z0-9-]+)","totalAwarded"/,
+		/"title":"((?:[^"\\]|\\.)*)","slug":"([a-z0-9-]+)","totalAwarded"/,
 	);
 	if (pageRec?.[2] !== slug) return null;
-	result.title = pageRec[1];
+	try {
+		result.title = JSON.parse(`"${pageRec[1]}"`);
+	} catch {
+		result.title = pageRec[1];
+	}
 	result.pageSlug = pageRec[2];
 	const pageRound = txt.match(/"lastAwardedRound":(-?\d+)/);
 	if (pageRound) result.lastAwardedRound = Number(pageRound[1]);
@@ -803,7 +810,11 @@ export function readScfPage(html: string, slug: string): ScfPage | null {
 	const urls = siteUrlsOf(txt);
 	if (urls) {
 		result.website ??= httpUrl(urls.website);
-		result.twitter ??= httpUrl(urls.x ?? urls.twitter);
+		// a follow button's URL (twitter.com/intent/follow?screen_name=...)
+		// is not the project's account (pactta-api-kgf links another
+		// company's that way)
+		const x = httpUrl(urls.x ?? urls.twitter);
+		result.twitter ??= x && !/\/intent\//i.test(x) ? x : undefined;
 		result.github ??= githubUrl(urls.github);
 	}
 
@@ -904,6 +915,182 @@ export function readAwardRounds(
 			rounds.set(String(o.id), { id: String(o.id), round, phase: o.phase });
 	}
 	return [...rounds.values()];
+}
+
+/** The project record a page (/project/<slug> or /project/<record id>)
+ * carries: its record id, slug, title and the round its summary names as its
+ * last award (null for none, for one SCF does not number, and for a record
+ * that does not say awarded: true, whose number can be a Kickstart round:
+ * money-app-treasury-and-invoice-dashboard-8ey names 11 for its Kickstart
+ * award, and SCF #11 lists it nowhere). Null when the page carries no
+ * project record or was not read whole. Read by field name, since SCF
+ * reorders fields. */
+export function readProjectRecord(html: string): {
+	id: string;
+	slug: string;
+	title: string;
+	lastAwardedRound: number | null;
+} | null {
+	const o = recordObjects(rebuildFlight(html))?.find(
+		(r) =>
+			typeof r.slug === "string" &&
+			typeof r.title === "string" &&
+			Array.isArray(r.submissions),
+	);
+	if (!o) return null;
+	const last = o.lastAwardedRound;
+	return {
+		id: String(o.id),
+		slug: o.slug as string,
+		title: o.title as string,
+		lastAwardedRound:
+			o.awarded === true && typeof last === "number" && last > 0 ? last : null,
+	};
+}
+
+/** The projects SCF's round pages name with an awarded submission, or one in
+ * a pipeline status (SCF leaves a funded submission there long after the
+ * award, and only the project's own page says), that its listing does not
+ * carry: the listing is 531 rows and every project outside it (Blend, Mystic
+ * Finance) was invisible to the enrich unless a hand map named its page. */
+export function offListingAwardees(
+	rounds: readonly ScfRound[],
+	listedIds: ReadonlySet<string>,
+): string[] {
+	const ids = new Set<string>();
+	for (const r of rounds)
+		for (const s of r.submissions ?? [])
+			if (s.project && s.verdict !== "declined" && !listedIds.has(s.project))
+				ids.add(s.project);
+	return [...ids];
+}
+
+/** SCF's round index and every numbered round's own page, in order, with a
+ * pause between pages. A round page that could not be read stays in the list
+ * with submissions null, so a caller names it instead of counting around it;
+ * null when the index was not read whole. */
+export async function readScfRounds(
+	get: (url: string) => Promise<string | null>,
+	pauseMs = 1000,
+): Promise<ScfRound[] | null> {
+	const index = await get(`${SCF}/awards`);
+	const listed = index === null ? null : readAwardRounds(index);
+	if (!listed) return null;
+	const rounds: ScfRound[] = [];
+	for (const r of listed) {
+		const page = await get(`${SCF}/awards/${r.id}`);
+		const subs = page === null ? null : readRoundSubmissions(page, r.round);
+		rounds.push({
+			round: r.round,
+			phase: r.phase,
+			// an ended round with no submission is a page that changed shape or
+			// did not load whole, never a round nobody entered
+			submissions: subs?.length === 0 && r.phase === "Ended" ? null : subs,
+		});
+		await new Promise((done) => setTimeout(done, pauseMs));
+	}
+	return rounds;
+}
+
+/** Each record id's own page (SCF serves /project/<record id>), read for its
+ * project record and parsed as readScfPage parses a listed page. An id whose
+ * page could not be fetched, or carries no record, is listed in `unread`:
+ * could not check, never a project with no award. */
+export async function readOffListingPages(
+	ids: readonly string[],
+	get: (url: string) => Promise<string | null>,
+	pauseMs = 300,
+): Promise<{
+	pages: Array<{
+		id: string;
+		slug: string;
+		title: string;
+		lastAwardedRound: number | null;
+		page: ScfPage;
+	}>;
+	unread: string[];
+}> {
+	const pages = [];
+	const unread: string[] = [];
+	for (const id of ids) {
+		const html = await get(`${SCF}/project/${id}`);
+		const rec = html === null ? null : readProjectRecord(html);
+		const page = rec && html !== null ? readScfPage(html, rec.slug) : null;
+		if (rec && page && rec.id === id) pages.push({ ...rec, page });
+		else unread.push(id);
+		await new Promise((done) => setTimeout(done, pauseMs));
+	}
+	return { pages, unread };
+}
+
+/** The total the enrich stores from a page: the page's own awarded total, null
+ * when the page discloses none (0, as on SCF's 2018 pages, StellarPay's among
+ * them, and no award on it carries an amount), and undefined when the reader
+ * found no total at all, which leaves the stored value alone: a reader that
+ * missed a field must not erase it. */
+export function storedTotal(
+	pageTotal: number | undefined,
+	roundAwards?: ScfPage["roundAwards"],
+): number | null | undefined {
+	if (pageTotal === undefined) return undefined;
+	if (pageTotal > 0) return pageTotal;
+	// a 0 beside an award with an amount is the page's summary lagging, not a
+	// page that discloses nothing: leave the stored total
+	return roundAwards?.some((r) => (r.amountUSD ?? 0) > 0) ? undefined : null;
+}
+
+/** One record from the pages folded onto one row (enrich-from-scf, "One
+ * row, several pages"): rounds and round awards are the union, the total is
+ * the sum of the pages' own totals (undefined when any page withholds it,
+ * never derived from round sums), and the rest is the primary page's (the
+ * first). */
+export function foldPageDetails(
+	details: ReadonlyArray<ScfPage | null | undefined>,
+): ScfPage | null {
+	// a member page not read would drop its awards from an exact write
+	if (details.some((d) => !d)) return null;
+	const read = details as ScfPage[];
+	const totals = read.map((d) => d.totalAwarded);
+	const seen = new Set<string>();
+	return {
+		...(details[0] ?? {}),
+		totalAwarded:
+			read.length === details.length &&
+			totals.every((t) => typeof t === "number")
+				? (totals as number[]).reduce((a, b) => a + b, 0)
+				: undefined,
+		awardedRounds: [
+			...new Set(read.flatMap((d) => d.awardedRounds ?? [])),
+		].sort((a, b) => a - b),
+		roundAwards: read
+			.flatMap((d) => d.roundAwards ?? [])
+			.filter((r) => {
+				const k = `${r.round ?? ""}|${r.awardName ?? ""}|${r.amountUSD ?? ""}`;
+				if (seen.has(k)) return false;
+				seen.add(k);
+				return true;
+			}),
+		verdictSubmissions: read.reduce(
+			(n, d) => n + (d.verdictSubmissions ?? 0),
+			0,
+		),
+		verdictAwardedAny: read.reduce((n, d) => n + (d.verdictAwardedAny ?? 0), 0),
+		notAwardedRounds: [
+			...new Set(read.flatMap((d) => d.notAwardedRounds ?? [])),
+		].sort((a, b) => a - b),
+	};
+}
+
+/** The round the enrich stores as lastAwardedRound: the highest numbered
+ * round the page awards, else the page summary's round when it is a real
+ * one. SCF's summary lags (reclaim's says 21 beside awards in 21 and 36),
+ * and a negative summary is an award SCF does not number, never a round. */
+export function storedLastRound(
+	signal: unknown,
+	awardedRounds?: readonly number[],
+): number | null {
+	if (awardedRounds?.length) return Math.max(...awardedRounds);
+	return typeof signal === "number" && signal > 0 ? signal : null;
 }
 
 /** What a submission's status says about an award: "awarded" (Awarded, or a
