@@ -10,8 +10,14 @@
  *
  *   pnpm exec tsx scripts/quality/append-north-star.ts [--execute]
  *
+ * Runs as a step of engine-c-health, right after that job commits the weekly
+ * evidence it reads. It used to run in generated-recall about two hours
+ * before that commit, so every append picked up the previous week's run and
+ * the newest week was always missing (2026-11-08 was never appended).
+ *
  * Rules:
- *  - append only when the engine artifact is NEWER than the last point, so
+ *  - one point per date: a date already in the series is never appended
+ *    again, and an artifact older than the last point is not appended, so
  *    re-runs are idempotent;
  *  - carry the engine's OWN date and numbers, never today's clock;
  *  - the aggregate is the sum of the board's buckets, which is the same
@@ -22,13 +28,16 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const EXECUTE = process.argv.includes("--execute");
-const SERIES = join(process.cwd(), "improvements/audits/north-star-series.json");
+const SERIES = join(
+	process.cwd(),
+	"improvements/audits/north-star-series.json",
+);
 const ENGINE = join(
 	process.cwd(),
 	"improvements/engine/weekly/engine-a-recall-latest.json",
 );
 
-type Point = {
+export type Point = {
 	date: string;
 	label: string;
 	okRate: number;
@@ -36,56 +45,75 @@ type Point = {
 	probes: number;
 	evidence: string;
 };
-
-const engine = JSON.parse(readFileSync(ENGINE, "utf8")) as {
+export type Engine = {
 	generatedAt?: string;
 	board?: Array<{ bucket: string; ok: number; total: number }>;
 };
-const series = JSON.parse(readFileSync(SERIES, "utf8")) as {
-	target: number;
-	series: Point[];
-};
 
-const board = engine.board ?? [];
-if (!board.length) {
-	console.error(
-		"INCONCLUSIVE: the engine artifact carries no board — nothing to append, and an empty run is not a 100% run.",
-	);
-	process.exit(2);
+/** The point to append, or why there is none. `inconclusive` = the artifact
+ *  cannot support a point; `skip` = the series already holds this run. */
+export function planAppend(
+	series: readonly Point[],
+	engine: Engine,
+): { point: Point } | { skip: string } | { inconclusive: string } {
+	const board = engine.board ?? [];
+	if (!board.length)
+		return {
+			inconclusive:
+				"the engine artifact carries no board: nothing to append, and an empty run is not a 100% run.",
+		};
+	const date = String(engine.generatedAt ?? "").slice(0, 10);
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
+		return { inconclusive: "the engine artifact has no usable generatedAt." };
+	// One point per date. Comparing with the last point alone let an
+	// out-of-order series take a second point for a date it already held.
+	if (series.some((p) => p.date === date))
+		return { skip: `the series already has a point dated ${date}.` };
+	const last = series[series.length - 1];
+	if (last && last.date > date)
+		return {
+			skip: `the engine ran ${date}, older than the last point ${last.date}.`,
+		};
+	const ok = board.reduce((a, b) => a + b.ok, 0);
+	const probes = board.reduce((a, b) => a + b.total, 0);
+	return {
+		point: {
+			date,
+			label: `Engine A full matrix (${board.length} buckets)`,
+			okRate: Math.round((ok / probes) * 100),
+			ok,
+			probes,
+			evidence: "improvements/engine/weekly/engine-a-recall-latest.json",
+		},
+	};
 }
-const date = String(engine.generatedAt ?? "").slice(0, 10);
-if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-	console.error("INCONCLUSIVE: the engine artifact has no usable generatedAt.");
-	process.exit(2);
-}
 
-const ok = board.reduce((a, b) => a + b.ok, 0);
-const probes = board.reduce((a, b) => a + b.total, 0);
-const last = series.series[series.series.length - 1];
-
-if (last && last.date >= date) {
+function main() {
+	const engine = JSON.parse(readFileSync(ENGINE, "utf8")) as Engine;
+	const series = JSON.parse(readFileSync(SERIES, "utf8")) as {
+		target: number;
+		series: Point[];
+	};
+	const plan = planAppend(series.series, engine);
+	if ("inconclusive" in plan) {
+		console.error(`INCONCLUSIVE: ${plan.inconclusive}`);
+		process.exit(2);
+	}
+	if ("skip" in plan) {
+		console.log(`nothing to append: ${plan.skip}`);
+		process.exit(0);
+	}
+	const { point } = plan;
 	console.log(
-		`up to date: last point ${last.date}, engine ran ${date} — nothing to append.`,
+		`append ${point.date}: ${point.ok}/${point.probes} = ${point.okRate}% (last point ${series.series.at(-1)?.date ?? "none"})`,
 	);
-	process.exit(0);
+	if (!EXECUTE) {
+		console.log("DRY RUN: pass --execute to write.");
+		process.exit(0);
+	}
+	series.series.push(point);
+	writeFileSync(SERIES, `${JSON.stringify(series, null, "\t")}\n`);
+	console.log(`wrote ${SERIES}`);
 }
 
-const point: Point = {
-	date,
-	label: `Engine A full matrix (${board.length} buckets)`,
-	okRate: Math.round((ok / probes) * 100),
-	ok,
-	probes,
-	evidence: "improvements/engine/weekly/engine-a-recall-latest.json",
-};
-
-console.log(
-	`append ${point.date}: ${point.ok}/${point.probes} = ${point.okRate}% (last point ${last?.date ?? "none"})`,
-);
-if (!EXECUTE) {
-	console.log("DRY RUN — pass --execute to write.");
-	process.exit(0);
-}
-series.series.push(point);
-writeFileSync(SERIES, `${JSON.stringify(series, null, "\t")}\n`);
-console.log(`wrote ${SERIES}`);
+if (process.argv[1]?.includes("append-north-star")) main();

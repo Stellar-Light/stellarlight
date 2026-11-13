@@ -160,7 +160,7 @@ export function getNorthStar(now: Date = new Date()): {
 /** How often this guard's evidence is supposed to be refreshed. A measurement
  * older than its own cadence allows is not evidence of health, it is absence
  * of measurement, and the two must never render alike. */
-export type GuardCadence = "weekly" | "on-deploy" | "baseline";
+export type GuardCadence = "weekly" | "twice-weekly" | "on-deploy" | "baseline";
 
 /** Days of evidence age each cadence tolerates before the row goes `stale`.
  * `baseline` is a one-off measurement of a thing that does not change on its
@@ -173,6 +173,9 @@ export const DEEPWIKI_MIN_GRADED = 20;
 
 export const GUARD_FRESHNESS: Record<GuardCadence, number> = {
 	weekly: 10,
+	// Monday and Thursday (quality-ratchets.yml): one missed run still lands
+	// inside 7 days, two do not.
+	"twice-weekly": 7,
 	"on-deploy": 14,
 	baseline: 120,
 };
@@ -454,7 +457,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				"a script or a test does not count as consumption; that is how codeProofTier passed for months while only a report called it",
 			],
 			asOf: consumption.asOf.slice(0, 10),
-			cadence: "on-deploy",
+			cadence: "twice-weekly",
 			severity: "high",
 			artifact: "improvements/audits/consumption-latest.json",
 			passing: consumption.dead.length === 0,
@@ -541,7 +544,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				"a count of 0 here means the ratchet is finished and the guard can become a plain tsc gate",
 			],
 			asOf: scriptsTypes.asOf.slice(0, 10),
-			cadence: "on-deploy",
+			cadence: "twice-weekly",
 			severity: "medium",
 			artifact: "improvements/audits/scripts-types-latest.json",
 			passing: scriptsTypes.added.length === 0,
@@ -579,7 +582,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				"limit: a scope holding one date is treated as dating every value in it, so this catches the sharper shape only: a value with NO date in scope while other objects in the response carry dates",
 			],
 			asOf: answerDating.asOf.slice(0, 10),
-			cadence: "on-deploy",
+			cadence: "twice-weekly",
 			severity: "medium",
 			artifact: "improvements/audits/answer-dating-latest.json",
 			// Same bar as the scripts-types ratchet, deliberately: this row is a
@@ -592,8 +595,9 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 		}),
 
 		// SCF coverage — the external roster vs what we actually serve. The
-		// gap matrix (report-coverage-gaps.ts) has run monthly and opened an
-		// ISSUE, but its headline never reached this board: 49 SCF-FUNDED
+		// gap matrix (report-coverage-gaps.ts) runs weekly (coverage-watch.yml;
+		// monthly until 2026-11-12, which left this row stale most of each
+		// month) and opens an ISSUE, but its headline never reached this board: 49 SCF-FUNDED
 		// projects, every one carrying a round badge, that the directory does
 		// not serve. Surfacing it is the quality move; filling it is
 		// human-gated curation (the workflow forbids bulk-create).

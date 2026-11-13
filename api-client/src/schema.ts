@@ -2909,7 +2909,7 @@ export interface operations {
                             generatedAt?: string;
                             consumer?: string;
                             definition?: string;
-                            /** @description THEIR status vocabulary -> count, verbatim from their records. */
+                            /** @description THEIR status vocabulary -> count, verbatim from their active records, plus retired: the length of `retired`. Never set from our side. */
                             counts?: {
                                 [key: string]: number;
                             };
@@ -2922,7 +2922,16 @@ export interface operations {
                                 scoredBy?: string;
                                 note?: string;
                             };
+                            /** @description Every record they filed against us: the active records plus the retired ones. */
                             total?: number;
+                            /** @description Records they retired: each left their active folder with a receipt in their improvements/resolved.json, the only source of this status. Compact on purpose; the record's text is in their ledger. Absent from an artifact written before retirements were read. */
+                            retired?: {
+                                id?: string;
+                                /** @description The resolved date on their receipt. */
+                                retired?: string | null;
+                                /** @description The PR, or the commit when its subject names no PR, in their repository that deleted the record. null = their history could not be read. */
+                                retiredBy?: string | null;
+                            }[];
                             records?: {
                                 id?: string;
                                 title?: string;
@@ -3161,7 +3170,7 @@ export interface operations {
                             asOf?: string;
                             ageDays?: number;
                             /** @enum {string} */
-                            cadence?: "weekly" | "on-deploy" | "baseline";
+                            cadence?: "weekly" | "twice-weekly" | "on-deploy" | "baseline";
                             freshnessDays?: number;
                             details?: string[];
                             evidence?: string;

@@ -1,18 +1,23 @@
-# Coverage watch — monthly delta-only review queue for ECOSYSTEM GAPS.
+# Coverage watch: weekly delta-only review queue for ECOSYSTEM GAPS.
 # The third detector next to liveness-watch and tag-watch: runs the read-only
 # report-coverage-gaps detector (external rosters vs what we serve + freshness)
-# and diffs its gap list against last month's, so the owner reviews only NEW
-# gaps. REPORT ONLY: missing projects become human-reviewed SEEDS and partner
-# surfaces become ingest candidates (verify via the directory-quality-verify
-# workflow before curating). Same detect→verify→curate flywheel.
+# and diffs its gap list against the last successful run's, so the owner
+# reviews only NEW gaps. REPORT ONLY: missing projects become human-reviewed
+# SEEDS and partner surfaces become ingest candidates (verify via the
+# directory-quality-verify workflow before curating). Same
+# detect→verify→curate flywheel.
+#
+# Weekly since 2026-11-12. It ran monthly against the /quality SCF coverage
+# row's 10-day window, so that row read stale for about three weeks of every
+# month. A run takes about a minute and reads public rosters plus our own API.
 #
 # This is the "move faster to find, index and serve" metric (raven#18):
 # the summary line IS the number we hold ourselves to over time.
 name: coverage-watch
 on:
   schedule:
-    # 08:00 UTC on the 1st of each month (after liveness-watch and tag-watch)
-    - cron: "0 8 1 * *"
+    # Mondays 08:00 UTC; the /quality row's window is 10 days
+    - cron: "0 8 * * 1"
   workflow_dispatch: {}
 concurrency:
   group: coverage-watch
@@ -38,7 +43,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Run coverage-gap report
         run: pnpm exec tsx scripts/report-coverage-gaps.ts --json > /tmp/coverage.json 2> /tmp/coverage.log
-      - name: Fetch previous month's artifact
+      - name: Fetch the previous run's artifact
         continue-on-error: true
         run: |
           PREV=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow=coverage-watch.yml --status=success --limit 1 --json databaseId --jq '.[0].databaseId // empty')
@@ -85,13 +90,13 @@ jobs:
           print()
           print(f"**Summary:** {s.get('missingDefillama','?')} llama-missing | {s.get('missingScf','?')} scf-missing | {s.get('partnerDocsWithoutOwnContent','?')} partner surfaces without own content | {s.get('staleOrEmptyResearchSources','?')} stale/empty research sources | {s.get('unstampedResearchSources','?')} undated research sources")
           print()
-          print(f"**NEW gaps since last month: {len(new)} | resolved: {len(resolved)}**")
+          print(f"**NEW gaps since the last run: {len(new)} | resolved: {len(resolved)}**")
           if new:
               print()
               for k in new: print(f"- 🆕 `{k}`")
           if resolved:
               print()
-              print(f"### Resolved since last month: {', '.join(f'`{k}`' for k in resolved)}")
+              print(f"### Resolved since the last run: {', '.join(f'`{k}`' for k in resolved)}")
           lanes = now.get('lanes', {})
           miss = lanes.get('defillama', {}).get('missing', [])
           if miss:
@@ -123,7 +128,7 @@ jobs:
                   print(f"- **{p['partner']}** ({p['surface']}): {p['verdict']} — {p['url']}")
           if not prev:
               print()
-              print("_(first tracked run — everything counts as current, deltas start next month)_")
+              print("_(first tracked run: everything counts as current, deltas start next run)_")
           EOF
           cat /tmp/watch.md | tee $GITHUB_STEP_SUMMARY
       - name: Upsert rolling watch issue
