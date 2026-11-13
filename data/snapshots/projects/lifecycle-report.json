@@ -1,99 +1,99 @@
 {
-	"generatedAt": "2026-11-12T13:46:24.870Z",
+	"generatedAt": "2026-11-13T13:07:30.565Z",
 	"source": "data/snapshots/projects/*.json.gz",
-	"latestSnapshot": "2026-11-12",
+	"latestSnapshot": "2026-11-13",
 	"historyStart": "2026-10-02",
-	"snapshots": 42,
+	"snapshots": 43,
 	"definitions": {
 		"launched": "Reached live: status Live now, or Inactive with a record that it was live before. Development and pre-release projects have not launched.",
 		"markedLive": "Status Live, on any evidence.",
-		"liveOnStrongEvidence": "Status Live where the status rests on the product itself (repo activity, on-chain activity, a product integration, a package release, an operator announcement or a human check), not only on its website answering.",
+		"liveOnStrongEvidence": "Status Live where the status rests on the product itself (repo activity, on-chain activity, a product integration, a package release or a human check), not on its website answering or on the team's own announcement.",
 		"observedActive": "A commit in a linked repo within 180 days of the snapshot, or a mainnet deployment observed through on-chain activity.",
 		"noActivityData": "Launched, with no linked repo commit and no on-chain deployment record: alive or not, we cannot observe it."
 	},
 	"groups": {
 		"all": {
-			"listed": 1020,
-			"launched": 937,
-			"markedLive": 830,
-			"liveOnStrongEvidence": 401,
-			"observedActive": 283,
-			"noActivityData": 423
+			"listed": 1012,
+			"launched": 908,
+			"markedLive": 825,
+			"liveOnStrongEvidence": 388,
+			"observedActive": 285,
+			"noActivityData": 404
 		},
 		"scf": {
-			"listed": 635,
-			"launched": 582,
-			"markedLive": 550,
-			"liveOnStrongEvidence": 246,
-			"observedActive": 193,
-			"noActivityData": 210
+			"listed": 711,
+			"launched": 637,
+			"markedLive": 569,
+			"liveOnStrongEvidence": 242,
+			"observedActive": 203,
+			"noActivityData": 237
 		},
 		"nonScf": {
-			"listed": 385,
-			"launched": 355,
-			"markedLive": 280,
-			"liveOnStrongEvidence": 155,
-			"observedActive": 90,
-			"noActivityData": 213
+			"listed": 301,
+			"launched": 271,
+			"markedLive": 256,
+			"liveOnStrongEvidence": 146,
+			"observedActive": 82,
+			"noActivityData": 167
 		}
 	},
 	"cohorts": {
 		"scfByFirstRound": [
 			{
 				"cohort": "rounds 1-15",
-				"listed": 83,
-				"launched": 81,
-				"markedLive": 73,
-				"liveOnStrongEvidence": 32,
-				"observedActive": 19,
-				"noActivityData": 34
+				"listed": 120,
+				"launched": 112,
+				"markedLive": 81,
+				"liveOnStrongEvidence": 30,
+				"observedActive": 20,
+				"noActivityData": 48
 			},
 			{
 				"cohort": "rounds 16-30",
-				"listed": 242,
-				"launched": 232,
-				"markedLive": 212,
-				"liveOnStrongEvidence": 93,
-				"observedActive": 61,
-				"noActivityData": 69
+				"listed": 279,
+				"launched": 255,
+				"markedLive": 221,
+				"liveOnStrongEvidence": 92,
+				"observedActive": 63,
+				"noActivityData": 85
 			},
 			{
 				"cohort": "rounds 31-45",
-				"listed": 302,
-				"launched": 261,
-				"markedLive": 257,
-				"liveOnStrongEvidence": 114,
-				"observedActive": 107,
-				"noActivityData": 106
+				"listed": 304,
+				"launched": 262,
+				"markedLive": 259,
+				"liveOnStrongEvidence": 112,
+				"observedActive": 113,
+				"noActivityData": 104
 			},
 			{
 				"cohort": "round unknown",
 				"listed": 8,
 				"launched": 8,
 				"markedLive": 8,
-				"liveOnStrongEvidence": 7,
-				"observedActive": 6,
-				"noActivityData": 1
+				"liveOnStrongEvidence": 8,
+				"observedActive": 7,
+				"noActivityData": 0
 			}
 		],
 		"nonScfByListedYear": [
 			{
 				"cohort": "2025",
-				"listed": 99,
-				"launched": 98,
-				"markedLive": 88,
-				"liveOnStrongEvidence": 41,
-				"observedActive": 31,
-				"noActivityData": 57
+				"listed": 95,
+				"launched": 92,
+				"markedLive": 87,
+				"liveOnStrongEvidence": 40,
+				"observedActive": 30,
+				"noActivityData": 55
 			},
 			{
 				"cohort": "2026",
-				"listed": 286,
-				"launched": 257,
-				"markedLive": 192,
-				"liveOnStrongEvidence": 114,
-				"observedActive": 59,
-				"noActivityData": 156
+				"listed": 206,
+				"launched": 179,
+				"markedLive": 169,
+				"liveOnStrongEvidence": 106,
+				"observedActive": 52,
+				"noActivityData": 112
 			}
 		]
 	},
@@ -102,8 +102,10 @@
 		"newlyLaunched": [
 			"chainlink",
 			"kast",
+			"kedgeway",
 			"metamask",
 			"stellar-atlas",
+			"vrf-soroban",
 			"zenex"
 		],
 		"newlyInactive": [
