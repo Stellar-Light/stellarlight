@@ -10,10 +10,12 @@ permissions: { contents: read }
 jobs:
   enrich:
     runs-on: ubuntu-latest
-    # 35, not 25 (2026-11-11): the execute and the Idempotence replan take
-    # about 16 minutes together, and Round counts adds SCF's 46 round pages
-    # plus up to three retries of a could-not-check.
-    timeout-minutes: 35
+    # 60, not 35 (2026-11-12, sls-116): each pass of the sync now also reads
+    # SCF's 46 round pages and the 216 project pages outside the listing
+    # (about 5 minutes), the execute and the Idempotence replan are two
+    # passes, and Round counts reads the same pages, with up to three
+    # retries of a could-not-check.
+    timeout-minutes: 60
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}

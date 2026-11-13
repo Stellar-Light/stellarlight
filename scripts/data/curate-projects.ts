@@ -412,6 +412,7 @@ const PG_AWARDS: Record<string, { rounds: string[]; evidence: string }> = {
 /** SCF fact corrections vs the OFFICIAL communityfund project pages (sls-027/
  * sls-030, dual-lane verified by our consumer 2026-07-10). Overwrites the scf
  * group for listed slugs — the official page is the source of truth. */
+const SCF_PAGE = "https://communityfund.stellar.org/project/";
 const SCF_FIX: Record<
 	string,
 	{
@@ -432,6 +433,10 @@ const SCF_FIX: Record<
 		 * matcher (another project's page written onto this row): drop the page
 		 * linkage (slug / sourceUrl / lastAwardedRound) too, not just the facts. */
 		unlink?: boolean;
+		/** sls-116: the SCF page slug the values were read from, written as
+		 * scf.slug and scf.sourceUrl, so a human-verified award cites a source
+		 * page too. Four of these rows served scfSourceUrl null. */
+		page?: string;
 	}
 > = {
 	// sls-027: official page shows 7 submissions, 4 AWARDED (#16 $150K, #20
@@ -481,18 +486,28 @@ const SCF_FIX: Record<
 		totalAwarded: 36000,
 		awardedRounds: [16],
 		roundAwards: [{ round: 16, amountUSD: 36000, awardType: null }],
+		page: "sstream-bu1", // read 2026-11-12: #16 $36,000, total $36,000
 	},
 	wagelink: {
 		awarded: true,
 		totalAwarded: 50000,
 		awardedRounds: [24],
 		roundAwards: [{ round: 24, amountUSD: 50000, awardType: null }],
+		page: "wagelink-sdp-integration-i2b", // read 2026-11-12: #24 $50,000
 	},
+	// sls-116: unalivio-nil, outside the listing, read 2026-11-12 (site
+	// unalivio.com, the row's): three awards, #16 $82,390, #29 $49,300 and
+	// #32 $18,475, total $150,165. The block carried #32 alone.
 	unalivio: {
 		awarded: true,
-		totalAwarded: null,
-		awardedRounds: [32],
-		roundAwards: [{ round: 32, amountUSD: 18475, awardType: null }],
+		totalAwarded: 150165,
+		awardedRounds: [16, 29, 32],
+		roundAwards: [
+			{ round: 16, amountUSD: 82390, awardType: "Legacy v4.0 Award" },
+			{ round: 29, amountUSD: 49300, awardType: "Legacy v5.0 Community Award" },
+			{ round: 32, amountUSD: 18475, awardType: "Build" },
+		],
+		page: "unalivio-nil",
 	},
 	// tucambio re-verified 2026-09-06 on seasonal-workers-payroll-lru (the
 	// project's only live page; tucambio-wallets-lru renders no payload):
@@ -539,6 +554,7 @@ const SCF_FIX: Record<
 			{ round: 13, amountUSD: 150000, awardType: null },
 			{ round: 18, amountUSD: 141000, awardType: null },
 		],
+		page: "comet-pas", // read 2026-11-12 (github.com/CometDEX): #13 $150,000, #18 $141,000
 	},
 	// sls-043: the canonical band row claimed SCF #41 / $100K while the alias
 	// row (band-protocol, merged 2026-07-10 S3b wave) carried the OFFICIAL
@@ -914,6 +930,19 @@ const DUPE_MERGES: Array<{
 	// stellar-command-insights-sci-czo (#29, $35,000) names both the repo
 	// and soroban-elk's netlify site as Stellar Command Insights'.
 	{ dupe: "soroban-elk", canonical: "stellar-command-insights" },
+	// sls-116 (2026-11-12): one project, two rows. Both list team.finance,
+	// which serves "Team Finance" and is run by TrustSwap Inc. ("TrustSwap
+	// Inc. All Rights Reserved"), and SCF's only page for it,
+	// trustswap-team-finance-coa, is titled "TrustSwap: Team Finance" (SCF
+	// #36, $120,000). Their status evidence is the same (site-liveness on
+	// team.finance, 2026-08-27). trustswap is canonical: it is the older row
+	// (2026-03-10), Verified (Community), the only one that cites the SCF
+	// page (official-record), and its description says what the product is
+	// on Stellar in our words; team-finance (LumenloopSeed, 2026-06-29)
+	// carries the page's own marketing copy and an uncited copy of the award.
+	// The product's name still resolves: a lookup of a shadow's name folds to
+	// its canonical row.
+	{ dupe: "team-finance", canonical: "trustswap" },
 	// NOT FOLDED, 2026-11-12: one maker, two products, each its own SCF
 	// record. A shared link was the wrong one and is fixed in the link maps;
 	// both rows stay.
@@ -2710,6 +2739,8 @@ async function main() {
 			(cur.awardedRounds ?? []).join(",") === fix.awardedRounds.join(",") &&
 			raInSync &&
 			(!fix.unlink || cur.slug == null) &&
+			(!fix.page ||
+				(cur.slug === fix.page && cur.sourceUrl === SCF_PAGE + fix.page)) &&
 			// provenance first-stamp (same gap enrich had, #828): a curated row
 			// whose values are in sync but whose basis is missing still needs
 			// the human-verified stamp — in-sync is not stamped.
@@ -2719,9 +2750,9 @@ async function main() {
 			continue;
 		}
 		console.log(
-			`  ${slug}: scf awarded=${cur.awarded}→${fix.awarded} total=${cur.totalAwarded}→${fix.totalAwarded} rounds=[${(cur.awardedRounds ?? []).join(",")}]→[${fix.awardedRounds.join(",")}]`,
+			`  ${slug}: scf awarded=${cur.awarded}→${fix.awarded} total=${cur.totalAwarded}→${fix.totalAwarded} rounds=[${(cur.awardedRounds ?? []).join(",")}]→[${fix.awardedRounds.join(",")}]${fix.page ? ` source=${cur.sourceUrl ?? null}→${SCF_PAGE}${fix.page}` : ""}`,
 		);
-		const { unlink, ...scfFix } = fix;
+		const { unlink, page, ...scfFix } = fix;
 		writes.push({
 			id: d.id,
 			slug,
@@ -2732,6 +2763,7 @@ async function main() {
 					...(unlink
 						? { slug: null, sourceUrl: null, lastAwardedRound: null }
 						: {}),
+					...(page ? { slug: page, sourceUrl: SCF_PAGE + page } : {}),
 					// curated corrections are page-verified by a human where the
 					// official record is ambiguous — the strongest basis we serve
 					basis: "human-verified",
