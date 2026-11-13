@@ -1384,6 +1384,30 @@
 			"pr": null,
 			"costUsd": null,
 			"note": "pushed task/packets-2026-11-12-20261112-1734; gh pr create failed: pull request create failed: GraphQL: GitHub Actions is not permitted to create or approve pull requests (createPullRequest)"
+		},
+		{
+			"task": "gap",
+			"unit": "sourced",
+			"items": [
+				"open-gamefi-sdk",
+				"roberto-sanz-criptomonedas",
+				"soroban-decompiler",
+				"stellar-command-insights",
+				"web3dev",
+				"teken",
+				"stellar-qt-sdk",
+				"stellar-nest",
+				"stellar-c-sdk",
+				"sstream",
+				"sorobanmath",
+				"soroban-pre-order-contract"
+			],
+			"date": "2026-11-13",
+			"run": "43470684703",
+			"outcome": "error",
+			"pr": null,
+			"costUsd": 0,
+			"note": "agent run failed: "
 		}
 	]
 }
