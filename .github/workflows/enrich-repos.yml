@@ -65,9 +65,11 @@ jobs:
       # dispatch: scheduled and chained runs only print the unlink plan.
       # An executed full run writes its redirect findings to the runner's
       # temp directory (src/lib/repo-takeover.ts), never into the checkout.
+      # The only input reaches the script through env, never as script text.
       - env:
           REPO_REDIRECTS_ARTIFACT: ${{ runner.temp }}/repo-redirects-latest.json
-        run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run' || inputs.execute) && '--execute' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }} ${{ github.event_name == 'workflow_dispatch' && inputs.execute && inputs.unlink && '--unlink' || '' }}
+          ONLY: ${{ inputs.only }}
+        run: pnpm exec tsx scripts/enrich-repos.ts ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run' || inputs.execute) && '--execute' || '' }} ${ONLY:+--only "$ONLY"} ${{ github.event_name == 'workflow_dispatch' && inputs.execute && inputs.unlink && '--unlink' || '' }}
       # The writer guards its own class: a lookup/write key mismatch in the
       # pass above creates one duplicate row per run and nothing else
       # red-lines (the 2026-08-28 census found 381 copies this way). Runs

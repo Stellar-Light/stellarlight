@@ -1,0 +1,152 @@
+soroban rust sdk         top-10 changed: +0 in, -0 out, 3 reordered
+    #1  stellar/rs-soroban-sdk (87) -> stellar/rs-soroban-sdk (87)
+    #2  XOXNO/rs-lending-xlm (63) -> XOXNO/rs-lending-xlm (63)
+    #3  fredericrezeau/xray-games (62) -> fredericrezeau/xray-games (61)
+    #4  Eras256/Nirium (62) -> BlaineHeffron/soroban-sdk-tools (59)  <
+    #5  BlaineHeffron/soroban-sdk-tools (59) -> kalepail/ohloss (57)  <
+    #6  kalepail/ohloss (58) -> Eras256/Nirium (54)  <
+    #7  XOXNO/xoxno-contract-sdk (53) -> XOXNO/xoxno-contract-sdk (53)
+    #8  rahul-soshte/rs-soroban-client (52) -> rahul-soshte/rs-soroban-client (52)
+    #9  stellar/rs-stellar-rpc-client (54) -> stellar/rs-stellar-rpc-client (54)
+    #10 hyperledger-solang/solang (89) -> hyperledger-solang/solang (89)
+javascript sdk           top-10 changed: +2 in, -2 out, 4 reordered
+    #1  stellar/js-stellar-sdk (98) -> stellar/js-stellar-sdk (98)
+    #2  fazzatti/colibri (94) -> fazzatti/colibri (94)
+    #3  Creit-Tech/Stellar-Router-SDK (53) -> Creit-Tech/Stellar-Router-SDK (53)
+    #4  DevelopersHelpDesk/soroban-test-utils (40) -> DevelopersHelpDesk/soroban-test-utils (39)
+    #5  cokehill/soroban-test-utils (40) -> blend-capital/blend-sdk-js (85)  <
+    #6  blend-capital/blend-sdk-js (85) -> stellar/js-stellar-base (88)  <
+    #7  script3/soroban-governor-js-sdk (40) -> Deen-Bridge/dnb-frontend (60)  <
+    #8  stellar/js-stellar-base (88) -> soumen0818/C-Pay (44)  <
+    #9  Deen-Bridge/dnb-frontend (58) -> Creit-Tech/Stellar-SEP-0005-JS (47)  <
+    #10 soumen0818/C-Pay (42) -> stellar/go-stellar-sdk (100)  <
+oracle                   top-10 changed: +1 in, -1 out, 3 reordered
+    #1  reflector-network/reflector-contract (88) -> reflector-network/reflector-contract (88)
+    #2  bp-ventures/lightecho-stellar-oracle (53) -> bp-ventures/lightecho-stellar-oracle (53)
+    #3  diadata-org/soroban-oracle-feeders (70) -> diadata-org/soroban-oracle-feeders (70)
+    #4  bandprotocol/band-std-reference-contracts-soroban (42) -> bandprotocol/band-std-reference-contracts-soroban (42)
+    #5  XOXNO/rs-lending-xlm (63) -> XOXNO/rs-lending-xlm (63)
+    #6  Heliobond/backend (56) -> Heliobond/backend (56)
+    #7  Gryd-lock/grydlock-oracle-adapter (53) -> Stellar-Unified-Price-Oracle/Stellar-Unified-Price-Oracle-Frontend- (54)  <
+    #8  Stellar-Unified-Price-Oracle/Stellar-Unified-Price-Oracle-Frontend- (46) -> Gryd-lock/grydlock-oracle-adapter (53)  <
+    #9  AyushmanGupta21/Parallax (41) -> Stellar-Unified-Price-Oracle/-Stellar-Unified-Price-Oracle-Aggregator-API-Backend (49)  <
+    #10 perspectivefi/spectra-oracles-stellar-public (37) -> AyushmanGupta21/Parallax (40)  <
+anchor platform          unchanged
+wallet kit               top-10 changed: +1 in, -1 out, 3 reordered
+    #1  stellar/passkey-kit (92) -> stellar/passkey-kit (92)
+    #2  Creit-Tech/Stellar-Wallets-Kit (87) -> Creit-Tech/Stellar-Wallets-Kit (87)
+    #3  stellar/freighter (87) -> stellar/freighter (87)
+    #4  Creit-Tech/xBull-Wallet (76) -> Creit-Tech/xBull-Wallet (76)
+    #5  stellar/smart-account-kit (85) -> stellar/smart-account-kit (85)
+    #6  tusharpamnani/stellar-wallet-kit (35) -> tusharpamnani/stellar-wallet-kit (35)
+    #7  bluxcc/core (77) -> techgob/institutional-signer-kit (36)  <
+    #8  fxjrin/stellar-contracts-kit (66) -> bluxcc/core (77)  <
+    #9  pollar-xyz/pollar (61) -> fxjrin/stellar-contracts-kit (65)  <
+    #10 0xNgoo/anchor-kit (50) -> pollar-xyz/pollar (61)  <
+stellar wallets kit      unchanged
+soroswap                 unchanged
+blend lending protocol   top-10 changed: +0 in, -0 out, 4 reordered
+    #1  blend-capital/blend-contracts-v2 (88) -> blend-capital/blend-contracts-v2 (88)
+    #2  xycloo/xycloans (61) -> xycloo/xycloans (61)
+    #3  PositiveSecurity/BlendV2-FV (29) -> PositiveSecurity/BlendV2-FV (28)
+    #4  XOXNO/rs-lending-xlm (63) -> XOXNO/rs-lending-xlm (63)
+    #5  alexzoid-eth/2025-02-blend-fv (35) -> alexzoid-eth/2025-02-blend-fv (34)
+    #6  BenRai1/BenRai1-2025-02-blend-fv (31) -> BenRai1/BenRai1-2025-02-blend-fv (30)
+    #7  LSHFGJ/2025-02-blend-fv (27) -> Robeartt/blend-contracts-v3 (28)  <
+    #8  Kirkeelee/blend-fv-contest-kirkeelee (27) -> LSHFGJ/2025-02-blend-fv (27)  <
+    #9  burhankhaja/Blend-FV-rust (27) -> Kirkeelee/blend-fv-contest-kirkeelee (27)  <
+    #10 Robeartt/blend-contracts-v3 (0) -> burhankhaja/Blend-FV-rust (27)  <
+passkey smart wallet     unchanged
+horizon api server       top-10 changed: +3 in, -3 out, 3 reordered
+    #1  stellar/stellar-horizon (92) -> stellar/stellar-horizon (92)
+    #2  stellar/go-stellar-sdk (100) -> stellar/go-stellar-sdk (100)
+    #3  mergepay/mergepay-api (37) -> mergepay/mergepay-api (41)
+    #4  Bonizozo/stellar-tipjar-frontend (40) -> Bonizozo/stellar-tipjar-frontend (40)
+    #5  rodweleo/blockbot (47) -> Liquifact/Liquifact-frontend (46)  <
+    #6  determined-001/Quay (41) -> Blockchain-Oracle/xlmtools (51)  <
+    #7  flashbacknetwork/FlashbackClient (38) -> Kevin737866/-stellar-analytics-dashboard (40)  <
+    #8  Blockchain-Oracle/xlmtools (52) -> penguinpecker/ko402 (48)  <
+    #9  Kevin737866/-stellar-analytics-dashboard (40) -> RaceeyXo/use-stellar (48)  <
+    #10 penguinpecker/ko402 (49) -> safetrustcr/dApp-SafeTrust (44)  <
+stellar core consensus   unchanged
+zk                       top-10 changed: +1 in, -1 out, 5 reordered
+    #1  stellar-experimental/who-ate-gerald (51) -> stellar-experimental/who-ate-gerald (51)
+    #2  NethermindEth/stellar-private-payments (66) -> NethermindEth/stellar-private-payments (66)
+    #3  0xZaid10/Cipher-Command-ZK-Game-on-Stellar- (58) -> 0xZaid10/Cipher-Command-ZK-Game-on-Stellar- (57)
+    #4  Ridhointerstellar/-ZK-RPS-Battle-Royale (54) -> kalepail/KALE-sc (53)  <
+    #5  0xZyrick/fog-of-chess (54) -> Ridhointerstellar/-ZK-RPS-Battle-Royale (53)  <
+    #6  kalepail/KALE-sc (53) -> 0xZyrick/fog-of-chess (53)  <
+    #7  kalepail/kalien (50) -> kalepail/kalien (49)
+    #8  ZK-VOTE/ZK-VOTE (48) -> eunomia-finance/eunomia (49)  <
+    #9  georgegoldman/Soroban-ZK-Std (48) -> ZK-VOTE/ZK-VOTE (48)  <
+    #10 eunomia-finance/eunomia (47) -> Iris-IV/ProofOfHeart-stellar (47)  <
+x402                     top-10 changed: +1 in, -1 out, 2 reordered
+    #1  OFFER-HUB/X402 (43) -> OFFER-HUB/X402 (43)
+    #2  pedro-pelicioni/x402 (29) -> pedro-pelicioni/x402 (29)
+    #3  x402-foundation/x402 (61) -> x402-foundation/x402 (61)
+    #4  stellar/x402-stellar (59) -> stellar/x402-stellar (59)
+    #5  Scopuly/x402-stellar-guard (72) -> Scopuly/x402-stellar-guard (72)
+    #6  UltravioletaDAO/uvd-x402-sdk-typescript (63) -> UltravioletaDAO/uvd-x402-sdk-typescript (63)
+    #7  jamesbachini/x402-mcp-stellar (59) -> jamesbachini/x402-mcp-stellar (58)
+    #8  CaBsCrypto/stellar-bazaar-x402 (55) -> Gabrielpatrola/stellar-x402-middleware (54)  <
+    #9  Gabrielpatrola/stellar-x402-middleware (54) -> CaBsCrypto/stellar-bazaar-x402 (53)  <
+    #10 TrebleLegacy/x402-agents-stellar-project (52) -> rumblefishdev/stellar-x402 (51)  <
+oracle price feed        unchanged
+streaming payments       top-10 changed: +1 in, -1 out, 5 reordered
+    #1  luanlabs/fluxity-v1-core (51) -> luanlabs/fluxity-v1-core (51)
+    #2  rahimklaber/SStream (38) -> rahimklaber/SStream (38)
+    #3  luanlabs/fluxity-interface (82) -> luanlabs/fluxity-interface (82)
+    #4  sandeepbehera21/StreamPay-Streaming-Subscription-Payments-on-Stellar-Soroban (25) -> sandeepbehera21/StreamPay-Streaming-Subscription-Payments-on-Stellar-Soroban (24)
+    #5  soroventures/SoroMint (51) -> David-J-Malan-CS50-HAV-MIT-neth-terms/Blockchain-based-Micropayment-for-Radio-Streaming-Airtime (22)  <
+    #6  Stellar-Paymaster/xlm-paymaster (39) -> soroventures/SoroMint (51)  <
+    #7  LabsCrypt/flowfi (53) -> Stellar-Paymaster/xlm-paymaster (37)  <
+    #8  SoroStream/sorostream-contracts (47) -> LabsCrypt/flowfi (54)  <
+    #9  conduit-protocol/streamFi-contracts (42) -> SoroStream/sorostream-contracts (47)  <
+    #10 Flux-DeFi/LiquidFlow (39) -> conduit-protocol/streamFi-contracts (42)  <
+escrow vault             top-10 changed: +0 in, -0 out, 2 reordered
+    #1  Trustless-Work/trustlesswork-smart-contract-stellar (84) -> Trustless-Work/trustlesswork-smart-contract-stellar (84)
+    #2  devasignhq/bounty-escrow (77) -> devasignhq/bounty-escrow (77)
+    #3  BootNodeDev/strata-vault-kit (49) -> BootNodeDev/strata-vault-kit (49)
+    #4  workvault-hq/workvault (28) -> workvault-hq/workvault (27)
+    #5  f0x1777/milestone (32) -> f0x1777/milestone (31)
+    #6  StellarDevHub/Web3-Student-Lab (55) -> StellarDevHub/Web3-Student-Lab (55)
+    #7  soroventures/SoroMint (51) -> soroventures/SoroMint (51)
+    #8  Lum-Agg/stellar-dex-agg (46) -> Lum-Agg/stellar-dex-agg (46)
+    #9  anonfedora/stellovault (45) -> TTL-Legacy/TTL-Legacy (45)  <
+    #10 TTL-Legacy/TTL-Legacy (43) -> anonfedora/stellovault (43)  <
+payments                 top-10 changed: +0 in, -0 out, 2 reordered
+    #1  stellar/anchor-platform (94) -> stellar/anchor-platform (94)
+    #2  stellar/basic-payment-app (74) -> stellar/basic-payment-app (74)
+    #3  stellar-experimental/js-private-payments-sdk (52) -> stellar-experimental/js-private-payments-sdk (52)
+    #4  Scopuly/x402-stellar-guard (72) -> Scopuly/x402-stellar-guard (72)
+    #5  Stellar-Light/stellar-pay (70) -> Stellar-Light/stellar-pay (70)
+    #6  davidmaronio/StellarPay402 (70) -> payrouteshq/stellartools (69)  <
+    #7  payrouteshq/stellartools (69) -> davidmaronio/StellarPay402 (69)  <
+    #8  Tellus-Cooperative/stellar-paylink (68) -> Tellus-Cooperative/stellar-paylink (68)
+    #9  NethermindEth/stellar-private-payments (66) -> NethermindEth/stellar-private-payments (66)
+    #10 vowena/sdk (63) -> vowena/sdk (62)
+remittance               top-10 changed: +1 in, -1 out, 7 reordered
+    #1  LabsCrypt/remitlend (54) -> LabsCrypt/remitlend (54)
+    #2  AfriWage/AfriWage (35) -> AfriWage/AfriWage (35)
+    #3  KB2410/StellarPay-Cross-Border-Remittance-Hub (25) -> Trust-Analysis/Micro-Remittance-Split-Billing-App-Stellar-Web-3- (25)  <
+    #4  azzam20-max/TKI-Remittance (25) -> KB2410/StellarPay-Cross-Border-Remittance-Hub (24)  <
+    #5  htmlcsslover/OFW-Split-Remittance-StellarX (17) -> azzam20-max/TKI-Remittance (24)  <
+    #6  outofcontextads07-glitch/remittance-stellar (15) -> thituc369-design/soroban-remittance (17)  <
+    #7  Trust-Analysis/Micro-Remittance-Split-Billing-App-Stellar-Web-3- (0) -> htmlcsslover/OFW-Split-Remittance-StellarX (15)  <
+    #8  thituc369-design/soroban-remittance (0) -> outofcontextads07-glitch/remittance-stellar (13)  <
+    #9  MSDmanish214/Remittance-Service2 (24) -> Timrossid/global-remittance-bridge (43)  <
+    #10 MSDmanish214/Remittance-Service (24) -> MSDmanish214/Remittance-Service2 (23)  <
+nft marketplace          top-10 changed: +1 in, -1 out, 0 reordered
+    #1  BuenDia-Builders/molotov (48) -> BuenDia-Builders/molotov (48)
+    #2  Kevin737866/stellar-nft-marketplace (24) -> Kevin737866/stellar-nft-marketplace (23)
+    #3  Phoenix-Protocol-Group/phoenix-nft-marketplace (46) -> Phoenix-Protocol-Group/phoenix-nft-marketplace (46)
+    #4  Anukshi30/NFT-Marketplace-Lists-and-purchases-NFTs-with-on-chain-ownership-transfer (25) -> Anukshi30/NFT-Marketplace-Lists-and-purchases-NFTs-with-on-chain-ownership-transfer (25)
+    #5  foundermafstat/nft-dnd-stellar (37) -> foundermafstat/nft-dnd-stellar (36)
+    #6  zeekman/FarmersMarketplace (33) -> zeekman/FarmersMarketplace (32)
+    #7  snehakundu123/Steluma (29) -> snehakundu123/Steluma (28)
+    #8  drishyam27/Carbon-Credit-Marketplace (24) -> drishyam27/Carbon-Credit-Marketplace (23)
+    #9  huuquyet/soroban-nft-gallery (21) -> huuquyet/soroban-nft-gallery (21)
+    #10 vanshcodeworks/MusicMint (32) -> Ada-Girly881/AutoMint (40)  <
+wallet                   unchanged
+
+13 of 20 queries change their top 10; 12 rows enter, 12 leave, 43 reorder within

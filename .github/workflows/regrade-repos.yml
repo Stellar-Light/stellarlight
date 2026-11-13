@@ -16,6 +16,10 @@ on:
         description: "Write? Leave false for a dry run."
         type: boolean
         default: false
+      only:
+        description: "Grade only these rows: owner/repo names, comma separated. Empty = every row."
+        type: string
+        default: ""
 
 concurrency:
   group: regrade-repos
@@ -24,7 +28,11 @@ concurrency:
 jobs:
   regrade:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Measured 2026-09-07: a full execute wrote 11,713 rows in 254 s (about
+    # 20 ms a write, read pass included). A full run today is about 6,351
+    # writes plus a read-back of each, near 5 minutes; 60 leaves room for a
+    # slow shared database.
+    timeout-minutes: 60
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
@@ -36,4 +44,8 @@ jobs:
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - name: Regrade
-        run: pnpm exec tsx scripts/regrade-repos.ts ${{ inputs.execute && '--execute' || '' }}
+        # The names go through env, never into the script text, so an input
+        # cannot inject shell.
+        env:
+          ONLY: ${{ inputs.only }}
+        run: pnpm exec tsx scripts/regrade-repos.ts ${{ inputs.execute && '--execute' || '' }} ${ONLY:+"--only=$ONLY"}

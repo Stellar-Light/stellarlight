@@ -42,4 +42,7 @@ jobs:
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - name: Enrich (dry-run unless execute=true)
-        run: pnpm exec tsx scripts/enrich-entities.ts ${{ inputs.execute && '--execute' || '' }} ${{ inputs.linksOnly && '--links-only' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }}
+        # The only input reaches the script through env, never as script text.
+        env:
+          ONLY: ${{ inputs.only }}
+        run: pnpm exec tsx scripts/enrich-entities.ts ${{ inputs.execute && '--execute' || '' }} ${{ inputs.linksOnly && '--links-only' || '' }} ${ONLY:+--only "$ONLY"}

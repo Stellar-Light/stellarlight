@@ -982,6 +982,27 @@ Found 2026-10-23 in review of the smart wallet O2 ship
   2026-11-12 corpus holds `@^13`, `@14` and `@^14` among 15 undotted
   `@stellar/stellar-sdk` ranges. Fails safe (never a false deprecated).
 
+Found by the regrade lane on 2026-11-13 (branch lane/r1113-regrade-scoped,
+improvements/audits/2026-11-13-regrade-drift/):
+
+- Builder-owned repos are never graded. enrich-builder-repos creates them
+  with no score and leaves grading to enrich-repos, which only visits rows a
+  project claims, so 425 of 918 (all but one created since the last full
+  regrade on 2026-09-15) store repoScore 0 with no label and sit at the
+  bottom of search's candidate window and the scanner's queue. Probe:
+  `curl -g 'https://www.stellarlight.xyz/api/repos?limit=1&where[source][equals]=builder-owned&where[repoScoreLabel][exists]=false'`
+  answers totalDocs 425.
+- `/api/repos?sort=id` answers 500 from page offset 11,600 (`limit=100&page=117`
+  and `limit=1000&page=12`), while the default sort pages to the end. Probe:
+  `curl -s -o /dev/null -w '%{http_code}' 'https://www.stellarlight.xyz/api/repos?limit=100&page=117&depth=0&sort=id'`
+  prints 500.
+- 21 free-text or number dispatch inputs in 13 workflows are still written
+  into run scripts as `${{ inputs.x }}`, so each is shell text (among them
+  scan-repo-code's `extra`, and repair-lane's and task-lane's `model` and
+  `budget_usd`). The five `only` inputs pass through env since this branch.
+  Probe: the named debt list in `src/lib/__tests__/workflow-inputs-env.test.ts`,
+  which fails on any new one and on any entry fixed but still listed.
+
 ## Owner decisions (safe default in brackets)
 
 - Tell Planet Pay, Web3 Antivirus and the Sora maker that their linked
@@ -992,6 +1013,15 @@ Found 2026-10-23 in review of the smart wallet O2 ship
   Sora's SORA toolkit is tolgayayci/sora (README and thesora.app match the
   row's description; STATUS_FIX sora already cites its releases) [none named
   until the owner confirms].
+- Regrade cadence. repoScore drifts between manual regrades: the
+  full regrade would move 6,351 of 13,868 rows (2026-11-13), 72% of them by
+  time only (commit and release age). Options: run the full regrade once, schedule it weekly after the
+  scan, activity and builder lanes with a change cap and the read-back, or
+  grade at creation (fixes 7%). Measured: 13 of 20 real queries change their
+  top 10, no first or second result changes, the ranking answer key holds 11
+  of 11 (improvements/audits/2026-11-13-regrade-drift/). Recommended: weekly
+  schedule. [keep manual; dispatch the scoped regrade for the 38 unlinked
+  rows first]
 
 - An RWA registry row below toml-bidirectional (entity-toml, on-chain-home-domain,
   contract-metadata, on-chain-only) no longer lends a deployment, but still

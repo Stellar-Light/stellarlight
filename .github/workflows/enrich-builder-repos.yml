@@ -60,11 +60,12 @@ jobs:
           DATABASE_URI: ${{ secrets.DATABASE_URI }}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          # The only input reaches the script through env, never as script text.
+          ONLY: ${{ inputs.only }}
         shell: bash
         run: |
           args=""
-          if [ -n "${{ inputs.only }}" ]; then args="$args --only ${{ inputs.only }}"; fi
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.execute }}" = "true" ]; then
             args="$args --execute"
           fi
-          pnpm exec tsx scripts/enrich-builder-repos.ts $args
+          pnpm exec tsx scripts/enrich-builder-repos.ts $args ${ONLY:+--only "$ONLY"}

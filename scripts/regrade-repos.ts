@@ -3,6 +3,17 @@
  * calls, no PAT budget.
  *
  *   pnpm exec tsx scripts/regrade-repos.ts [--execute] [--limit=N]
+ *     [--only=owner/repo,owner/repo] [--only-file=<path>]
+ *
+ * --only and --only-file grade just the named rows (exact names, any letter
+ * case; the file holds one name per line, # comments allowed), with the same
+ * per-row code as the full pass (src/lib/repo-regrade.ts), and print every
+ * move. Built for rows one writer changed under the grade, such as the 38
+ * rows enrich-repos unlinked on 2026-11-13, without the full pass's 6,351
+ * moves. Any other argument, the space form `--only a/b` included,
+ * stops the run before it reads anything: an unread scope would be a full
+ * pass. A scoped run plans every page first and writes nothing when a name
+ * matches no row or more than one; every write is read back.
  *
  * Why this exists. The grade is computed at WRITE time by whichever lane
  * happens to own a row, and the lanes do not cover the same rows:
@@ -23,29 +34,27 @@
  * the score actually moved.
  */
 import "./load-env";
-import { getPayload } from "payload";
+import { readFileSync } from "node:fs";
 import config from "@payload-config";
+import { getPayload } from "payload";
 import {
-	isFirstParty,
-	repoGrade,
-	vouchingNoteCount,
-} from "../src/lib/repo-grade";
-import { CURATED_CANONICAL_REPOS } from "../src/lib/repo-search";
+	type ProjectAuthority,
+	parseRegradeArgs,
+	projectAuthority,
+	runRegrade,
+} from "../src/lib/repo-regrade";
 
-const EXECUTE = process.argv.includes("--execute");
-const LIMIT = Number(
-	process.argv.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? 0,
+// Before any database access: a mistyped flag must stop here.
+const ARGS = parseRegradeArgs(process.argv.slice(2), (p) =>
+	readFileSync(p, "utf8"),
 );
-const CURATED = new Set(CURATED_CANONICAL_REPOS.map((n) => n.toLowerCase()));
+const ONLY = ARGS.only;
 
 async function main() {
 	const payload = await getPayload({ config });
 
-	// Authority inputs live on the project, not the repo.
-	const projects = new Map<
-		string,
-		{ prominence: number; scfAwarded: boolean; hackathonWinner: boolean }
-	>();
+	// Every project, scoped run or not: a row's grade reads its project.
+	const projects = new Map<string, ProjectAuthority>();
 	for (let page = 1; page < 40; page++) {
 		const res = await payload.find({
 			collection: "projects",
@@ -54,132 +63,70 @@ async function main() {
 			depth: 0,
 			overrideAccess: true,
 		});
-		for (const p of res.docs as unknown as Array<Record<string, unknown>>) {
-			projects.set(String(p.slug), {
-				prominence: Number(p.prominence ?? 0),
-				scfAwarded: Boolean((p.scf as { awarded?: boolean })?.awarded),
-				hackathonWinner: Boolean(p.hackathonPlacement),
-			});
-		}
+		for (const p of res.docs as unknown as Array<Record<string, unknown>>)
+			projects.set(String(p.slug), projectAuthority(p));
 		if (!res.hasNextPage) break;
 	}
 	console.log(`projects read: ${projects.size}`);
+	if (ONLY) console.log(`scoped to ${ONLY.size} named rows`);
 
-	let read = 0;
-	let moved = 0;
-	let wrote = 0;
-	const deltas: Array<{ full: string; from: number; to: number }> = [];
+	async function* pages() {
+		for (let page = 1; page < 200; page++) {
+			const res = await payload.find({
+				collection: "repos",
+				limit: 200,
+				page,
+				depth: 0,
+				overrideAccess: true,
+				context: { internal: true },
+			});
+			yield res.docs as unknown as Array<Record<string, unknown>>;
+			if (!res.hasNextPage) return;
+		}
+	}
 
-	for (let page = 1; page < 200; page++) {
-		const res = await payload.find({
+	const run = await runRegrade(pages(), projects, ARGS, async (m) => {
+		// BOTH fields, always. Writing the score alone left 1,741 rows whose
+		// served label contradicted their own score, because enrich-repos
+		// writes the pair and this lane wrote one of them.
+		const data = { repoScore: m.to, repoScoreLabel: m.labelTo };
+		await payload.update({
 			collection: "repos",
-			limit: 200,
-			page,
-			depth: 0,
+			id: m.id,
+			data,
 			overrideAccess: true,
 			context: { internal: true },
 		});
-		for (const r of res.docs as unknown as Array<Record<string, unknown>>) {
-			read++;
-			const slug = r.projectSlug ? String(r.projectSlug) : null;
-			const proj = slug ? projects.get(slug) : undefined;
-			// Internal notes are triage memory ("not worth surfacing") — a verdict
-			// AGAINST the repo. They must not count as external validation.
-			const notes = Array.isArray(r.knowledgeNotes) ? r.knowledgeNotes : [];
-			const grade = repoGrade({
-				lastCommitAt: (r.lastCommitAt as string) ?? null,
-				stargazerCount: Number(r.stars ?? 0),
-				isFork: Boolean(r.isFork),
-				isArchived: Boolean(r.isArchived),
-				hackathonWinner: Boolean(r.hackathonWinner) || !!proj?.hackathonWinner,
-				scfAwarded: !!proj?.scfAwarded,
-				projectProminence: proj?.prominence ?? 0,
-				hasDescription: !!String(r.description ?? "").trim(),
-				topicCount: Array.isArray(r.topics) ? r.topics.length : 0,
-				openIssues: Number(r.openIssues ?? 0),
-				commits90d:
-					typeof (r.activitySignals as { commits90d?: number })?.commits90d ===
-					"number"
-						? (r.activitySignals as { commits90d: number }).commits90d
-						: null,
-				codeDepth: typeof r.codeDepth === "number" ? r.codeDepth : null,
-				judgeScore: typeof r.judgeScore === "number" ? r.judgeScore : null,
-				stellarProof: typeof r.stellarProof === "string" ? r.stellarProof : null,
-				knowledgeNoteCount: vouchingNoteCount(notes),
-				curatedCanonical: CURATED.has(String(r.fullName ?? "").toLowerCase()),
-				firstParty: isFirstParty(String(r.fullName ?? "")),
-				// Scanned facts. Present on the row since the code scan; they
-				// reached the grade for the first time on 2026-09-07.
-				testsPresent:
-					typeof r.testsPresent === "boolean" ? r.testsPresent : null,
-				ciPresent: typeof r.ciPresent === "boolean" ? r.ciPresent : null,
-				lastReleaseAt:
-					(r.activitySignals as { lastReleaseAt?: string })?.lastReleaseAt ??
-					null,
-				versionStatus:
-					typeof r.versionStatus === "string" ? r.versionStatus : null,
-				contractInterfaceCount: Array.isArray(r.contractInterface)
-					? r.contractInterface.length
-					: 0,
-				codeScanned: r.codeScanState === "scanned",
-				// Feeds the template/scaffold demotion — a repo whose PURPOSE is
-				// to be incomplete is a weaker reference than a finished one.
-				name: r.fullName ? String(r.fullName) : null,
-				// Registry-verified packages. The formula has read this since
-				// #1508 and NEITHER writer passed it, so the whole signal computed
-				// as zero for every row.
-				publishedPackageCount: Array.isArray(r.publishedPackages)
-					? r.publishedPackages.length
-					: 0,
-				// Stored on the row by enrich, which passes it to repoGrade. This
-				// script did not, so the same row scored differently depending on
-				// which lane wrote it last — the one-field-one-writer flip-flop.
-				builderReputation:
-					typeof r.builderReputation === "number" ? r.builderReputation : 0,
-			});
-			const before = Number(r.repoScore ?? -1);
-			const labelBefore = r.repoScoreLabel ? String(r.repoScoreLabel) : "";
-			// A row whose score is right but whose LABEL is stale still needs a
-			// write, so skipping on score alone would leave the 1,741 desynced
-			// rows unrepaired by the very run meant to repair them.
-			if (grade.score === before && grade.label === labelBefore) continue;
-			moved++;
-			deltas.push({
-				full: String(r.fullName),
-				from: before,
-				to: grade.score,
-			});
-			if (EXECUTE) {
-				await payload.update({
-					collection: "repos",
-					id: String(r.id),
-					// BOTH fields, always. Writing the score alone left 1,741 rows
-					// whose served label contradicted their own score — 11 of them
-					// labelled "low" while scoring in the "high" band — because
-					// enrich-repos writes the pair and this lane wrote one of them.
-					// Same class as the input divergence above: two writers of one
-					// concept, behaving differently.
-					data: { repoScore: grade.score, repoScoreLabel: grade.label },
-					overrideAccess: true,
-					context: { internal: true },
-				});
-				wrote++;
-			}
-			if (LIMIT && moved >= LIMIT) break;
-		}
-		if (!res.hasNextPage || (LIMIT && moved >= LIMIT)) break;
-	}
+		const back = (await payload.findByID({
+			collection: "repos",
+			id: m.id,
+			depth: 0,
+			overrideAccess: true,
+			context: { internal: true },
+		})) as unknown as Record<string, unknown>;
+		return back.repoScore === data.repoScore &&
+			back.repoScoreLabel === data.repoScoreLabel
+			? null
+			: `${m.fullName}: wrote ${data.repoScore}/${data.repoScoreLabel}, read ${back.repoScore}/${back.repoScoreLabel}`;
+	});
 
-	deltas.sort((a, b) => Math.abs(b.to - b.from) - Math.abs(a.to - a.from));
-	console.log(`\nlargest moves:`);
-	for (const d of deltas.slice(0, 20))
+	// A scoped run prints every move; the full pass prints the 20 largest.
+	const shown = ONLY
+		? [...run.moves].sort((a, b) => a.fullName.localeCompare(b.fullName))
+		: [...run.moves]
+				.sort((a, b) => Math.abs(b.to - b.from) - Math.abs(a.to - a.from))
+				.slice(0, 20);
+	console.log(ONLY ? "\nmoves:" : "\nlargest moves:");
+	for (const d of shown)
 		console.log(
-			`  ${d.full.padEnd(46)} ${String(d.from).padStart(3)} → ${String(d.to).padStart(3)}  (${d.to - d.from >= 0 ? "+" : ""}${d.to - d.from})`,
+			`  ${d.fullName.padEnd(46)} ${String(d.from).padStart(3)} → ${String(d.to).padStart(3)}  (${d.to - d.from >= 0 ? "+" : ""}${d.to - d.from})  ${d.labelFrom || "none"} → ${d.labelTo}`,
 		);
+	for (const p of run.problems) console.log(`\nREFUSED, nothing written: ${p}`);
+	for (const m of run.mismatched) console.log(`READ-BACK MISMATCH ${m}`);
 	console.log(
-		`\n${EXECUTE ? "REGRADED" : "DRY RUN"}: ${read} read · ${moved} would change${EXECUTE ? ` · ${wrote} written` : ""}`,
+		`\n${ARGS.execute ? "REGRADED" : "DRY RUN"}: ${run.read} read${ONLY ? ` · ${run.matched.length} of ${ONLY.size} named matched` : ""} · ${run.moves.length} would change${ARGS.execute ? ` · ${run.wrote} written · ${run.wrote - run.mismatched.length} read back` : ""}`,
 	);
-	process.exit(0);
+	process.exit(run.problems.length || run.mismatched.length ? 1 : 0);
 }
 
 main().catch((e) => {

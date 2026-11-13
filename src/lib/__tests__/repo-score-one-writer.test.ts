@@ -67,9 +67,11 @@ describe("every repoScore writer feeds the formula the same inputs", () => {
 		// an entire lane, six PRs — computed as zero for all 13,169 rows while
 		// this suite stayed green.
 		const declared = gradeInputFields();
+		// The regrade lane's per-row grading lives in src/lib/repo-regrade.ts,
+		// shared by its full pass and its scoped (--only) runs.
 		const regrade = gradeCallKeys(
-			"scripts/regrade-repos.ts",
-			"const grade = repoGrade(",
+			"src/lib/repo-regrade.ts",
+			"const input: RepoGradeInput =",
 		);
 		// Fields a writer legitimately cannot know are listed here, with the
 		// reason. Anything else missing is a signal computing as zero.
@@ -84,9 +86,11 @@ describe("every repoScore writer feeds the formula the same inputs", () => {
 	});
 
 	it("regrade-repos and enrich-repos pass an identical input key set", () => {
+		// The regrade lane's per-row grading lives in src/lib/repo-regrade.ts,
+		// shared by its full pass and its scoped (--only) runs.
 		const regrade = gradeCallKeys(
-			"scripts/regrade-repos.ts",
-			"const grade = repoGrade(",
+			"src/lib/repo-regrade.ts",
+			"const input: RepoGradeInput =",
 		);
 		const enrich = gradeCallKeys("scripts/enrich-repos.ts", "? repoGrade(");
 		expect(regrade.size).toBeGreaterThan(15); // the parse actually found the call
