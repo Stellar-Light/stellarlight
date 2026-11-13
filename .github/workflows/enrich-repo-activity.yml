@@ -57,4 +57,7 @@ jobs:
       # dispatch stays dry-run unless the execute box is ticked. Once the
       # never-stamped lane is empty the schedule keeps rows ≤14 days old.
       - name: Enrich repo activity
-        run: pnpm exec tsx scripts/enrich-repo-activity.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }} ${{ github.event_name == 'schedule' && '--stale-days 14' || '' }}
+        # The only input reaches the script through env, never as script text.
+        env:
+          ONLY: ${{ inputs.only }}
+        run: pnpm exec tsx scripts/enrich-repo-activity.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} ${ONLY:+--only "$ONLY"} ${{ github.event_name == 'schedule' && '--stale-days 14' || '' }}

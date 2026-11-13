@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-13",
+		surfaces: ["api"],
+		version: "spec@1.9.149",
+		type: "changed",
+		summary:
+			"A repo's `repoScore` and `repoScoreLabel` can now be recomputed for named repos only. searchRepos ranks by them, and the regrade lane that writes them used to run over every row or none: it now takes a list of owner/repo names and grades just those, with the same code as the full pass, and reads back every write. Its first use is the 38 repos that enrich-repos unlinked on 2026-11-13 from projects that no longer list them: their stored grades still counted the old project's SCF award or prominence. Planned from the public rows on 2026-11-13, a run over them lowers 27 scores by 1 to 12 points (12 of them because the old project no longer counts, 15 by time only, commit and release age, since the last full regrade), and no label changes. The scores change when that run is dispatched, not with this release. No schema change.",
+		detail:
+			"The full regrade is not run by this release. It would move 6,351 of 13,868 rows, mostly by 1 or 2 points, because nothing grades a row between manual regrades (replayed on the public rows on 2026-11-13; the lane's own dry run printed 6,339 shortly before, while a code scan was still writing). 4,556 moves are time only (commit and release age), about 1,360 are rows whose archive flag, stars, SDK pin or code scan changed after the last full regrade on 2026-09-15 through lanes that do not grade, and 425 are builder-owned repos added since then, which are created with no grade and stored as 0. Replayed on 20 real queries against the live ranking (matching it exactly before), the full regrade changes the top 10 of 13 of them: 12 repos enter, 12 leave, no first or second result changes, and one third result does.",
+	},
+	{
 		date: "2026-11-12",
 		surfaces: ["api"],
 		version: "spec@1.9.148",

@@ -1,0 +1,33 @@
+projects read: 1157
+scoped to 38 named rows
+
+moves:
+  aolieman/cfce-monorepo                          13 →  12  (-1)  low → low
+  jamiels/ramm.ai                                 32 →  21  (-11)  low → low
+  naveed-siddiqi/lumos-dao                         8 →   6  (-2)  low → low
+  normalfinance/arbitrage-bot                     10 →   9  (-1)  low → low
+  normalfinance/defindex-strategies               15 →  14  (-1)  low → low
+  normalfinance/normal-auth                       19 →  17  (-2)  low → low
+  normalfinance/stellar-crank                      6 →   5  (-1)  low → low
+  normalfinance/tesseract                         26 →  25  (-1)  low → low
+  octoplace/contracts                              6 →   3  (-3)  low → low
+  octoplace/contracts-upgradable                   6 →   3  (-3)  low → low
+  octoplace/octoplace-contracts                    6 →   3  (-3)  low → low
+  octoplace/Octoplace-NFT-Swap-                    6 →   3  (-3)  low → low
+  octoplace/octoplace-octomillion                  6 →   3  (-3)  low → low
+  octoplace/octoplace-proxy-contracts              6 →   3  (-3)  low → low
+  octoplace/octoplace-ui                           6 →   3  (-3)  low → low
+  orbit-cdp/hermes                                22 →  21  (-1)  low → low
+  paltalabs/defindex-hackathon                    16 →   9  (-7)  low → low
+  paltalabs/defindex-meru-sdk                     19 →  10  (-9)  low → low
+  paltalabs/defindex-ybx-incident                 26 →  14  (-12)  low → low
+  raum-network/CRE_Developer_Expert_Program       25 →  24  (-1)  low → low
+  raum-network/raum-chrysalis-ccipintegration     18 →  17  (-1)  low → low
+  raum-network/raum-chrysalis-cctpintegration     18 →  17  (-1)  low → low
+  raum-network/raum-chrysalis-multichain-v2       16 →  15  (-1)  low → low
+  raum-network/raum-chrysalis-stellarcontract     16 →  15  (-1)  low → low
+  raum-network/raum-chrysalis-v2                  37 →  36  (-1)  low → low
+  raum-network/raum-rnbridge-frontend             21 →  20  (-1)  low → low
+  usepaykit/paykit-sdk                            21 →  16  (-5)  low → low
+
+DRY RUN: 13868 read · 38 of 38 named matched · 27 would change

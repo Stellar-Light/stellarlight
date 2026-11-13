@@ -1,0 +1,21 @@
+soroban rust sdk         exact:True overlap:10/10 truncatedPool:True
+javascript sdk           exact:True overlap:10/10 truncatedPool:True
+oracle                   exact:True overlap:10/10 truncatedPool:False
+anchor platform          exact:True overlap:10/10 truncatedPool:True
+wallet kit               exact:True overlap:10/10 truncatedPool:True
+stellar wallets kit      exact:True overlap:10/10 truncatedPool:True
+soroswap                 exact:True overlap:10/10 truncatedPool:False
+blend lending protocol   exact:True overlap:10/10 truncatedPool:False
+passkey smart wallet     exact:True overlap:10/10 truncatedPool:True
+horizon api server       exact:True overlap:10/10 truncatedPool:True
+stellar core consensus   exact:True overlap:10/10 truncatedPool:True
+zk                       exact:True overlap:10/10 truncatedPool:True
+x402                     exact:True overlap:10/10 truncatedPool:False
+oracle price feed        exact:True overlap:10/10 truncatedPool:True
+streaming payments       exact:True overlap:10/10 truncatedPool:True
+escrow vault             exact:True overlap:10/10 truncatedPool:True
+payments                 exact:True overlap:10/10 truncatedPool:True
+remittance               exact:True overlap:10/10 truncatedPool:False
+nft marketplace          exact:True overlap:10/10 truncatedPool:True
+wallet                   exact:True overlap:10/10 truncatedPool:True
+20 of 20 exact; mean overlap 10.0/10

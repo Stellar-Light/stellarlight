@@ -50,4 +50,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Verify
         # Scheduled runs always execute; manual dispatch stays dry unless ticked.
-        run: pnpm exec tsx scripts/verify-published-packages.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} ${{ inputs.limit != '0' && format('--limit={0}', inputs.limit) || '' }} ${{ inputs.only && format('--only={0}', inputs.only) || '' }}
+        # The inputs reach the script through env, never as script text;
+        # --limit=0 means no limit, as an absent --limit does.
+        env:
+          LIMIT: ${{ inputs.limit }}
+          ONLY: ${{ inputs.only }}
+        run: pnpm exec tsx scripts/verify-published-packages.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} ${LIMIT:+"--limit=$LIMIT"} ${ONLY:+"--only=$ONLY"}
