@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-12T14:13:14.204Z",
+	"generatedAt": "2026-11-13T13:38:37.716Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -29,7 +29,7 @@
 		},
 		{
 			"probe": "note-stale:blindpaylabs/blindpay-node:npm:@blindpay/node",
-			"note": "note (asOf 2026-09-02) cites 5.3.1; registry latest is 6.1.0 (published 2026-11-11)",
+			"note": "note (asOf 2026-09-02) cites 5.3.1; registry latest is 6.2.0 (published 2026-11-12)",
 			"surface": "code"
 		},
 		{
@@ -94,7 +94,7 @@
 		},
 		{
 			"probe": "note-stale:raceeyxo/use-stellar:npm:use-stellar",
-			"note": "note (asOf 2026-09-02) cites 0.1.5; registry latest is 0.2.2 (published 2026-11-12)",
+			"note": "note (asOf 2026-09-02) cites 0.1.5; registry latest is 0.2.3 (published 2026-11-12)",
 			"surface": "code"
 		},
 		{
@@ -119,7 +119,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-ledger-data-indexer:docker:stellar/stellar-ledger-data-indexer",
-			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-10-30 (published 2026-10-30)",
+			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-11-12 (published 2026-11-12)",
 			"surface": "code"
 		},
 		{
@@ -149,7 +149,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
-			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-10-26 (published 2026-10-26)",
+			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-11-13 (published 2026-11-13)",
 			"surface": "code"
 		},
 		{
@@ -239,7 +239,7 @@
 		},
 		{
 			"probe": "note-stale:axis-markets/js-client:npm:@axis-markets/client",
-			"note": "note (asOf 2026-09-14) cites 0.5.0; registry latest is 0.9.0 (published 2026-10-23)",
+			"note": "note (asOf 2026-09-14) cites 0.5.0; registry latest is 0.9.1 (published 2026-11-12)",
 			"surface": "code"
 		},
 		{
@@ -304,7 +304,7 @@
 		},
 		{
 			"probe": "note-stale:nirvana-labs/nirvana-typescript:npm:@nirvana-labs/nirvana",
-			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 3.1.0 (published 2026-11-10)",
+			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 3.3.0 (published 2026-11-13)",
 			"surface": "code"
 		},
 		{
@@ -314,12 +314,17 @@
 		},
 		{
 			"probe": "note-stale:blindpaylabs/blindpay-python:pypi:blindpay",
-			"note": "note (asOf 2026-09-14) cites 3.4.0; registry latest is 4.0.1 (published 2026-11-11)",
+			"note": "note (asOf 2026-09-14) cites 3.4.0; registry latest is 4.1.1 (published 2026-11-12)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-predates-archival:Wadzzo2023/brand-wadzzo",
 			"note": "public note asOf 2026-09-07; repo archived 2026-10-27 — the note describes a live repo",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:shariqazeem/kyvernlabs",
+			"note": "public note asOf 2026-04-08; github.com/shariqazeem/kyvernlabs is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
 		},
 		{
