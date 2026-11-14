@@ -1,0 +1,88 @@
+name: Repair missing logos (manual)
+
+# Project rows whose logo file answers 404 get the image from their own SCF
+# page, uploaded to R2 as a new media record, and the row pointed at it.
+# Measured on 2026-11-13: 137 rows, written by the SCF sync between 2026-06-14
+# and 2026-09-06 from a runner with no R2 secrets (src/lib/media-files.ts).
+#
+# Dry run by default. The plan reads the public API and SCF's public pages
+# with GET and needs no secret, so the Plan step prints, before any write,
+# one line per row: the source URL and what would be written, or why the row
+# cannot be repaired (it is then left as it is). An execute uploads, reads
+# each new file back from the site byte for byte, then points the row at it
+# and reads the row back from the API. Re-plan must then say 0: a repair
+# still planned after an execute did not hold.
+#
+# Dispatch only: no schedule, and an execute only on main. Run a dry run and
+# read it, then execute one row (only=<slug>), then all. Nothing is deleted.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write? Leave false for a dry run."
+        type: boolean
+        default: false
+      only:
+        description: "One project slug. Leave empty for every row."
+        default: ""
+
+concurrency:
+  group: repair-missing-logos
+  cancel-in-progress: false
+
+permissions: { contents: read }
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ONLY: ${{ inputs.only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Plan (dry run)
+        run: pnpm exec tsx scripts/data/repair-missing-logos.ts ${ONLY:+--only "$ONLY"}
+      # Only main's code may write. A dispatch on another branch would run
+      # that branch's script with the production secrets, so it plans and
+      # stops here, loudly, instead of reading as an execute that did nothing.
+      - name: Refuse an execute off main
+        if: ${{ inputs.execute && github.ref != 'refs/heads/main' }}
+        run: |
+          echo "::error::execute runs only on main; this run on $GITHUB_REF planned and wrote nothing"
+          exit 1
+      # The only step that holds a secret. Without the four R2 values the
+      # script refuses before its first write. It stops at the first upload
+      # or file read-back that fails; a row whose own update or read-back
+      # fails is counted, the run goes on, and the step ends red.
+      - name: Execute
+        if: ${{ inputs.execute && github.ref == 'refs/heads/main' }}
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: pnpm exec tsx scripts/data/repair-missing-logos.ts --execute ${ONLY:+--only "$ONLY"}
+      # The lane's claim about the world after it ran: nothing left to repair.
+      # Rows it could not repair are listed again and do not fail the step.
+      - name: Re-plan
+        if: ${{ !cancelled() && inputs.execute && github.ref == 'refs/heads/main' }}
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm exec tsx scripts/data/repair-missing-logos.ts ${ONLY:+--only "$ONLY"} 2>&1 | tee replan.log
+          n=$(grep -oE '^[0-9]+ repair\(s\) planned' replan.log | grep -oE '^[0-9]+' || echo unknown)
+          if [ "$n" != "0" ]; then
+            echo "::error::$n repair(s) still planned after the execute; see the plan above"
+            exit 1
+          fi
+          echo "0 repairs planned after the execute"

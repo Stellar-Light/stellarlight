@@ -126,6 +126,9 @@ const CLASS_OF: Record<string, string> = {
 	// sweeps): promised official-record fields empty on specific rows — the
 	// same class as the population misses above, found by a different sweep.
 	"completeness-residual": "evidence-population",
+	// A served logo or image whose file answers 404 (check-media-files): the
+	// field is populated and nothing stands behind it.
+	"media-file-missing": "evidence-population",
 	// §0.4 taxonomy coverage — a demanded vertical that is invisible
 	"demand-miss": "taxonomy-coverage",
 	"coverage-gap": "taxonomy-coverage",

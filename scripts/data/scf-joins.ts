@@ -3,13 +3,22 @@
  * the slug form enrich-from-scf.ts matches with, in one module tests can
  * read. No I/O.
  */
+
+import {
+	RESERVED as GITHUB_RESERVED,
+	parseGithubIdentity,
+} from "../../src/lib/github-identity";
 import {
 	cleanTitle as cleanScfTitle,
 	findTitlePrefixMatch,
 	normSpaceless,
 	stemSlugHash,
 } from "../../src/lib/identity";
-import { registrableDomain } from "../../src/lib/partner-project-identity";
+import {
+	parseLink,
+	registrableDomain,
+	urlHost,
+} from "../../src/lib/partner-project-identity";
 import { isThirdPartyLink } from "../eval/scf-official";
 
 /** Generate slug from name */
@@ -277,6 +286,17 @@ export const SCF_SLUG_OVERRIDES: Record<string, string> = {
 	// exact-matches the band-protocol DUPE row by name; the CANONICAL slug is
 	// `band`, which otherwise matches nothing and would keep stale data.
 	"band-protocol-2ob": "band",
+	// Read 2026-11-14. The page "Soroban Optimistic Oracle (SOO)" (SCF #33,
+	// $30,000 Build Award) links two repositories of one account:
+	// github.com/stackman27/SOO, which is the repository our row links
+	// (Rust, pushed 2025-04-13), and github.com/stackman27/soroban-opt-oracle,
+	// which answers 404. The page reader returns the second as the page's
+	// site, and two rows link that account (this one, and the Draft
+	// `soroban-optimsitic-oracle`, the awarded submission's own misspelling),
+	// so the logo repair's same-repository rule could not confirm the page.
+	// The name already joins this page to this row in the sync; this entry
+	// records why the page is the row's.
+	"soroban-optimistic-oracle-soo-b6y": "soroban-optimistic-oracle",
 };
 
 /** A directory row as the matcher reads it. */
@@ -517,9 +537,15 @@ const CODE_HOST =
 	/^(?:github\.com|gitlab\.com|github\.io|vercel\.app|netlify\.app|herokuapp\.com)$/;
 
 /** The GitHub owner a link names, lowercased (SCF writes an org as
- * github.com/orgs/<owner>), or null. */
-const githubOwner = (u?: string | null) =>
-	u?.match(/github\.com\/(?:orgs\/)?([^/\s?#]+)/i)?.[1]?.toLowerCase() ?? null;
+ * github.com/orgs/<owner>), or null. GitHub's own first segments (sponsors,
+ * marketplace) name nobody: two links under github.com/sponsors/ once read as
+ * the shared owner "sponsors". */
+const githubOwner = (u?: string | null) => {
+	const owner = u
+		?.match(/github\.com\/(?:orgs\/)?([^/\s?#]+)/i)?.[1]
+		?.toLowerCase();
+	return owner && !GITHUB_RESERVED.has(owner) ? owner : null;
+};
 
 /**
  * The link an SCF page and a row share, or null: the registrable domain of
@@ -539,10 +565,138 @@ export function sharedLink(
 		site === registrableDomain(row.links?.website)
 	)
 		return `site ${site}`;
+	return sharedOwner(page, row);
+}
+
+/** The GitHub owner an SCF page and a row both link, or null. */
+function sharedOwner(
+	page: { website?: string | null; github?: string | null },
+	row: JoinRow,
+): string | null {
 	const owner = githubOwner(page.github) ?? githubOwner(page.website);
 	const ours =
 		githubOwner(row.links?.github) ?? githubOwner(row.links?.website);
 	return owner && owner === ours ? `github ${owner}` : null;
+}
+
+/** Hosts whose pages belong to many unrelated owners (a channel, a profile,
+ * a package, a submission): a link on one is no project's site, even when
+ * both links are the same URL. */
+const SHARED_HOST =
+	/^(?:youtube\.com|youtu\.be|vimeo\.com|twitch\.tv|facebook\.com|instagram\.com|tiktok\.com|reddit\.com|npmjs\.com|jsr\.io|crates\.io|pypi\.org|huggingface\.co|bitbucket\.org|devpost\.com|dorahacks\.io|taikai\.network|figma\.com|bit\.ly)$/;
+
+/**
+ * The site an SCF page and a row share, as the logo repair reads it: the
+ * same full host, a leading www aside. A registrable domain is not enough
+ * here: two unrelated tenants of onrender.com or pages.dev share one, and a
+ * subdomain can be another party's. Never a code host, a host that holds
+ * many owners' pages (SHARED_HOST) or a third-party page.
+ */
+function sameHost(
+	page: { website?: string | null },
+	row: JoinRow,
+): string | null {
+	// urlHost, not a cut of the link's text: see its note. The domain is read
+	// off the parsed host for the same reason.
+	const host = urlHost(page.website);
+	const domain = registrableDomain(host);
+	return host &&
+		host === urlHost(row.links?.website) &&
+		!CODE_HOST.test(domain) &&
+		!SHARED_HOST.test(domain) &&
+		!isThirdPartyLink(String(page.website))
+		? `site ${host}`
+		: null;
+}
+
+/**
+ * The GitHub owner and repository a link names, lowercased, or null. Stricter
+ * than githubOwner: the link's host must be github.com as a URL parser reads
+ * it (github.com inside a path or a query names nobody), and the owner must
+ * be a login (parseGithubIdentity).
+ */
+function githubRef(
+	link?: string | null,
+): { owner: string; repo: string | null } | null {
+	const url = parseLink(link);
+	if (!url || urlHost(link) !== "github.com") return null;
+	const seg = url.pathname.split("/").filter(Boolean);
+	if (seg[0]?.toLowerCase() === "orgs") seg.shift();
+	const id = parseGithubIdentity(`github.com/${seg.slice(0, 2).join("/")}`);
+	if (!id.orgLogin) return null;
+	const owner = id.orgLogin.toLowerCase();
+	return {
+		owner,
+		repo: id.repo ? `${owner}/${id.repo.name.toLowerCase()}` : null,
+	};
+}
+
+const rowGithub = (row: JoinRow) =>
+	githubRef(row.links?.github) ?? githubRef(row.links?.website);
+
+/**
+ * The GitHub owners more than one project links (a lineage shadow and its
+ * canonical row are one project). Measured 2026-11-14: 49, among them
+ * stellar (11 projects), soneso (8) and creit-tech (6). Such an owner says
+ * which organisation a page belongs to, not which of its projects.
+ */
+export function githubOwnersOfManyRows(rows: readonly JoinRow[]): Set<string> {
+	const slugs = new Set(rows.map((r) => r.slug));
+	const projects = new Map<string, Set<string>>();
+	for (const r of rows) {
+		const owner = rowGithub(r)?.owner;
+		if (!owner) continue;
+		const id =
+			r.canonicalSlug && slugs.has(r.canonicalSlug) ? r.canonicalSlug : r.slug;
+		projects.set(owner, (projects.get(owner) ?? new Set()).add(id));
+	}
+	return new Set(
+		[...projects].filter(([, ids]) => ids.size > 1).map(([owner]) => owner),
+	);
+}
+
+/**
+ * The GitHub link that says an SCF page is this row's, or null: the same
+ * owner when that owner is this project's alone, the same repository when
+ * several projects link the owner (`ownersOfManyRows`).
+ */
+function sameGithub(
+	page: { website?: string | null; github?: string | null },
+	row: JoinRow,
+	ownersOfManyRows: ReadonlySet<string>,
+): string | null {
+	const theirs = githubRef(page.github) ?? githubRef(page.website);
+	const ours = rowGithub(row);
+	if (!theirs || !ours || theirs.owner !== ours.owner) return null;
+	if (!ownersOfManyRows.has(theirs.owner)) return `github ${theirs.owner}`;
+	return theirs.repo && theirs.repo === ours.repo
+		? `github ${theirs.repo}`
+		: null;
+}
+
+/**
+ * What says an SCF page is this row's own, or null: a reviewed join
+ * (SCF_SLUG_OVERRIDES, SCF_PAGES_BEYOND_CAP), else a site on the same full
+ * host (sameHost), else a GitHub owner or repository the two link
+ * (sameGithub). The logo repair asks before it takes a page's image as a
+ * row's logo: the page a row stores was often joined by name alone, and the
+ * bridge row (bridge.xyz) stores "Bridge+Anchor XOF/USDC for lomi.". Stricter
+ * than sharedLink, which the SCF sync still uses for pages outside the
+ * listing. `ownersOfManyRows`: githubOwnersOfManyRows over every row.
+ */
+export function pageConfirmsRow(
+	pageSlug: string,
+	page: { website?: string | null; github?: string | null },
+	row: JoinRow,
+	ownersOfManyRows: ReadonlySet<string>,
+): string | null {
+	const reviewed = SCF_SLUG_OVERRIDES[pageSlug];
+	if (
+		(reviewed && (reviewed === row.slug || reviewed === row.canonicalSlug)) ||
+		SCF_PAGES_BEYOND_CAP[row.slug] === pageSlug
+	)
+		return "a reviewed join";
+	return sameHost(page, row) ?? sameGithub(page, row, ownersOfManyRows);
 }
 
 /**

@@ -14,6 +14,7 @@
  */
 import "./load-env";
 import { getPayload } from "payload";
+import { assertMediaStore } from "../src/lib/media-files";
 import configPromise from "../src/payload.config";
 import { ENTITY_LINK_FIXES } from "./data/curation-maps";
 
@@ -24,6 +25,8 @@ const dryRun = !args.includes("--execute");
  *  one: that is a different change, with a different blast radius, and it
  *  should be asked for rather than ride along. */
 const linksOnly = args.includes("--links-only");
+// The logo pass uploads files: with no file store it stops before any write.
+if (!dryRun && !linksOnly) assertMediaStore();
 /** --only <slug>: act on ONE entity.
  *
  *  The 2026-09-15 dry run is why this exists. A links-only pass over all 47

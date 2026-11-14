@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getPayload } from "payload";
+import { assertMediaStore } from "../src/lib/media-files";
 import configPromise from "../src/payload.config";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -208,6 +209,9 @@ function normalizeLink(link: string): string {
 }
 
 async function run() {
+	// Uploads logos, and swallows an upload error: with no file store it
+	// stops before any write.
+	assertMediaStore();
 	// Read CSV file
 	const csvPath = path.join(__dirname, "airtable_import.csv");
 	if (!fs.existsSync(csvPath)) {

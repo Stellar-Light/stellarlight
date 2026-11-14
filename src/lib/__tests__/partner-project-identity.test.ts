@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
 	ALLOWED_DOMAIN_MISMATCHES,
 	PARTNER_PROJECT_LINKS,
+	parseLink,
 	registrableDomain,
+	urlHost,
 } from "../partner-project-identity";
 
 describe("registrableDomain", () => {
@@ -31,6 +33,36 @@ describe("registrableDomain", () => {
 	it("empty/null-safe", () => {
 		expect(registrableDomain(null)).toBe("");
 		expect(registrableDomain("")).toBe("");
+	});
+});
+
+describe("urlHost", () => {
+	it("reads the host a URL parser reads, not the one the text shows", () => {
+		// Each of these is a page at lomi.africa (re-audit of 2026-11-14).
+		for (const u of [
+			"https://bridge.xyz:x@lomi.africa/",
+			"https://lomi.africa/?u=//bridge.xyz",
+			"https://lomi.africa//bridge.xyz",
+			"https://lomi.africa\\@bridge.xyz",
+		])
+			expect(urlHost(u)).toBe("lomi.africa");
+	});
+	it("drops the scheme, a leading www, the port, the case and a final dot", () => {
+		expect(urlHost("HTTPS://WWW.Blend.Capital:443/app?x#y")).toBe(
+			"blend.capital",
+		);
+		expect(urlHost("https://acme.example./")).toBe("acme.example");
+		expect(urlHost("  http://app.acme.example  ")).toBe("app.acme.example");
+	});
+	it("reads a link with no scheme as https", () => {
+		expect(urlHost("stellar.expert/explorer")).toBe("stellar.expert");
+		expect(urlHost("acme.example:8080/x")).toBe("acme.example");
+		expect(parseLink("acme.example/a/b")?.pathname).toBe("/a/b");
+	});
+	it("answers nothing for text that is no URL", () => {
+		for (const u of [null, undefined, "", "   ", "http://[bad", "not a url"])
+			expect(urlHost(u)).toBe("");
+		expect(parseLink("http://[bad")).toBeNull();
 	});
 });
 

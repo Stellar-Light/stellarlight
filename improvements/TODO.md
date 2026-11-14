@@ -299,7 +299,107 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     `rowsWithReason` equal to the row count on the live API, checked by
     someone other than the author.
 
+13. **Project rows serve a logo whose file answers 404.**
+    Probe: `curl -s -o /dev/null -w '%{http_code}' https://www.stellarlight.xyz/api/media/file/account-demolisher-scf.png`
+    answers 404, and `jq .tally.refsMissing improvements/audits/media-files-latest.json`
+    reads 137 (2026-11-13: 400 of 1,232 media records have no file; 137
+    project rows point at one, 117 of them Live; 263 no row points at).
+    Found by one GET per media file on 2026-11-13. Cause: the record was
+    saved by a process with the database and no file store, so Payload wrote
+    the file to that machine's disk. Seven runs of the SCF sync between
+    2026-06-14 and 2026-09-06 wrote 160 of them and one curation run two
+    more: the workflows named R2 secrets the repository did not hold until
+    2026-09-23T17:10Z (run 33432705400 prints the four variables empty beside
+    17 THUMBNAIL lines). The other 238 date from 2025-11 and 2025-12, before
+    any lane held the database; every one of the 234 from 2025-12-17 has a
+    served twin uploaded 16 to 22 minutes later.
+    State: branch `lane/r1113-media-missing` (spec 1.9.151, renumbered at
+    merge): an upload with no file store is refused in the Media collection
+    and in each writer; `media-files.yml` probes daily and feeds the ledger;
+    `repair-missing-logos.yml` (dispatch, dry run by default) plans 117
+    repairs from each row's own SCF page and leaves 20 rows unchanged. Not
+    run: the lane writes to production.
+    Done when: the repair has run (dry run read, one row, then all, re-plan
+    0), the next `media-files` artifact lists only the rows it could not
+    repair, and each of those has a reviewed join, a logo set by hand or a
+    cleared pointer.
+
 ## Next
+
+Found by the media lane on 2026-11-13 (branch lane/r1113-media-missing), not
+changed there:
+
+- 18 project rows store an SCF page that no reviewed join and no shared
+  site or GitHub owner confirms, so the logo repair leaves them: authline,
+  ballast-re, blink, bridge, dd, jumpa, latch, lucent, merkl, mesh, pg-atlas,
+  rails, smart-treasury, stabble, study-stellar-sdk-soroban, vank, velo,
+  west-african-ambassadors. Some are another project's page: the bridge row
+  (bridge.xyz) stores "Bridge+Anchor XOF/USDC for lomi." (site lomi.africa)
+  and serves its award, `scf.awarded` true and 95,000 USD, with basis
+  official-record; merkl stores Merkle Science's page, velo Wirex's, rails
+  and dd pages of other names (those four serve no award). Others are
+  likely right and lack a link the rule reads (latch and pg-atlas share
+  only a URL on a code host; vank's page site differs from the row's).
+  Probe: `pnpm exec tsx scripts/data/repair-missing-logos.ts` prints
+  "a name alone is not enough" for each. Fix per row: a reviewed entry in
+  SCF_SLUG_OVERRIDES where the page is the row's, an SCF_FIX unlink where
+  it is not, then re-run the repair. A source SCF serves as WebP or GIF is
+  also left (Payload re-encodes those on upload, so the new file could not
+  be read back byte for byte); none of the 137 is one today.
+- ankr and stbl hold a logo record with no file and record no SCF page
+  (the page that supplied the image was since unlinked). Set a logo through
+  LOGO_SET or clear the pointer.
+- The SCF sync logs a failed thumbnail upload and exits 0
+  (`THUMBNAIL ERROR`, scripts/enrich-from-scf.ts). With no file store it now
+  stops before its first write; any other upload error is still only a log
+  line. Counting it as a write error would hold the lane red on one image
+  SCF serves in a form Payload refuses, so measure how often it fires first.
+- The Media guard does not cover an update that crops an image and sends
+  no new file. The hook refuses a create and an update that carries a file
+  (`req.file`); a crop-only update has none, and Payload then re-reads the
+  stored file and writes the cropped one, to the local disk when there is
+  no store. No script does this; the admin's crop tool on a machine with
+  the database and no R2 values would. Refuse it by reading `uploadEdits`
+  off the request, with a test against Payload's update operation.
+- `sharedLink` (scripts/data/scf-joins.ts), which the SCF sync uses to join
+  pages outside SCF's listing, compares registrable domains: two unrelated
+  tenants of onrender.com or pages.dev, or two channels on youtube.com,
+  confirm each other, and a GitHub owner many projects link (stellar 11,
+  soneso 8, creit-tech 6 on 2026-11-14) confirms any of them. The logo
+  repair no longer uses it (it asks for the same full host, refuses hosts
+  that hold many owners' pages, and asks for the same repository when
+  several projects link the owner). Not changed for the sync, because a
+  stricter rule there can undo joins that carry awards: run the sync's dry
+  run with the stricter rule, read which joins move, then decide.
+- `registrableDomain` (src/lib/partner-project-identity.ts) cuts the host
+  out of the link's text, so the text can name another host. Failing
+  cases, each a page at lomi.africa (or evil.example) read as the other
+  name: `registrableDomain("https://bridge.xyz:x@lomi.africa/")`,
+  `("https://lomi.africa/?u=//bridge.xyz")` and
+  `("https://lomi.africa//bridge.xyz")` answer `bridge.xyz`;
+  `("evil.example?//partner.example")` answers `partner.example`; and
+  `("https://acme.example./x")` answers `example.`. Callers: the sync's
+  `sharedLink` and `foldLinkNote`, `claimVerifiedByDomain` (partner
+  claims), the off-site redirect test in `page-verdict.ts`, the packet
+  stamp re-read and the partner link checks. The logo repair reads hosts
+  with `urlHost` (same file), which uses a URL parser. Not changed here:
+  a version routed through `urlHost` answers the same on all 2,550 links
+  the public API serves (project, entity and partner links, 127 SCF page
+  links, read 2026-11-14), but it turns an internationalised host into
+  punycode, and the link checker's stored URLs (`link-checks`, not public)
+  could not be compared. Fix in its own change: read `link-checks` with
+  the database, compare old and new on every stored and final URL, then
+  route `registrableDomain` through `urlHost`.
+- `soroban-optimsitic-oracle` (Draft) is a second row for the project
+  `soroban-optimistic-oracle` holds: its name is the awarded submission's
+  own misspelling, and its only links are github.com/stackman27/soroban-opt-oracle,
+  which answers 404 (2026-11-14). It has no canonical slug. Fold it into
+  the canonical row.
+- enrich-entities.yml held the database and no R2 secret, so an execute of
+  its logo pass would have written entity logos to the runner's disk. The
+  secrets are added and the script refuses without them. Its 9 runs, all on
+  2026-09-15, left no entity logo without a file: every entity logo
+  answered 200 on 2026-11-13.
 
 Found by the repo-unlink lane on 2026-11-12 (branch lane/r1112-repo-unlink):
 
@@ -1034,6 +1134,27 @@ improvements/audits/2026-11-13-regrade-drift/):
   which fails on any new one and on any entry fixed but still listed.
 
 ## Owner decisions (safe default in brackets)
+
+- Media records with no file that no row points at: 263 on 2026-11-13, 380
+  once the logo repair has run (it keeps each old record). They cost
+  nothing and `/api/media` lists each with a URL that answers 404. Delete
+  them through a dispatch with a dry run, or keep them [keep; the daily
+  media-files check lists them by filename].
+- Uploads on a developer's machine: with no R2 variables an upload used to
+  land on the local disk, and is now refused. A local admin pointed at the
+  production database needs production's own four R2 values to upload: any
+  other store, another bucket or another S3 endpoint, recreates the defect
+  (the record goes to production and the site reads a bucket that never got
+  the file), and the guard cannot tell one bucket from another. Add an
+  explicit opt-in for a local disk store with a local database, or keep the
+  refusal [keep the refusal: a local process pointed at the production
+  database is how 238 records lost their files].
+- 20 project rows keep serving a logo URL that answers 404 after the
+  repair, since no source could be confirmed as theirs. Serve null for a
+  logo known to be missing (a response change, and a stored verdict a lane
+  would have to own), or keep the stored URL until each row is settled
+  [keep: the site falls back to the default mark on a failed image, the
+  rows are open ledger findings, and a failed probe erases nothing].
 
 - Tell Planet Pay, Web3 Antivirus and the Sora maker that their linked
   GitHub paths now lead to another account (Web3 Antivirus's own site and
