@@ -1,5 +1,21 @@
 {
-	"generatedAt": "2026-11-13T13:37:54.315Z",
+	"generatedAt": "2026-11-14T12:39:09.291Z",
 	"detector": "battery-coverage",
-	"failures": []
+	"failures": [
+		{
+			"probe": "battery:q-sdf-2026-strategy-priorities",
+			"note": "top 0.54 < 0.6 via research/confidence for \"What are SDF's stated strategic priorities for 2026, and where are its strategy \" (history-org-tokenomics); best: https://lumenloop.com/research/scf-q4-2026-public-goods-award-results",
+			"surface": "corpus"
+		},
+		{
+			"probe": "battery:q-token-xlm-supply-total-circulating",
+			"note": "top 0.59 < 0.6 via research/confidence for \"How many XLM exist today, how many are in circulation, and can new XLM ever be c\" (history-org-tokenomics); best: https://lumenloop.com/research/stellar-weekly-roundup-week-nov-6-2026",
+			"surface": "corpus"
+		},
+		{
+			"probe": "battery:q-consumer-apps-spend-save-send",
+			"note": "top 0.50 < 0.6 via projects/confidence for \"Which consumer apps or cards let people spend, save, or send money on Stellar, a\" (retail-consumer); best: digitpay-finance",
+			"surface": "corpus"
+		}
+	]
 }

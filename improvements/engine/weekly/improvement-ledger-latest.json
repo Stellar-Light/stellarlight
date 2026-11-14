@@ -1,57 +1,57 @@
 {
-	"generatedAt": "2026-11-13T13:39:18.555Z",
-	"total": 1004,
-	"open": 143,
-	"refreshQueue": 134,
+	"generatedAt": "2026-11-14T12:40:37.913Z",
+	"total": 1009,
+	"open": 9,
+	"refreshQueue": 135,
 	"blockedUpstream": 17,
 	"lagPastGrace": {
 		"count": 11,
 		"graceDays": 20,
-		"oldestDays": 113,
+		"oldestDays": 114,
 		"probes": [
 			{
 				"id": "raven-routing:reflector-oracle-on-stellar",
-				"days": 113
+				"days": 114
 			},
 			{
 				"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
-				"days": 113
+				"days": 114
 			},
 			{
 				"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
-				"days": 77
+				"days": 78
 			},
 			{
 				"id": "raven-routing:who-gives-out-grants-for-building-on-stellar",
-				"days": 69
+				"days": 70
 			},
 			{
 				"id": "raven-routing:show-me-some-example-stellar-projects-i-can-copy",
-				"days": 69
+				"days": 70
 			},
 			{
 				"id": "raven-routing:which-stellar-wallets-support-soroban-contracts",
-				"days": 69
+				"days": 70
 			},
 			{
 				"id": "raven-routing:which-stellar-projects-had-a-smart-contract-audi",
-				"days": 69
+				"days": 70
 			},
 			{
 				"id": "raven-routing:how-does-blend-calculate-interest-accrual",
-				"days": 69
+				"days": 70
 			},
 			{
 				"id": "raven-routing:which-anchors-actually-implement-sep-24",
-				"days": 69
+				"days": 70
 			},
 			{
 				"id": "raven-routing:how-much-has-the-stellar-community-fund-awarded-",
-				"days": 69
+				"days": 70
 			},
 			{
 				"id": "raven-routing:which-verticals-on-stellar-have-the-least-compet",
-				"days": 69
+				"days": 70
 			}
 		]
 	},
@@ -59,44 +59,44 @@
 		"raven-scorer": 6,
 		"raven-catalog-lag": 11
 	},
-	"closed": 710,
+	"closed": 848,
 	"verified": 7,
-	"cleared": 703,
+	"cleared": 841,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 487,
+	"clearedOnSilence": 625,
 	"closingRate": 0.22,
-	"silenceShare": 0.49,
+	"silenceShare": 0.62,
 	"recurrence": {
 		"reopened": 17,
 		"reopenedShareOfClosures": 0.02,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 181,
-				"recurred": 160,
-				"ratePct": 88.4
+				"newFindings": 186,
+				"recurred": 165,
+				"ratePct": 88.7
 			},
 			"lifetime": {
-				"newFindings": 1004,
-				"recurred": 436,
-				"ratePct": 43.4
+				"newFindings": 1009,
+				"recurred": 441,
+				"ratePct": 43.7
 			}
 		}
 	},
-	"oldestOpenDays": 47,
+	"oldestOpenDays": 43,
 	"inWave": 0,
-	"highOpen": 142,
-	"staleHighOpen": 29,
+	"highOpen": 5,
+	"staleHighOpen": 0,
 	"bySurface": [
-		{
-			"surface": "code",
-			"open": 137,
-			"total": 277
-		},
 		{
 			"surface": "directory",
 			"open": 3,
 			"total": 254
+		},
+		{
+			"surface": "corpus",
+			"open": 3,
+			"total": 29
 		},
 		{
 			"surface": "retrieval",
@@ -109,6 +109,11 @@
 			"total": 37
 		},
 		{
+			"surface": "code",
+			"open": 0,
+			"total": 279
+		},
+		{
 			"surface": "scf",
 			"open": 0,
 			"total": 16
@@ -117,11 +122,6 @@
 			"surface": "contract",
 			"open": 0,
 			"total": 47
-		},
-		{
-			"surface": "corpus",
-			"open": 0,
-			"total": 26
 		}
 	],
 	"unverifiedOpen": 17,
@@ -129,65 +129,65 @@
 		{
 			"source": "raven-routing",
 			"open": 17,
-			"days": 60
+			"days": 61
 		}
 	],
 	"topOpen": [
 		{
-			"id": "gone-repos:noetherdex-noether",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "NoetherDEX/noether",
+			"id": "raven-loop:recent-mainnet-upgrade",
+			"surface": "consumer",
+			"source": "raven-loop",
+			"probe": "recent mainnet upgrade",
 			"severity": "high"
 		},
 		{
-			"id": "gone-repos:dione-b-stellar-start",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "Dione-b/stellar-start",
+			"id": "packet-recheck:one-click-http-404",
+			"surface": "directory",
+			"source": "packet-recheck",
+			"probe": "one-click — HTTP 404",
 			"severity": "high"
 		},
 		{
-			"id": "gone-repos:thiagocbalducci-neon-wallet-desktop",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "thiagocbalducci/neon-wallet-desktop",
+			"id": "golden-eval:soroban-hosterror-decode",
+			"surface": "retrieval",
+			"source": "golden-eval",
+			"probe": "soroban-hosterror-decode",
 			"severity": "high"
 		},
 		{
-			"id": "gone-repos:adletgamer-pakta",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "adletgamer/pakta",
+			"id": "engine-d-demand:help",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "help",
 			"severity": "high"
 		},
 		{
-			"id": "gone-repos:fernandomay-stellar-energy-assets",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "FernandoMay/stellar-energy-assets",
+			"id": "packet-recheck:kale-http-402",
+			"surface": "directory",
+			"source": "packet-recheck",
+			"probe": "kale — HTTP 402",
 			"severity": "high"
 		},
 		{
-			"id": "gone-repos:geraldin21l-stellaryield-ai",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "geraldin21l/stellaryield-ai",
-			"severity": "high"
+			"id": "weak-basis-liveness:command-robotics",
+			"surface": "directory",
+			"source": "weak-basis-liveness",
+			"probe": "command-robotics",
+			"severity": "medium"
 		},
 		{
-			"id": "gone-repos:anoukrimola-biochainfinalrepo",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "AnoukRImola/biochainfinalrepo",
-			"severity": "high"
+			"id": "raven-routing:top-stellar-projects-by-github-activity",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "top Stellar projects by GitHub activity",
+			"severity": "medium"
 		},
 		{
-			"id": "gone-repos:anuoluwapo25-fast-chow",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "Anuoluwapo25/fast-chow",
-			"severity": "high"
+			"id": "raven-routing:reflector-oracle-on-stellar",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "reflector oracle on Stellar",
+			"severity": "medium"
 		}
 	]
 }

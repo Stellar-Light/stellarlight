@@ -1,10 +1,10 @@
 {
-	"generatedAt": "2026-11-13T13:38:37.716Z",
+	"generatedAt": "2026-11-14T12:39:50.118Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
 			"probe": "note-stale:dfns/dfns-sdk-ts:npm:@dfns/sdk",
-			"note": "note (asOf 2026-09-03) cites 0.8.29; registry latest is 0.8.35 (published 2026-10-23)",
+			"note": "note (asOf 2026-09-03) cites 0.8.29; registry latest is 0.8.37 (published 2026-11-13)",
 			"surface": "code"
 		},
 		{
@@ -24,7 +24,7 @@
 		},
 		{
 			"probe": "note-stale:dfns/dfns-sdk-python:pypi:dfns-sdk",
-			"note": "note (asOf 2026-09-13) cites 0.0.4; registry latest is 1.0.5 (published 2026-11-06)",
+			"note": "note (asOf 2026-09-13) cites 0.0.4; registry latest is 1.0.6 (published 2026-11-13)",
 			"surface": "code"
 		},
 		{
@@ -54,7 +54,7 @@
 		},
 		{
 			"probe": "note-stale:keybase/client:docker:keybaseio/client",
-			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-09-17 (published 2026-09-17)",
+			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-13 (published 2026-11-13)",
 			"surface": "code"
 		},
 		{
@@ -123,13 +123,18 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:hot-dao/kit:npm:@hot-labs/kit",
+			"note": "note (asOf 2026-09-01) cites 1.6.4; registry latest is 2.0.0 (published 2026-11-13)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:allbridge-io/allbridge-core-js-sdk:npm:@allbridge/bridge-core-sdk",
 			"note": "note (asOf 2026-09-13) cites 3.35.0; registry latest is 3.38.0 (published 2026-10-29)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:soneso/kmp-stellar-sdk:maven:com.soneso.stellar:stellar-sdk",
-			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.16.0 (published 2026-10-24)",
+			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.17.0 (published 2026-11-14)",
 			"surface": "code"
 		},
 		{
@@ -323,11 +328,6 @@
 			"surface": "code"
 		},
 		{
-			"probe": "note-repo-gone:shariqazeem/kyvernlabs",
-			"note": "public note asOf 2026-04-08; github.com/shariqazeem/kyvernlabs is 404 — the note describes a repo that no longer exists",
-			"surface": "code"
-		},
-		{
 			"probe": "note-repo-gone:comzzy-comzzy/datavend",
 			"note": "public note asOf 2026-04-11; github.com/comzzy-comzzy/datavend is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
@@ -395,6 +395,11 @@
 		{
 			"probe": "note-repo-gone:Brale-xyz/canton-backup-utility",
 			"note": "public note asOf 2026-09-14; github.com/Brale-xyz/canton-backup-utility is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-predates-archival:stellar/debit-card-reference",
+			"note": "public note asOf 2026-09-14; repo archived 2026-11-13 — the note describes a live repo",
 			"surface": "code"
 		},
 		{
