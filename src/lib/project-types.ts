@@ -9,6 +9,19 @@
  * this array and `spec-enum-parity.test.ts` pins them to it. Provenance notes
  * for the newer values travelled here from the collection.
  */
+/** Option values of the projects.category select (src/collections/Projects.ts
+ * spreads this list). Every project has exactly one, so sweeping each category
+ * reads the whole directory (src/lib/completeness-sweep.ts). */
+export const PROJECT_CATEGORIES = [
+	"Infrastructure",
+	"Tooling",
+	"Partner Integration",
+	"User-Facing App",
+	"Asset",
+	"Protocol/Contract",
+	"Anchor",
+] as const;
+
 export const PROJECT_TYPES = [
 	"Wallet",
 	"DEX",

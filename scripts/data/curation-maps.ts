@@ -6529,11 +6529,17 @@ export const PRODUCT_KIND: Record<string, (typeof PRODUCT_KINDS)[number]> = {
 export const PRODUCT_KIND_UNRESOLVED: Record<string, string> = {};
 
 /** The shape of one `availability` row in the curated maps (Projects.ts
- * availability). storeUrl is left out on an unavailable row. */
+ * availability). An unavailable row whose listing is gone leaves storeUrl out
+ * and names the URL that was read in sourceUrl: the listing or app the
+ * operator linked, or the operator page that shows no app. A row with a
+ * storeUrl may add the page its state rests on: the operator's shutdown
+ * notice, or the developer page that ties a listing to the operator. A test
+ * fails on a row of any state with neither URL. */
 export interface AvailabilityRow {
 	platform: (typeof AVAILABILITY_PLATFORMS)[number];
 	state: (typeof AVAILABILITY_STATES)[number];
 	storeUrl?: string;
+	sourceUrl?: string;
 	checkedAt: string;
 	note?: string;
 }
@@ -6542,9 +6548,12 @@ export interface AvailabilityRow {
  * deliberately separate from lifecycle `status` (a Live project can have a
  * dead store listing, as xBull's did). EXACT-SYNC for listed slugs, applied by
  * curate-projects.ts with WALLET_AVAILABILITY below. The `available` rows of
- * 2026-07-14 were curl-verified live that day (200 on the exact surface URL);
- * the xBull ios/android `unavailable` rows carry the 2026-07-13 re-check date
- * and note the issue cited. A wallet left off keeps availability empty, which
+ * 2026-07-14 were curl-verified live that day (200 on the exact surface URL).
+ * The xBull and Lumexo mobile rows were fetched again on 2026-11-13, when an
+ * unavailable row gained sourceUrl (the listing or operator page that was
+ * read): xBull's two former listings returned 404, Lumexo's App Store button
+ * was still "Coming Soon", and Lumexo's Android app had a Google Play listing,
+ * so that row is available. A wallet left off keeps availability empty, which
  * means unknown, never "unavailable". checkedAt dates each row; re-verify
  * before relying. Moved here from curate-projects.ts on 2026-11-11 so a test
  * can read every served note; its 16 notes that served an em dash were
@@ -6696,17 +6705,22 @@ export const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 				"https://chromewebstore.google.com/detail/xbull-wallet/omajpeaffjgmlpmhbfdjepdejoemifpe",
 			checkedAt: "2026-07-14",
 		},
+		// Both listings come from xbull.app's own buttons as archived on
+		// 2025-06-19 (web.archive.org/web/20250619085551/https://xbull.app/).
 		{
 			platform: "ios",
 			state: "unavailable",
-			checkedAt: "2026-07-13",
-			note: "formerly-listed iOS app not reachable (sls-033 #519 re-check); web + Chrome extension remain live",
+			sourceUrl: "https://apps.apple.com/us/app/xbull-wallet/id6705122563",
+			checkedAt: "2026-11-13",
+			note: "The App Store button on xbull.app, as archived on 2025-06-19, linked this listing. Fetched 2026-11-13: HTTP 404, and Apple's lookup by id returned no result for 26 storefront country codes",
 		},
 		{
 			platform: "android",
 			state: "unavailable",
-			checkedAt: "2026-07-13",
-			note: "formerly-listed Play app not reachable (sls-033 #519 re-check); web + Chrome extension remain live",
+			sourceUrl:
+				"https://play.google.com/store/apps/details?id=app.xbull.mobile",
+			checkedAt: "2026-11-13",
+			note: "The Google Play button on xbull.app, as archived on 2025-06-19, linked this listing (app.xbull.mobile, the id in the wallet's own repo). Fetched 2026-11-13 from one machine: HTTP 404, also with the gl country parameter set to each of 8 countries",
 		},
 	],
 	freighter: [
@@ -6767,17 +6781,23 @@ export const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 			storeUrl: "https://app.lumexo.io/",
 			checkedAt: "2026-07-15",
 		},
+		// lumexo.io on 2026-07-15 said its mobile app was "arriving soon" and
+		// linked no store. On 2026-11-13 its Google Play button opens a listing
+		// and its App Store button is a disabled "Coming Soon".
 		{
 			platform: "ios",
 			state: "unavailable",
-			checkedAt: "2026-07-15",
-			note: "mobile app 'arriving soon': no App Store listing yet",
+			sourceUrl: "https://lumexo.io/",
+			checkedAt: "2026-11-13",
+			note: "Fetched 2026-11-13: lumexo.io (HTTP 200) shows its App Store button as 'Coming Soon' with no link, beside a working Google Play button",
 		},
 		{
 			platform: "android",
-			state: "unavailable",
-			checkedAt: "2026-07-15",
-			note: "mobile app 'arriving soon': no Play listing yet",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=io.lumexo.wallet",
+			checkedAt: "2026-11-13",
+			note: "Listed as 'Lumexo - Stellar Wallet' by Lumexo TECH, updated 2026-11-05; linked from lumexo.io",
 		},
 	],
 	swiftex: [
@@ -6878,13 +6898,15 @@ export const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
  * planning if they do. New entries go here.
  *
  * Every row was read on 2026-11-11. A store listing counts only when the
- * operator's own site, docs or repo links it (never a store search by name),
- * and it was then read in the store itself: Apple's lookup API by id, the
+ * operator's own site, docs or repo links it (never a store search by name;
+ * Empowch's Android row is the one exception and says why), and it was then
+ * read in the store itself: Apple's lookup API by id, the
  * Google Play page, the Chrome Web Store page. An unavailable row says in its
- * note why: an operator link that now leads nowhere, or a product its operator
- * has shut down (storeUrl then keeps the listing that is still up). A row says
- * where the app is offered, not that it supports Stellar there; a note says so
- * where checked. */
+ * note why: an operator link that now leads nowhere (sourceUrl is that link,
+ * fetched again on 2026-11-13, and storeUrl is left out), or a product its
+ * operator has shut down (storeUrl then keeps the listing that is still up). A
+ * row says where the app is offered, not that it supports Stellar there; a
+ * note says so where checked. */
 export const WALLET_AVAILABILITY: Record<string, AvailabilityRow[]> = {
 	albedo: [
 		{
@@ -7003,12 +7025,19 @@ export const WALLET_AVAILABILITY: Record<string, AvailabilityRow[]> = {
 	// Shut down by its operator on 2026-09-06 while its listings stay up: the
 	// timeline on cypherhq.io says "The current Cypher mobile app, dApp, and
 	// business platform will no longer be available", so each row is
-	// unavailable and keeps the URL its button still opens.
+	// unavailable and keeps the URL its button still opens. sourceUrl is the
+	// operator page that names the product, both read again on 2026-11-13
+	// (HTTP 200). The notice of termination, also the row's statusSourceUrl,
+	// names the app: after 2026-09-06 "the Cypher mobile application and the
+	// Cypher Card will no longer be operational". It does not name the dApp;
+	// the timeline quoted above, on the home page, does, so the web row
+	// cites that page.
 	cypher: [
 		{
 			platform: "ios",
 			state: "unavailable",
 			storeUrl: "https://apps.apple.com/in/app/cypher-wallet/id1604120414",
+			sourceUrl: "https://cypherhq.io/notice-of-termination",
 			checkedAt: "2026-11-11",
 			note: "'Get for iOS' on cypherhq.io still opens this listing (Cypher Wallet, last release 2026-07-14), but the operator says the mobile app is no longer available after its 2026-09-06 shutdown",
 		},
@@ -7017,6 +7046,7 @@ export const WALLET_AVAILABILITY: Record<string, AvailabilityRow[]> = {
 			state: "unavailable",
 			storeUrl:
 				"https://play.google.com/store/apps/details?id=com.cypherd.androidwallet",
+			sourceUrl: "https://cypherhq.io/notice-of-termination",
 			checkedAt: "2026-11-11",
 			note: "'Get for Android' on cypherhq.io still opens this listing (updated 2026-07-13), but the operator says the mobile app is no longer available after its 2026-09-06 shutdown",
 		},
@@ -7024,10 +7054,20 @@ export const WALLET_AVAILABILITY: Record<string, AvailabilityRow[]> = {
 			platform: "web",
 			state: "unavailable",
 			storeUrl: "https://app.cypherhq.io/",
+			sourceUrl: "https://cypherhq.io/",
 			checkedAt: "2026-11-11",
 			note: "'Go to App' on cypherhq.io still opens this dApp's Connect Wallet screen, but the operator says the dApp is no longer available after its 2026-09-06 shutdown",
 		},
 	],
+	// The one listing here its operator's site does not link. empowch.com/fintech
+	// links Google Play id com.app.bankey, which was "Empowch" by Bankey LLC
+	// when archived on 2025-12-07 and answers 404 (fetched 2026-11-13). The
+	// same Google Play developer page now lists one app, "Shaheen money"
+	// (com.app.bankey.Shaheen), whose developer contact is at empowch.com:
+	// the name the iOS listing took, which empowch.com's iOS link redirects
+	// to. App Store and Google Play accounts are separate, so the match with
+	// iOS is the developer's name and the app's name. Both rows count that
+	// app, and sourceUrl is the Google Play developer page.
 	empowch: [
 		{
 			platform: "ios",
@@ -7038,9 +7078,12 @@ export const WALLET_AVAILABILITY: Record<string, AvailabilityRow[]> = {
 		},
 		{
 			platform: "android",
-			state: "unavailable",
-			checkedAt: "2026-11-11",
-			note: "The Google Play link on empowch.com/fintech (com.app.bankey) returned 404",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.app.bankey.Shaheen",
+			sourceUrl: "https://play.google.com/store/apps/developer?id=Bankey+LLC",
+			checkedAt: "2026-11-13",
+			note: "Listed as 'Shaheen money' by Bankey LLC, updated 2026-11-11: the same developer name and app name as the iOS listing, with a developer contact at empowch.com. Found on Bankey LLC's Google Play developer page, not on empowch.com: empowch.com/fintech still links the former id com.app.bankey ('Empowch' by Bankey LLC when archived on 2025-12-07), which returned 404 on 2026-11-13",
 		},
 	],
 	hana: [
@@ -7104,17 +7147,23 @@ export const WALLET_AVAILABILITY: Record<string, AvailabilityRow[]> = {
 		},
 	],
 	interstellar: [
+		// Both links come from interstellar.exchange as archived on 2026-06-07
+		// (web.archive.org/web/20260607105302/https://interstellar.exchange/).
 		{
 			platform: "ios",
 			state: "unavailable",
-			checkedAt: "2026-11-11",
-			note: "App Store id1437679072, linked from interstellar.exchange (archived 2026-06-07), has no listing: the page 404s and lookup returns no result",
+			sourceUrl:
+				"https://itunes.apple.com/us/app/interstellar-stellar-wallet/id1437679072",
+			checkedAt: "2026-11-13",
+			note: "The App Store link on interstellar.exchange, as archived on 2026-06-07. Fetched 2026-11-13: it redirects to apps.apple.com, which returned HTTP 404, and Apple's lookup by id returned no result for 26 storefront country codes",
 		},
 		{
 			platform: "android",
 			state: "unavailable",
-			checkedAt: "2026-11-11",
-			note: "Google Play cm.fintech.interstellar, linked from interstellar.exchange (archived 2026-06-07), returned 404",
+			sourceUrl:
+				"https://play.google.com/store/apps/details?id=cm.fintech.interstellar",
+			checkedAt: "2026-11-13",
+			note: "The Google Play link on interstellar.exchange, as archived on 2026-06-07 (cm.fintech.interstellar). Fetched 2026-11-13 from one machine: HTTP 404, also with the gl country parameter set to each of 8 countries",
 		},
 	],
 	// No app: the operator's wallet runs over SMS. Its pages say SMS, not USSD
@@ -7249,8 +7298,9 @@ export const WALLET_AVAILABILITY: Record<string, AvailabilityRow[]> = {
 		{
 			platform: "web",
 			state: "unavailable",
-			checkedAt: "2026-11-11",
-			note: "The testnet app the repo README links ('Try it live', privacywallet.coderipper.xyz) returned 404 from its host",
+			sourceUrl: "https://privacywallet.coderipper.xyz/",
+			checkedAt: "2026-11-13",
+			note: "The testnet app the repo README links as 'Try it live'. Fetched 2026-11-13: HTTP 404 from its host, 'Application not found'",
 		},
 	],
 	openxswitch: [
@@ -7346,8 +7396,10 @@ export const WALLET_AVAILABILITY: Record<string, AvailabilityRow[]> = {
 		{
 			platform: "ios",
 			state: "unavailable",
-			checkedAt: "2026-11-11",
-			note: "The App Store link on scopuly.com (id1383402218, also its Mac App Store link) has no listing: the page 404s and lookup returns no result in 21 storefronts",
+			sourceUrl:
+				"https://apps.apple.com/app/scopuly-stellar-defi-wallet/id1383402218",
+			checkedAt: "2026-11-13",
+			note: "The App Store link on scopuly.com (id1383402218, also its Mac App Store link). Fetched 2026-11-13: HTTP 404, and Apple's lookup by id returned no result for 26 storefront country codes",
 		},
 	],
 	"smart-treasury": [

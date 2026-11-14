@@ -4,6 +4,7 @@ import {
 	AVAILABILITY_PLATFORMS,
 	AVAILABILITY_STATES,
 	PRODUCT_KINDS,
+	PROJECT_CATEGORIES,
 	PROJECT_TYPES,
 	VENUE_ROLES,
 } from "@/lib/project-types";
@@ -71,15 +72,7 @@ export const Projects: CollectionConfig = {
 			name: "category",
 			type: "select",
 			required: true,
-			options: [
-				"Infrastructure",
-				"Tooling",
-				"Partner Integration",
-				"User-Facing App",
-				"Asset",
-				"Protocol/Contract",
-				"Anchor",
-			],
+			options: [...PROJECT_CATEGORIES],
 		},
 		{
 			name: "types",
@@ -634,7 +627,7 @@ export const Projects: CollectionConfig = {
 			type: "array",
 			admin: {
 				description:
-					"Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, and the date it was checked. Distinct from `status` (project lifecycle). Written only by the curate-projects lane (AVAILABILITY_SET and WALLET_AVAILABILITY in scripts/data/curation-maps.ts). Empty means unknown, not unavailable; availabilityCheck records a check that found nothing.",
+					"Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, source URL, and the date it was checked. Distinct from `status` (project lifecycle). Written only by the curate-projects lane (AVAILABILITY_SET and WALLET_AVAILABILITY in scripts/data/curation-maps.ts). Empty means unknown, not unavailable; availabilityCheck records a check that found nothing.",
 			},
 			fields: [
 				{
@@ -659,6 +652,18 @@ export const Projects: CollectionConfig = {
 					admin: {
 						description:
 							"The store listing / product surface URL that was checked (App Store, Google Play, Chrome Web Store, vendor shop, web app). Null for an unavailable row whose listing no longer exists.",
+					},
+				},
+				{
+					// 2026-11-13: an unavailable row whose listing is gone served
+					// no URL at all (9 of 12 unavailable facts). storeUrl stays
+					// empty there, and this names what was read. A row with a
+					// storeUrl may also name the page its state rests on.
+					name: "sourceUrl",
+					type: "text",
+					admin: {
+						description:
+							"The URL that was read for this row when it is not storeUrl: a store listing or operator page that no longer answers or shows no app yet, the operator notice that says the product ended, or the developer page that ties a listing to the operator. Empty when storeUrl is the URL that was checked. Every row carries storeUrl or sourceUrl.",
 					},
 				},
 				{

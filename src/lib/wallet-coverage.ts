@@ -54,12 +54,15 @@ export function normCheck(c: unknown): string {
 	});
 }
 
-/** An availability row as the curated maps hold it (storeUrl and note left
- * out when there is none). */
+/** An availability row as the curated maps hold it (storeUrl, sourceUrl and
+ * note left out when there is none). sourceUrl is the listing or operator
+ * page that was read when it is not the row's storeUrl: an unavailable row
+ * whose listing is gone keeps storeUrl out and names the URL here. */
 export interface CuratedAvailabilityRow {
 	platform: string;
 	state: string;
 	storeUrl?: string;
+	sourceUrl?: string;
 	checkedAt: string;
 	note?: string;
 }
@@ -67,9 +70,87 @@ type StoredRow = {
 	platform: string;
 	state: string;
 	storeUrl: string | null;
+	sourceUrl: string | null;
 	checkedAt: string;
 	note: string | null;
 };
+
+/**
+ * The availability rows that name no URL at all, in any state: neither a
+ * listing (storeUrl) nor the listing or operator page that was read
+ * (sourceUrl). Such a row is a claim with no source (Raven's sls-033 recheck,
+ * 2026-11-12: 9 of 12 served unavailable facts). A blank string is no URL.
+ * Shared by the test over both curated maps and the nightly S6 sweep.
+ */
+export function unsourcedAvailability<T>(
+	rows: readonly T[] | null | undefined,
+): T[] {
+	const url = (v: unknown) => typeof v === "string" && v.trim() !== "";
+	return (rows ?? []).filter((row) => {
+		// Rows arrive from the maps, the database and the served JSON alike.
+		const r = row as { storeUrl?: unknown; sourceUrl?: unknown } | null;
+		return !url(r?.storeUrl) && !url(r?.sourceUrl);
+	});
+}
+
+/**
+ * The projects, of any type, that serve an availability row with no URL, each
+ * once with the platforms of those rows. Availability is not a Wallet-only
+ * field (9 slugs of AVAILABILITY_SET are typed Payments), so the sweep hands
+ * this every project row it read, and a row two sweeps return counts once.
+ */
+export function availabilitySourceGaps(
+	rows: ReadonlyArray<{
+		slug: string;
+		availability?: readonly unknown[] | null;
+	}>,
+): Array<{ slug: string; platforms: string[] }> {
+	const out = new Map<string, string[]>();
+	for (const r of rows) {
+		if (out.has(r.slug)) continue;
+		const bare = unsourcedAvailability(r.availability);
+		if (bare.length)
+			out.set(
+				r.slug,
+				bare.map((a) => String((a as { platform?: unknown })?.platform)),
+			);
+	}
+	return [...out].map(([slug, platforms]) => ({ slug, platforms }));
+}
+
+/**
+ * What the nightly sweep files for availability sources, from every project
+ * row it read. No row serving availability at all is itself a finding: 73
+ * did on 2026-11-13, so zero is an outage or a dropped field, and "0 of 0
+ * with a row that names no URL" would read as a pass.
+ */
+export function availabilitySourceFindings(
+	rows: ReadonlyArray<{
+		slug: string;
+		availability?: readonly unknown[] | null;
+	}>,
+): { serving: number; findings: Array<{ probe: string; note: string }> } {
+	const serving = new Set(
+		rows.filter((r) => r.availability?.length).map((r) => r.slug),
+	).size;
+	if (serving === 0)
+		return {
+			serving,
+			findings: [
+				{
+					probe: "availability sources: nothing to check",
+					note: `0 of ${rows.length} project rows read serve an availability array (73 did on 2026-11-13): an outage or a field the route stopped serving, not a clean pass`,
+				},
+			],
+		};
+	return {
+		serving,
+		findings: availabilitySourceGaps(rows).map((g) => ({
+			probe: `availability source: ${g.slug}`,
+			note: `Availability row(s) ${g.platforms.join(", ")} serve neither storeUrl nor sourceUrl. Fetch the listing or operator page behind each row and record that URL, the date and what it returned: storeUrl for a listing that is up, sourceUrl for a listing that is gone or an operator page (AVAILABILITY_SET or WALLET_AVAILABILITY in scripts/data/curation-maps.ts)`,
+		})),
+	};
+}
 
 /** One comparable form of stored or wanted rows (Payload's row ids dropped). */
 function normRows(rows: unknown): string {
@@ -78,6 +159,7 @@ function normRows(rows: unknown): string {
 			platform: r?.platform ?? null,
 			state: r?.state ?? null,
 			storeUrl: r?.storeUrl ?? null,
+			sourceUrl: r?.sourceUrl ?? null,
 			checkedAt: r?.checkedAt ?? null,
 			note: r?.note ?? null,
 		})),
@@ -118,6 +200,7 @@ export function availabilityPatch(
 			platform: r.platform,
 			state: r.state,
 			storeUrl: r.storeUrl ?? null,
+			sourceUrl: r.sourceUrl ?? null,
 			checkedAt: r.checkedAt,
 			note: r.note ?? null,
 		}));
@@ -136,7 +219,8 @@ export function availabilityPatch(
  * The Wallet rows that miss a recorded state: no productKind and no dated
  * reason, or no availability and no availability check. The type is checked
  * here as well as in the sweep's query, so a route that stopped honouring
- * type=Wallet cannot pass a row.
+ * type=Wallet cannot pass a row. Whether each availability row names a URL is
+ * availabilitySourceGaps' question, asked of every project row.
  */
 export function walletCoverageGaps<
 	T extends {

@@ -602,7 +602,7 @@ export interface Project {
 		  )
 		| null;
 	/**
-	 * Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, and the date it was checked. Distinct from `status` (project lifecycle). Written only by the curate-projects lane (AVAILABILITY_SET and WALLET_AVAILABILITY in scripts/data/curation-maps.ts). Empty means unknown, not unavailable; availabilityCheck records a check that found nothing.
+	 * Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, source URL, and the date it was checked. Distinct from `status` (project lifecycle). Written only by the curate-projects lane (AVAILABILITY_SET and WALLET_AVAILABILITY in scripts/data/curation-maps.ts). Empty means unknown, not unavailable; availabilityCheck records a check that found nothing.
 	 */
 	availability?:
 		| {
@@ -622,6 +622,10 @@ export interface Project {
 				 * The store listing / product surface URL that was checked (App Store, Google Play, Chrome Web Store, vendor shop, web app). Null for an unavailable row whose listing no longer exists.
 				 */
 				storeUrl?: string | null;
+				/**
+				 * The URL that was read for this row when it is not storeUrl: a store listing or operator page that no longer answers or shows no app yet, the operator notice that says the product ended, or the developer page that ties a listing to the operator. Empty when storeUrl is the URL that was checked. Every row carries storeUrl or sourceUrl.
+				 */
+				sourceUrl?: string | null;
 				/**
 				 * YYYY-MM-DD the availability state was last verified — availability is a dated fact, re-check before relying on it.
 				 */
@@ -3742,6 +3746,7 @@ export interface ProjectsSelect<T extends boolean = true> {
 				platform?: T;
 				state?: T;
 				storeUrl?: T;
+				sourceUrl?: T;
 				checkedAt?: T;
 				note?: T;
 				id?: T;
