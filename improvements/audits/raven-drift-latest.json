@@ -1,6 +1,6 @@
 {
-	"generatedAt": "2026-11-13T13:39:25.572Z",
-	"specVersion": "1.9.148",
+	"generatedAt": "2026-11-14T12:43:50.037Z",
+	"specVersion": "1.9.150",
 	"graceDays": 10,
 	"expectedOps": [
 		"analyzeEcosystem",
@@ -90,12 +90,12 @@
 		{
 			"op": "getStablecoins",
 			"addedAt": "2026-11-04",
-			"ageDays": 9
+			"ageDays": 10
 		}
 	],
 	"extraInCatalog": [],
 	"claimedOpCount": 30,
-	"auditArchetypeRoutesToRegistry": true,
+	"auditArchetypeRoutesToRegistry": null,
 	"checked": true,
 	"notes": []
 }
