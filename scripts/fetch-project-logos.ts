@@ -15,11 +15,14 @@
  */
 import "./load-env";
 import { getPayload } from "payload";
+import { assertMediaStore } from "../src/lib/media-files";
 import configPromise from "../src/payload.config";
 
 // --- CLI args ---
 const args = process.argv.slice(2);
 const dryRun = !args.includes("--execute");
+// Uploads files: with no file store it stops before any write.
+if (!dryRun) assertMediaStore();
 const force = args.includes("--force");
 
 // --- Stats ---

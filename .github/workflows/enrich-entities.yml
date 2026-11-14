@@ -34,6 +34,12 @@ jobs:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
       UNAVATAR_API_KEY: ${{ secrets.UNAVATAR_API_KEY }}
+      # The logo pass uploads to R2. Without these the script refuses to
+      # execute it: the files would land on the runner's disk.
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

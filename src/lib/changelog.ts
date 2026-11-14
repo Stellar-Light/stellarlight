@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-13",
 		surfaces: ["api"],
+		version: "spec@1.9.151",
+		type: "changed",
+		summary:
+			"A HEAD request to a media file now answers as GET does, and an upload is refused when the server has no file store. HEAD on /api/media/file/<filename> answered 404 for files that GET served with 200; on every Payload REST route it now returns GET's status and headers with no body. Read on 2026-11-13 with one GET per file: 400 of 1,232 media records have no file behind them (404), and 137 project rows serve one of those as their logo, so their `logoUrl` is a dead link (117 Live, 9 Development, 4 Pre-Release, 4 Inactive, 3 Draft). This release does not repair those rows: the repair lane it adds has not been run, and the 137 URLs still answer 404.",
+		detail:
+			"The records were saved by processes that held the database and no file store, so the file was never stored; 160 came from seven runs of the SCF sync between 2026-06-14 and 2026-09-06, from a runner whose store credentials did not exist until 2026-09-23. An upload is now refused, before any record is written, when the server or script has no file store. A new daily check GETs every media file and files each served row (a project logo, an entity logo, a carousel image, a blog image) that points at a missing one in the improvement ledger; a file it could not check is never reported as missing. The other 263 records with no file have no row pointing at them; the check lists them and they are kept. The repair lane is dispatch only and a dry run by default: it takes the image on a row's own SCF page only when a reviewed join, a site on the same host, or a GitHub owner or repository both link confirms the page is that row's, and leaves every other row as it is. A later entry will say what it repaired. No response field was added, removed or retyped.",
+	},
+	{
+		date: "2026-11-13",
+		surfaces: ["api"],
 		version: "spec@1.9.150",
 		type: "added",
 		summary:

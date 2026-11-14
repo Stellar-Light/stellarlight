@@ -730,6 +730,27 @@ const REPO_REDIRECTS_SPEC: SourceSpec = {
 	],
 };
 
+// check-media-files (daily): a served row (a project, an entity, a carousel
+// item, a blog post) pointing at a media record whose file answers 404 on
+// GET. Ours and served: the row hands out a logo URL that is dead. Only rows
+// the probe got a 404 for reach `missing`; a file it could not check stays
+// out, and a missing file no row points at is listed in the artifact and is
+// not a finding.
+const MEDIA_FILES_SPEC: SourceSpec = {
+	source: "media-files",
+	file: "media-files-latest.json",
+	dir: AUDITS,
+	arrays: [
+		{
+			key: "missing",
+			surface: "directory",
+			mode: "media-file-missing",
+			severity: "medium",
+			probe: (r) => str(r?.ref),
+		},
+	],
+};
+
 function readJson(path: string): Row | null {
 	try {
 		return JSON.parse(readFileSync(path, "utf8"));
@@ -768,6 +789,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 		PACKET_STAMPS_SPEC,
 		SDK_FACTS_SPEC,
 		REPO_REDIRECTS_SPEC,
+		MEDIA_FILES_SPEC,
 	]) {
 		const path = join(spec.dir ?? WEEKLY, spec.file);
 		const data = readJson(path);
