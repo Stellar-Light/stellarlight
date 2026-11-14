@@ -15,6 +15,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { undeclaredInServed } from "../../../scripts/contract/served-shape";
 import {
 	AVAILABILITY_CHECKED,
 	AVAILABILITY_SET,
@@ -23,6 +24,7 @@ import {
 	STATUS_FIX,
 	WALLET_AVAILABILITY,
 } from "../../../scripts/data/curation-maps";
+import { spec } from "../openapi-spec";
 import {
 	AVAILABILITY_CHECK_RESULTS,
 	AVAILABILITY_PLATFORMS,
@@ -31,9 +33,12 @@ import {
 } from "../project-types";
 import {
 	availabilityPatch,
+	availabilitySourceFindings,
+	availabilitySourceGaps,
 	CLEARED_CHECK,
 	normCheck,
 	pickAvailabilityCheck,
+	unsourcedAvailability,
 	walletCoverageGaps,
 } from "../wallet-coverage";
 
@@ -163,13 +168,19 @@ describe("WALLET_AVAILABILITY rows hold the served contract", () => {
 		}
 	});
 
-	it("an available row names the https surface that was read; an unavailable one says why", () => {
-		for (const r of rows) {
+	it("an available row names the https surface that was read; an unavailable one says why, in both maps", () => {
+		const legacy = Object.entries(AVAILABILITY_SET).flatMap(([slug, rs]) =>
+			rs.map((r) => ({ slug, ...r })),
+		);
+		expect(legacy.some((r) => r.state === "available")).toBe(true);
+		expect(legacy.some((r) => r.state === "unavailable")).toBe(true);
+		for (const r of [...rows, ...legacy]) {
 			if (r.state === "available")
 				expect(r.storeUrl, r.slug).toMatch(/^https:\/\/\S+$/);
 			else {
 				expect(r.note?.length ?? 0, r.slug).toBeGreaterThan(40);
-				// a URL only for a listing that is still up
+				// storeUrl only for a listing that is still up; a listing that
+				// is gone is named by sourceUrl instead
 				if (r.storeUrl !== undefined) {
 					expect(r.storeUrl, r.slug).toMatch(/^https:\/\/\S+$/);
 					expect(r.note, r.slug).toMatch(/still/);
@@ -240,6 +251,170 @@ describe("WALLET_AVAILABILITY rows hold the served contract", () => {
 			}),
 		]);
 		expect(AVAILABILITY_CHECKED["kotani-pay"]).toBeUndefined();
+	});
+});
+
+describe("every availability row names the URL that was checked (sls-033, 2026-11-13)", () => {
+	// Raven's recheck on 2026-11-12: 9 of the 12 unavailable platform facts
+	// served storeUrl null and no other source URL. storeUrl stays null for a
+	// listing that is gone; sourceUrl holds the listing or operator page read.
+	const all = [
+		...Object.entries(WALLET_AVAILABILITY),
+		...Object.entries(AVAILABILITY_SET),
+	].flatMap(([slug, rs]) => rs.map((r) => ({ slug, ...r })));
+	const fact = (slug: string, platform: string) =>
+		all.find((r) => r.slug === slug && r.platform === platform);
+
+	it("no row of either map, in any state, lacks both storeUrl and sourceUrl", () => {
+		// both maps are read: xbull lives in AVAILABILITY_SET, scopuly in
+		// WALLET_AVAILABILITY
+		expect(AVAILABILITY_SET.xbull.length).toBeGreaterThan(0);
+		expect(WALLET_AVAILABILITY.scopuly.length).toBeGreaterThan(0);
+		expect(all).toHaveLength(
+			[AVAILABILITY_SET, WALLET_AVAILABILITY]
+				.flatMap((m) => Object.values(m))
+				.reduce((n, rs) => n + rs.length, 0),
+		);
+		for (const state of AVAILABILITY_STATES)
+			expect(
+				all.some((r) => r.state === state),
+				state,
+			).toBe(true);
+		expect(
+			unsourcedAvailability(all).map((r) => `${r.slug} ${r.platform}`),
+		).toEqual([]);
+	});
+
+	it("a sourceUrl is an https URL, and never repeats the row's own storeUrl", () => {
+		for (const r of all) {
+			if (r.sourceUrl === undefined) continue;
+			expect(r.sourceUrl, r.slug).toMatch(/^https:\/\/\S+$/);
+			expect(r.sourceUrl, r.slug).not.toBe(r.storeUrl);
+			expect(r.note, r.slug).not.toMatch(DASH);
+		}
+	});
+
+	it("the seven facts still unavailable carry the listing or operator page fetched on 2026-11-13", () => {
+		const want: Array<[string, string, string]> = [
+			[
+				"xbull",
+				"ios",
+				"https://apps.apple.com/us/app/xbull-wallet/id6705122563",
+			],
+			[
+				"xbull",
+				"android",
+				"https://play.google.com/store/apps/details?id=app.xbull.mobile",
+			],
+			[
+				"scopuly",
+				"ios",
+				"https://apps.apple.com/app/scopuly-stellar-defi-wallet/id1383402218",
+			],
+			["lumexo", "ios", "https://lumexo.io/"],
+			[
+				"openzeppelin-stellar-privacy-wallet",
+				"web",
+				"https://privacywallet.coderipper.xyz/",
+			],
+			[
+				"interstellar",
+				"ios",
+				"https://itunes.apple.com/us/app/interstellar-stellar-wallet/id1437679072",
+			],
+			[
+				"interstellar",
+				"android",
+				"https://play.google.com/store/apps/details?id=cm.fintech.interstellar",
+			],
+		];
+		for (const [slug, platform, sourceUrl] of want) {
+			const r = fact(slug, platform);
+			expect(r, `${slug} ${platform}`).toMatchObject({
+				state: "unavailable",
+				sourceUrl,
+				checkedAt: "2026-11-13",
+			});
+			// a listing that is gone keeps storeUrl null
+			expect(r?.storeUrl, `${slug} ${platform}`).toBeUndefined();
+			// the note says what the fetch returned that day
+			expect(r?.note, `${slug} ${platform}`).toMatch(
+				/2026-11-13.*(404|Coming Soon)|(404|Coming Soon).*2026-11-13/,
+			);
+		}
+	});
+
+	it("Lumexo's Android app is out: its operator links a Google Play listing that answers", () => {
+		// lumexo.io linked no store on 2026-07-15 ("arriving soon"); on
+		// 2026-11-13 its Google Play button opens this listing (HTTP 200).
+		expect(fact("lumexo", "android")).toMatchObject({
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=io.lumexo.wallet",
+			checkedAt: "2026-11-13",
+		});
+	});
+
+	it("Empowch's Android app is available under its new name and package id, on the developer account's page", () => {
+		// com.app.bankey was "Empowch" by Bankey LLC (archived 2025-12-07) and
+		// answers 404; the same account now lists "Shaheen money", the name of
+		// the iOS app this project already counts. empowch.com still links the
+		// former id, so the basis is the developer page, and the note says so.
+		const android = fact("empowch", "android");
+		expect(android).toMatchObject({
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.app.bankey.Shaheen",
+			sourceUrl: "https://play.google.com/store/apps/developer?id=Bankey+LLC",
+			checkedAt: "2026-11-13",
+		});
+		expect(android?.note).toMatch(/Shaheen money/);
+		expect(android?.note).toMatch(/Bankey LLC/);
+		expect(android?.note).toMatch(/com\.app\.bankey\b[^.]/);
+		expect(android?.note).toMatch(/404/);
+		expect(android?.note).toMatch(/empowch\.com\/fintech/);
+		// App Store and Google Play accounts are separate: the match with the
+		// iOS listing is the developer's name and the app's name
+		expect(android?.note).toMatch(
+			/the same developer name and app name as the iOS listing/,
+		);
+		expect(android?.note).not.toMatch(/same developer account/);
+		// one standard: the iOS row counts the same developer's app
+		const ios = fact("empowch", "ios");
+		expect(ios?.state).toBe("available");
+		expect(ios?.note).toMatch(/'Shaheen money' by Bankey LLC/);
+	});
+
+	it("Cypher's three rows keep the listing that is still up and cite the operator page that names each product", () => {
+		// The termination notice names the mobile application; the sentence
+		// that names the dApp is on the home page timeline (both read
+		// 2026-11-13).
+		const notice = "https://cypherhq.io/notice-of-termination";
+		expect(
+			WALLET_AVAILABILITY.cypher.map((r) => [r.platform, r.sourceUrl]),
+		).toEqual([
+			["ios", notice],
+			["android", notice],
+			["web", "https://cypherhq.io/"],
+		]);
+		for (const r of WALLET_AVAILABILITY.cypher) {
+			expect(r.state, r.platform).toBe("unavailable");
+			expect(r.storeUrl, r.platform).toMatch(/^https:\/\//);
+		}
+		// the notice is the page the row's status cites
+		expect(STATUS_FIX.cypher.sourceUrl).toBe(notice);
+	});
+
+	it("the collection stores sourceUrl, so the writer's value is not dropped", () => {
+		const collection = readFileSync(
+			resolve(__dirname, "../../collections/Projects.ts"),
+			"utf8",
+		);
+		const fields = collection.slice(
+			collection.indexOf('name: "availability"'),
+			collection.indexOf('name: "availabilityCheck"'),
+		);
+		expect(fields).toMatch(/name:\s*"sourceUrl"/);
 	});
 });
 
@@ -389,7 +564,9 @@ describe("the check the lane writes and the route serves", () => {
 			wanted,
 			check,
 		);
-		expect(patch.availability).toEqual([{ ...wanted[0], note: null }]);
+		expect(patch.availability).toEqual([
+			{ ...wanted[0], sourceUrl: null, note: null },
+		]);
 		expect(patch.availabilityCheck).toEqual(CLEARED_CHECK);
 		// and the next run plans nothing
 		expect(
@@ -402,6 +579,37 @@ describe("the check the lane writes and the route serves", () => {
 				check,
 			),
 		).toEqual({});
+	});
+
+	it("a sourceUrl is written with its row, and a row that only gains one is rewritten once", () => {
+		const gone = [
+			{
+				platform: "ios",
+				state: "unavailable",
+				sourceUrl: "https://apps.apple.com/app/id1",
+				checkedAt: "2026-11-13",
+				note: "The listing returned 404 on 2026-11-13",
+			},
+		];
+		// as stored before 2026-11-13: the same row with no sourceUrl
+		const before = [{ ...gone[0], id: "r1", sourceUrl: undefined }];
+		const patch = availabilityPatch(
+			stored({ availability: before }),
+			gone,
+			undefined,
+		);
+		expect(patch.availability).toEqual([{ ...gone[0], storeUrl: null }]);
+		expect(
+			availabilityPatch(
+				stored({ availability: patch.availability }),
+				gone,
+				undefined,
+			),
+		).toEqual({});
+		// a row with a storeUrl and no sourceUrl stores sourceUrl null
+		expect(
+			availabilityPatch(stored({}), wanted, undefined).availability,
+		).toEqual([{ ...wanted[0], sourceUrl: null, note: null }]);
 	});
 
 	it("rows in sync with a stale stored check plan only the clear", () => {
@@ -458,6 +666,19 @@ describe("walletCoverageGaps (the nightly S6 guard)", () => {
 			["neither", ["productKind", "availability"]],
 		]);
 	});
+	it("leaves the URL check to availabilitySourceGaps, so a Wallet row is reported once", () => {
+		expect(
+			walletCoverageGaps(
+				[
+					w("nosource", {
+						availability: [{ platform: "ios", state: "unavailable" }],
+					}),
+				],
+				{},
+			),
+		).toEqual([]);
+	});
+
 	it("passes a dated check, a dated reason, and rows that are not Wallets", () => {
 		const rows = [
 			w("checked", {
@@ -479,6 +700,103 @@ describe("walletCoverageGaps (the nightly S6 guard)", () => {
 		expect(walletCoverageGaps(rows, { blank: " " }).map((g) => g.slug)).toEqual(
 			["hollow", "blank", "constructor"],
 		);
+	});
+});
+
+describe("availabilitySourceGaps (S6, every project row that serves availability)", () => {
+	const row = (over: Record<string, unknown> = {}) => ({
+		platform: "ios",
+		state: "unavailable",
+		storeUrl: null,
+		sourceUrl: null,
+		...over,
+	});
+	const p = (
+		slug: string,
+		types: string[] | null,
+		availability: unknown[] | null,
+	) => ({ slug, types, availability });
+
+	it("names a row with neither URL whatever its state and whatever the project's type", () => {
+		expect(
+			availabilitySourceGaps([
+				p("wallet-gone", ["Wallet"], [row()]),
+				// 9 slugs of AVAILABILITY_SET are typed Payments, not Wallet
+				p("payments-gone", ["Payments"], [row()]),
+				p(
+					"payments-listed",
+					["Payments"],
+					[row({ platform: "android", state: "available" })],
+				),
+				p("blank", ["DEX"], [row({ storeUrl: "", sourceUrl: " " })]),
+				p("untyped", null, [
+					row(),
+					row({ platform: "web", storeUrl: "https://example.test/" }),
+					row({ platform: "android" }),
+				]),
+			]),
+		).toEqual([
+			{ slug: "wallet-gone", platforms: ["ios"] },
+			{ slug: "payments-gone", platforms: ["ios"] },
+			{ slug: "payments-listed", platforms: ["android"] },
+			{ slug: "blank", platforms: ["ios"] },
+			{ slug: "untyped", platforms: ["ios", "android"] },
+		]);
+	});
+
+	it("passes a row with either URL, and a project with no availability", () => {
+		expect(
+			availabilitySourceGaps([
+				p(
+					"sourced",
+					["Wallet"],
+					[row({ sourceUrl: "https://example.test/gone" })],
+				),
+				p(
+					"stillup",
+					["Payments"],
+					[row({ storeUrl: "https://example.test/app" })],
+				),
+				p("none", ["Wallet"], null),
+				p("empty", ["Wallet"], []),
+			]),
+		).toEqual([]);
+		expect(unsourcedAvailability(null)).toEqual([]);
+	});
+
+	it("a sweep in which no row serves availability is a finding, never 0 of 0 with a pass", () => {
+		const none = availabilitySourceFindings([
+			p("a", ["Wallet"], null),
+			p("b", ["Payments"], []),
+		]);
+		expect(none.serving).toBe(0);
+		expect(none.findings).toHaveLength(1);
+		expect(none.findings[0].note).toMatch(/0 of 2 project rows/);
+		expect(availabilitySourceFindings([]).findings).toHaveLength(1);
+	});
+
+	it("files one finding per project with a bare row, and tells a repair to record the URL", () => {
+		const { serving, findings } = availabilitySourceFindings([
+			p("gone", ["Payments"], [row()]),
+			p("fine", ["Wallet"], [row({ sourceUrl: "https://example.test/x" })]),
+			p("none", ["Wallet"], null),
+		]);
+		expect(serving).toBe(2);
+		expect(findings.map((f) => f.probe)).toEqual(["availability source: gone"]);
+		expect(findings[0].note).toMatch(/record that URL/);
+		expect(findings[0].note).not.toMatch(/remove/);
+		expect(
+			availabilitySourceFindings([
+				p("fine", ["Wallet"], [row({ storeUrl: "https://example.test/" })]),
+			]),
+		).toEqual({ serving: 1, findings: [] });
+	});
+
+	it("counts a project once when two sweeps return it", () => {
+		const twice = p("twice", ["Wallet", "Payments"], [row()]);
+		expect(availabilitySourceGaps([twice, { ...twice }])).toEqual([
+			{ slug: "twice", platforms: ["ios"] },
+		]);
 	});
 });
 
@@ -525,6 +843,38 @@ const ROWS = [
 	}),
 	wallet("plainwallet", {
 		availabilityCheck: { result: null, sources: [] },
+	}),
+	wallet("gonewallet", {
+		availability: [
+			{
+				id: "g1",
+				platform: "ios",
+				state: "unavailable",
+				storeUrl: null,
+				sourceUrl: "https://apps.apple.com/app/id2",
+				checkedAt: "2026-11-13",
+				note: "The listing returned 404 on 2026-11-13",
+			},
+			// written before sourceUrl existed, with no storeUrl either
+			{
+				id: "g2",
+				platform: "android",
+				state: "unavailable",
+				sourceUrl: "",
+				checkedAt: "2026-07-13",
+				note: "old row",
+			},
+			// a blank sourceUrl is no source: the storeUrl is
+			{
+				id: "g3",
+				platform: "web",
+				state: "available",
+				storeUrl: "https://example.test/app",
+				sourceUrl: "  ",
+				checkedAt: "2026-11-13",
+				note: "blank source",
+			},
+		],
 	}),
 	wallet("oldwallet", {
 		status: "Inactive",
@@ -607,6 +957,83 @@ describe("GET /api/projects/search serves availabilityCheck (sls-033)", () => {
 		expect(by.listedwallet.availability).toHaveLength(1);
 		expect(by.listedwallet.availabilityCheck).toBeNull();
 		expect(by.plainwallet.availabilityCheck).toBeNull();
+	});
+
+	it("every availability row serves sourceUrl: its own unless blank, else its storeUrl, else null", async () => {
+		const { body } = await search("type=Wallet");
+		const by = Object.fromEntries(
+			(body.projects as Served[]).map((p) => [p.slug, p]),
+		);
+		expect(by.gonewallet.availability).toEqual([
+			{
+				platform: "ios",
+				state: "unavailable",
+				storeUrl: null,
+				sourceUrl: "https://apps.apple.com/app/id2",
+				checkedAt: "2026-11-13",
+				note: "The listing returned 404 on 2026-11-13",
+			},
+			{
+				platform: "android",
+				state: "unavailable",
+				storeUrl: null,
+				sourceUrl: null,
+				checkedAt: "2026-07-13",
+				note: "old row",
+			},
+			{
+				platform: "web",
+				state: "available",
+				storeUrl: "https://example.test/app",
+				sourceUrl: "https://example.test/app",
+				checkedAt: "2026-11-13",
+				note: "blank source",
+			},
+		]);
+		// a row whose listing is up was checked at that listing
+		expect(by.listedwallet.availability).toEqual([
+			expect.objectContaining({
+				storeUrl: "https://apps.apple.com/app/id1",
+				sourceUrl: "https://apps.apple.com/app/id1",
+			}),
+		]);
+		// the nightly guard reads the served rows and names the old one
+		expect(
+			unsourcedAvailability(
+				by.gonewallet.availability as Array<Record<string, unknown>>,
+			),
+		).toHaveLength(1);
+	});
+
+	it("the spec declares every field and null a served availability row carries", async () => {
+		const { body } = await search("type=Wallet");
+		const schema = (
+			spec as unknown as {
+				components: {
+					schemas: { Project: { properties: { availability: unknown } } };
+				};
+			}
+		).components.schemas.Project.properties.availability;
+		for (const p of body.projects as Served[])
+			expect(undeclaredInServed(spec, schema, p.availability), p.slug).toEqual(
+				[],
+			);
+		const item = (
+			schema as {
+				items: { properties: Record<string, { description?: string }> };
+			}
+		).items.properties;
+		expect(Object.keys(item).sort()).toEqual(
+			[
+				"checkedAt",
+				"note",
+				"platform",
+				"sourceUrl",
+				"state",
+				"storeUrl",
+			].sort(),
+		);
+		expect(item.sourceUrl.description).toMatch(/storeUrl/);
 	});
 
 	it("a shadow swapped for its canonical serves the canonical's check", async () => {

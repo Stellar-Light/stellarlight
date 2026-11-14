@@ -36,18 +36,35 @@
  *      reason in PRODUCT_KIND_UNRESOLVED, and availability rows or a dated
  *      availabilityCheck (sls-033). Searching type=Wallet is exact (74 rows on
  *      2026-11-11), and the check reads the type again on every row.
+ *      Availability sources: on every project row read (S2's category sweeps
+ *      and the Wallet sweep, since 9 rows that serve availability are not
+ *      typed Wallet), an availability row of any state with neither a
+ *      storeUrl nor a sourceUrl is a claim with no source (2026-11-12: 9 of
+ *      the 12 served unavailable rows).
  *
  *   SCOUT_BASE=https://stellarlight.xyz npx tsx scripts/check-record-completeness.ts
  *
  * Exits 1 on any undocumented residual OR a zero-row sweep (an empty sweep is
- * an outage, not a clean pass). No DB / auth / LLM — public API only. Wired
+ * an outage, not a clean pass). Exits 2 when a page could not be read: an
+ * HTTP error or an error in the body is could-not-check, never "no rows"
+ * (src/lib/completeness-sweep.ts). The directory is read once, by category;
+ * until 2026-11-13 S0 searched with no filter, got no_query and 0 rows, and
+ * passed with nothing checked. No DB / auth / LLM: public API only. Wired
  * into nightly-health.yml.
  */
 
+import {
+	DIRECTORY_SWEEPS,
+	SweepUnreadable,
+	sweepRows,
+} from "../src/lib/completeness-sweep";
 import { deploymentGaps } from "../src/lib/project-deployment";
 import { tvlCitationGaps } from "../src/lib/status-checks";
 import { unclassifiedLiveDexRows } from "../src/lib/venue-role-coverage";
-import { walletCoverageGaps } from "../src/lib/wallet-coverage";
+import {
+	availabilitySourceFindings,
+	walletCoverageGaps,
+} from "../src/lib/wallet-coverage";
 import {
 	PRODUCT_KIND_UNRESOLVED,
 	VENUE_ROLE_UNRESOLVED,
@@ -80,18 +97,20 @@ const KNOWN_EMPTY_ROUND_AWARDS: Record<string, string> = {
 // biome-ignore lint/suspicious/noExplicitAny: API rows
 type Row = Record<string, any>;
 
-async function page(path: string, offset: number): Promise<Row[]> {
-	const res = await fetch(`${BASE}${path}&limit=100&offset=${offset}`, {
+async function page(path: string, offset: number, key: string): Promise<Row[]> {
+	const url = `${path}&limit=100&offset=${offset}`;
+	const res = await fetch(`${BASE}${url}`, {
 		headers: { Accept: "application/json", ...UA },
 	});
-	const body = (await res.json()) as { projects?: Row[] };
-	return body.projects ?? [];
+	// A body that is not JSON is unreadable too; sweepRows says so.
+	const body = await res.json().catch(() => null);
+	return sweepRows(url, res.status, body, key);
 }
 
-async function sweep(path: string): Promise<Row[]> {
+async function sweep(path: string, key = "projects"): Promise<Row[]> {
 	const all: Row[] = [];
 	for (let offset = 0; offset < 2000; offset += 100) {
-		const rows = await page(path, offset);
+		const rows = await page(path, offset, key);
 		all.push(...rows);
 		if (rows.length < 100) break;
 	}
@@ -114,15 +133,34 @@ async function main() {
 	// "honeycoin" are NOT project slugs like "honey-coin"), so it is
 	// checked against the live /entities/{slug} pages. canonicalSlug is a
 	// project-namespace field and stays checked against the project set.
+	//
+	// The directory is read once, one sweep per category, and shared by S0,
+	// S2, S3, S5 and S6. Zero rows is an outage: nothing below could be
+	// checked, so the run stops here instead of passing S0 on an empty set.
+	const swept: Row[] = [];
+	for (const path of DIRECTORY_SWEEPS) swept.push(...(await sweep(path)));
+	if (swept.length === 0) {
+		console.error("✗ directory sweep read 0 rows: an outage, not a clean pass");
+		writeNightlyFindings("record-completeness", [
+			{ probe: "S2 sweep outage", note: "0 project rows returned" },
+		]);
+		process.exit(1);
+	}
 	{
-		const all = await sweep("/api/projects/search?limit=100");
+		const all = swept;
 		const slugSet = new Set(all.map((p) => String(p.slug)));
 		const dangling: string[] = [];
 		const builtBySlugs = new Set<string>();
+		// Counted so the line below shows what each check had to read: a
+		// category sweep served no canonicalSlug on 2026-11-14 (shadows are
+		// swapped for their canonical or left out), so that check is empty
+		// through this API and the line says so.
+		let pointers = 0;
 		for (const p of all) {
 			const bb = (p as { builtBy?: { slug?: string } }).builtBy;
 			if (bb?.slug) builtBySlugs.add(bb.slug);
 			const cs = (p as { canonicalSlug?: string | null }).canonicalSlug;
+			if (cs) pointers++;
 			if (cs && !slugSet.has(cs))
 				dangling.push(`${p.slug}: canonicalSlug → "${cs}" (no such slug)`);
 		}
@@ -130,12 +168,20 @@ async function main() {
 			const res = await fetch(`${BASE}/entities/${encodeURIComponent(slug)}`, {
 				method: "HEAD",
 			});
-			if (!res.ok)
+			// 404 is the page saying no such entity. Any other failure (a 429,
+			// a 5xx) is a page that could not be read, not a dangling reference.
+			if (res.status === 404)
 				dangling.push(
 					`builtBy → "${slug}" (/entities/${slug} returned ${res.status})`,
 				);
+			else if (!res.ok)
+				throw new SweepUnreadable(
+					`/entities/${slug} answered HTTP ${res.status}`,
+				);
 		}
-		const audits = await sweep("/api/audits?limit=100");
+		const audits = await sweep("/api/audits?limit=100", "audits");
+		if (audits.length === 0)
+			dangling.push("audits sweep read 0 audits: an outage, not a clean pass");
 		const reportIds = new Set(
 			audits.map((a) => Number((a as { reportId?: number }).reportId)),
 		);
@@ -158,7 +204,7 @@ async function main() {
 			);
 		} else {
 			console.log(
-				`✓ S0 referential integrity: ${all.length} projects + ${audits.length} audits, 0 dangling references`,
+				`✓ S0 referential integrity: ${all.length} projects (${builtBySlugs.size} builtBy targets, ${pointers} canonicalSlug pointers) + ${audits.length} audits (${audits.filter((a) => (a as { supersededByReportId?: number | null }).supersededByReportId != null).length} superseded), 0 dangling references`,
 			);
 		}
 	}
@@ -196,35 +242,14 @@ async function main() {
 	if (residuals.length) failures++;
 
 	// ── S2: statusBasis on every project row (sls-024 corpus invariant) ──
-	let scanned = 0;
+	const scanned = swept.length;
 	let blank = 0;
 	const blanks: string[] = [];
-	const swept: Row[] = [];
-	for (const cat of [
-		"Anchor",
-		"Asset",
-		"Infrastructure",
-		"Partner%20Integration",
-		"Protocol%2FContract",
-		"Tooling",
-		"User-Facing%20App",
-	]) {
-		const rows = await sweep(`/api/projects/search?category=${cat}`);
-		scanned += rows.length;
-		swept.push(...rows);
-		for (const p of rows)
-			if (!p.statusBasis) {
-				blank++;
-				if (blanks.length < 12) blanks.push(p.slug);
-			}
-	}
-	if (scanned === 0) {
-		console.error("✗ S2 swept 0 rows — outage, not a clean pass");
-		writeNightlyFindings("record-completeness", [
-			{ probe: "S2 sweep outage", note: "0 project rows returned" },
-		]);
-		process.exit(1);
-	}
+	for (const p of swept)
+		if (!p.statusBasis) {
+			blank++;
+			if (blanks.length < 12) blanks.push(p.slug);
+		}
 	console.log(
 		`S2 statusBasis: ${scanned} rows swept · ${blank} blank${blank ? ` (${blanks.join(", ")}${blank > 12 ? ", …" : ""})` : ""}`,
 	);
@@ -383,6 +408,26 @@ async function main() {
 			});
 		}
 		if (gaps.length) failures++;
+	}
+
+	// Every availability row names a URL, whatever its state and whatever the
+	// project's type: the directory sweep plus the Wallet sweep (9 rows that
+	// serve availability are typed Payments, not Wallet). A row with neither
+	// a storeUrl nor a sourceUrl is a claim with no source, and a sweep in
+	// which no row serves availability checked nothing.
+	{
+		const src = availabilitySourceFindings(
+			[...swept, ...wallets].map((p) => ({
+				slug: String(p.slug),
+				availability: Array.isArray(p.availability) ? p.availability : null,
+			})),
+		);
+		console.log(
+			`S6 availability sources: ${src.serving} project rows serve availability · ${src.serving ? `${src.findings.length} with a row that names no URL` : "nothing was checked"}`,
+		);
+		for (const f of src.findings) console.log(`  ✗ ${f.probe}: ${f.note}`);
+		failRows.push(...src.findings);
+		if (src.findings.length) failures++;
 	}
 
 	writeNightlyFindings("record-completeness", failRows);

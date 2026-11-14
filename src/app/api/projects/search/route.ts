@@ -722,6 +722,13 @@ interface PlatformAvailability {
 	platform: string;
 	state: string;
 	storeUrl: string | null;
+	// The URL read on checkedAt: the row's own sourceUrl unless blank (a
+	// listing that is gone, an operator page), else its storeUrl. Null only on
+	// a row stored with neither. The nightly record-completeness sweep (S6)
+	// reports such a row, in any state, on every project row it reads: the
+	// seven category sweeps and type=Wallet. A row of a project outside both
+	// is not read by it; the test over the curated maps covers the source.
+	sourceUrl: string | null;
 	checkedAt: string | null;
 	note: string | null;
 }
@@ -749,10 +756,17 @@ function pickAvailability(
 	for (const r of rows) {
 		if (!r || typeof r !== "object") continue;
 		if (typeof r.platform !== "string" || typeof r.state !== "string") continue;
+		const storeUrl = typeof r.storeUrl === "string" ? r.storeUrl : null;
+		const own =
+			typeof r.sourceUrl === "string" && r.sourceUrl.trim()
+				? r.sourceUrl
+				: null;
 		out.push({
 			platform: r.platform,
 			state: r.state,
-			storeUrl: typeof r.storeUrl === "string" ? r.storeUrl : null,
+			storeUrl,
+			// never "": a blank own value falls back, a blank storeUrl is no URL
+			sourceUrl: own ?? (storeUrl?.trim() ? storeUrl : null),
 			checkedAt: typeof r.checkedAt === "string" ? r.checkedAt : null,
 			note: typeof r.note === "string" ? r.note : null,
 		});

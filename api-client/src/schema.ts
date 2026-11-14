@@ -1570,14 +1570,25 @@ export interface components {
              * @enum {string|null}
              */
             productKind?: "end-user-wallet" | "hardware-wallet" | "connectivity-protocol" | "wallet-sdk" | "integration-kit" | "smart-account-tooling" | null;
-            /** @description Per-platform app availability, each row dated by checkedAt (YYYY-MM-DD). platform sms is a wallet used by text message, with no app; its storeUrl is the operator's page for that service. available = the store listing or product surface at storeUrl was reachable on checkedAt; unavailable = the operator listed or announced the product for that platform but it could not be used there on checkedAt: the listing is gone or 404s, the product is not out yet, or the operator says it has shut down (the note says which; storeUrl is null unless a listing is still up). Rows say where the product's app is offered, not that it supports Stellar on that platform, and are separate from `status` (lifecycle). Null = no platform fact recorded: unknown, never 'unavailable'; availabilityCheck says whether a check found none. */
+            /** @description Per-platform app availability, each row dated by checkedAt (YYYY-MM-DD). platform sms is a wallet used by text message, with no app; its storeUrl is the operator's page for that service. available = the store listing or product surface at storeUrl was reachable on checkedAt; unavailable = the operator listed or announced the product for that platform but it could not be used there on checkedAt: the listing is gone or 404s, the product is not out yet, or the operator says it has shut down (the note says which; storeUrl is null unless a listing is still up, and sourceUrl names the URL that was read). Rows say where the product's app is offered, not that it supports Stellar on that platform, and are separate from `status` (lifecycle). Null = no platform fact recorded: unknown, never 'unavailable'; availabilityCheck says whether a check found none. */
             availability?: {
-                /** @enum {string} */
+                /**
+                 * @description Where the product is offered. sms is a wallet used by text message, with no app.
+                 * @enum {string}
+                 */
                 platform?: "ios" | "android" | "web" | "browser-extension" | "desktop" | "hardware-device" | "sms";
-                /** @enum {string} */
+                /**
+                 * @description Whether the product could be used on this platform on checkedAt. The array description says what each value means.
+                 * @enum {string}
+                 */
                 state?: "available" | "unavailable";
+                /** @description The store listing or product surface a user opens: App Store, Google Play, an extension store, a vendor shop or a web app. Null on an unavailable row whose listing is gone or not out yet; sourceUrl then names what was read. */
                 storeUrl?: string | null;
+                /** @description The URL that was read on checkedAt for this row. On a row with a storeUrl it is that storeUrl, unless a separate page was recorded: the operator notice that says the product ended, or the developer page that ties the listing to the operator. On an unavailable row with storeUrl null it is the store listing or operator page that was read: a listing or app the operator linked that no longer answers, or the operator page that shows no app yet. The note says what it returned. Null = the row was recorded with no URL: a gap in our record, never a statement about the product. */
+                sourceUrl?: string | null;
+                /** @description YYYY-MM-DD the state was last checked. A dated fact: check again before relying on it. */
                 checkedAt?: string | null;
+                /** @description One line on what the check found: what the URL returned, and where its link came from. */
                 note?: string | null;
             }[] | null;
             /** @description A dated check behind a null availability. result none-found = the sources (the operator's site, docs or repo and the store links they give) were read on checkedAt and offer no app, extension, device, web app or SMS service, or the operator's domain no longer resolves (the note says which); could-not-check = a source could not be read on checkedAt. Unknown either way, never 'unavailable'; note says what the sources showed. Null when availability has rows or no check is recorded. */

@@ -528,6 +528,36 @@ shutdown notice (STATUS_FIX); the rest are for the status lane.
 - Blaze's check is could-not-check: its store link is sent only through an
   email form. Retry when the operator publishes the link.
 
+Found fetching the unavailable Wallet facts on 2026-11-13 (sls-033,
+`sourceUrl`):
+
+- xBull's `web` availability row serves https://xbull.app as available,
+  checked 2026-07-14. On 2026-11-13 that host refused the TLS handshake
+  (alert 80, three tries from one machine, curl and Node) while
+  wallet.xbull.app and the Chrome Web Store listing answered 200. Probe:
+  `curl -sS -o /dev/null -w '%{http_code}' https://xbull.app` prints 000.
+  One vantage point, so not changed: re-check from a second network, then
+  move the row's storeUrl to the wallet app or mark what the check found.
+- Available rows carry no page of their own for where the listing link was
+  found: their served `sourceUrl` is the `storeUrl` itself, and the operator
+  page is named only in the note ("linked from coca.xyz"). On 2026-11-13,
+  111 available rows, each with a `storeUrl`; Empowch's Android row is the
+  first with a page of its own.
+
+Found making the record-completeness sweep read real rows (2026-11-14 UTC):
+
+- S0's canonicalSlug check has nothing to read. The seven category sweeps
+  serve 1,012 rows and none carries a `canonicalSlug`: a shadow is swapped
+  for its canonical or left out of an enumeration, so a dangling pointer
+  cannot be seen through the public API. The S0 line now prints the count
+  (0 canonicalSlug pointers). Probe:
+  `pnpm exec tsx scripts/check-record-completeness.ts` prints
+  "0 canonicalSlug pointers". Checking it needs a read of the stored rows.
+- The sweep treats a page with `meta.partial` true as a full page. A failed
+  secondary read (per-project repos, the audits rollup) sets that flag.
+  Whether any partial read drops project rows was not checked, so the flag
+  was left alone; a partial that drops rows would pass.
+
 Found by Stellar Raven's HackMeridian evaluation on 2026-11-02 and filed
 here as #1900 to #1905; each issue carries its read-only probes.
 
