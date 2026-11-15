@@ -131,6 +131,14 @@
 			"ok": 2280,
 			"probes": 2280,
 			"evidence": "improvements/engine/weekly/engine-a-recall-latest.json"
+		},
+		{
+			"date": "2026-11-15",
+			"label": "Engine A full matrix (8 buckets)",
+			"okRate": 100,
+			"ok": 2287,
+			"probes": 2287,
+			"evidence": "improvements/engine/weekly/engine-a-recall-latest.json"
 		}
 	]
 }
