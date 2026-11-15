@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-15T13:08:01.638Z",
+ "generatedAt": "2026-11-15T14:57:24.884Z",
  "surfaces": [
   {
    "surface": "directory",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 115,
+   "oldestDays": 116,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -468,7 +468,7 @@
  },
  "projects": {
   "read": 1012,
-  "population": 1158,
+  "population": 1159,
   "servedPopulation": 1012,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -9687,11 +9687,11 @@
     },
     {
      "label": "slowing",
-     "count": 1186
+     "count": 1187
     },
     {
      "label": "active",
-     "count": 979
+     "count": 978
     },
     {
      "label": "unknown",
