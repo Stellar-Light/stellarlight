@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-14T12:39:50.118Z",
+	"generatedAt": "2026-11-15T13:06:56.492Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -29,7 +29,7 @@
 		},
 		{
 			"probe": "note-stale:blindpaylabs/blindpay-node:npm:@blindpay/node",
-			"note": "note (asOf 2026-09-02) cites 5.3.1; registry latest is 6.2.0 (published 2026-11-12)",
+			"note": "note (asOf 2026-09-02) cites 5.3.1; registry latest is 6.2.1 (published 2026-11-15)",
 			"surface": "code"
 		},
 		{
@@ -44,7 +44,7 @@
 		},
 		{
 			"probe": "note-stale:soneso/stellar-php-sdk:packagist:soneso/stellar-php-sdk",
-			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.17.0 (published 2026-10-24)",
+			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.18.0 (published 2026-11-14)",
 			"surface": "code"
 		},
 		{
@@ -139,7 +139,7 @@
 		},
 		{
 			"probe": "note-stale:soneso/stellar_flutter_sdk:pub:stellar_flutter_sdk",
-			"note": "note (asOf 2026-09-01) cites 3.6.0; registry latest is 3.10.0 (published 2026-10-25)",
+			"note": "note (asOf 2026-09-01) cites 3.6.0; registry latest is 3.11.0 (published 2026-11-14)",
 			"surface": "code"
 		},
 		{
@@ -289,7 +289,7 @@
 		},
 		{
 			"probe": "note-stale:Soneso/stellar_wallet_flutter_sdk:pub:stellar_wallet_flutter_sdk",
-			"note": "note (asOf 2026-09-14) cites 1.1.4; registry latest is 1.1.8 (published 2026-10-25)",
+			"note": "note (asOf 2026-09-14) cites 1.1.4; registry latest is 1.1.9 (published 2026-11-15)",
 			"surface": "code"
 		},
 		{
