@@ -1,7 +1,13 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 43,
+    "count": 56,
     "sample": [
+      {
+        "slug": "circle",
+        "field": "supportedNetworks",
+        "prose": "base",
+        "missing": "evm"
+      },
       {
         "slug": "hito-wallet",
         "field": "supportedNetworks",
@@ -93,6 +99,12 @@
         "missing": "evm"
       },
       {
+        "slug": "pollar",
+        "field": "supportedNetworks",
+        "prose": "solana",
+        "missing": "solana"
+      },
+      {
         "slug": "hana",
         "field": "supportedNetworks",
         "prose": "ethereum",
@@ -139,51 +151,39 @@
         "field": "supportedNetworks",
         "prose": "arbitrum",
         "missing": "evm"
-      },
-      {
-        "slug": "lendwise",
-        "field": "supportedNetworks",
-        "prose": "base",
-        "missing": "evm"
-      },
-      {
-        "slug": "sorted",
-        "field": "supportedNetworks",
-        "prose": "polygon",
-        "missing": "evm"
       }
     ]
   },
   "s2_field_population": {
     "Infrastructure": {
-      "shortDescription": "98% (203/207)",
-      "types": "99% (205/207)",
-      "supportedNetworks": "55% (114/207)",
-      "logoUrl": "76% (157/207)"
+      "shortDescription": "98% (202/206)",
+      "types": "99% (204/206)",
+      "supportedNetworks": "66% (136/206)",
+      "logoUrl": "76% (157/206)"
     },
     "Tooling": {
-      "shortDescription": "97% (179/184)",
-      "types": "100% (184/184)",
-      "logoUrl": "83% (152/184)"
+      "shortDescription": "98% (183/187)",
+      "types": "100% (187/187)",
+      "logoUrl": "84% (157/187)"
     },
     "User-Facing App": {
-      "shortDescription": "99% (402/407)",
-      "types": "100% (405/407)",
-      "supportedNetworks": "75% (305/407)",
-      "logoUrl": "85% (346/407)"
+      "shortDescription": "99% (404/409)",
+      "types": "100% (407/409)",
+      "supportedNetworks": "84% (344/409)",
+      "logoUrl": "85% (346/409)"
     },
     "Asset": {
       "shortDescription": "33% (12/36)",
       "types": "100% (36/36)",
-      "supportedNetworks": "25% (9/36)",
+      "supportedNetworks": "64% (23/36)",
       "logoUrl": "81% (29/36)"
     },
     "Protocol/Contract": {
       "shortDescription": "100% (158/158)",
       "types": "99% (157/158)",
-      "supportedNetworks": "78% (123/158)",
-      "logoUrl": "81% (128/158)",
-      "tvlUSD": "10% (16/158)"
+      "supportedNetworks": "85% (134/158)",
+      "logoUrl": "83% (131/158)",
+      "tvlUSD": "9% (15/158)"
     },
     "Anchor": {
       "shortDescription": "93% (14/15)",
@@ -203,7 +203,7 @@
     "groups": []
   },
   "s3b_domain_duplicates": {
-    "count": 9,
+    "count": 7,
     "groups": [
       {
         "apex": "jsr.io",
@@ -211,7 +211,7 @@
           {
             "slug": "stellar-router-sdk",
             "name": "Stellar Router SDK",
-            "scfAwarded": false
+            "scfAwarded": true
           },
           {
             "slug": "stellar-indexer",
@@ -236,6 +236,11 @@
           {
             "slug": "autoaction",
             "name": "AutoAction",
+            "scfAwarded": true
+          },
+          {
+            "slug": "agentsmith-x402",
+            "name": "AgentSmith x402",
             "scfAwarded": true
           }
         ]
@@ -286,21 +291,6 @@
         ]
       },
       {
-        "apex": "lusty.finance",
-        "records": [
-          {
-            "slug": "lusty-finance",
-            "name": "Lusty Finance",
-            "scfAwarded": true
-          },
-          {
-            "slug": "lusty",
-            "name": "Lusty",
-            "scfAwarded": false
-          }
-        ]
-      },
-      {
         "apex": "nouns.build",
         "records": [
           {
@@ -331,21 +321,6 @@
         ]
       },
       {
-        "apex": "safustaking.com",
-        "records": [
-          {
-            "slug": "safu-protocol",
-            "name": "SAFU Protocol",
-            "scfAwarded": true
-          },
-          {
-            "slug": "safu",
-            "name": "SAFU",
-            "scfAwarded": false
-          }
-        ]
-      },
-      {
         "apex": "crebitpay.com",
         "records": [
           {
@@ -363,20 +338,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 378,
-    "liveStale365": 134,
+    "liveNoDatedSignal": 368,
+    "liveStale365": 136,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 615,
+        "ageDays": 622,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 983,
+        "ageDays": 990,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -418,7 +393,7 @@
       {
         "slug": "lightecho",
         "name": "Lightecho",
-        "ageDays": 426,
+        "ageDays": 433,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -472,13 +447,6 @@
         "tvlUSD": null
       },
       {
-        "slug": "ankr",
-        "name": "Ankr",
-        "ageDays": null,
-        "hasDated": false,
-        "tvlUSD": null
-      },
-      {
         "slug": "circle-cctp-cross-chain-transfer-protocol",
         "name": "Circle CCTP (Cross-Chain Transfer Protocol)",
         "ageDays": null,
@@ -505,9 +473,16 @@
         "ageDays": null,
         "hasDated": false,
         "tvlUSD": null
+      },
+      {
+        "slug": "walletconnect",
+        "name": "WalletConnect",
+        "ageDays": null,
+        "hasDated": false,
+        "tvlUSD": null
       }
     ]
   },
-  "generatedAt": "2026-11-08T16:00:37Z",
+  "generatedAt": "2026-11-15T16:16:58Z",
   "evalKey": "engine-b-sweeps"
 }

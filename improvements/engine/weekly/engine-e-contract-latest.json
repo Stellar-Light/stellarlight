@@ -1,11 +1,11 @@
 {
   "base": "https://stellarlight.xyz",
-  "generatedAt": "2026-11-08T16:00:37Z",
-  "specVersion": "1.9.127",
+  "generatedAt": "2026-11-15T16:16:57Z",
+  "specVersion": "1.9.150",
   "frame": {
     "ops": 42,
     "paramsProbed": 42,
-    "fieldsChecked": 1024,
+    "fieldsChecked": 1044,
     "postChecked": 5,
     "skipped": [
       "GET /api/hackathons/builds/{id} (no sample for path params)",
@@ -280,12 +280,12 @@
     {
       "op": "GET /api/hackathons/builds",
       "field": "builds[].security",
-      "evidence": "documented optional item property absent from all 97 sampled rows (https://stellarlight.xyz/api/hackathons/builds?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+      "evidence": "documented optional item property absent from all 98 sampled rows (https://stellarlight.xyz/api/hackathons/builds?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/hackathons/builds",
       "field": "builds[].similarity",
-      "evidence": "documented optional item property absent from all 97 sampled rows (https://stellarlight.xyz/api/hackathons/builds?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+      "evidence": "documented optional item property absent from all 98 sampled rows (https://stellarlight.xyz/api/hackathons/builds?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/hackathons/analyze",

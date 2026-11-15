@@ -1,13 +1,19 @@
 {
-	"generatedAt": "2026-11-08T16:00:37.163Z",
+	"generatedAt": "2026-11-15T16:16:57.817Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
 	"frame": {
 		"graded": 47,
-		"passed": 46,
-		"failed": 1
+		"passed": 45,
+		"failed": 2
 	},
-	"okRate": 0.98,
+	"okRate": 0.96,
 	"misses": [
+		{
+			"query": "latest soroban release",
+			"mode": "research",
+			"failureMode": "mismatch",
+			"expected": "protocol\\s*2[6-9]|zipper"
+		},
 		{
 			"query": "recent mainnet upgrade",
 			"mode": "research",
@@ -16,8 +22,8 @@
 		}
 	],
 	"demand": {
-		"checked": 0,
-		"parityHeld": 0,
+		"checked": 1,
+		"parityHeld": 1,
 		"deadends": 0,
 		"goneNow": 0
 	},

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-08T16:00:37Z",
+  "generatedAt": "2026-11-15T16:16:57Z",
   "frame": {
     "scf": 531,
-    "directory": 1008,
-    "matched": 340,
-    "roundsChecked": 340
+    "directory": 1012,
+    "matched": 345,
+    "roundsChecked": 345
   },
   "overstated": [],
   "understated": [],
@@ -87,6 +87,26 @@
       "reason": "no submission verdict found for round(s) #41"
     },
     {
+      "slug": "canary-protocol",
+      "name": "Canary Protocol",
+      "ourRounds": [
+        "45"
+      ],
+      "url": "https://communityfund.stellar.org/project/canary-protocol-y4l",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
+      "slug": "pods",
+      "name": "Pods",
+      "ourRounds": [
+        "45"
+      ],
+      "url": "https://communityfund.stellar.org/project/pods-dxl",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
       "slug": "autoaction",
       "name": "AutoAction",
       "ourRounds": [
@@ -154,6 +174,32 @@
         "31"
       ],
       "reason": "no submission verdict found for round(s) #41"
+    },
+    {
+      "slug": "unstoppable-wallet",
+      "name": "Unstoppable Wallet",
+      "ourRounds": [
+        "34",
+        "42"
+      ],
+      "url": "https://communityfund.stellar.org/project/unstoppable-wallet-thi",
+      "officialAwardedRounds": [
+        "34"
+      ],
+      "reason": "no submission verdict found for round(s) #42"
+    },
+    {
+      "slug": "gatewayfm",
+      "name": "Gateway.fm",
+      "ourRounds": [
+        "16",
+        "44"
+      ],
+      "url": "https://communityfund.stellar.org/project/gatewayfm-noq",
+      "officialAwardedRounds": [
+        "16"
+      ],
+      "reason": "no submission verdict found for round(s) #44"
     }
   ],
   "evalKey": "scf-crosscheck"

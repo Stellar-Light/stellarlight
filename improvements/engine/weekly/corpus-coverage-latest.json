@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-08T16:00:37Z",
+  "generatedAt": "2026-11-15T16:16:57Z",
   "total": 14,
   "ok": 14,
   "failed": 0,
@@ -130,7 +130,7 @@
       "source": "dev-docs",
       "url": "https://developers.stellar.org/launch/usdt0",
       "ingestedBy": "ingest-developers-docs.ts",
-      "chunkCount": 42,
+      "chunkCount": 44,
       "missingSignatures": [],
       "status": "OK"
     },

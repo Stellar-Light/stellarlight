@@ -45,7 +45,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8303866386413574,
+      "topScore": 0.8305076956748962,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -63,7 +63,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8846102952957153,
+      "topScore": 0.8846119046211243,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -171,7 +171,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.830951988697052,
+      "topScore": 0.8310980796813965,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -449,7 +449,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Live network value — served by adapters/RPC, not the static research corpus."
+      "sample": "Live network value \u2014 served by adapters/RPC, not the static research corpus."
     },
     {
       "id": "soroban-sdk-version",
@@ -467,7 +467,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Today's pinned version is a live fact (crates.io) — not the static corpus's job."
+      "sample": "Today's pinned version is a live fact (crates.io) \u2014 not the static corpus's job."
     },
     {
       "id": "repos-zk",
@@ -701,7 +701,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "yieldblox-incident-facts",
@@ -719,7 +719,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "cap-exact-id-0038",
@@ -958,5 +958,6 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-11-15T12:59:53Z"
+  "generatedAt": "2026-11-15T16:16:58Z",
+  "evalKey": "golden-eval"
 }
