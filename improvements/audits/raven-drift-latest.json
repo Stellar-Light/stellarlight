@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-14T12:43:50.037Z",
+	"generatedAt": "2026-11-15T13:10:45.119Z",
 	"specVersion": "1.9.150",
 	"graceDays": 10,
 	"expectedOps": [
@@ -83,16 +83,11 @@
 	"missingFromCatalog": [],
 	"undiscoverable": [
 		"getChanges",
+		"getStablecoins",
 		"listContracts"
 	],
 	"uncataloged": [],
-	"laggingInCatalog": [
-		{
-			"op": "getStablecoins",
-			"addedAt": "2026-11-04",
-			"ageDays": 10
-		}
-	],
+	"laggingInCatalog": [],
 	"extraInCatalog": [],
 	"claimedOpCount": 30,
 	"auditArchetypeRoutesToRegistry": null,
