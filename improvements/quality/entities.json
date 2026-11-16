@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-15T14:57:24.884Z",
+ "generatedAt": "2026-11-16T14:11:17.627Z",
  "surfaces": [
   {
    "surface": "directory",
@@ -19,14 +19,21 @@
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
    "openFindings": 2,
-   "clearedFindings": 345,
+   "clearedFindings": 346,
    "verifiedFindings": 0
   },
   {
    "surface": "consumer",
    "means": "questions real consumers asked that we answered weakly",
-   "openFindings": 1,
+   "openFindings": 2,
    "clearedFindings": 19,
+   "verifiedFindings": 0
+  },
+  {
+   "surface": "code",
+   "means": "repo scanning, code depth, symbol extraction",
+   "openFindings": 2,
+   "clearedFindings": 170,
    "verifiedFindings": 0
   },
   {
@@ -42,20 +49,13 @@
    "openFindings": 0,
    "clearedFindings": 40,
    "verifiedFindings": 7
-  },
-  {
-   "surface": "code",
-   "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 0,
-   "clearedFindings": 170,
-   "verifiedFindings": 0
   }
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 1011,
-  "open": 9,
-  "refreshQueue": 136,
+  "total": 1017,
+  "open": 12,
+  "refreshQueue": 138,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -79,17 +79,17 @@
     "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
-  "cleared": 842,
+  "cleared": 843,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 139,
-    "total": 517
+    "open": 143,
+    "total": 521
    },
    "instrument": {
-    "open": 23,
-    "total": 494
+    "open": 24,
+    "total": 496
    }
   },
   "byFailureMode": [
@@ -104,7 +104,7 @@
    },
    {
     "mode": "repo-gone",
-    "open": 0,
+    "open": 2,
     "refresh": 0,
     "blocked": 0,
     "cleared": 159,
@@ -114,7 +114,7 @@
    {
     "mode": "broken-link",
     "open": 0,
-    "refresh": 23,
+    "refresh": 24,
     "blocked": 0,
     "cleared": 132,
     "verified": 0,
@@ -134,7 +134,7 @@
     "open": 1,
     "refresh": 0,
     "blocked": 0,
-    "cleared": 51,
+    "cleared": 52,
     "verified": 0,
     "surface": "retrieval"
    },
@@ -213,7 +213,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 85,
+    "refresh": 86,
     "blocked": 0,
     "cleared": 6,
     "verified": 0,
@@ -256,6 +256,15 @@
     "surface": "directory"
    },
    {
+    "mode": "raven-consumer-miss",
+    "open": 2,
+    "refresh": 0,
+    "blocked": 0,
+    "cleared": 0,
+    "verified": 0,
+    "surface": "consumer"
+   },
+   {
     "mode": "stamp-contradicted",
     "open": 2,
     "refresh": 0,
@@ -292,15 +301,6 @@
     "surface": "directory"
    },
    {
-    "mode": "raven-consumer-miss",
-    "open": 1,
-    "refresh": 0,
-    "blocked": 0,
-    "cleared": 0,
-    "verified": 0,
-    "surface": "consumer"
-   },
-   {
     "mode": "supersession-unrecorded",
     "open": 0,
     "refresh": 24,
@@ -322,7 +322,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 5
+    "count": 8
    },
    {
     "bucket": "8–30d",
@@ -338,6 +338,12 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "help",
+    "surface": "retrieval",
+    "failureMode": "demand-miss",
+    "clearedAt": "2026-11-16"
+   },
    {
     "probe": "https://scorechain.com",
     "surface": "directory",
@@ -379,26 +385,20 @@
     "surface": "code",
     "failureMode": "repo-gone",
     "clearedAt": "2026-11-14"
-   },
-   {
-    "probe": "AnoukRImola/biochainfinalrepo",
-    "surface": "code",
-    "failureMode": "repo-gone",
-    "clearedAt": "2026-11-14"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 167,
-     "recurred": 145,
-     "ratePct": 86.8
+     "newFindings": 173,
+     "recurred": 150,
+     "ratePct": 86.7
     },
     "lifetime": {
-     "newFindings": 1011,
-     "recurred": 441,
-     "ratePct": 43.6
+     "newFindings": 1017,
+     "recurred": 446,
+     "ratePct": 43.9
     }
    },
    "reopened": {
@@ -410,20 +410,20 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 167,
-     "repeats": 166,
+     "newFindings": 173,
+     "repeats": 172,
      "ratePct": 99.4
     },
     "lifetime": {
-     "newFindings": 1011,
-     "repeats": 1004,
+     "newFindings": 1017,
+     "repeats": 1010,
      "ratePct": 99.3
     },
     "byClass": [
      {
       "class": "cross-surface-consistency",
-      "total": 448,
-      "open": 133,
+      "total": 452,
+      "open": 137,
       "firstSeen": "2026-07-22"
      },
      {
@@ -434,7 +434,7 @@
      },
      {
       "class": "taxonomy-coverage",
-      "total": 115,
+      "total": 116,
       "open": 1,
       "firstSeen": "2026-07-22"
      },
@@ -458,8 +458,8 @@
      },
      {
       "class": "unclassified",
-      "total": 7,
-      "open": 7,
+      "total": 8,
+      "open": 8,
       "firstSeen": "2026-10-26"
      }
     ]
@@ -9683,15 +9683,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1440
+     "count": 1441
     },
     {
      "label": "slowing",
-     "count": 1187
+     "count": 1191
     },
     {
      "label": "active",
-     "count": 978
+     "count": 973
     },
     {
      "label": "unknown",
@@ -10824,28 +10824,28 @@
     "value": 289
    },
    {
-    "id": "s:link-health",
-    "label": "link-health",
-    "column": 0,
-    "value": 159
-   },
-   {
     "id": "s:gone-repos",
     "label": "gone-repos",
     "column": 0,
-    "value": 159
+    "value": 161
+   },
+   {
+    "id": "s:link-health",
+    "label": "link-health",
+    "column": 0,
+    "value": 160
    },
    {
     "id": "s:engine-d-demand",
     "label": "engine-d-demand",
     "column": 0,
-    "value": 115
+    "value": 116
    },
    {
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 91
+    "value": 92
    },
    {
     "id": "s:raven-routing",
@@ -10917,7 +10917,7 @@
     "id": "s:raven-loop",
     "label": "raven-loop",
     "column": 0,
-    "value": 2
+    "value": 3
    },
    {
     "id": "s:weak-basis-liveness",
@@ -10929,7 +10929,7 @@
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
-    "value": 347
+    "value": 348
    },
    {
     "id": "f:directory",
@@ -10941,7 +10941,7 @@
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 170
+    "value": 172
    },
    {
     "id": "f:contract",
@@ -10959,7 +10959,7 @@
     "id": "f:consumer",
     "label": "consumer",
     "column": 1,
-    "value": 20
+    "value": 21
    },
    {
     "id": "f:scf",
@@ -10971,13 +10971,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 842
+    "value": 843
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 162
+    "value": 167
    },
    {
     "id": "o:verified",
@@ -10999,14 +10999,14 @@
     "target": 25,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
-    "value": 345
+    "value": 346
    },
    {
     "source": 3,
     "target": 18,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:retrieval",
-    "value": 52
+    "value": 53
    },
    {
     "source": 0,
@@ -11069,7 +11069,7 @@
     "target": 26,
     "sourceId": "f:consumer",
     "targetId": "o:open",
-    "value": 18
+    "value": 19
    },
    {
     "source": 16,
@@ -11146,35 +11146,35 @@
     "target": 20,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 91
+    "value": 92
    },
    {
     "source": 20,
     "target": 26,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 109
+    "value": 112
    },
    {
-    "source": 1,
+    "source": 2,
     "target": 19,
     "sourceId": "s:link-health",
     "targetId": "f:directory",
-    "value": 159
+    "value": 160
    },
    {
     "source": 19,
     "target": 26,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 30
+    "value": 31
    },
    {
-    "source": 2,
+    "source": 1,
     "target": 20,
     "sourceId": "s:gone-repos",
     "targetId": "f:code",
-    "value": 159
+    "value": 161
    },
    {
     "source": 9,
@@ -11202,7 +11202,7 @@
     "target": 23,
     "sourceId": "s:raven-loop",
     "targetId": "f:consumer",
-    "value": 1
+    "value": 2
    },
    {
     "source": 18,

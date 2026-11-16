@@ -45,7 +45,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8305076956748962,
+      "topScore": 0.8303866386413574,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -243,7 +243,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8266752362251282,
+      "topScore": 0.8266192674636841,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -449,7 +449,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Live network value \u2014 served by adapters/RPC, not the static research corpus."
+      "sample": "Live network value — served by adapters/RPC, not the static research corpus."
     },
     {
       "id": "soroban-sdk-version",
@@ -467,7 +467,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Today's pinned version is a live fact (crates.io) \u2014 not the static corpus's job."
+      "sample": "Today's pinned version is a live fact (crates.io) — not the static corpus's job."
     },
     {
       "id": "repos-zk",
@@ -575,7 +575,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "soroswap/soroswap-ui"
+      "sample": "soroswap/poc-soroswap-indexer"
     },
     {
       "id": "bridge-evm-to-stellar",
@@ -585,15 +585,15 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7964655160903931,
+      "topScore": 0.7982287406921387,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": false,
+      "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Cross-Chain USDC Transfers with CCTP"
+      "sample": "Smart Contract Asset Interoperability"
     },
     {
       "id": "bridge-solana-to-stellar",
@@ -621,7 +621,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7094414234161377,
+      "topScore": 0.70998215675354,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -701,7 +701,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "yieldblox-incident-facts",
@@ -711,7 +711,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7408052682876587,
+      "topScore": 0.7410167455673218,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -719,7 +719,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "cap-exact-id-0038",
@@ -947,7 +947,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8435437083244324,
+      "topScore": 0.8437657356262207,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -958,6 +958,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-11-15T16:16:58Z",
-  "evalKey": "golden-eval"
+  "generatedAt": "2026-11-16T14:02:44Z"
 }

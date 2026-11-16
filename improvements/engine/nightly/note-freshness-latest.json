@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-15T13:06:56.492Z",
+	"generatedAt": "2026-11-16T14:10:10.022Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -54,7 +54,7 @@
 		},
 		{
 			"probe": "note-stale:keybase/client:docker:keybaseio/client",
-			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-13 (published 2026-11-13)",
+			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-16 (published 2026-11-16)",
 			"surface": "code"
 		},
 		{
@@ -75,6 +75,16 @@
 		{
 			"probe": "note-stale:rango-exchange/rango-sdk:npm:rango-sdk-basic",
 			"note": "note (asOf 2026-09-02) cites 0.5.0; registry latest is 0.6.0 (published 2026-09-23)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:ggoldani/agent-passport:npm:@ggoldani/agent-passport-sdk",
+			"note": "note (asOf 2026-09-02) cites 0.1.0; registry latest is 0.2.0 (published 2026-11-15)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:ggoldani/agent-passport:npm:@ggoldani/agent-passport-mcp",
+			"note": "note (asOf 2026-09-02) cites 0.1.0; registry latest is 0.2.0 (published 2026-11-15)",
 			"surface": "code"
 		},
 		{
@@ -134,7 +144,7 @@
 		},
 		{
 			"probe": "note-stale:soneso/kmp-stellar-sdk:maven:com.soneso.stellar:stellar-sdk",
-			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.17.0 (published 2026-11-14)",
+			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.18.0 (published 2026-11-15)",
 			"surface": "code"
 		},
 		{
