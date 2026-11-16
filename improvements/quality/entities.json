@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-16T14:11:17.627Z",
+ "generatedAt": "2026-11-16T17:20:06.282Z",
  "surfaces": [
   {
    "surface": "directory",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 116,
+   "oldestDays": 117,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
