@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-14T21:27:15.901Z",
+	"asOf": "2026-11-16T13:39:23.050Z",
 	"source": "scripts/check-answer-dating.ts",
-	"valuesChecked": 83,
-	"undated": 34,
+	"valuesChecked": 120,
+	"undated": 28,
 	"added": [],
 	"fixed": [],
 	"findings": [
@@ -127,18 +127,6 @@
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
-			"op": "getPartners",
-			"value": "score",
-			"where": "partners.trust",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "getPartners",
-			"value": "label",
-			"where": "partners.trust",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
 			"op": "matchPartners",
 			"value": "summary",
 			"where": "(root)",
@@ -166,30 +154,6 @@
 			"op": "getRfps",
 			"value": "status",
 			"where": "rfps",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "scfPitch",
-			"value": "tier",
-			"where": "report.vet.competitors.repos",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "scfPitch",
-			"value": "status",
-			"where": "report.vet.competitors.projects",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "hackathonBrief",
-			"value": "tier",
-			"where": "report.vet.competitors.repos",
-			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
-		},
-		{
-			"op": "hackathonBrief",
-			"value": "status",
-			"where": "report.vet.competitors.projects",
 			"why": "undated in its own scope, while OTHER objects in this response carry dates a consumer could mistake for it"
 		},
 		{
