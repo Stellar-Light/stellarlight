@@ -1,121 +1,140 @@
 {
-  "asOf": "2026-11-01T14:35:34.673Z",
+  "asOf": "2026-11-16T17:34:36.003Z",
   "source": "scripts/report-coverage-gaps.ts",
   "scf": {
     "total": 531,
-    "absent": 10,
-    "served": 521,
-    "absentAwarded": 10,
+    "absent": 9,
+    "served": 522,
+    "absentAwarded": 9,
     "absentSubmittedOnly": 0,
     "sample": [
       {
-        "scfSlug": "open-rwa-vault-infrastructure-nis",
+        "scfSlug": "passkey-ui-sj6",
         "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/open-rwa-vault-infrastructure-nis"
-      },
-      {
-        "scfSlug": "canary-protocol-y4l",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/canary-protocol-y4l"
-      },
-      {
-        "scfSlug": "pods-dxl",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/pods-dxl"
-      },
-      {
-        "scfSlug": "pollar-nqe",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [
-          "42"
-        ],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/pollar-nqe"
-      },
-      {
-        "scfSlug": "cara7-yyx",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/cara7-yyx"
-      },
-      {
-        "scfSlug": "astrolabe-bzg",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/astrolabe-bzg"
-      },
-      {
-        "scfSlug": "nila-fwc",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/nila-fwc"
-      },
-      {
-        "scfSlug": "fermah-pay-w3c",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/fermah-pay-w3c"
-      },
-      {
-        "scfSlug": "principal-vzt",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [
           "44"
         ],
+        "notAwardedRounds": [],
         "awarded": true,
-        "url": "https://communityfund.stellar.org/project/principal-vzt"
+        "url": "https://communityfund.stellar.org/project/passkey-ui-sj6"
       },
       {
-        "scfSlug": "zkella-protocol-compliance-ready-confidential-finance-infrastructure-for-stellar-sib",
+        "scfSlug": "soroban-security-portal-7ea",
         "rounds": [
-          "45"
+          "36"
+        ],
+        "notAwardedRounds": [
+          "35"
+        ],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/soroban-security-portal-7ea"
+      },
+      {
+        "scfSlug": "hyperledger-solang-dwa",
+        "rounds": [
+          "33",
+          "23",
+          "20"
         ],
         "notAwardedRounds": [],
         "awarded": true,
-        "url": "https://communityfund.stellar.org/project/zkella-protocol-compliance-ready-confidential-finance-infrastructure-for-stellar-sib"
+        "url": "https://communityfund.stellar.org/project/hyperledger-solang-dwa"
+      },
+      {
+        "scfSlug": "sdk-for-stellar-qt-mab",
+        "rounds": [
+          "4"
+        ],
+        "notAwardedRounds": [],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/sdk-for-stellar-qt-mab"
+      },
+      {
+        "scfSlug": "soroban-and-stellar-content-g7j",
+        "rounds": [
+          "25"
+        ],
+        "notAwardedRounds": [],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/soroban-and-stellar-content-g7j"
+      },
+      {
+        "scfSlug": "liquid-by-upesa-dvq",
+        "rounds": [
+          "42"
+        ],
+        "notAwardedRounds": [
+          "41"
+        ],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/liquid-by-upesa-dvq"
+      },
+      {
+        "scfSlug": "autowhale-ys0",
+        "rounds": [
+          "34"
+        ],
+        "notAwardedRounds": [],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/autowhale-ys0"
+      },
+      {
+        "scfSlug": "stellar-integration-in-adamik-api-piy",
+        "rounds": [
+          "37"
+        ],
+        "notAwardedRounds": [],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/stellar-integration-in-adamik-api-piy"
+      },
+      {
+        "scfSlug": "stellar-attestation-service-lda",
+        "rounds": [
+          "32",
+          "29"
+        ],
+        "notAwardedRounds": [],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/stellar-attestation-service-lda"
       }
     ]
   },
   "defillama": {
-    "stellarListed": 44,
+    "stellarListed": 47,
     "matched": 32,
-    "missing": 1,
-    "belowFloor": 1
+    "missing": 2,
+    "belowFloor": 2
   },
   "corroboratedAbsent": [],
   "domainMatched": [
     {
+      "scf": "loop-cashback-everywhere-with-stellar-zom",
+      "slug": "ctx",
+      "domain": "ctx.com"
+    },
+    {
       "scf": "lul-serving-the-unbanked-ckz",
       "slug": "lulpay",
       "domain": "lulpay.com"
+    },
+    {
+      "scf": "ssc-scorechain-stellar-compliance-vr7",
+      "slug": "scorechain",
+      "domain": "scorechain.com"
+    },
+    {
+      "scf": "cobo-custody-integration-for-institution-p8i",
+      "slug": "cobo",
+      "domain": "cobo.com"
+    },
+    {
+      "scf": "muwpay-qwa",
+      "slug": "chainlink",
+      "domain": "chain.link"
+    },
+    {
+      "scf": "greep-pos-greep-pay-mhp",
+      "slug": "greeppay",
+      "domain": "greep.io"
     },
     {
       "scf": "a-real-estate-tokenization-platform-ss1",
@@ -123,14 +142,49 @@
       "domain": "verseprop.com"
     },
     {
+      "scf": "convexity-humanitarian-aid-transfer-solution-chats-bd8",
+      "slug": "chats",
+      "domain": "chats.cash"
+    },
+    {
+      "scf": "peer-by-honeycoin-inz",
+      "slug": "honey-coin",
+      "domain": "honeycoin.app"
+    },
+    {
+      "scf": "paid-payrolling-0sk",
+      "slug": "paid",
+      "domain": "p-aid.world"
+    },
+    {
+      "scf": "cocaxyz-5fk",
+      "slug": "coca",
+      "domain": "coca.xyz"
+    },
+    {
+      "scf": "hana-wallet-x9e",
+      "slug": "hana",
+      "domain": "hanawallet.io"
+    },
+    {
       "scf": "anticipatory-aid-on-soroban-f7j",
       "slug": "coala-pay",
       "domain": "coalapay.org"
     },
     {
+      "scf": "coinsph-stellar-remittances-qwo",
+      "slug": "coins-ph",
+      "domain": "coins.ph"
+    },
+    {
       "scf": "ctxcom-evm",
       "slug": "ctx",
       "domain": "ctx.com"
+    },
+    {
+      "scf": "oz-accounts-policy-builder-by-gatewayfm-mqp",
+      "slug": "gatewayfm",
+      "domain": "gateway.fm"
     },
     {
       "scf": "soroban-contract-source-verification-service-bax",
@@ -139,7 +193,7 @@
     },
     {
       "scf": "soroban-disassembler-working-title-ply",
-      "slug": "inference",
+      "slug": "inferera",
       "domain": "inferara.com"
     },
     {
@@ -154,13 +208,28 @@
     },
     {
       "scf": "advanced-debugging-for-soroban-contracts-5sr",
-      "slug": "runtime-verification",
-      "domain": "runtimeverification.com"
+      "slug": "simbolik",
+      "domain": "simbolik.dev"
+    },
+    {
+      "scf": "confidential-transfers-and-balances-hdt",
+      "slug": "fairblock",
+      "domain": "fairblock.network"
     },
     {
       "scf": "paysomeai-7gh",
       "slug": "smilepay",
       "domain": "smilepay.app"
+    },
+    {
+      "scf": "soroban-rpc-sdk-dep",
+      "slug": "cross-platform-soroban-rpc-sdk",
+      "domain": "github.com/frankszendzielarz/sorobanrpcsdk"
+    },
+    {
+      "scf": "identity-operating-system-idos-nqg",
+      "slug": "idos",
+      "domain": "idos.network"
     },
     {
       "scf": "stellar-women-bootcamp-r5v",
@@ -173,9 +242,24 @@
       "domain": "youtube.com/@robertosanzcriptomonedas"
     },
     {
+      "scf": "bridgeanchor-xofusdc-for-lomi-xpb",
+      "slug": "bridge",
+      "domain": "bridge.xyz"
+    },
+    {
+      "scf": "bexo-wallet-usdc-payments-cross-border-transfers-qr-merchant-payments-for-latin-america-uyu",
+      "slug": "bexo",
+      "domain": "bexo.app"
+    },
+    {
       "scf": "embedded-collective-investment-via-soroban-syi",
       "slug": "escala",
       "domain": "escalahq.com"
+    },
+    {
+      "scf": "dcent-wallet-u4x",
+      "slug": "dcent",
+      "domain": "dcentwallet.com"
     },
     {
       "scf": "seasonal-workers-payroll-lru",
@@ -188,9 +272,34 @@
       "domain": "lobster-protocol.com"
     },
     {
+      "scf": "ibis-stablecoin-neobank-ramp-api-infrastructure-g4c",
+      "slug": "ibis",
+      "domain": "usaibis.com"
+    },
+    {
+      "scf": "unstoppable-money-eii",
+      "slug": "unstoppable-wallet",
+      "domain": "unstoppable.money"
+    },
+    {
       "scf": "smart-account-onboarding-8yr",
       "slug": "the-aha-company",
       "domain": "theaha.co"
+    },
+    {
+      "scf": "cashabroad-smart-treasury-wla",
+      "slug": "cash-abroad",
+      "domain": "cashabroad.one"
+    },
+    {
+      "scf": "conomypayment4platforms-crg",
+      "slug": "conomy",
+      "domain": "conomyhq.com"
+    },
+    {
+      "scf": "sfx-super-money-app-uav",
+      "slug": "ripe",
+      "domain": "ripe.money"
     },
     {
       "scf": "institutional-treasury-xlm-wyu",
@@ -198,9 +307,14 @@
       "domain": "arreltech.com"
     },
     {
-      "scf": "the-merchant-settlement-rail-for-africa-bzf",
-      "slug": "slimepay",
-      "domain": "slimepay.com"
+      "scf": "lendxyz-7xc",
+      "slug": "lend",
+      "domain": "lend.xyz"
+    },
+    {
+      "scf": "rozo-one-tap-to-pay-vqy",
+      "slug": "rozo",
+      "domain": "rozo.ai"
     },
     {
       "scf": "regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
@@ -208,24 +322,79 @@
       "domain": "li.fi"
     },
     {
+      "scf": "zarf-protocol-zarfto-b5n",
+      "slug": "zarf",
+      "domain": "zarf.to"
+    },
+    {
+      "scf": "eara-european-regulated-rwa-ecosystem-dmu",
+      "slug": "eara",
+      "domain": "earaglobal.com"
+    },
+    {
+      "scf": "vanna-protocol-icb",
+      "slug": "vanna-finance",
+      "domain": "vanna.finance"
+    },
+    {
+      "scf": "zkcrossdex-ipb",
+      "slug": "zkcross",
+      "domain": "zkcross.network"
+    },
+    {
+      "scf": "bondhiveonchain-fixed-deposit-pbl",
+      "slug": "bondhive",
+      "domain": "bondhive.xyz"
+    },
+    {
+      "scf": "soroswapfinance-yax",
+      "slug": "soroswap",
+      "domain": "soroswap.finance"
+    },
+    {
+      "scf": "pelago-airswift-nkm",
+      "slug": "airswift",
+      "domain": "pelagotech.com"
+    },
+    {
       "scf": "post-quantum-secure-wallets-for-stellar-97o",
       "slug": "soundness",
       "domain": "soundness.xyz"
     },
     {
+      "scf": "bpv-stellarmesh-anchor-afq",
+      "slug": "bp-ventures",
+      "domain": "bpventures.us"
+    },
+    {
       "scf": "meta-contracts-in-stellar-p4c",
       "slug": "stellar-router-sdk",
       "domain": "jsr.io/@creit-tech/stellar-router-sdk"
+    },
+    {
+      "scf": "stellarchainio-ypp",
+      "slug": "stellarchain",
+      "domain": "stellarchain.io"
+    },
+    {
+      "scf": "zkfetch-zktls-powered-oracle-solution-mfy",
+      "slug": "reclaim",
+      "domain": "reclaimprotocol.org"
+    },
+    {
+      "scf": "band-protocol-2ob",
+      "slug": "band",
+      "domain": "bandprotocol.com"
     }
   ],
   "reviewedAbsent": [],
-  "unreviewedAbsent": 10,
+  "unreviewedAbsent": 9,
   "summary": {
-    "missingDefillama": 1,
-    "missingScf": 10,
-    "missingScfAwarded": 10,
+    "missingDefillama": 2,
+    "missingScf": 9,
+    "missingScfAwarded": 9,
     "partnerDocsWithoutOwnContent": 3,
-    "staleCollections": 2,
+    "staleCollections": 0,
     "staleOrEmptyResearchSources": 0,
     "refreshUnmeasurableSources": 2
   }
