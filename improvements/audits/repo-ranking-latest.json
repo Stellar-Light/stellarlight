@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-16T14:18:44.679Z",
+	"generatedAt": "2026-11-17T15:10:51.686Z",
 	"source": "scripts/check-repo-ranking.ts",
 	"rule": "Written ordering claims about repoScore, graded against the live index. An inversion is a finding for a human; a missing repo is never a pass.",
 	"tally": {
