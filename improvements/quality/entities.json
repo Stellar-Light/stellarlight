@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-17T15:05:59.316Z",
+ "generatedAt": "2026-11-17T17:02:20.181Z",
  "surfaces": [
   {
    "surface": "directory",
@@ -468,7 +468,7 @@
  },
  "projects": {
   "read": 1012,
-  "population": 1159,
+  "population": 1160,
   "servedPopulation": 1012,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -9689,11 +9689,11 @@
     },
     {
      "label": "slowing",
-     "count": 1192
+     "count": 1193
     },
     {
      "label": "active",
-     "count": 995
+     "count": 994
     },
     {
      "label": "unknown",
