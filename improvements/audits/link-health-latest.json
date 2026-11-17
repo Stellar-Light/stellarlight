@@ -1,9 +1,9 @@
 {
- "generatedAt": "2026-11-16T09:57:35.459Z",
- "asOf": "2026-11-16T09:57:35.459Z",
+ "generatedAt": "2026-11-17T10:55:09.839Z",
+ "asOf": "2026-11-17T10:55:09.839Z",
  "source": "scripts/check-links.ts",
  "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
- "checked": 2851,
+ "checked": 2852,
  "brokenSplit": "broken = cited by at least one row that is not already retired, so somebody has to look. brokenOnRetired = every citing row is already Inactive or Draft: the dead link agrees with the verdict we already published, so it is corroboration, not a defect. Only `broken` reaches the improvement ledger.",
  "broken": [
   {
@@ -198,17 +198,6 @@
    ]
   },
   {
-   "url": "https://raissacillero",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "builders/6acdc8edda8e6b8575dde141.website_url"
-   ],
-   "citedByStatus": [
-    "6acdc8edda8e6b8575dde141: n/a"
-   ]
-  },
-  {
    "url": "https://spacemeet.co",
    "httpStatus": null,
    "reason": "fetch failed",
@@ -250,6 +239,17 @@
    ],
    "citedByStatus": [
     "walletban: Live"
+   ]
+  },
+  {
+   "url": "https://winszn.xyz",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "builders/6ab8b0ed4a995ea17b08d6ea.website_url"
+   ],
+   "citedByStatus": [
+    "6ab8b0ed4a995ea17b08d6ea: n/a"
    ]
   },
   {
@@ -345,17 +345,6 @@
    ]
   },
   {
-   "url": "https://https",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/borderdollar.links.twitter"
-   ],
-   "citedByStatus": [
-    "borderdollar: Inactive"
-   ]
-  },
-  {
    "url": "https://octoplace.io",
    "httpStatus": 404,
    "reason": "Not Found",
@@ -424,17 +413,6 @@
    ],
    "citedByStatus": [
     "blink: Live"
-   ]
-  },
-  {
-   "url": "https://winszn.xyz",
-   "verdict": "parked",
-   "pageTitle": null,
-   "targets": [
-    "builders/6ab8b0ed4a995ea17b08d6ea.website_url"
-   ],
-   "citedByStatus": [
-    "6ab8b0ed4a995ea17b08d6ea: n/a"
    ]
   }
  ],
