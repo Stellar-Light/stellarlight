@@ -243,7 +243,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8266192674636841,
+      "topScore": 0.8266752362251282,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -387,7 +387,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8044580221176147,
+      "topScore": 0.8044507503509521,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -585,15 +585,15 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7982287406921387,
+      "topScore": 0.7964655160903931,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": true,
+      "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Smart Contract Asset Interoperability"
+      "sample": "Cross-Chain USDC Transfers with CCTP"
     },
     {
       "id": "bridge-solana-to-stellar",
@@ -621,7 +621,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.70998215675354,
+      "topScore": 0.7094414234161377,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -675,7 +675,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6733469632960171,
+      "topScore": 0.710854709148407,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -711,7 +711,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7410167455673218,
+      "topScore": 0.7408052682876587,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -729,7 +729,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7038772702217102,
+      "topScore": 0.7056256532669067,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -947,7 +947,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8437657356262207,
+      "topScore": 0.8435437083244324,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -958,5 +958,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-11-16T14:02:44Z"
+  "generatedAt": "2026-11-17T14:57:33Z"
 }
