@@ -1,9 +1,9 @@
 {
-	"generatedAt": "2026-11-10T15:48:08.418Z",
+	"generatedAt": "2026-11-17T17:05:22.564Z",
 	"basis": "archived repos from the public repos API (isArchived=true), restricted to the curated pool (project-linked or repoScore >= 60), compared against REPO_SUPERSESSIONS keys",
-	"archivedTotal": 289,
-	"archivedInPool": 64,
-	"covered": 40,
+	"archivedTotal": 291,
+	"archivedInPool": 63,
+	"covered": 39,
 	"missing": [
 		{
 			"fullName": "ravendevteam/alternet",
