@@ -1,9 +1,9 @@
 {
-	"generatedAt": "2026-11-16T13:39:27.437Z",
+	"generatedAt": "2026-11-17T14:24:56.470Z",
 	"source": "data/snapshots/projects/*.json.gz",
-	"latestSnapshot": "2026-11-16",
+	"latestSnapshot": "2026-11-17",
 	"historyStart": "2026-10-02",
-	"snapshots": 46,
+	"snapshots": 47,
 	"definitions": {
 		"launched": "Reached live: status Live now, or Inactive with a record that it was live before. Development and pre-release projects have not launched.",
 		"markedLive": "Status Live, on any evidence.",
@@ -17,16 +17,16 @@
 			"launched": 908,
 			"markedLive": 825,
 			"liveOnStrongEvidence": 388,
-			"observedActive": 282,
-			"noActivityData": 404
+			"observedActive": 285,
+			"noActivityData": 403
 		},
 		"scf": {
 			"listed": 711,
 			"launched": 637,
 			"markedLive": 569,
 			"liveOnStrongEvidence": 242,
-			"observedActive": 200,
-			"noActivityData": 237
+			"observedActive": 203,
+			"noActivityData": 236
 		},
 		"nonScf": {
 			"listed": 301,
@@ -54,8 +54,8 @@
 				"launched": 255,
 				"markedLive": 221,
 				"liveOnStrongEvidence": 92,
-				"observedActive": 61,
-				"noActivityData": 85
+				"observedActive": 64,
+				"noActivityData": 84
 			},
 			{
 				"cohort": "rounds 31-45",
