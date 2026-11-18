@@ -2,37 +2,33 @@
   "source": "Electric Capital's Open Dev Data",
   "sourceUrl": "https://www.developerreport.com/ecosystems/stellar",
   "ecosystem": "Stellar",
-  "asOf": "2026-11-09",
-  "refreshedAt": "2026-11-17T22:47:19.347208+00:00",
+  "asOf": "2026-11-10",
+  "refreshedAt": "2026-11-18T22:29:22.790789+00:00",
   "mad": {
-    "total": 4237,
-    "exclusive": 2899,
+    "total": 4225,
+    "exclusive": 2887,
     "multichain": 1338,
     "thirtyDaysAgo": 4421,
-    "ninetyDaysAgo": 4303,
-    "oneYearAgo": 1493,
+    "ninetyDaysAgo": 4256,
+    "oneYearAgo": 1492,
     "allTimePeak": 5035,
     "allTimePeakDay": "2026-10-21"
   },
   "commits28d": {
-    "total": 97593,
-    "thirtyDaysAgo": 115881
+    "total": 98355,
+    "thirtyDaysAgo": 116181
   },
   "tenure": {
-    "fullTime": 523,
-    "partTime": 3409,
-    "oneTime": 305
+    "fullTime": 518,
+    "partTime": 3406,
+    "oneTime": 301
   },
   "experience": {
-    "lessThan1Year": 3318,
-    "oneToTwoYears": 399,
-    "twoYearsPlus": 520
+    "lessThan1Year": 3312,
+    "oneToTwoYears": 396,
+    "twoYearsPlus": 517
   },
   "series365d": [
-    {
-      "date": "2025-11-09",
-      "mad": 1493
-    },
     {
       "date": "2025-11-10",
       "mad": 1492
@@ -1492,12 +1488,16 @@
     {
       "date": "2026-11-09",
       "mad": 4237
+    },
+    {
+      "date": "2026-11-10",
+      "mad": 4225
     }
   ],
   "geo": {
-    "totalActive28d": 4237,
-    "located": 630,
-    "unknown": 3607,
+    "totalActive28d": 4225,
+    "located": 627,
+    "unknown": 3598,
     "topCountries": [
       {
         "country": "Nigeria",
@@ -1505,7 +1505,7 @@
       },
       {
         "country": "United States",
-        "devs": 65
+        "devs": 62
       },
       {
         "country": "India",
@@ -1524,15 +1524,15 @@
         "devs": 14
       },
       {
-        "country": "United Kingdom",
-        "devs": 14
-      },
-      {
         "country": "China",
         "devs": 13
       },
       {
         "country": "Germany",
+        "devs": 13
+      },
+      {
+        "country": "United Kingdom",
         "devs": 13
       },
       {
@@ -1545,12 +1545,8 @@
     {
       "id": 2,
       "name": "Ethereum",
-      "current": 8811,
+      "current": 8716,
       "series": [
-        {
-          "date": "2025-11-09",
-          "mad": 17193
-        },
         {
           "date": "2025-11-10",
           "mad": 17175
@@ -3010,18 +3006,18 @@
         {
           "date": "2026-11-09",
           "mad": 8811
+        },
+        {
+          "date": "2026-11-10",
+          "mad": 8716
         }
       ]
     },
     {
       "id": 391,
       "name": "Solana",
-      "current": 2811,
+      "current": 2792,
       "series": [
-        {
-          "date": "2025-11-09",
-          "mad": 6178
-        },
         {
           "date": "2025-11-10",
           "mad": 6197
@@ -3948,115 +3944,115 @@
         },
         {
           "date": "2026-06-29",
-          "mad": 2937
+          "mad": 2938
         },
         {
           "date": "2026-06-30",
-          "mad": 2933
+          "mad": 2934
         },
         {
           "date": "2026-07-01",
-          "mad": 2911
+          "mad": 2912
         },
         {
           "date": "2026-07-02",
-          "mad": 2929
+          "mad": 2930
         },
         {
           "date": "2026-07-03",
-          "mad": 2922
+          "mad": 2923
         },
         {
           "date": "2026-07-04",
-          "mad": 2905
+          "mad": 2906
         },
         {
           "date": "2026-07-05",
-          "mad": 2893
+          "mad": 2894
         },
         {
           "date": "2026-07-06",
-          "mad": 2897
+          "mad": 2898
         },
         {
           "date": "2026-07-07",
-          "mad": 2913
+          "mad": 2914
         },
         {
           "date": "2026-07-08",
-          "mad": 2919
+          "mad": 2920
         },
         {
           "date": "2026-07-09",
-          "mad": 2933
+          "mad": 2934
         },
         {
           "date": "2026-07-10",
-          "mad": 2944
-        },
-        {
-          "date": "2026-07-11",
-          "mad": 2937
-        },
-        {
-          "date": "2026-07-12",
-          "mad": 2942
-        },
-        {
-          "date": "2026-07-13",
           "mad": 2945
         },
         {
+          "date": "2026-07-11",
+          "mad": 2938
+        },
+        {
+          "date": "2026-07-12",
+          "mad": 2943
+        },
+        {
+          "date": "2026-07-13",
+          "mad": 2946
+        },
+        {
           "date": "2026-07-14",
-          "mad": 2916
+          "mad": 2917
         },
         {
           "date": "2026-07-15",
-          "mad": 2904
+          "mad": 2905
         },
         {
           "date": "2026-07-16",
-          "mad": 2839
+          "mad": 2840
         },
         {
           "date": "2026-07-17",
-          "mad": 2825
+          "mad": 2826
         },
         {
           "date": "2026-07-18",
-          "mad": 2807
+          "mad": 2808
         },
         {
           "date": "2026-07-19",
-          "mad": 2796
+          "mad": 2797
         },
         {
           "date": "2026-07-20",
-          "mad": 2800
+          "mad": 2801
         },
         {
           "date": "2026-07-21",
-          "mad": 2791
+          "mad": 2792
         },
         {
           "date": "2026-07-22",
-          "mad": 2751
+          "mad": 2752
         },
         {
           "date": "2026-07-23",
-          "mad": 2799
+          "mad": 2800
         },
         {
           "date": "2026-07-24",
-          "mad": 2791
+          "mad": 2792
         },
         {
           "date": "2026-07-25",
-          "mad": 2781
+          "mad": 2782
         },
         {
           "date": "2026-07-26",
-          "mad": 2778
+          "mad": 2779
         },
         {
           "date": "2026-07-27",
@@ -4481,18 +4477,18 @@
         {
           "date": "2026-11-09",
           "mad": 2811
+        },
+        {
+          "date": "2026-11-10",
+          "mad": 2792
         }
       ]
     },
     {
       "id": 1,
       "name": "Bitcoin",
-      "current": 2625,
+      "current": 2613,
       "series": [
-        {
-          "date": "2025-11-09",
-          "mad": 4260
-        },
         {
           "date": "2025-11-10",
           "mad": 4260
@@ -5952,18 +5948,18 @@
         {
           "date": "2026-11-09",
           "mad": 2625
+        },
+        {
+          "date": "2026-11-10",
+          "mad": 2613
         }
       ]
     },
     {
       "id": 2692,
       "name": "Polygon",
-      "current": 1182,
+      "current": 1168,
       "series": [
-        {
-          "date": "2025-11-09",
-          "mad": 2993
-        },
         {
           "date": "2025-11-10",
           "mad": 2986
@@ -7423,18 +7419,18 @@
         {
           "date": "2026-11-09",
           "mad": 1182
+        },
+        {
+          "date": "2026-11-10",
+          "mad": 1168
         }
       ]
     },
     {
       "id": 2817,
       "name": "NEAR",
-      "current": 597,
+      "current": 599,
       "series": [
-        {
-          "date": "2025-11-09",
-          "mad": 827
-        },
         {
           "date": "2025-11-10",
           "mad": 815
@@ -8894,18 +8890,18 @@
         {
           "date": "2026-11-09",
           "mad": 597
+        },
+        {
+          "date": "2026-11-10",
+          "mad": 599
         }
       ]
     },
     {
       "id": 8,
       "name": "Cardano",
-      "current": 583,
+      "current": 579,
       "series": [
-        {
-          "date": "2025-11-09",
-          "mad": 910
-        },
         {
           "date": "2025-11-10",
           "mad": 925
@@ -10365,6 +10361,10 @@
         {
           "date": "2026-11-09",
           "mad": 583
+        },
+        {
+          "date": "2026-11-10",
+          "mad": 579
         }
       ]
     }
