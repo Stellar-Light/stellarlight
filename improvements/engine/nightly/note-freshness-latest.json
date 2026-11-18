@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-17T15:04:53.744Z",
+	"generatedAt": "2026-11-18T14:43:27.677Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -54,7 +54,7 @@
 		},
 		{
 			"probe": "note-stale:keybase/client:docker:keybaseio/client",
-			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-17 (published 2026-11-17)",
+			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-18 (published 2026-11-18)",
 			"surface": "code"
 		},
 		{
@@ -143,8 +143,18 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:soneso/kmp-stellar-sdk:maven:com.soneso.stellar:stellar-sdk",
+			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.18.0 (published 2026-11-15)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:soneso/stellar_flutter_sdk:pub:stellar_flutter_sdk",
 			"note": "note (asOf 2026-09-01) cites 3.6.0; registry latest is 3.12.0 (published 2026-11-16)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:lightsail-network/java-stellar-sdk-android-spi:maven:network.lightsail:stellar-sdk-android-spi",
+			"note": "note (asOf 2026-09-01) cites 5.0.0; registry latest is 6.0.0 (published 2026-10-28)",
 			"surface": "code"
 		},
 		{
@@ -170,6 +180,11 @@
 		{
 			"probe": "note-stale:horizontalsystems/stellar-web-sdk:npm:stellar-web-sdk",
 			"note": "note (asOf 2026-09-07) cites 0.2.0; registry latest is 0.2.1 (published 2026-09-16)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:lightsail-network/java-stellar-sdk:maven:network.lightsail:stellar-sdk",
+			"note": "note (asOf 2026-09-01) cites 5.0.0; registry latest is 6.0.0 (published 2026-10-28)",
 			"surface": "code"
 		},
 		{
@@ -209,7 +224,7 @@
 		},
 		{
 			"probe": "note-stale:NethermindEth/stellar-private-payments:npm:stellar-private-payments",
-			"note": "note (asOf 2026-09-14) cites 0.1.0; registry latest is 0.3.0 (published 2026-11-09)",
+			"note": "note (asOf 2026-09-14) cites 0.1.0; registry latest is 0.4.0 (published 2026-11-18)",
 			"surface": "code"
 		},
 		{
@@ -304,12 +319,12 @@
 		},
 		{
 			"probe": "note-stale:nirvana-labs/nirvana-typescript:npm:@nirvana-labs/nirvana",
-			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 3.3.1 (published 2026-11-16)",
+			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 3.3.2 (published 2026-11-17)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:Dione-b/caatinga:npm:@caatinga/cli",
-			"note": "note (asOf 2026-09-14) cites 3.9.2; registry latest is 3.12.0 (published 2026-10-03)",
+			"note": "note (asOf 2026-09-14) cites 3.9.2; registry latest is 3.14.0 (published 2026-11-18)",
 			"surface": "code"
 		},
 		{
@@ -338,8 +353,18 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-repo-gone:lobstrco/vault-ios",
+			"note": "public note asOf 2026-09-02; github.com/lobstrco/vault-ios is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
 			"probe": "note-repo-gone:ggoldani/agent-passport",
 			"note": "public note asOf 2026-09-02; github.com/ggoldani/agent-passport is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:lobstrco/vault-android",
+			"note": "public note asOf 2026-09-01; github.com/lobstrco/vault-android is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
 		},
 		{

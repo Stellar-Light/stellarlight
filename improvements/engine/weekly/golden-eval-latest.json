@@ -387,7 +387,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8044507503509521,
+      "topScore": 0.8153647184371948,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -395,7 +395,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Q2 2026: What Stellar was built for has arrived"
+      "sample": "Q3 2026: The rail, put to work"
     },
     {
       "id": "ecosystem-stablecoin-anchor",
@@ -675,7 +675,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.710854709148407,
+      "topScore": 0.6733469632960171,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -683,7 +683,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "SCF Q4 2026 Public Goods Award Results"
+      "sample": "Q3 2026: The rail, put to work"
     },
     {
       "id": "blend-incident-facts",
@@ -729,7 +729,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7056256532669067,
+      "topScore": 0.7038772702217102,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -958,5 +958,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-11-17T14:57:33Z"
+  "generatedAt": "2026-11-18T14:36:45Z"
 }
