@@ -1160,5 +1160,19 @@
   "liveRows": 825,
   "liveNoSource": 32,
   "humanVerified": 305
+ },
+ {
+  "date": "2026-11-19",
+  "batteryPass": 90,
+  "batteryFail": 1,
+  "batteryErrors": 0,
+  "parityPass": 46,
+  "openMaps": 0,
+  "honestyDebt": 0,
+  "sampled": 1161,
+  "population": 1161,
+  "liveRows": 825,
+  "liveNoSource": 32,
+  "humanVerified": 305
  }
 ]

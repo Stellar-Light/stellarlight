@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-18T16:42:29.694Z",
+ "generatedAt": "2026-11-19T16:44:56.487Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
