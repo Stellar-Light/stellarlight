@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-18T14:43:27.677Z",
+	"generatedAt": "2026-11-19T14:51:13.025Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -54,7 +54,7 @@
 		},
 		{
 			"probe": "note-stale:keybase/client:docker:keybaseio/client",
-			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-18 (published 2026-11-18)",
+			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-19 (published 2026-11-19)",
 			"surface": "code"
 		},
 		{
@@ -284,7 +284,7 @@
 		},
 		{
 			"probe": "note-stale:RozoAI/rozo-checkout-skill:npm:@rozoai/checkout",
-			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.26 (published 2026-11-11)",
+			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.27 (published 2026-11-18)",
 			"surface": "code"
 		},
 		{
@@ -418,6 +418,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-predates-archival:boundless-xyz/signal-on-stellar",
+			"note": "public note asOf 2026-09-14; repo archived 2026-11-18 — the note describes a live repo",
+			"surface": "code"
+		},
+		{
 			"probe": "note-predates-archival:stellar/debit-card-reference",
 			"note": "public note asOf 2026-09-14; repo archived 2026-11-13 — the note describes a live repo",
 			"surface": "code"
@@ -440,6 +445,11 @@
 		{
 			"probe": "note-predates-archival:equilibriumco/nebula",
 			"note": "public note asOf 2026-09-14; repo archived 2026-11-06 — the note describes a live repo",
+			"surface": "code"
+		},
+		{
+			"probe": "note-predates-archival:boundless-xyz/stellar-risc0-verifier",
+			"note": "public note asOf 2026-09-14; repo archived 2026-11-19 — the note describes a live repo",
 			"surface": "code"
 		},
 		{

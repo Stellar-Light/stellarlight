@@ -711,7 +711,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7408052682876587,
+      "topScore": 0.7411662936210632,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -958,5 +958,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-11-18T14:36:45Z"
+  "generatedAt": "2026-11-19T14:44:04Z"
 }
