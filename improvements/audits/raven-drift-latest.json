@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-19T14:55:37.726Z",
+	"generatedAt": "2026-11-20T14:37:06.171Z",
 	"specVersion": "1.9.150",
 	"graceDays": 10,
 	"expectedOps": [
@@ -49,7 +49,7 @@
 		"verifyClaim"
 	],
 	"ravenPolicySource": "https://raw.githubusercontent.com/stellar-experimental/stellar-raven/main/src/policy/scout-exposure.ts",
-	"ravenPolicySha256": "9c01d2f96f0d15ce050b9ee9890fc0007cbd12dd2058f2449b359e61d0dc8d50",
+	"ravenPolicySha256": "b0209205be40d4c58e1e85224163627275e9a4d2aec582a592d2f557287a8043",
 	"inCatalogButExcludedByPolicy": [],
 	"catalogOps": [
 		"analyzeEcosystem",
