@@ -1,8 +1,8 @@
 {
-	"generatedAt": "2026-11-19T14:52:08.242Z",
-	"total": 1028,
+	"generatedAt": "2026-11-20T14:32:51.366Z",
+	"total": 1032,
 	"open": 19,
-	"refreshQueue": 141,
+	"refreshQueue": 165,
 	"blockedUpstream": 17,
 	"lagPastGrace": {
 		"count": 11,
@@ -19,39 +19,39 @@
 			},
 			{
 				"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
-				"days": 83
+				"days": 84
 			},
 			{
 				"id": "raven-routing:who-gives-out-grants-for-building-on-stellar",
-				"days": 75
+				"days": 76
 			},
 			{
 				"id": "raven-routing:show-me-some-example-stellar-projects-i-can-copy",
-				"days": 75
+				"days": 76
 			},
 			{
 				"id": "raven-routing:which-stellar-wallets-support-soroban-contracts",
-				"days": 75
+				"days": 76
 			},
 			{
 				"id": "raven-routing:which-stellar-projects-had-a-smart-contract-audi",
-				"days": 75
+				"days": 76
 			},
 			{
 				"id": "raven-routing:how-does-blend-calculate-interest-accrual",
-				"days": 75
+				"days": 76
 			},
 			{
 				"id": "raven-routing:which-anchors-actually-implement-sep-24",
-				"days": 75
+				"days": 76
 			},
 			{
 				"id": "raven-routing:how-much-has-the-stellar-community-fund-awarded-",
-				"days": 75
+				"days": 76
 			},
 			{
 				"id": "raven-routing:which-verticals-on-stellar-have-the-least-compet",
-				"days": 75
+				"days": 76
 			}
 		]
 	},
@@ -59,31 +59,31 @@
 		"raven-scorer": 6,
 		"raven-catalog-lag": 11
 	},
-	"closed": 851,
+	"closed": 831,
 	"verified": 7,
-	"cleared": 844,
+	"cleared": 824,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 628,
+	"clearedOnSilence": 608,
 	"closingRate": 0.22,
-	"silenceShare": 0.61,
+	"silenceShare": 0.59,
 	"recurrence": {
-		"reopened": 20,
-		"reopenedShareOfClosures": 0.02,
+		"reopened": 40,
+		"reopenedShareOfClosures": 0.05,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 178,
-				"recurred": 155,
-				"ratePct": 87.1
+				"newFindings": 172,
+				"recurred": 150,
+				"ratePct": 87.2
 			},
 			"lifetime": {
-				"newFindings": 1028,
-				"recurred": 457,
-				"ratePct": 44.5
+				"newFindings": 1032,
+				"recurred": 461,
+				"ratePct": 44.7
 			}
 		}
 	},
-	"oldestOpenDays": 48,
+	"oldestOpenDays": 49,
 	"inWave": 0,
 	"highOpen": 15,
 	"staleHighOpen": 0,
@@ -96,7 +96,7 @@
 		{
 			"surface": "directory",
 			"open": 3,
-			"total": 257
+			"total": 261
 		},
 		{
 			"surface": "corpus",
@@ -129,7 +129,7 @@
 		{
 			"source": "raven-routing",
 			"open": 17,
-			"days": 66
+			"days": 67
 		}
 	],
 	"topOpen": [

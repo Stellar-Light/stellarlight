@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-19T16:44:55.988Z",
+ "generatedAt": "2026-11-20T14:33:00.547Z",
  "surfaces": [
   {
    "surface": "code",
@@ -12,7 +12,7 @@
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 3,
-   "clearedFindings": 227,
+   "clearedFindings": 207,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 1028,
+  "total": 1032,
   "open": 19,
-  "refreshQueue": 141,
+  "refreshQueue": 165,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -79,13 +79,13 @@
     "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
-  "cleared": 844,
+  "cleared": 824,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 153,
-    "total": 532
+    "open": 177,
+    "total": 536
    },
    "instrument": {
     "open": 24,
@@ -114,9 +114,9 @@
    {
     "mode": "broken-link",
     "open": 0,
-    "refresh": 23,
+    "refresh": 47,
     "blocked": 0,
-    "cleared": 133,
+    "cleared": 113,
     "verified": 0,
     "surface": "directory"
    },
@@ -391,39 +391,39 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 178,
-     "recurred": 155,
-     "ratePct": 87.1
+     "newFindings": 172,
+     "recurred": 150,
+     "ratePct": 87.2
     },
     "lifetime": {
-     "newFindings": 1028,
-     "recurred": 457,
-     "ratePct": 44.5
+     "newFindings": 1032,
+     "recurred": 461,
+     "ratePct": 44.7
     }
    },
    "reopened": {
-    "count": 20,
-    "shareOfClosures": 0.02,
+    "count": 40,
+    "shareOfClosures": 0.05,
     "regressedFromVerified": 0,
     "note": "a lower bound — re-clearing a reopened finding wipes its reopenedAt stamp, so reopen→reclear cycles are invisible here. regressedFromVerified counts the strongest case: a fix a human asserted had landed that a detector raised again."
    },
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 178,
-     "repeats": 177,
+     "newFindings": 172,
+     "repeats": 171,
      "ratePct": 99.4
     },
     "lifetime": {
-     "newFindings": 1028,
-     "repeats": 1021,
+     "newFindings": 1032,
+     "repeats": 1025,
      "ratePct": 99.3
     },
     "byClass": [
      {
       "class": "cross-surface-consistency",
-      "total": 463,
-      "open": 147,
+      "total": 467,
+      "open": 171,
       "firstSeen": "2026-07-22"
      },
      {
@@ -9679,15 +9679,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1447
+     "count": 1448
     },
     {
      "label": "slowing",
-     "count": 1199
+     "count": 1213
     },
     {
      "label": "active",
-     "count": 998
+     "count": 983
     },
     {
      "label": "unknown",
@@ -10520,7 +10520,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": "active",
+    "activity": "slowing",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10533,7 +10533,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": "active",
+    "activity": "slowing",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10546,7 +10546,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": "active",
+    "activity": "slowing",
     "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
@@ -10829,7 +10829,7 @@
     "id": "s:link-health",
     "label": "link-health",
     "column": 0,
-    "value": 160
+    "value": 164
    },
    {
     "id": "s:engine-d-demand",
@@ -10931,7 +10931,7 @@
     "id": "f:directory",
     "label": "directory",
     "column": 1,
-    "value": 230
+    "value": 210
    },
    {
     "id": "f:code",
@@ -10967,13 +10967,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 844
+    "value": 824
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 177
+    "value": 201
    },
    {
     "id": "o:verified",
@@ -11093,7 +11093,7 @@
     "target": 25,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 227
+    "value": 207
    },
    {
     "source": 6,
@@ -11156,14 +11156,14 @@
     "target": 19,
     "sourceId": "s:link-health",
     "targetId": "f:directory",
-    "value": 160
+    "value": 164
    },
    {
     "source": 19,
     "target": 26,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 30
+    "value": 54
    },
    {
     "source": 1,
