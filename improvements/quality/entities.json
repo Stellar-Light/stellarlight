@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-20T14:33:00.547Z",
+ "generatedAt": "2026-11-20T16:20:24.933Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 120,
+   "oldestDays": 121,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -9683,11 +9683,11 @@
     },
     {
      "label": "slowing",
-     "count": 1213
+     "count": 1214
     },
     {
      "label": "active",
-     "count": 983
+     "count": 982
     },
     {
      "label": "unknown",
