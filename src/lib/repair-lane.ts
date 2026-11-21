@@ -58,6 +58,8 @@ export const DENIED_SOURCES: Record<string, string> = {
 		"a dead link is a curation refresh (relink or retire), not code",
 	"raven-routing":
 		"a routing miss is Raven's index (catalog-lag) or a scorer we do not own",
+	"media-files":
+		"a missing file is repaired by a production write (repair-missing-logos.yml), not code",
 };
 
 /** Paths the agent may edit only through a human: the API contract, the

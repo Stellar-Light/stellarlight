@@ -22,6 +22,7 @@
 import "./load-env";
 import { writeFileSync } from "node:fs";
 import { getPayload } from "payload";
+import { assertMediaStore, scfThumbnailUrl } from "../src/lib/media-files";
 import configPromise from "../src/payload.config";
 import { curatedFieldsFor } from "./data/curation-maps";
 import {
@@ -57,6 +58,11 @@ const flagValue = (name: string) => {
 	const i = args.indexOf(name);
 	return i >= 0 ? args[i + 1] : undefined;
 };
+// An execute uploads thumbnails. With no file store it stops here, before
+// its first write: in seven runs between 2026-06-14 and 2026-09-06 the sync
+// step logged "THUMBNAIL: <n>KB" and exited 0 while every file went to the
+// runner's disk (160 media records with no file).
+if (!dryRun) assertMediaStore();
 const rowsFrom = flagValue("--rows-from")?.replace(/\/$/, "");
 const planOut = flagValue("--plan-out");
 // More stranded removals than STRANDED_CEILING are written only when this
@@ -717,10 +723,7 @@ async function main() {
 
 		// --- Thumbnail: use SCF image if project has no logo ---
 		if (!ours.logo && scf.thumbnail) {
-			const imgUrl =
-				scf.thumbnail.url ||
-				scf.thumbnail.file?.thumbnails?.large?.url ||
-				scf.thumbnail.file?.url;
+			const imgUrl = scfThumbnailUrl(scf);
 			if (imgUrl) {
 				if (dryRun || !payload) {
 					console.log(`    WOULD FETCH thumbnail: ${imgUrl.slice(0, 80)}...`);

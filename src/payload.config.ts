@@ -46,6 +46,7 @@ import { TransparencyLogs } from "./collections/TransparencyLogs";
 import { Users } from "./collections/Users";
 import { Banner } from "./globals/Banner";
 import { syncRSSFeedTask } from "./jobs/syncRSSFeed";
+import { mediaStoreConfigured } from "./lib/media-files";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -238,11 +239,10 @@ export default buildConfig({
 		payloadCloudPlugin(),
 		// Cloudflare R2 storage for media uploads (using S3-compatible adapter)
 		// R2 is S3-compatible, so we use the S3 storage adapter
-		// Conditionally enabled when credentials are available
-		...(process.env.R2_ACCESS_KEY_ID &&
-		process.env.R2_SECRET_ACCESS_KEY &&
-		process.env.R2_BUCKET &&
-		process.env.R2_ENDPOINT
+		// Loaded only when all four R2 variables are set. Without it the Media
+		// collection refuses every upload (requireMediaStore): Payload would
+		// otherwise write the file to the local disk and keep the record.
+		...(mediaStoreConfigured()
 			? [
 					s3Storage({
 						collections: {
