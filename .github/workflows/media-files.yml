@@ -1,0 +1,99 @@
+name: media files
+
+# Does every media record's file answer, and which served rows (project
+# logos, entity logos, carousel images, blog images) point at one that does
+# not. Measured on 2026-11-13: 400 of 1,232 media records answered 404 and 137
+# project rows served one as their logo, and no lane looked.
+#
+# Reads only the public API, with GET (a HEAD on a media file answered 404
+# for files that exist). No secrets. 200 served, 404 missing, anything else
+# unchecked and never reported as missing. A run in which no file answered
+# 200, or more than half gave no verdict, exits 2 and writes nothing.
+#
+# REPORT ONLY. The red is the finding: a served row points at a missing file
+# the last run did not record. The standing set is in the artifact, which the
+# improvement ledger reads (scripts/improvement-ledger.ts, MEDIA_FILES_SPEC).
+# The repair is its own lane: repair-missing-logos.yml.
+# workflow-health: signal-steps: ^Probe$
+
+on:
+  schedule:
+    # 05:17 UTC daily: off the hour, before the morning read.
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: media-files
+  cancel-in-progress: false
+
+# Read-only for the job that installs dependencies. Only record, which
+# installs and runs nothing from the repo, may push.
+permissions: { contents: read }
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      wrote: ${{ steps.kept.outputs.wrote }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Written to the runner's temp directory, never into the checkout. The
+      # last run's file is read so a file that cannot be checked today keeps
+      # its finding.
+      - name: Probe
+        run: pnpm exec tsx scripts/check-media-files.ts --prev improvements/audits/media-files-latest.json --out "$RUNNER_TEMP/media-files-latest.json"
+      # Only a run that could look writes the file, so a blind run hands
+      # nothing on and the last artifact stands.
+      - name: Keep the artifact
+        id: kept
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/media-files-latest.json" ]; then
+            echo "wrote=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: always() && steps.kept.outputs.wrote == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: media-files
+          path: ${{ runner.temp }}/media-files-latest.json
+          retention-days: 14
+          # A re-run attempt uploads under the same name.
+          overwrite: true
+  # Commits the one file the probe left, for the improvement ledger. The only
+  # job with a write token, and it installs and runs nothing from the repo.
+  # Only a run on main records. always(): a red probe is a finding to record.
+  record:
+    needs: probe
+    if: always() && github.ref == 'refs/heads/main' && needs.probe.outputs.wrote == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: media-files
+          path: improvements/audits
+      - name: Commit the artifact
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/media-files-latest.json
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "chore(audit): media files probe [skip ci]"
+          # Push first; on a rejection keep THIS run's file (-X theirs is the
+          # commit being replayed) and stash anything else (check-links.yml).
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash -X theirs origin main || git rebase --abort
+          done
+          git push

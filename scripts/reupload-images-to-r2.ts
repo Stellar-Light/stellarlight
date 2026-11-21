@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getPayload } from "payload";
+import { mediaStoreConfigured } from "../src/lib/media-files";
 import configPromise from "../src/payload.config";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -150,10 +151,6 @@ function getExtension(contentType: string, originalFilename: string): string {
 
 async function run() {
 	// Verify required environment variables are set
-	const r2AccessKey = process.env.R2_ACCESS_KEY_ID;
-	const r2SecretKey = process.env.R2_SECRET_ACCESS_KEY;
-	const r2Bucket = process.env.R2_BUCKET;
-	const r2Endpoint = process.env.R2_ENDPOINT;
 	const payloadSecret = process.env.PAYLOAD_SECRET;
 
 	if (!payloadSecret) {
@@ -161,7 +158,7 @@ async function run() {
 		process.exit(1);
 	}
 
-	if (!r2AccessKey || !r2SecretKey || !r2Bucket || !r2Endpoint) {
+	if (!mediaStoreConfigured()) {
 		console.error("R2 credentials not found in environment variables");
 		process.exit(1);
 	}

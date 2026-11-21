@@ -114,6 +114,35 @@ const TWO_LABEL_SUFFIXES = new Set([
 	"com.au",
 ]);
 
+/**
+ * A link as a URL parser reads it, or null when the text is no URL. A link
+ * with no scheme ("acme.com/app") is read as https.
+ */
+export function parseLink(url?: string | null): URL | null {
+	const s = url?.trim();
+	if (!s) return null;
+	try {
+		return new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(s) ? s : `https://${s}`);
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * A link's host: lowercase, no port, no leading www, "" when the text is no
+ * URL. Read by a URL parser, never cut out of the text: the text before an
+ * "@", after a second "//" or inside a query can name any host
+ * (https://bridge.xyz:x@lomi.africa/ is a page at lomi.africa).
+ */
+export function urlHost(url?: string | null): string {
+	return (
+		parseLink(url)
+			?.hostname.toLowerCase()
+			.replace(/\.$/, "")
+			.replace(/^www\./, "") ?? ""
+	);
+}
+
 /** Registrable domain (eTLD+1): lowercase, strip scheme/path/port/^www. */
 export function registrableDomain(url?: string | null): string {
 	if (!url) return "";

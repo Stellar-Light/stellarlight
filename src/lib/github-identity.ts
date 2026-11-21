@@ -22,7 +22,7 @@
 const LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/;
 
 /** First-segment paths that are GitHub's own, never an owner. */
-const RESERVED = new Set([
+export const RESERVED = new Set([
 	"orgs",
 	"sponsors",
 	"marketplace",

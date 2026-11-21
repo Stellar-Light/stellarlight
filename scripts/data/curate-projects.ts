@@ -18,6 +18,7 @@ import {
 	parseGithubIdentity,
 	parseGithubRepoRef,
 } from "../../src/lib/github-identity";
+import { mediaStoreConfigured } from "../../src/lib/media-files";
 import { fillScfFromDupe } from "../../src/lib/scf-merge";
 import { availabilityPatch } from "../../src/lib/wallet-coverage";
 import configPromise from "../../src/payload.config";
@@ -2327,12 +2328,7 @@ async function main() {
 		writes.push({ id: d.id, slug, data: { name } });
 	}
 
-	const r2Ready = !!(
-		process.env.R2_ACCESS_KEY_ID &&
-		process.env.R2_SECRET_ACCESS_KEY &&
-		process.env.R2_BUCKET &&
-		process.env.R2_ENDPOINT
-	);
+	const r2Ready = mediaStoreConfigured();
 	if (Object.keys(LOGO_SET).length && EXECUTE && !r2Ready) {
 		// 2026-09-23: two logos were "set" this way and 404ed — the files went
 		// to the runner's disk and vanished with the job.
