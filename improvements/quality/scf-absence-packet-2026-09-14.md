@@ -276,6 +276,13 @@ row:
 - `scf: { awarded: false, roundAwards: [] }` — the SCF page records **Awarded,
   SCF #42, $96,000**, with a submission card whose status is literally "Awarded".
   We are hiding real funding from agents on a row we already hold.
+  **Corrected 2026-09-15:** the award is not missing from the index, it is on a
+  DUPLICATE. `pagcrypto` is the same company — same website `pag.finance`, same
+  types — and carries the #42 award and the github link, while `pagfinance`
+  carries the brand name and no award. One entity, seeded twice, and an agent
+  that finds the brand-named row is told it has no SCF funding. Queued as a
+  DUPE_MERGE (pagcrypto → pagfinance, copyScf) rather than a hand-written
+  award.
 - `links.website` is `https://pag.finance/` while SCF lists
   `https://pagcrypto.finance/`. Different registrable domains, which is exactly
   why the domain-equality pass never connected the two and why the crosscheck
