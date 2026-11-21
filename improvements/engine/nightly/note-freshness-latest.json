@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-20T14:31:59.348Z",
+	"generatedAt": "2026-11-21T13:51:58.480Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -34,7 +34,7 @@
 		},
 		{
 			"probe": "note-stale:blindpaylabs/blindpay-mcp:npm:@blindpay/mcp",
-			"note": "note (asOf 2026-09-02) cites 1.7.1; registry latest is 1.10.3 (published 2026-11-09)",
+			"note": "note (asOf 2026-09-02) cites 1.7.1; registry latest is 1.10.4 (published 2026-11-20)",
 			"surface": "code"
 		},
 		{
