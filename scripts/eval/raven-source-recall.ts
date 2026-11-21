@@ -24,6 +24,8 @@
  *   pnpm exec tsx scripts/eval/raven-source-recall.ts [--limit N] [--per 4] [--ref main] [--out file.jsonl]
  */
 import { appendFileSync, writeFileSync } from "node:fs";
+import { jevEvaluate, jevKey } from "../../src/lib/jev";
+import { RELEVANCE_QUESTIONS } from "../../src/lib/jev-research";
 import { researchOrder } from "../../src/lib/research-rank";
 import { RESEARCH_SOURCES } from "../../src/lib/research-sources";
 
@@ -36,6 +38,9 @@ const LIMIT = Number(arg("--limit") ?? 0);
 const PER = Number(arg("--per") ?? 4);
 const REF = arg("--ref") ?? "main";
 const OUT = arg("--out");
+/** With a gateway key: how many merged rows per card Jev scores for the re-rank and cutoff experiment. */
+const JEV_TOP = Number(arg("--jev-top") ?? 20);
+const JEV = jevKey();
 const BASE = process.env.SCOUT_BASE ?? "https://stellarlight.xyz";
 const CARDS = `https://raw.githubusercontent.com/stellar-experimental/stellar-raven/${REF}/eval/corpus/raven-next/research/golden/compiled/golden.json`;
 
@@ -121,7 +126,7 @@ async function research(q: string, sources: string, per: number) {
 		title: String(r.title ?? ""),
 		score: Number(r.score ?? 0),
 		publishedAt: (r.publishedAt as string | null) ?? null,
-		content: "",
+		content: String(r.content ?? "").slice(0, 1500),
 		confidence: {
 			score: Number((r.confidence as { score?: number } | null)?.score ?? 0),
 		},
@@ -159,9 +164,103 @@ interface Result {
 	/** The same, merged by researchOrder: what the API serves once multi-
 	 * source rows are ranked across sources by the per-source rule. */
 	mergedRank: number | null;
+	/** With a gateway key: the gold rank after Jev re-ranks the top
+	 * JEV_TOP merged rows by relevance (ties keep the merged order). */
+	jevRank?: number | null;
+	/** With a gateway key: dropping the rows Jev scores unrelated. */
+	cut?: { scored: number; dropped: number; goldLost: boolean };
+	/** A news gold document not served under its own URL, but the same
+	 * story served from the news feed (title match; a human checks it). */
+	newsCovered?: string | null;
 	/** For a miss: did a scoped probe find a gold document at all? */
 	probe?: "found" | "not-found" | "could-not-check";
 	error?: string;
+}
+
+/** Re-rank the top JEV_TOP merged rows by Jev's relevance score (0 to 3),
+ * ties keeping the merged order, and measure a cutoff that drops the rows
+ * Jev scores unrelated: does it lose any gold document? */
+async function jevTune(question: string, merged: Row[], gold: string[]) {
+	const top = merged.slice(0, JEV_TOP);
+	const scores = await mapLimit(top, 6, async (r) => {
+		try {
+			const res = await jevEvaluate(
+				{
+					question,
+					passage: { source: r.source, title: r.title, text: r.content },
+				},
+				RELEVANCE_QUESTIONS,
+				{ apiKey: JEV as string, signal: AbortSignal.timeout(20_000) },
+			);
+			const a = res.answers.answers;
+			return a.type === "score" ? a.score : null;
+		} catch {
+			return null;
+		}
+	});
+	const reranked = [
+		...top
+			.map((r, i) => ({ r, i, s: scores[i] }))
+			.sort((a, b) => (b.s ?? -1) - (a.s ?? -1) || a.i - b.i)
+			.map((x) => x.r),
+		...merged.slice(JEV_TOP),
+	];
+	const j = reranked.findIndex((r) => gold.some((g) => matches(r.url, g)));
+	const unrelated = top.filter(
+		(_, i) => scores[i] !== null && (scores[i] as number) < 0.5,
+	);
+	return {
+		jevRank: j >= 0 ? j + 1 : null,
+		cut: {
+			scored: scores.filter((x) => x !== null).length,
+			dropped: unrelated.length,
+			goldLost: unrelated.some((r) => gold.some((g) => matches(r.url, g))),
+		},
+	};
+}
+
+/** Words in a news slug that say nothing about which story it is. */
+const NEWS_STOP = new Set([
+	"the",
+	"and",
+	"with",
+	"now",
+	"for",
+	"from",
+	"into",
+	"stellar",
+	"network",
+	"launches",
+	"launch",
+	"launched",
+	"plans",
+	"joins",
+	"available",
+	"development",
+	"foundation",
+	"years",
+	"first",
+]);
+
+/** A gold news page (stellar.org press or blog) missing under its own URL
+ * may still be served as the same story from the news feed: report the
+ * served title whose words carry the slug's distinctive terms. */
+function newsCover(gold: string[], served: Row[]): string | null {
+	for (const g of gold) {
+		if (!/stellar\.org\/(press|blog)\//.test(g)) continue;
+		const terms = (norm(g).split("/").pop() ?? "")
+			.split("-")
+			.filter((w) => w.length >= 4 && !NEWS_STOP.has(w));
+		const need = Math.min(2, terms.length);
+		if (!need) continue;
+		const hit = served.find(
+			(r) =>
+				/^(lumenloop|lumenloop-research|sdf-blog)$/.test(r.source) &&
+				terms.filter((t) => r.title.toLowerCase().includes(t)).length >= need,
+		);
+		if (hit) return `${hit.source}: ${hit.title}`;
+	}
+	return null;
 }
 
 async function main() {
@@ -212,6 +311,8 @@ async function main() {
 					scoreRank: sidx >= 0 ? sidx + 1 : null,
 					mergedRank: midx >= 0 ? midx + 1 : null,
 				} as Result;
+				if (JEV) Object.assign(base, await jevTune(c.question, merged, gold));
+				if (idx < 0) base.newsCovered = newsCover(gold, served);
 				if (idx >= 0) return base;
 				// Scoped probe: the gold URL's own source, its path words as query.
 				let probe: Result["probe"] = "not-found";
@@ -315,13 +416,38 @@ async function main() {
 	say("| Order | Gold first | Gold in top 5 | Gold in top 10 |");
 	say("| --- | --- | --- | --- |");
 	for (const [name, key] of [
-		["As served (grouped by source)", "rank"],
+		["As served", "rank"],
 		["Sorted by raw score across sources", "scoreRank"],
 		["Ranked across sources by the per-source rule", "mergedRank"],
 	] as const)
 		say(
 			`| ${name} | ${pct(atR(read, 1, key), read.length)} | ${pct(atR(read, 5, key), read.length)} | ${pct(atR(read, 10, key), read.length)} |`,
 		);
+	if (JEV) {
+		const jr = read.filter((r) => r.jevRank !== undefined);
+		const atJ = (k: number) =>
+			jr.filter((r) => r.jevRank != null && (r.jevRank as number) <= k).length;
+		say(
+			`| Re-ranked by Jev relevance (top ${JEV_TOP}) | ${pct(atJ(1), jr.length)} | ${pct(atJ(5), jr.length)} | ${pct(atJ(10), jr.length)} |`,
+		);
+		const scored = jr.reduce((n, r) => n + (r.cut?.scored ?? 0), 0);
+		const dropped = jr.reduce((n, r) => n + (r.cut?.dropped ?? 0), 0);
+		say();
+		say(
+			`Cutoff: dropping passages Jev scores unrelated removes ${pct(dropped, scored)} of the top ${JEV_TOP} (${dropped} of ${scored}) and loses a gold document on ${jr.filter((r) => r.cut?.goldLost).length} of ${jr.length} cards.`,
+		);
+	} else {
+		say();
+		say(
+			"Jev re-rank and cutoff: could not check (AI_GATEWAY_API_KEY is not set).",
+		);
+	}
+	const covered = read.filter((r) => r.rank === null && r.newsCovered);
+	say();
+	say(
+		`News served under another URL: ${covered.length} card(s) whose gold story is not served under its own URL but is served from the news feed (title match, check each):`,
+	);
+	for (const r of covered) say(`- ${r.id}: ${r.newsCovered}`);
 	say();
 	const gaps = read.filter((r) => r.rank === null && r.probe === "not-found");
 	const byPrefix = new Map<string, number>();
@@ -337,7 +463,19 @@ async function main() {
 		say(`- ${p}: ${n}`);
 
 	if (OUT)
-		writeFileSync(OUT, `${results.map((r) => JSON.stringify(r)).join("\n")}\n`);
+		writeFileSync(
+			OUT,
+			`${results
+				.map((r) =>
+					// Passage text stays out of the export: ids, titles and ranks
+					// are the training pairs; the text is a fetch away.
+					JSON.stringify({
+						...r,
+						served: r.served.map(({ content, ...row }) => row),
+					}),
+				)
+				.join("\n")}\n`,
+		);
 	if (process.env.GITHUB_STEP_SUMMARY)
 		appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
 }

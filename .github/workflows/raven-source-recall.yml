@@ -3,7 +3,8 @@ name: Raven source recall (manual)
 # corpus (stellar-experimental/stellar-raven, Apache-2.0) and reports where
 # the gold documents rank, which are in the corpus but ranked out, and which
 # a scoped probe cannot find (candidate ingestion gaps). GitHub + our public
-# API only; no secrets. Paced under the research route's 60/min limit.
+# API, plus the optional AI_GATEWAY_API_KEY for the Jev experiment. Paced
+# under the research route's 60/min limit.
 on:
   workflow_dispatch:
     inputs:
@@ -22,6 +23,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - env:
           REF: ${{ inputs.ref }}
+          # Optional: with it the run adds the Jev re-rank and cutoff experiment;
+          # without it the report says that part could not be checked.
+          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
         run: pnpm exec tsx scripts/eval/raven-source-recall.ts --ref "$REF" --out raven-source-recall.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
