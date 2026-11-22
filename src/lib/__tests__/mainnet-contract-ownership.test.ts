@@ -19,6 +19,7 @@ import {
 	readContractFns,
 	type SourceRead,
 	verifyMainnetContract,
+	deploymentFiles,
 } from "../../../scripts/scan/fetch-repo-code";
 import { contractSource } from "../code-symbols";
 import {
@@ -1210,5 +1211,246 @@ describe("whose contract: what the audit broke", () => {
 				"see https://gist.github.com/acme/abc123 and https://github.com/acme/.github and https://www.github.com/acme/contracts",
 			),
 		).toEqual(["acme/contracts"]);
+	});
+});
+
+// 2026-11-22: the scan read contract ids from the README only. Over 2,590
+// project repos, 33 name a live mainnet contract there and 53 more name one
+// only in a deployment file (mainnet.contracts.json, deployments/mainnet.md,
+// deploy.sh). Those repos could never get a mainnet join.
+describe("deployment files are a second place a repo names its contract", () => {
+	const id = (n: number) => StrKey.encodeContract(Buffer.alloc(32, n));
+	const blob = (path: string, size = 900) => ({
+		path,
+		type: "blob" as const,
+		size,
+		sha: `sha-${path}`,
+	});
+
+	const { soroswapFactory: soroswap } = fx;
+	const ownerSource = {
+		...contractSource([soroswap.owner.source]),
+		unread: false,
+		isFork: false,
+	};
+
+	it("judges an id the README never names, and takes it when the repo's source defines it", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				"No ids here.",
+				soroswap.owner.repo,
+				undefined,
+				null,
+				ownerSource,
+				`{"factory": "${soroswap.id}"}`,
+			),
+		).toEqual({ id: soroswap.id, basis: "source-matched" });
+	});
+
+	// Review 2026-11-22. A config file is mostly a list of what the repo CALLS.
+	it("never answers with a contract a deployment file only cites", async () => {
+		const chain = mainnet();
+		chain.wasm(ID_B);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				"No ids here.",
+				"acme/vault",
+				undefined,
+				null,
+				undefined,
+				`ORACLE_ID=${ID_B}`,
+			),
+		).toBeNull();
+	});
+
+	it("keeps a README answer when a deployment-file id could not be read", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		const hash = chain.wasm(ID_A, { source_repo: "github:other/oracle" });
+		chain.attest("other/oracle", hash);
+		chain.serve((u) =>
+			u.includes("/attestations/")
+				? new Response("", { status: 403 })
+				: undefined,
+		);
+		expect(
+			await verifyMainnetContract(
+				soroswap.owner.readme,
+				soroswap.owner.repo,
+				undefined,
+				null,
+				ownerSource,
+				`ORACLE_ID=${ID_A}`,
+			),
+		).toEqual({ id: soroswap.id, basis: "source-matched" });
+	});
+
+	it("keeps a README answer when a deployment-file id's ledger entry does not decode", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		let first = true;
+		chain.serve((u) => {
+			if (u !== MAINNET_RPC || !first) return undefined;
+			first = false;
+			return Response.json({
+				jsonrpc: "2.0",
+				id: 1,
+				result: {
+					latestLedger: 65364392,
+					entries: [
+						{ key: instanceKey(soroswap.id), xdr: soroswap.instanceXdr },
+						{ key: instanceKey(ID_A), xdr: "AAAA" },
+					],
+				},
+			});
+		});
+		expect(
+			await verifyMainnetContract(
+				soroswap.owner.readme,
+				soroswap.owner.repo,
+				undefined,
+				null,
+				ownerSource,
+				`BROKEN=${ID_A}`,
+			),
+		).toEqual({ id: soroswap.id, basis: "source-matched" });
+	});
+
+	it("keeps a README answer when a deployment-file id's attestation request throws", async () => {
+		const chain = mainnet();
+		chain.real(soroswap);
+		const hash = chain.wasm(ID_A, { source_repo: "github:other/oracle" });
+		chain.attest("other/oracle", hash);
+		chain.serve((u) => {
+			if (u.includes("/attestations/")) throw new Error("socket hang up");
+			return undefined;
+		});
+		expect(
+			await verifyMainnetContract(
+				soroswap.owner.readme,
+				soroswap.owner.repo,
+				undefined,
+				null,
+				ownerSource,
+				`ORACLE_ID=${ID_A}`,
+			),
+		).toEqual({ id: soroswap.id, basis: "source-matched" });
+	});
+
+	it.each([
+		["answers HTTP 503", () => new Response("", { status: 503 })],
+		[
+			"does not answer",
+			() => {
+				throw new Error("socket hang up");
+			},
+		],
+	])(
+		"answers as the README alone would when the code read %s and only deployment-file ids were in play",
+		async (_, fail) => {
+			const chain = mainnet();
+			chain.wasm(ID_B);
+			let rpcCalls = 0;
+			chain.serve((u) => {
+				if (u !== MAINNET_RPC) return undefined;
+				rpcCalls++;
+				return rpcCalls === 2 ? fail() : undefined;
+			});
+			expect(
+				await verifyMainnetContract(
+					"No ids here.",
+					"acme/vault",
+					undefined,
+					null,
+					undefined,
+					`VAULT=${ID_B}`,
+				),
+			).toBeNull();
+		},
+	);
+
+	it("keeps the stored id when the deployment file that named it could not be read", async () => {
+		const chain = mainnet();
+		chain.wasm(ID_B);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(
+				"No ids here.",
+				"acme/vault",
+				undefined,
+				ID_B,
+				undefined,
+				null,
+				true,
+			),
+		).toBe("could-not-check");
+	});
+
+	it("gives README ids their three slots first, then up to nine from deployment files, in one RPC call", async () => {
+		const chain = mainnet();
+		const { rpcKeys } = chain.serve();
+		const readme = [10, 11, 12, 13].map(id).join(" ");
+		const deploy = Array.from({ length: 12 }, (_, n) => id(20 + n)).join(" ");
+		await verifyMainnetContract(
+			readme,
+			"acme/vault",
+			undefined,
+			null,
+			undefined,
+			`${id(10)} ${deploy}`,
+		);
+		expect(rpcKeys[0]).toEqual(
+			[10, 11, 12, 20, 21, 22, 23, 24, 25, 26, 27, 28].map((n) =>
+				instanceKey(id(n)),
+			),
+		);
+	});
+
+	it("keeps the answer README-only callers got before", async () => {
+		const chain = mainnet();
+		chain.wasm(ID_B);
+		chain.serve();
+		expect(
+			await verifyMainnetContract(`${ID_A} then ${ID_B}`, "acme/vault"),
+		).toEqual({ id: ID_B, basis: "cited" });
+	});
+
+	it("picks at most four deployment files, mainnet-named first, and never a lockfile, a dependency, a snapshot or a large file", () => {
+		const picked = deploymentFiles([
+			blob("README.md"),
+			blob("scripts/deploy.sh"),
+			blob("public/mainnet.contracts.json"),
+			blob("docs/addresses.md"),
+			blob("deployments/testnet.json"),
+			blob(".env.mainnet"),
+			blob("src/networks.ts"),
+			blob("node_modules/x/mainnet.json"),
+			blob("contracts/test_snapshots/deploy.1.json"),
+			blob("pnpm-lock.yaml"),
+			blob("deployments/mainnet-all.json", 900_000),
+			blob("assets/deploy.png"),
+			{ path: "deployments", type: "tree" as const, sha: "t" },
+		]).map((e) => e.path);
+		expect(picked).toEqual([
+			".env.mainnet",
+			"public/mainnet.contracts.json",
+			"docs/addresses.md",
+			"scripts/deploy.sh",
+		]);
+	});
+
+	it("does not spend a slot on a CI workflow or an ordinary source file named address", () => {
+		expect(
+			deploymentFiles([
+				blob(".github/workflows/deploy.yml"),
+				blob("src/utils/address.ts"),
+				blob("lib/addressBook.js"),
+				blob("src/config/mainnet-addresses.ts"),
+			]).map((e) => e.path),
+		).toEqual(["src/config/mainnet-addresses.ts"]);
 	});
 });

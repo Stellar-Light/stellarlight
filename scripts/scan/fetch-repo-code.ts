@@ -848,7 +848,57 @@ export async function readContractFns(
 	};
 }
 
-/** Resolve the mainnet contract a repo actually OWNS from the ids in its README.
+// Where a repo writes down what it deployed, beyond its README. Measured
+// 2026-11-22 over 2,590 project repos: 33 name a live mainnet contract in the
+// README and 53 more name one only in a file like mainnet.contracts.json,
+// deployments/mainnet.md or deploy.sh. Reading those files only widens the
+// candidate ids: every id still has to pass the same ownership rules below.
+const DEPLOY_NAME = /(mainnet|pubnet|deploy|address|contract[-_]?ids?)/i;
+const DEPLOY_MAINNET = /(mainnet|pubnet)/i;
+const DEPLOY_OTHER_NET = /(testnet|futurenet|localnet|standalone)/i;
+const DEPLOY_EXT =
+	/\.(json|toml|ya?ml|md|txt|sh|ts|js|mjs|env|example)$|(^|\/)\.env[^/]*$/i;
+const DEPLOY_CODE = /\.(ts|js|mjs)$/i;
+const DEPLOY_SKIP =
+	/(^|\/)(\.github|node_modules|target|dist|build|vendor|test_snapshots|__snapshots__|snapshots|fixtures|tests?)\/|(^|\/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|Cargo\.lock)$|\.min\.js$/i;
+const DEPLOY_MAX_FILES = 4;
+const DEPLOY_MAX_BYTES = 100_000;
+/** Ids taken from deployment files, after the README's three. All ids go to
+ *  the RPC in one getLedgerEntries call, so the extra slots cost no request. */
+const DEPLOY_ID_SLOTS = 9;
+
+/** At most four deployment files: mainnet-named first, another network's
+ *  last, then the shallowest and shortest path. Never a lockfile, a
+ *  dependency, a test snapshot or a file too large to be hand-written. */
+export function deploymentFiles(tree: TreeEntry[]): TreeEntry[] {
+	const rank = (path: string) =>
+		DEPLOY_MAINNET.test(path) ? 0 : DEPLOY_OTHER_NET.test(path) ? 2 : 1;
+	const depth = (path: string) => path.split("/").length;
+	return tree
+		.filter(
+			(e) =>
+				e.type === "blob" &&
+				(e.size ?? 0) <= DEPLOY_MAX_BYTES &&
+				!/^readme\.md$/i.test(e.path) &&
+				DEPLOY_NAME.test(e.path) &&
+				DEPLOY_EXT.test(e.path) &&
+				// A source file counts only when its path says mainnet: "address"
+				// alone matches src/utils/address.ts in half the repos scanned.
+				(!DEPLOY_CODE.test(e.path) || DEPLOY_MAINNET.test(e.path)) &&
+				!DEPLOY_SKIP.test(e.path),
+		)
+		.sort(
+			(a, b) =>
+				rank(a.path) - rank(b.path) ||
+				depth(a.path) - depth(b.path) ||
+				a.path.length - b.path.length ||
+				a.path.localeCompare(b.path),
+		)
+		.slice(0, DEPLOY_MAX_FILES);
+}
+
+/** Resolve the mainnet contract a repo actually OWNS from the ids in its README
+ * and its deployment files (deploymentFiles above).
  *
  * This used to accept any id that stellar.expert could resolve, which only ever
  * proved the address exists — not whose it is. A README that names the USDC SAC
@@ -884,6 +934,16 @@ export async function readContractFns(
  * The answer is the first source-matched id, else the first cited one, so a
  * repo that ships a contract is never represented by an id it only cites,
  * and a cited id is kept with its basis rather than dropped.
+ * An id that only a deployment file names is held to a higher bar: it can be
+ * the answer when it is self-validated, source-matched or sibling-matched,
+ * and never as published or cited (a config file lists what the repo calls).
+ * It also cannot end the check as unread: a read, a decode or a request
+ * that fails for such an id drops that id only, so the README's answer
+ * stands whatever happens to the extra ids. Two reads are shared by every
+ * id. The instances read: if it fails, no id was read at all and the
+ * check did not run, as before. The code read: if it fails with a README
+ * or stored id among the contracts, the check did not run; with only
+ * deployment-file ids among them, the answer is the README's alone.
  * A check that could not run (the RPC failed or did not answer, or GitHub
  * answered an attestation request other than 200 or 404) returns
  * CONTRACT_UNREAD at once: a later id must not stand in for one that could
@@ -901,15 +961,38 @@ export async function verifyMainnetContract(
 		unread: false,
 		isFork: false,
 	},
+	/** Text of the repo's deployment files, or null. Its ids are judged after
+	 *  the README's and held to a higher bar (see the rules above). */
+	deployText: string | null = null,
+	/** A picked deployment file could not be read. */
+	deployUnread = false,
 ): Promise<MainnetContract | null | typeof CONTRACT_UNREAD> {
 	// A shape with a bad checksum is no contract id: never probe it, so a typo
-	// can neither end the check as unread nor take one of the three slots.
-	const named = [
-		...new Set(readmeText?.match(/\bC[A-Z2-7]{55}\b/g) ?? []),
-	].filter((id) => StrKey.isValidContract(id));
-	const ids = named.slice(0, 3);
-	// The id this repo holds is judged again wherever its README still names
-	// it: Kryon-Protocol/Kryon's README grew a table of eleven ids above its
+	// can neither end the check as unread nor take one of the slots.
+	const valid = (text: string | null) =>
+		[...new Set(text?.match(/\bC[A-Z2-7]{55}\b/g) ?? [])].filter((id) =>
+			StrKey.isValidContract(id),
+		);
+	const inReadme = valid(readmeText);
+	const ids = inReadme.slice(0, 3);
+	const inDeploy = valid(deployText);
+	ids.push(
+		...inDeploy.filter((id) => !ids.includes(id)).slice(0, DEPLOY_ID_SLOTS),
+	);
+	const named = [...new Set([...inReadme, ...inDeploy])];
+	// The ids that decide a README-only scan: its three slots and the id the
+	// repo already holds. An id that only a deployment file adds may improve
+	// the answer (when the repo's source defines it) and nothing else: it
+	// cannot end the check as unread, and it cannot be the answer as "cited",
+	// because a config file is mostly a list of what the repo calls.
+	const core = new Set(inReadme.slice(0, 3));
+	if (storedId) core.add(storedId);
+	// The held id may have come from a deployment file that this scan could
+	// not read. Nothing read names it, so it cannot be judged again: keep it.
+	if (deployUnread && storedId && !named.includes(storedId))
+		return CONTRACT_UNREAD;
+	// The id this repo holds is judged again wherever its README or a
+	// deployment file still names it: Kryon-Protocol/Kryon's README grew a table of eleven ids above its
 	// mainnet one, and a rescan would have erased the held id unread.
 	if (storedId && named.includes(storedId) && !ids.includes(storedId))
 		ids.push(storedId);
@@ -924,19 +1007,31 @@ export async function verifyMainnetContract(
 				if (storedId && id === storedId) return CONTRACT_UNREAD;
 				continue; // not a mainnet contract
 			}
-			const executable = xdr.LedgerEntryData.fromXDR(entry.xdr, "base64")
-				.contractData()
-				.val()
-				.instance()
-				.executable();
-			if (executable.switch().name === "contractExecutableStellarAsset")
-				continue;
-			wasm.set(id, executable.wasmHash());
+			try {
+				const executable = xdr.LedgerEntryData.fromXDR(entry.xdr, "base64")
+					.contractData()
+					.val()
+					.instance()
+					.executable();
+				if (executable.switch().name === "contractExecutableStellarAsset")
+					continue;
+				wasm.set(id, executable.wasmHash());
+			} catch (e) {
+				// An entry that does not decode is a check that did not run, for
+				// the ids that decide the answer. An extra id is just dropped.
+				if (core.has(id)) throw e;
+			}
 		}
 		const codes = await readLedgerEntries(
 			[...wasm.values()].map((hash) => codeKey(hash)),
 		);
-		if (!codes) return CONTRACT_UNREAD;
+		// The code read failed. With a README or stored id among the contracts,
+		// the check did not run. With only deployment-file ids, the answer is
+		// what the README alone gives: nothing.
+		if (!codes)
+			return [...wasm.keys()].some((id) => core.has(id))
+				? CONTRACT_UNREAD
+				: null;
 		let matched: MainnetContract | null = null;
 		let unjudged: MainnetContract | null = null;
 		let cited: MainnetContract | null = null;
@@ -948,19 +1043,39 @@ export async function verifyMainnetContract(
 			// The instance runs this WASM, so a missing code entry is an answer
 			// that is not whole, not evidence about the contract.
 			const code = codes.get(codeKey(hash));
-			if (!code) return CONTRACT_UNREAD;
-			const bytes = xdr.LedgerEntryData.fromXDR(code.xdr, "base64")
-				.contractCode()
-				.code();
-			const claimed = sourceRepo(contractMeta(bytes));
+			if (!code) {
+				if (!core.has(id)) continue;
+				return CONTRACT_UNREAD;
+			}
+			let bytes: Buffer;
+			let claimed: ReturnType<typeof sourceRepo>;
+			let deployed: ReturnType<typeof specFunctions>;
+			try {
+				bytes = xdr.LedgerEntryData.fromXDR(code.xdr, "base64")
+					.contractCode()
+					.code();
+				claimed = sourceRepo(contractMeta(bytes));
+				deployed = specFunctions(bytes);
+			} catch (e) {
+				if (core.has(id)) throw e;
+				continue;
+			}
 			let attested = 0;
 			if (claimed) {
 				if (acct) acct.api++;
-				const n = await countAttestations(claimed, hash);
-				if (n === null) return CONTRACT_UNREAD;
+				let n: Awaited<ReturnType<typeof countAttestations>>;
+				try {
+					n = await countAttestations(claimed, hash);
+				} catch (e) {
+					if (core.has(id)) throw e;
+					continue;
+				}
+				if (n === null) {
+					if (!core.has(id)) continue;
+					return CONTRACT_UNREAD;
+				}
 				attested = n;
 			}
-			const deployed = specFunctions(bytes);
 			const basis = ownership(repoFullName ?? "", claimed, attested, {
 				deployed,
 				defined: source.defined,
@@ -978,28 +1093,38 @@ export async function verifyMainnetContract(
 				source.isFork ||
 				(basis === "other-repo" && claimed?.split("/")[0] !== owner)
 			) {
-				cited ??= { id, basis: "cited" };
+				if (core.has(id)) cited ??= { id, basis: "cited" };
 				continue;
 			}
 			// Not this repo's source. A team's frontend or SDK repo points to
 			// the repo its contract lives in: the build's SEP-55 source_repo, a
 			// git submodule, or a README link, under the same GitHub owner.
-			const side = source.siblings
-				? await siblingBasis(
-						repoFullName ?? "",
-						claimed,
-						deployed,
-						source.siblings,
-						read,
-					)
-				: "cited";
-			if (side === CONTRACT_UNREAD) return CONTRACT_UNREAD;
+			let side: Awaited<ReturnType<typeof siblingBasis>> | "cited";
+			try {
+				side = source.siblings
+					? await siblingBasis(
+							repoFullName ?? "",
+							claimed,
+							deployed,
+							source.siblings,
+							read,
+						)
+					: "cited";
+			} catch (e) {
+				if (core.has(id)) throw e;
+				continue;
+			}
+			if (side === CONTRACT_UNREAD) {
+				if (!core.has(id)) continue;
+				return CONTRACT_UNREAD;
+			}
 			if (side === "sibling-matched") {
 				matched ??= { id, basis: side };
 				continue;
 			}
 			// Nothing matched. Only a whole read of this repo's source can say
 			// cited, and trait defaults leave its functions unnamed.
+			if (!core.has(id)) continue;
 			if (source.unread) return CONTRACT_UNREAD;
 			if (side === "published" || takesDefaults(deployed, source.defaults))
 				unjudged ??= { id, basis: "published" };
@@ -1104,6 +1229,17 @@ export async function fetchRepoCode(
 				acct,
 			)
 		: null;
+	// A deployment file that cannot be read is skipped: these files only add
+	// candidate ids, and verifyMainnetContract keeps the held id when the file
+	// that named it is the one that failed.
+	const deployRead = await Promise.all(
+		deploymentFiles(tree).map((e) =>
+			fetchBlob(gh, owner, name, e.sha, e.path, blobRef, acct),
+		),
+	);
+	const deployText =
+		deployRead.filter((t): t is string => typeof t === "string").join("\n") ||
+		null;
 	// The repo's own contract functions, read from the sources this scan
 	// fetched: a contract id is this repo's only if its source, or a
 	// same-owner repo it points to, defines it.
@@ -1151,6 +1287,8 @@ export async function fetchRepoCode(
 				read: (repo) => readContractFns(gh, repo, acct),
 			},
 		},
+		deployText,
+		deployRead.some((t) => t === null),
 	);
 	const mainnetContractUnread = mainnetCheckUnread(
 		!!readmeEntry,
