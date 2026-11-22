@@ -131,6 +131,8 @@ export function policyReader(file: string, text: string) {
 		visit(source);
 		return found;
 	};
+	/** The spans of the values read through this reader: the file's data. */
+	const read: Array<[number, number]> = [];
 	const init = (name: string): ts.Expression => {
 		const found = source.statements
 			.filter(ts.isVariableStatement)
@@ -148,6 +150,7 @@ export function policyReader(file: string, text: string) {
 		if (!found[0]?.isConst) fail(name, "is not declared const");
 		const changed = change(name);
 		if (changed) fail(name, changed);
+		read.push([e.getStart(source), e.end]);
 		while (
 			ts.isParenthesizedExpression(e) ||
 			ts.isAsExpression(e) ||
@@ -177,6 +180,31 @@ export function policyReader(file: string, text: string) {
 		return arg ? items(name, arg) : [];
 	};
 	return {
+		/** sha256 of the file's code: every token outside the values read so
+		 * far, with comments and layout dropped. The data may change under it;
+		 * an edit to anything else (a set built from two others, a function, a
+		 * pattern) changes it. Call it after the reads. Tokens come from the
+		 * parsed tree, so a `//` inside a regex is never taken for a comment. */
+		code: () => {
+			const out: string[] = [];
+			const walk = (node: ts.Node): void => {
+				if (
+					node.kind >= ts.SyntaxKind.FirstJSDocNode &&
+					node.kind <= ts.SyntaxKind.LastJSDocNode
+				)
+					return;
+				const at = node.getStart(source);
+				if (read.some(([from, to]) => at === from && node.end === to)) {
+					out.push("<data>");
+					return;
+				}
+				const kids = node.getChildren(source);
+				if (kids.length) kids.forEach(walk);
+				else if (node.end > at) out.push(node.getText(source));
+			};
+			walk(source);
+			return sha256(out.join(" "));
+		},
 		map: (name: string) =>
 			new Map(
 				built(name, "Map").map((pair) => {
@@ -214,10 +242,13 @@ export function policyReader(file: string, text: string) {
 
 /** src/policy/scout-exposure.ts: Raven's reviewed Scout exclusions. */
 export function scoutExposure(text: string) {
-	const read = policyReader("src/policy/scout-exposure.ts", text);
-	return {
-		excluded: read.map("EXCLUDED_SCOUT_OPERATIONS"),
-		optionalExcluded: read.map("OPTIONAL_EXCLUDED_SCOUT_OPERATIONS"),
-		absentPaths: read.set("SCOUT_PATHS_ABSENT_FROM_SPEC"),
+	const reader = policyReader("src/policy/scout-exposure.ts", text);
+	const data = {
+		excluded: reader.map("EXCLUDED_SCOUT_OPERATIONS"),
+		optionalExcluded: reader.map("OPTIONAL_EXCLUDED_SCOUT_OPERATIONS"),
+		absentPaths: reader.set("SCOUT_PATHS_ABSENT_FROM_SPEC"),
 	};
+	// The file also holds code the replica ports (how the excluded paths are
+	// put together and matched): its hash, with the three values left out.
+	return { ...data, code: reader.code() };
 }

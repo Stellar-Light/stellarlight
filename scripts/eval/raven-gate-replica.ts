@@ -1,6 +1,6 @@
 /**
  * Portions of this file are ported, with changes, from
- * stellar-experimental/stellar-raven at commit fec1c79 (Apache License 2.0),
+ * stellar-experimental/stellar-raven at commit c41c0f9 (Apache License 2.0),
  * and through Raven's vendored scorer from @cloudflare/codemode 0.4.2 (MIT
  * License, Copyright (c) 2025 Cloudflare, Inc.). See THIRD-PARTY-NOTICES.md
  * and LICENSES/ for the notices and license texts.
@@ -35,14 +35,30 @@
  * exits 2, as does a changed ported source file (PORTED_FROM_RAVEN), a missing
  * --raven, or a thrown error: re-port before trusting a verdict. A missing
  * --raven exits 2 with the usage line; once a checkout is given, every exit-2
- * message names the ported files that differ from fec1c79. Exit 0 =
+ * message names the ported files that differ from the pin. Exit 0 =
  * Raven would accept, 1 = it would hold (gate breach, a lower accepted total,
  * a per-question hit-to-miss flip in any of the 544 rows across five lanes:
  * 338 legacy, 23 skills, 49 holdout, 122 extended, 12 protocol; or a catalog
  * build guard). Question counts come from Raven's case files, the same for
  * the baseline and the candidate.
  *
- * Ported from Raven at commit fec1c79 (2026-11-03; first port b1dc866):
+ * Ported from Raven at commit c41c0f9 (2026-11-20; first port b1dc866,
+ * previous pin fec1c79 of 2026-11-03). What the re-port changed: card
+ * binding rule 4 (`<noun>_detail` -> `get<Noun>`), card caveats attached to
+ * rebuilt entries, the stellarOrg service kept as committed, the excluded
+ * path rule (a path is a leak only where it ends), the detail-edge join
+ * check, Raven's unbound-card test as a gate problem and the unlisted paths
+ * (/api/repos) in the leak rule. Three review rounds against Raven's real
+ * build scripts then added rules the first port never had: the leak guard
+ * over the super spec (with its response stub), the guard on keyword
+ * exclusion sources, the checks of Raven's manifest load (unique ids, legal
+ * and unique sandbox names, object schemas, a string server address) and the
+ * protocol-history target. Compared with comments and types stripped,
+ * scoring.ts, id.ts, extract-keywords.ts and the vendored scorer hold the
+ * same code; search.ts changed outside hit selection (catalog schema checks,
+ * card signatures, recovery walks). The gate's evidence-hash rules moved to
+ * eval/lib/gate-evidence.mjs unchanged; its threshold rules stay in
+ * eval/run-routing.mjs.
  *   src/catalog/vendor/search-scoring.ts  field scorer and coverage gate
  *   src/catalog/scoring.ts                keyword blends, stopword rescue,
  *                                         aliases, acronym rescue, diversity
@@ -58,7 +74,21 @@
  *   scripts/description-notes.mjs         reference rewrites, clause drops,
  *                                         schema scrubs
  *   scripts/emitted-text-guard.mjs, scripts/lib/skill-markdown.mjs
- *   eval/run-routing.mjs, eval/lib/grade.mjs  lanes, grading, gate rule
+ *   scripts/build-super-spec.mjs          buildScout, reference namespacing,
+ *                                         the response stub for large
+ *                                         outputs, component pruning and the
+ *                                         leak guard over the whole spec
+ *   scripts/lib/super-spec-compaction.ts, src/catalog/output-compaction.ts,
+ *   src/catalog/vendor/json-schema-types.ts
+ *                                         which responses are stubbed, and to
+ *                                         what
+ *   src/catalog/detail-relation.ts, src/catalog/types.ts
+ *   eval/run-routing.mjs, eval/lib/grade.mjs, eval/lib/gate-evidence.mjs
+ *                                         lanes, grading, gate rule
+ *   test/routing-card-binding.test.mjs    the lanes whose cards must all
+ *                                         bind, and two exact bindings
+ *   src/policy/scout-exposure.ts          the excluded-path set and matcher
+ *                                         (its code only, PORTED_CODE_IN_POLICY)
  * Policy is data, read from the checkout at run time with the TypeScript
  * parser (scripts/eval/raven-policy.ts; a file that does not parse, or a
  * declaration that is missing, not const, changed later in the file or not a
@@ -66,7 +96,9 @@
  * scripts/exposure.mjs, the scrubs in scripts/description-notes.mjs and the
  * retired-skill pattern in src/skills/scrub.ts. Policy files are not pinned;
  * every run prints their sha256 and --json records it. Only ported code is
- * pinned (PORTED_FROM_RAVEN). Notes, retrieval profiles, cases and thresholds
+ * pinned (PORTED_FROM_RAVEN, and the code inside the exposure file).
+ * build-family-text.mjs is not ported: the text it guards names services,
+ * never an operation, so a Scout spec cannot change its outcome. Notes, retrieval profiles, cases and thresholds
  * are read whole from Raven's JSON. None of it is copied here. Lumenloop and skills entries come from the committed
  * manifest as is: our spec cannot move them. stellarDocs keywords are rebuilt
  * because Raven's title filter reads Scout vocabulary.
@@ -83,45 +115,83 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import {
+	jsonSchemaToType,
+	sanitizeToolName,
+	toPascalCase,
+} from "./raven-json-schema-types";
 import { isEntry, policyReader, scoutExposure, sha256 } from "./raven-policy";
 
 /**
- * The Raven source files this script ports, hashed at commit fec1c79. Any
+ * The Raven source files this script ports, hashed at commit c41c0f9. Any
  * difference fails the self-check: Raven can change its scorer without
  * changing its accepted totals, and a port of old code would then grade a
  * spec by rules Raven no longer runs. Policy files are data: read, shape
  * checked and hashed into the report on every run, never pinned here.
  */
-export const PORTED_AT = "fec1c79";
+export const PORTED_AT = "c41c0f9";
 export const PORTED_FROM_RAVEN: Record<string, string> = {
 	"src/catalog/vendor/search-scoring.ts":
-		"718924d10533ea49d472602f600ece0e4d7a0aae3e9e0ca5a95d9a8c6e611b14",
+		"a02568aad28ca94457fd6a455373766597210d40ba981254c91bde7b257775b4",
 	"src/catalog/scoring.ts":
-		"5c2d39dbefae23a89abd07a07eba61f05a3116f9477900f0b1324f1aa086781a",
+		"4b89a5373d2e731e7472ff670748bb1bdc94de49cccef0708c8122453031e6d3",
 	"src/catalog/search.ts":
-		"02e8c9b3512ca791582a29c9a21f1baba8ea347490e7cec75b5041a5aa7945fe",
+		"0fede6bd6fbdfb58c809266ca0e84ab67b06126c680ca937ea3754fdfabbc4b3",
 	"src/catalog/known-aliases.ts":
 		"fbff3fb8eeb0a256020fca2e93f889e7b5c474526a3baf4d576ed3a4a44b3db2",
 	"src/catalog/skill-search-admission.ts":
 		"6c26fb77db5663db6b5774f494e428db338213faca197eec5935b65a5d1744d3",
 	"src/catalog/id.ts":
-		"f39bd39a88d171956a1760ae451c559fea5363413b24625f0fbf64c42cead104",
+		"2424cfb25b973341da6d27ba3f4c2b29e24a630ac5dd8c891ff34a4d81dd9102",
 	"src/catalog/extract-keywords.ts":
-		"598a0d012a4a4b0855092547f2d61e0cf63e53b9c66c41a45a2c98978a8f684e",
+		"d991c7fa9e085f48f4800c2b34fc344d9f4aafdc2bbc78fb617bbbf9c9864714",
 	"src/catalog/extract-routing-phrases.ts":
 		"943251c31eb5ce37ea27ee960ad7aa707a80793df0dfdda8c77df7d16b247812",
 	"scripts/build-catalog.mjs":
-		"0cce099cb2d8284811761e2f8fdab80761a3f5d0c3874f109dd398b6061ba0f4",
+		"1fd03332b4ade08378f3a009a7ec5ab25bd125c7a8ae3c61db5acf62eac218be",
 	"scripts/description-notes.mjs":
-		"3a7dcd565016bf90516ba47daaad5d43beb04636ea170bd73104b4a2672bfcf5",
+		"0a8a5bd4343e1eead48ca5bea905934a83362d67e4c924cf0d8b8d085f85f06c",
 	"scripts/emitted-text-guard.mjs":
-		"45c3f619ce9165fd8c180e39b7432c984e91ec2f7843877181db05d3522636d2",
+		"c8c6189b9bef1b338d808921c690b83f8962ccb8f039bd5e72a05bf31bfb749c",
 	"scripts/lib/skill-markdown.mjs":
 		"0b0e3be17701dff06a8fd97d838dab9c2c477bcc3afd4e8f62920d9d767bcb1b",
 	"eval/run-routing.mjs":
-		"9a938a710fe3b573e1e0306021e3816c77448ba41be6c375bb15b555de43916a",
+		"9df990458b9c2c0b37ac3918cd60017a4c040877391d85d2493826cbe0c2acde",
 	"eval/lib/grade.mjs":
-		"86d42c16038821629ad517cf9db0a8a6238a197caea8917801463e9986c3a8cf",
+		"56c48ad6f4d13bbf52f837a22f0b0cf4a68f206499eab1dfee795ef4406c349b",
+	"src/catalog/detail-relation.ts":
+		"55dac9d4dc7d99571e0d406106123eb365b39dc2c8b88cf28d97820455861be7",
+	// The entry schema the catalog is loaded through (card caveats, detail edges).
+	"src/catalog/types.ts":
+		"2029bfa11fdac54513c06f98b3390b17abfd034d62c149ddf132b857c4088e9e",
+	// buildScout, pruneUnreachableComponents and the guard over the whole spec.
+	"scripts/build-super-spec.mjs":
+		"557cdc3f817d3d9f5ed893d465951d9677ca43c069eb7b42629bcaa2449e72d4",
+	// The response stub of the super spec and the size rule that selects it;
+	// the renderer is copied whole into ./raven-json-schema-types.ts.
+	"scripts/lib/super-spec-compaction.ts":
+		"e712b82ba361f2b5a7af12fa9b1df77e84d2eea35609134625d9c3698d4268dc",
+	"src/catalog/output-compaction.ts":
+		"28aae41b6600da48e468018405c002425d0092307389bf6e4b3cc540f0928652",
+	"src/catalog/vendor/json-schema-types.ts":
+		"6d6271d9beb75a8d79146ab1acded72936b8e5ffb06b10fafa5f8d982fe2f074",
+	// The evidence rules of --gate (hashes aside, see mechanicalGate).
+	"eval/lib/gate-evidence.mjs":
+		"3f0a85202d3eacbac96061e13521aca426fb69bea1ca04e93abe3734f5a0bd30",
+	// Which lanes must bind every card, and the two exact detail bindings.
+	"test/routing-card-binding.test.mjs":
+		"3bf158cff885cbfe5d9ea5c1480cdd9cf60d48724cdae290ee6bdaa0661b9b7c",
+};
+/**
+ * Policy files hold data, read live and never pinned, but
+ * src/policy/scout-exposure.ts also holds code this script ports: how the
+ * excluded paths are put together and matched. This is the hash of that code
+ * alone (scoutExposure().code), so an exclusion added upstream changes
+ * nothing here and an edit to the matcher does.
+ */
+export const PORTED_CODE_IN_POLICY: Record<string, string> = {
+	"src/policy/scout-exposure.ts":
+		"601e8b95e0fdde18a5b6012cca7ec82007e9b9018c914faae583142ce48d2a2e",
 };
 
 type Json = Record<string, unknown>;
@@ -144,6 +214,9 @@ interface Entry {
 	routingExclusions?: Array<{ tokens: string[] }>;
 	knownAliases?: string[];
 	knownAliasTriggers?: string[];
+	/** One line a compact search card must keep (Raven scripts/catalog-data/
+	 *  card-caveats.mjs, attached by attachCardCaveats). Never scored. */
+	cardCaveat?: string;
 	retrievalProfile?: Profile;
 	searchable?: boolean;
 	inputSchema?: unknown;
@@ -1505,11 +1578,21 @@ function attachOperationKeywords(
 		const distinctive = [...(tokenSets.get(e.id) ?? [])].filter(
 			(t) => (df.get(t) ?? 0) <= maxDf,
 		);
-		const keywords = extractKeywords(
-			distinctive.join(" "),
-			[e.id, e.service, e.kind, e.description, ...(e.routingKeywords ?? [])],
-			cap,
-		);
+		// guardedExtractKeywords: the body and every exclusion source pass the
+		// leak guard, so an operation named like an excluded one is caught by
+		// its own id.
+		const body = distinctive.join(" ");
+		const exclude = [
+			e.id,
+			e.service,
+			e.kind,
+			e.description,
+			...(e.routingKeywords ?? []),
+		];
+		guard?.(body, `${e.id} keyword source`);
+		for (const text of exclude)
+			guard?.(text, `${e.id} keyword exclusion source`);
+		const keywords = extractKeywords(body, exclude, cap);
 		return keywords.length > 0 ? { ...e, keywords } : e;
 	});
 }
@@ -1526,6 +1609,7 @@ interface Policy {
 	retiredSkillRe: RegExp;
 	notes: Map<string, string>; // operationId -> plainText note (from manifest)
 	profiles: Map<string, Profile>; // entry id -> retrievalProfile (from manifest)
+	caveats: Map<string, string>; // entry id -> cardCaveat (from manifest)
 	files: Record<string, string>; // policy file -> sha256, as read this run
 }
 
@@ -1554,8 +1638,10 @@ export function loadPolicy(
 	);
 	const notes = new Map<string, string>();
 	const profiles = new Map<string, Profile>();
+	const caveats = new Map<string, string>();
 	for (const e of manifest.entries) {
 		if (e.retrievalProfile) profiles.set(e.id, e.retrievalProfile);
+		if (e.cardCaveat !== undefined) caveats.set(e.id, e.cardCaveat);
 		if (e.service !== "scout") continue;
 		const i = e.description.indexOf("\n\n");
 		if (i >= 0) notes.set(lastIdSegment(e.id), e.description.slice(i + 2));
@@ -1574,6 +1660,7 @@ export function loadPolicy(
 		retiredSkillRe,
 		notes,
 		profiles,
+		caveats,
 		files,
 	};
 }
@@ -1588,33 +1675,38 @@ function leakIn(text: string, p: Policy): string | null {
 		new RegExp(`(?<![.\\w])lumenloop\\.(?:${ll})\\b`, "i"),
 	);
 	if (qualified) return `non-exposed operation "${qualified[0]}"`;
-	const decoded = text
-		.replace(/(?:%[0-9a-f]{2})+/gi, (enc) => {
-			try {
-				return decodeURIComponent(enc);
-			} catch {
-				return enc;
-			}
-		})
-		.toLowerCase();
-	for (const sig of p.excludedOps) {
-		const path = sig.split(" ")[1] as string;
-		// A templated segment (`{id}`) also matches a concrete value. This is
-		// Raven's rule at fec1c79, holes included: an id followed by "/" is no
-		// leak to Raven's build either. Pinned by the parity test in
-		// src/lib/__tests__/raven-gate-replica.test.ts; do not make it stricter.
-		const templated = /\{[^}/]+\}/.test(path)
-			? new RegExp(
-					`${path
-						.toLowerCase()
-						.split(/(\{[^}/]+\})/)
-						.map((part) =>
-							/^\{[^}/]+\}$/.test(part) ? "[^\\s/`)\\]]+" : regexEscape(part),
-						)
-						.join("")}(?![\\w/-])`,
+	const decoded = text.replace(/(?:%[0-9a-f]{2})+/gi, (enc) => {
+		try {
+			return decodeURIComponent(enc);
+		} catch {
+			return enc;
+		}
+	});
+	// EXCLUDED_SCOUT_PATHS: every excluded operation's path, then the paths
+	// Raven's policy says the spec must not list at all (/api/repos).
+	const excludedPaths = new Set([
+		...[...p.excludedOps].map((sig) => sig.split(" ")[1] as string),
+		...p.absentPaths,
+	]);
+	for (const path of excludedPaths) {
+		// Raven's findExcludedScoutPath (src/policy/scout-exposure.ts, re-ported
+		// at c41c0f9). A templated segment (`{id}`) also matches a concrete
+		// value, and a path is a leak only where it ENDS: followed by a word
+		// character, a dash, or a further path segment it is a different,
+		// longer path. Before c41c0f9 a plain path matched as a substring, so
+		// "/api/partners/chat" leaked "/api/partners"; it no longer does.
+		// Pinned by the parity test in src/lib/__tests__/raven-gate-replica.test.ts;
+		// do not make it stricter than Raven's build.
+		const pattern = new RegExp(
+			`${path
+				.split(/(\{[^}/]+\})/)
+				.map((part) =>
+					/^\{[^}/]+\}$/.test(part) ? "[^\\s/`)\\]]+" : regexEscape(part),
 				)
-			: null;
-		if (decoded.includes(path.toLowerCase()) || templated?.test(decoded))
+				.join("")}(?![\\w-]|\\/[\\w{%-])`,
+			"i",
+		);
+		if (pattern.test(text) || pattern.test(decoded))
 			return `excluded scout endpoint path "${path}"`;
 	}
 	if (p.retiredSkillRe.test(text)) return "retired-skill reference";
@@ -1721,7 +1813,7 @@ function scoutTextScrubs(p: Policy) {
 	};
 	const dropClauses = (text: string) => {
 		const d = lists(text);
-		// Raven's splitter at fec1c79, byte for byte, pinned by the parity test
+		// Raven's splitter (unchanged from fec1c79 to c41c0f9), byte for byte, pinned by the parity test
 		// in src/lib/__tests__/raven-gate-replica.test.ts: the description Raven
 		// scores is the contract, so do not split more finely here.
 		const clauses = d.split(/(?<=[.!?;])\s+|\n+/u);
@@ -1747,6 +1839,27 @@ function scoutTextScrubs(p: Policy) {
 		return out;
 	};
 	return { scrubSchema, dropClauses };
+}
+
+/** Raven src/catalog/id.ts VALID_IDENT. */
+const VALID_IDENT = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+
+/** Raven src/catalog/output-compaction.ts COMPACT_OUTPUT_THRESHOLD. */
+const COMPACT_OUTPUT_THRESHOLD = 2000;
+
+/** build-super-spec.mjs namespaceRefs: a $ref into the components gains the
+ *  "scout." prefix its target is stored under. Only $ref values: a pointer
+ *  held by any other key keeps its old name, and no longer resolves. */
+function namespaceRefs(node: unknown): unknown {
+	if (Array.isArray(node)) return node.map(namespaceRefs);
+	if (!node || typeof node !== "object") return node;
+	const out: Json = {};
+	for (const [key, value] of Object.entries(node))
+		out[key] =
+			key === "$ref" && typeof value === "string"
+				? value.replace(/^#\/components\/([^/]+)\//, "#/components/$1/scout.")
+				: namespaceRefs(value);
+	return out;
 }
 
 /**
@@ -1801,10 +1914,19 @@ export function buildScoutEntries(
 	const base =
 		((openapi.servers as Json[] | undefined)?.[0]?.url as string) ??
 		"https://stellarlight.xyz";
+	// The address becomes every Scout entry's transport.base, which Raven's
+	// manifest load requires to be a string (types.ts transportSchema).
+	if (typeof base !== "string")
+		problems.push(
+			`servers[0].url is not a string: Raven's manifest load rejects each Scout entry's transport.base`,
+		);
 	const entries: Entry[] = [];
 	const routingBodies = new Map<string, string>();
 	const routingSources = new Map<string, Record<string, string[]>>();
 	const consumedNotes = new Set<string>();
+	// build-super-spec.mjs buildScout: each exposed operation as the spec
+	// codemode.spec() returns holds it (see the guard after this loop).
+	const superOps: Json[] = [];
 	for (const [path, pathItem] of Object.entries(paths)) {
 		for (const method of HTTP_METHODS) {
 			const op = (pathItem as Json)[method] as Json | undefined;
@@ -1824,13 +1946,43 @@ export function buildScoutEntries(
 					);
 				fields = fields.map((text) => text.split(needle).join(""));
 			}
-			const raw = fields
-				.map(dropClauses)
+			const clean = fields.map(dropClauses);
+			const raw = clean
 				.filter(Boolean)
 				.join(". ")
 				.replace(/\.\.\s/g, ". ");
 			const description = plainText(rewriteScoutRefs(raw, refPairs));
 			const note = p.notes.get(opId);
+			{
+				const [summary, body] = clean.map((text) =>
+					text ? plainText(rewriteScoutRefs(text, refPairs)) : undefined,
+				);
+				const text = [body, note ? plainText(note) : undefined]
+					.filter(Boolean)
+					.join("\n\n");
+				const parameters = [
+					...(((pathItem as Json).parameters as unknown[]) ?? []),
+					...((op.parameters as unknown[]) ?? []),
+				];
+				superOps.push({
+					operationId: `scout.${opId}`,
+					...(summary ? { summary } : {}),
+					...(text ? { description: text } : {}),
+					tags: ["scout", ...((op.tags as unknown[]) ?? [])],
+					...(parameters.length > 0
+						? { parameters: scrub(namespaceRefs(parameters)) }
+						: {}),
+					...(op.requestBody
+						? { requestBody: scrub(namespaceRefs(op.requestBody)) }
+						: {}),
+					...(op.responses
+						? { responses: scrub(namespaceRefs(op.responses)) }
+						: {}),
+					"x-service": "scout",
+					"x-upstream": { method: httpMethod, path },
+					"x-execute": `await scout.${opId}(args)`,
+				});
+			}
 			if (note !== undefined) consumedNotes.add(opId);
 			const routing = op["x-routing"] as Json | undefined;
 			if (routing && typeof routing === "object") {
@@ -1888,16 +2040,121 @@ export function buildScoutEntries(
 				`SCOUT_DESCRIPTION_SCRUBS key "${key}" matched no exposed scout operation`,
 			);
 
+	// build-super-spec.mjs: Raven runs the same leak guard over the whole spec
+	// codemode.spec() returns. Scout's part of it, built the way Raven builds
+	// it: the operations above, a stub in place of every large 200 schema,
+	// the components still reached (their names and $refs prefixed "scout."),
+	// the tag list and the server address. A description is scrubbed first;
+	// an example, an enum value, a component name or /api/repos is not.
+	//
+	// compactOversizedResponseSchemas: an output whose rendered type is longer
+	// than 2,000 characters is replaced by its top-level field names.
+	const byId = new Map(entries.map((e) => [e.id, e]));
+	for (const op of superOps) {
+		const entry = byId.get(op.operationId as string);
+		const out = entry?.outputSchema as Json | null | undefined;
+		if (!entry || !out) continue;
+		const name = entry.id.slice(entry.id.lastIndexOf(".") + 1);
+		const block = jsonSchemaToType(
+			out,
+			`${toPascalCase(sanitizeToolName(name))}Output`,
+		);
+		if (block.length <= COMPACT_OUTPUT_THRESHOLD) continue;
+		const media = (
+			((op.responses as Json | undefined)?.["200"] as Json | undefined)
+				?.content as Json | undefined
+		)?.["application/json"] as Json | undefined;
+		if (!media?.schema) {
+			problems.push(
+				`super-spec: oversized output schema for ${entry.id} has no application/json 200 response`,
+			);
+			continue;
+		}
+		const describe = `codemode.describe(${JSON.stringify(entry.id)})`;
+		const fields = Object.keys(
+			(out.properties as Json | undefined) ?? {},
+		).sort();
+		media.schema = {
+			...(Object.hasOwn(out, "type") ? { type: out.type } : {}),
+			description: `Compact output schema with exact top-level fields. Call ${describe} for the full output schema.`,
+			...(fields.length > 0
+				? { properties: Object.fromEntries(fields.map((f) => [f, {}])) }
+				: {}),
+			...(Object.hasOwn(out, "required") ? { required: out.required } : {}),
+			"x-codemode-describe": describe,
+		};
+	}
+	const components: Record<string, Json> = {};
+	for (const [group, defs] of Object.entries(
+		(openapi.components as Json | undefined) ?? {},
+	)) {
+		components[group] = {};
+		for (const [name, def] of Object.entries((defs as Json | null) ?? {}))
+			(components[group] as Json)[`scout.${name}`] = scrub(namespaceRefs(def));
+	}
+	// componentPointersIn: every string that points at a component, a $ref or
+	// not. Only $refs were renamed, so any other pointer keeps the old name.
+	const pointersIn = (node: unknown, acc = new Set<string>()): Set<string> => {
+		if (!node || typeof node !== "object") return acc;
+		for (const value of Object.values(node)) {
+			if (typeof value !== "string") {
+				pointersIn(value, acc);
+				continue;
+			}
+			const m = value.match(/^#\/components\/([^/]+)\/([^/]+)/);
+			if (m)
+				acc.add(
+					`${m[1]}/${(m[2] as string).replace(/~1/g, "/").replace(/~0/g, "~")}`,
+				);
+		}
+		return acc;
+	};
+	// pruneUnreachableComponents
+	const reachable = pointersIn(superOps);
+	for (let grew = true; grew; ) {
+		grew = false;
+		for (const key of [...reachable]) {
+			const [group, name] = key.split("/") as [string, string];
+			const def = components[group]?.[name];
+			if (!def) continue;
+			for (const ref of pointersIn(def))
+				if (!reachable.has(ref)) {
+					reachable.add(ref);
+					grew = true;
+				}
+		}
+	}
+	const kept: Record<string, Json> = {};
+	for (const [group, defs] of Object.entries(components)) {
+		kept[group] = {};
+		for (const [name, def] of Object.entries(defs))
+			if (reachable.has(`${group}/${name}`)) (kept[group] as Json)[name] = def;
+	}
+	const superSpec = sortDeep({
+		paths: superOps,
+		components: kept,
+		tags: scrub(openapi.tags ?? []),
+		"x-services": { scout: { base, source: `${base}/api/openapi.json` } },
+	});
+	// assertEveryComponentRefResolves, over the pruned spec
+	for (const key of pointersIn(superSpec)) {
+		const [group, name] = key.split("/") as [string, string];
+		if (!kept[group]?.[name])
+			problems.push(
+				`super-spec: dangling component reference "#/components/${key}"`,
+			);
+	}
+	guard(JSON.stringify(superSpec), "specs/super-spec.json");
+
 	const withRouting = entries.map((e) => {
 		let out: Entry = e;
 		const body = routingBodies.get(e.id);
 		if (body) {
+			const exclude = [e.id, e.service, e.kind, e.description];
 			guard(body, `${e.id} keyword source`);
-			const routingKeywords = extractKeywords(
-				body,
-				[e.id, e.service, e.kind, e.description],
-				256,
-			);
+			for (const text of exclude)
+				guard(text, `${e.id} keyword exclusion source`);
+			const routingKeywords = extractKeywords(body, exclude, 256);
 			if (routingKeywords.length > 0) out = { ...out, routingKeywords };
 		}
 		const source = routingSources.get(e.id);
@@ -2024,16 +2281,66 @@ export function buildDocsEntries(
 }
 
 /** Catalog Raven would build with these Scout entries (docs keywords rebuilt). */
-function assembleCatalog(
-	raven: Raven,
+/** Raven src/catalog/detail-relation.ts detailJoinKeys (c41c0f9): the inputs a
+ *  detail-lane target requires, when one array in the source's output carries
+ *  every one of them on its rows; null when the edge cannot be followed. */
+function detailJoinKeys(
+	source: { outputSchema?: unknown },
+	target: { inputSchema?: unknown; retrievalProfile?: { lane?: string } },
+): string[] | null {
+	if (target.retrievalProfile?.lane !== "detail") return null;
+	const required = (target.inputSchema as { required?: unknown } | undefined)
+		?.required;
+	if (
+		!Array.isArray(required) ||
+		required.length === 0 ||
+		!required.every((key) => typeof key === "string")
+	)
+		return null;
+	const props =
+		(
+			source.outputSchema as
+				| {
+						properties?: Record<
+							string,
+							{
+								type?: unknown;
+								items?: { properties?: Record<string, unknown> };
+							}
+						>;
+				  }
+				| undefined
+		)?.properties ?? {};
+	for (const property of Object.values(props)) {
+		if (property.type !== "array" || !property.items?.properties) continue;
+		const itemKeys = property.items.properties;
+		if ((required as string[]).every((key) => key in itemKeys))
+			return [...(required as string[])];
+	}
+	return null;
+}
+
+/** Raven scripts/catalog-data/card-caveats.mjs CARD_CAVEAT_MAX_CHARS. */
+const CARD_CAVEAT_MAX_CHARS = 135;
+
+export function assembleCatalog(
+	raven: Pick<Raven, "manifest" | "docsSpec" | "docsTitles" | "policy">,
 	scout: Entry[],
 	problems: string[],
 ): Entry[] {
+	// stellarOrg (the stellar.org site source) joined the catalog after fec1c79.
+	// Like lumenloop and skills, its entries are taken as committed.
 	const kept = raven.manifest.entries.filter(
-		(e) => e.service === "lumenloop" || e.service === "skills",
+		(e) =>
+			e.service === "lumenloop" ||
+			e.service === "skills" ||
+			e.service === "stellarOrg",
 	);
+	// build-catalog.mjs passes stellarDocsTitleExtras the lumenloop, scout,
+	// docs and skill entries. stellarOrg is not among them, and counting it
+	// as one more service changes which title words the docs entries keep.
 	const docs = buildDocsEntries(raven.docsSpec, raven.docsTitles, [
-		...kept,
+		...kept.filter((e) => e.service !== "stellarOrg"),
 		...scout,
 	]);
 	const entries = [...kept, ...scout, ...docs].sort((a, b) =>
@@ -2047,34 +2354,77 @@ function assembleCatalog(
 			problems.push(
 				`retrieval profile key "${id}" matched no exposed operation`,
 			);
+	const byId = new Map(entries.map((e) => [e.id, e]));
+	const profileOf = (e: Entry) =>
+		e.service === "scout" || e.service === "stellarDocs"
+			? raven.policy.profiles.get(e.id)
+			: e.retrievalProfile;
 	const out = entries.map((e) => {
-		const profile =
-			e.service === "scout" || e.service === "stellarDocs"
-				? raven.policy.profiles.get(e.id)
-				: e.retrievalProfile;
-		for (const edge of profile?.recoverWith ?? [])
-			if (!ops.has(edge.id))
+		const profile = profileOf(e);
+		for (const edge of profile?.recoverWith ?? []) {
+			if (!ops.has(edge.id)) {
 				problems.push(
 					`retrieval profile "${e.id}" references non-exposed operation "${edge.id}"`,
 				);
-		return profile && !e.retrievalProfile
-			? { ...e, retrievalProfile: profile }
-			: e;
+				continue;
+			}
+			// build-catalog.mjs attachRetrievalProfiles (c41c0f9): a detail edge
+			// must lead to a detail-lane operation whose required inputs the
+			// source's rows carry, or Raven's build throws.
+			if (edge.relation === "detail") {
+				const target = byId.get(edge.id);
+				if (
+					target &&
+					detailJoinKeys(e, {
+						...target,
+						retrievalProfile: profileOf(target),
+					}) === null
+				)
+					problems.push(
+						`retrieval profile "${e.id}" detail edge to "${edge.id}" needs a detail-lane target whose required inputs the source's rows carry`,
+					);
+			}
+		}
+		const withProfile =
+			profile && !e.retrievalProfile ? { ...e, retrievalProfile: profile } : e;
+		// attachCardCaveats: the rebuilt Scout and Docs entries take the line
+		// Raven's policy holds for them; kept entries already carry theirs.
+		const caveat =
+			e.service === "scout" || e.service === "stellarDocs"
+				? raven.policy.caveats.get(e.id)
+				: undefined;
+		return caveat !== undefined && withProfile.cardCaveat === undefined
+			? { ...withProfile, cardCaveat: caveat }
+			: withProfile;
 	});
+	for (const [id, caveat] of raven.policy.caveats) {
+		if (!ops.has(id))
+			problems.push(`card caveat key "${id}" matched no exposed operation`);
+		if (
+			!/^\S[^\r\n\u2028\u2029]*\.$/u.test(caveat) ||
+			caveat.length > CARD_CAVEAT_MAX_CHARS
+		)
+			problems.push(
+				`card caveat "${id}" must be one line of at most ${CARD_CAVEAT_MAX_CHARS} characters that ends with a period`,
+			);
+	}
 	// assertNoNonExposedRefs: callable tokens must name an exposed op.
 	for (const e of out) {
 		const text = [
 			e.description,
+			e.cardCaveat ?? "",
 			...(e.keywords ?? []),
 			...(e.routingKeywords ?? []),
 			...(e.routingPhrases ?? []).flatMap((x) => x.tokens),
 			...(e.routingExclusions ?? []).flatMap((x) => x.tokens),
+			...(e.knownAliases ?? []),
+			...(e.knownAliasTriggers ?? []),
 			...(e.kind === "operation"
 				? [JSON.stringify(e.inputSchema), JSON.stringify(e.outputSchema)]
 				: []),
 		].join("\n");
 		for (const token of text.match(
-			/(?<![.\w])(?:lumenloop|scout|stellarDocs)\.[A-Za-z_]\w*/g,
+			/(?<![.\w])(?:lumenloop|scout|stellarDocs|stellarOrg)\.[A-Za-z_]\w*/g,
 		) ?? []) {
 			if (
 				["com", "org", "net", "io", "xyz", "dev", "app", "buzz"].includes(
@@ -2091,6 +2441,39 @@ function assembleCatalog(
 			const leak = leakIn(text, raven.policy);
 			if (leak) problems.push(`ADR-0003 leak: ${e.id} emits ${leak}`);
 		}
+	}
+	// What Raven's manifest load rejects before any lane runs (search.ts
+	// refinedCatalogSchema, types.ts): a repeated id (build-catalog.mjs throws
+	// on it too), an operation whose last id segment is not a legal JavaScript
+	// identifier or is taken twice in its service (the sandbox function name),
+	// and a schema that is neither an object nor null.
+	const seenIds = new Set<string>();
+	const sandboxNames = new Map<string, Map<string, string>>();
+	for (const e of out) {
+		if (seenIds.has(e.id)) problems.push(`duplicate catalog id: ${e.id}`);
+		seenIds.add(e.id);
+		for (const field of ["inputSchema", "outputSchema"] as const) {
+			const schema = e[field] ?? null;
+			if (
+				schema !== null &&
+				(typeof schema !== "object" || Array.isArray(schema))
+			)
+				problems.push(`${e.id} ${field} is neither an object nor null`);
+		}
+		if (e.kind !== "operation") continue;
+		const name = lastIdSegment(e.id);
+		if (!VALID_IDENT.test(name))
+			problems.push(
+				`operation ${e.id} has terminal name "${name}" which is not a legal JS identifier (sandbox fn name)`,
+			);
+		const names = sandboxNames.get(e.service) ?? new Map<string, string>();
+		sandboxNames.set(e.service, names);
+		const prior = names.get(name);
+		if (prior === undefined) names.set(name, e.id);
+		else
+			problems.push(
+				`operation name collision in service "${e.service}": ${prior} and ${e.id} both map to sandbox fn "${name}"`,
+			);
 	}
 	return out;
 }
@@ -2148,7 +2531,68 @@ function cardMatches(
 	const op = hitOp(hit);
 	if (e.op === op) return true;
 	const [shorter, longer] = e.op.length <= op.length ? [e.op, op] : [op, e.op];
-	return shorter.length >= 4 && longer.includes(shorter);
+	if (shorter.length >= 4 && longer.includes(shorter)) return true;
+	// Rule 4 (Raven eval/lib/grade.mjs, 2026-11-19): a same-service
+	// `<noun>_detail` card binds to a `get_<noun>` or `get<noun>` operation
+	// (`scout_hackathon_detail` -> `scout.getHackathon`).
+	if (e.op.endsWith("_detail")) {
+		const noun = e.op.slice(0, -"_detail".length);
+		if (/^[a-z0-9]+(?:_[a-z0-9]+)*$/.test(noun))
+			return op === `get_${noun}` || op === `get${noun.replace(/_/g, "")}`;
+	}
+	return false;
+}
+
+// Raven eval/lib/grade.mjs classifyCardBinding (c41c0f9). Raven's test suite
+// (test/routing-card-binding.test.mjs) fails when a routing or skills card no
+// longer binds to anything searchable, so a spec that renames or drops the
+// operation behind a card is not absorbed even with every ranking gate green.
+const EXTERNAL_CARD_PREFIXES = ["perplexity_", "parallel_"];
+function cardBinding(
+	card: string,
+	searchable: Array<{ id: string; service: string }>,
+): "external" | "service" | "operation" | null {
+	const c = canonToken(card);
+	if (EXTERNAL_CARD_PREFIXES.some((prefix) => c.startsWith(prefix)))
+		return "external";
+	const { service, op } = splitCard(card);
+	if (!service) return null;
+	if (op === "mcp") {
+		const svc = canonToken(service);
+		return searchable.some((e) => canonToken(e.service) === svc)
+			? "service"
+			: null;
+	}
+	return searchable.some((e) => cardMatches(card, e)) ? "operation" : null;
+}
+/** findUnboundRoutingCards, as messages. */
+function unboundCards(
+	lane: string,
+	cases: Array<{ id: string; expected_cards?: string[] }>,
+	searchable: Array<{ id: string; service: string }>,
+): string[] {
+	const out: string[] = [];
+	for (const c of cases) {
+		const cards = c.expected_cards ?? [];
+		if (!cards.length) {
+			out.push(
+				`${lane} case ${c.id} has no expected cards; Raven's card-binding test fails`,
+			);
+			continue;
+		}
+		const bindings = cards.map((card) => cardBinding(card, searchable));
+		cards.forEach((card, i) => {
+			if (bindings[i] === null)
+				out.push(
+					`${lane} card "${card}" binds to no searchable entry (case ${c.id}); Raven's card-binding test fails`,
+				);
+		});
+		if (!bindings.some((b) => b === "service" || b === "operation"))
+			out.push(
+				`${lane} case ${c.id} has no card bound to this catalog; Raven's card-binding test fails`,
+			);
+	}
+	return out;
 }
 
 interface Case {
@@ -2296,6 +2740,20 @@ function loadRaven(dir: string): Raven {
 	};
 }
 
+/** run-routing.mjs: the protocol-history lane throws unless its target is
+ *  exactly one searchable operation. */
+export function protocolTargetProblem(
+	entries: Array<Pick<Entry, "id" | "kind" | "searchable">>,
+	target: string,
+): string | null {
+	const found = entries.filter(
+		(e) => e.id === target && e.searchable !== false,
+	);
+	return found.length === 1 && found[0]?.kind === "operation"
+		? null
+		: `protocol-history target "${target}" resolves to ${found.length} searchable operation entries`;
+}
+
 function runLanes(
 	raven: Raven,
 	entries: Entry[],
@@ -2306,7 +2764,28 @@ function runLanes(
 	const searchable = entries.filter(
 		(e) => e.searchable !== false && e.kind !== "skill-section",
 	);
+	if (raven.lanes.some((l) => l.lane === "protocol")) {
+		const problem = protocolTargetProblem(entries, raven.protocolTarget);
+		if (problem) problems.push(problem);
+	}
+	// test/routing-card-binding.test.mjs: these two detail cards bind their
+	// getter and nothing else.
+	for (const [card, id] of [
+		["scout_hackathon_detail", "scout.getHackathon"],
+		["scout_skill_detail", "scout.getSkill"],
+	] as const) {
+		const bound = searchable
+			.filter((e) => cardMatches(card, e))
+			.map((e) => e.id);
+		if (bound.length !== 1 || bound[0] !== id)
+			problems.push(
+				`routing card "${card}" binds [${bound.join(", ")}]; Raven's test requires exactly [${id}]`,
+			);
+	}
 	for (const { lane, cases } of raven.lanes) {
+		// The same test runs Raven's unbound-card check on these three lanes.
+		if (lane === "legacy" || lane === "extended" || lane === "skills")
+			problems.push(...unboundCards(lane, cases, searchable));
 		for (const c of cases) {
 			if (lane === "holdout")
 				for (const card of [
@@ -2605,6 +3084,17 @@ export function changedPortedSources(
 		if (createHash("sha256").update(bytes).digest("hex") !== sha)
 			changed.push(path);
 	}
+	if (pins !== PORTED_FROM_RAVEN) return changed;
+	for (const [path, sha] of Object.entries(PORTED_CODE_IN_POLICY)) {
+		let code: string;
+		try {
+			code = scoutExposure(readFileSync(join(dir, path), "utf8")).code;
+		} catch {
+			changed.push(`${path} (code unreadable)`);
+			continue;
+		}
+		if (code !== sha) changed.push(`${path} (code)`);
+	}
 	return changed;
 }
 
@@ -2669,6 +3159,35 @@ async function main() {
 				!rebuilt.some((r) => r.id === e.id),
 		)
 		.map((e) => e.id);
+	// RAVEN_GATE_EXPLAIN=1 names the fields in which a rebuilt entry differs
+	// from the committed one, so a failed self-check says what to re-port.
+	if (process.env.RAVEN_GATE_EXPLAIN) {
+		const byId = new Map(raven.manifest.entries.map((e) => [e.id, e]));
+		for (const e of rebuilt.filter((r) => mismatched.includes(r.id))) {
+			const c = byId.get(e.id) as unknown as
+				| Record<string, unknown>
+				| undefined;
+			const r = e as unknown as Record<string, unknown>;
+			for (const k of new Set([...Object.keys(r), ...Object.keys(c ?? {})])) {
+				const canon = (v: unknown): unknown =>
+					Array.isArray(v)
+						? v.map(canon)
+						: v && typeof v === "object"
+							? Object.fromEntries(
+									Object.entries(v as Record<string, unknown>)
+										.sort(([x], [y]) => (x < y ? -1 : 1))
+										.map(([x, y]) => [x, canon(y)]),
+								)
+							: v;
+				const a = JSON.stringify(canon(r[k]));
+				const b = JSON.stringify(canon(c?.[k]));
+				if (a !== b)
+					console.log(
+						`  explain ${e.id}.${k}\n    rebuilt   ${String(a).slice(0, 420)}\n    committed ${String(b).slice(0, 420)}`,
+					);
+			}
+		}
+	}
 	console.log(`Raven checkout ${raven.dir}`);
 	console.log(`  ${portedSourcesLine(changedSources)}`);
 	console.log(
