@@ -7,7 +7,13 @@
  * status of 200 are not, on their own, a product.
  */
 import { describe, expect, it } from "vitest";
-import { judgeStamp } from "../../../scripts/check-packet-stamps";
+import {
+	domainState,
+	errorText,
+	isDnsFailure,
+	judgeStamp,
+	lookupHost,
+} from "../../../scripts/check-packet-stamps";
 
 const base = {
 	slug: "example",
@@ -463,5 +469,98 @@ describe("a client-rendered page still serves a head", () => {
 		const v = judgeStamp({ ...base, to: "Live", html: shell("") });
 		expect(v.verdict).toBe("COULD-NOT-CHECK");
 		expect(v.reason).toMatch(/no head to read/);
+	});
+});
+
+describe("a domain that no longer exists", () => {
+	// 2026-11-22: walletban.xyz and rampmedaddy.com were NXDOMAIN on two public
+	// resolvers, yet the weekly sweep filed them as "fetch failed". Node's
+	// fetch puts the code on error.cause, so the DNS branch never saw it.
+	it("keeps the cause code Node hides behind 'fetch failed'", () => {
+		const e = Object.assign(new TypeError("fetch failed"), {
+			cause: Object.assign(new Error("getaddrinfo ENOTFOUND walletban.xyz"), {
+				code: "ENOTFOUND",
+			}),
+		});
+		expect(errorText(e)).toContain("ENOTFOUND");
+		expect(isDnsFailure(errorText(e))).toBe(true);
+		expect(isDnsFailure(errorText(new TypeError("fetch failed")))).toBe(false);
+	});
+
+	const nx = async () => ({ ok: true, json: async () => ({ Status: 3 }) });
+	const found = async () => ({
+		ok: true,
+		json: async () => ({ Status: 0, Answer: [{ type: 1, data: "1.2.3.4" }] }),
+	});
+	const down = async () => {
+		throw new Error("resolver unreachable");
+	};
+
+	it("is gone only when both public resolvers answer NXDOMAIN", async () => {
+		expect(await domainState("walletban.xyz", [nx, nx])).toBe("gone");
+		expect(await domainState("example.com", [nx, found])).toBe("exists");
+		// One resolver down is not a second witness.
+		expect(await domainState("example.com", [nx, down])).toBe("unknown");
+		// SERVFAIL (Status 2) is the resolver failing, not the name ending.
+		const servfail = async () => ({
+			ok: true,
+			json: async () => ({ Status: 2 }),
+		});
+		expect(await domainState("example.com", [servfail, servfail])).toBe(
+			"unknown",
+		);
+	});
+
+	// Review 2026-11-22: asked as a NAME, an IP address or a one-label string
+	// is NXDOMAIN on every resolver, so a live site stored as an address, or a
+	// website field holding "N/A", would have been reported gone.
+	it("only asks DNS about a public name", () => {
+		expect(lookupHost("http://203.0.113.5:8080")).toBeNull();
+		expect(lookupHost("https://[2001:db8::1]/")).toBeNull();
+		expect(lookupHost("N/A")).toBeNull();
+		expect(lookupHost("")).toBeNull();
+		// Re-check 2026-11-22: junk can carry a dot too.
+		expect(lookupHost("N.A.")).toBeNull();
+		expect(lookupHost("n.a")).toBeNull();
+		expect(lookupHost("TBA.")).toBeNull();
+		expect(lookupHost("https://Example.COM./x")).toBe("example.com");
+		expect(lookupHost("example.com/path")).toBe("example.com");
+		expect(lookupHost("https://app.foo.xyz:8443/x")).toBe("app.foo.xyz");
+	});
+
+	it("says the name resolves publicly when only this runner failed to look it up", () => {
+		const v = judgeStamp({
+			...base,
+			httpStatus: null,
+			error: "fetch failed: EAI_AGAIN",
+			domain: "exists",
+		});
+		expect(v.verdict).toBe("COULD-NOT-CHECK");
+		expect(v.reason).not.toContain("does not resolve");
+		// A host that was never asked must not claim the resolvers were consulted.
+		const notAsked = judgeStamp({
+			...base,
+			httpStatus: null,
+			error: "fetch failed: ENOTFOUND",
+		});
+		expect(notAsked.reason).not.toContain("public resolvers");
+	});
+
+	it("contradicts a Live stamp, holds an Inactive one, and never judges an unconfirmed failure", () => {
+		const dead = {
+			...base,
+			httpStatus: null,
+			error: "fetch failed: ENOTFOUND",
+		};
+		expect(judgeStamp({ ...dead, domain: "gone" }).verdict).toBe(
+			"CONTRADICTED",
+		);
+		expect(
+			judgeStamp({ ...dead, to: "Inactive", domain: "gone" }).verdict,
+		).toBe("HOLDS");
+		expect(judgeStamp({ ...dead, domain: "unknown" }).verdict).toBe(
+			"COULD-NOT-CHECK",
+		);
+		expect(judgeStamp(dead).verdict).toBe("COULD-NOT-CHECK");
 	});
 });

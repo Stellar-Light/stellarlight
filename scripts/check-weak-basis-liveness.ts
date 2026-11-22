@@ -11,14 +11,20 @@
  * its own URL through the same `judgeStamp` the packet guard uses, and reports
  * the trinary: holds / contradicted / could-not-check.
  *
- * Contradictions are a queue for a human, never an auto-flip. Exit 1 when any
+ * Every OTHER Live row with a website gets one cheap question: does its own
+ * domain still exist? A name that two public resolvers both answer NXDOMAIN
+ * for is reported as contradicted; anything less certain is not reported.
+ *
+ * Contradictions are a queue for a human, never an auto-flip. Blind wins over
+ * contradicted: both fail the job and the rows are in the artifact either way,
+ * but a run that could not read its pool must say so first. Exit 1 when any
  * row is contradicted (the workflow declares that step as its signal), exit 2
  * when the API did not answer or more than half the run was blind — a sweep
  * that could not look must never read as a sweep that found nothing.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { probe } from "./check-packet-stamps";
+import { domainState, lookupHost, probe } from "./check-packet-stamps";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -41,6 +47,8 @@ const LIMIT = Number(
 const WEAK = new Set(["site-liveness", "source-inherited", "unverified"]);
 const DORMANT_DAYS = 365;
 const CONCURRENCY = 4;
+const DNS_CONCURRENCY = 8;
+const GONE = "host does not exist (NXDOMAIN from two public resolvers)";
 
 type Project = {
 	slug: string;
@@ -123,17 +131,63 @@ async function main() {
 		);
 	}
 
+	// Domain sweep. The pool above is narrow by design (a full page read is
+	// slow and can be refused), and on 2026-11-22 it held 2 of the 10 Live rows
+	// whose domain no longer existed: the other 8 were on another basis or had
+	// no linked repo. Whether a name still exists is cheap and cannot be refused,
+	// so every other Live row gets that one question. A website that is not a
+	// public name (an IP address, junk text) is never asked and counts as
+	// unknown. A dead subdomain under a living domain is reported too: the fix
+	// is then the link, not the status.
+	const probed = new Set(batch.map((p) => p.slug));
+	const rest = projects.filter((p) => p.links?.website && !probed.has(p.slug));
+	const gone: typeof rows = [];
+	let domainUnknown = 0;
+	for (let i = 0; i < rest.length; i += DNS_CONCURRENCY) {
+		const states = await Promise.all(
+			rest.slice(i, i + DNS_CONCURRENCY).map(async (p) => {
+				// biome-ignore lint/style/noNonNullAssertion: filtered above
+				const host = lookupHost(p.links!.website!);
+				return [p, host ? await domainState(host) : "unknown"] as const;
+			}),
+		);
+		for (const [p, state] of states) {
+			if (state === "unknown") domainUnknown++;
+			if (state === "gone")
+				gone.push({
+					slug: p.slug,
+					to: "Live",
+					// biome-ignore lint/style/noNonNullAssertion: filtered above
+					sourceUrl: p.links!.website!,
+					httpStatus: null,
+					verdict: "CONTRADICTED",
+					reason: GONE,
+					checkedAt: new Date().toISOString(),
+				});
+		}
+	}
+
+	// Blindness is judged on the probed pool only: the domain sweep can add a
+	// contradiction but can never make a run that could not read pages look
+	// like one that could.
 	const tally = {
 		poolSize: pool.length,
 		checked: rows.length,
 		holds: rows.filter((r) => r.verdict === "HOLDS").length,
-		contradicted: rows.filter((r) => r.verdict === "CONTRADICTED").length,
+		contradicted:
+			rows.filter((r) => r.verdict === "CONTRADICTED").length + gone.length,
 		couldNotCheck: rows.filter((r) => r.verdict === "COULD-NOT-CHECK").length,
+		domainSweep: {
+			checked: rest.length,
+			gone: gone.length,
+			unknown: domainUnknown,
+		},
 	};
+	rows.push(...gone);
 	const report = {
 		generatedAt: new Date().toISOString(),
 		source: "scripts/check-weak-basis-liveness.ts",
-		rule: "A Live row on a weak basis whose every repo is over a year silent is re-probed at the PRODUCT's own URL. Repo staleness is not death and is never judged here; a contradiction is a queue for a human, never an auto-flip.",
+		rule: "A Live row on a weak basis whose every repo is over a year silent is re-probed at the PRODUCT's own URL. Every other Live row is asked one thing only: does its own domain still exist (NXDOMAIN from two public resolvers is a contradiction). Repo staleness is not death and is never judged here; a contradiction is a queue for a human, never an auto-flip.",
 		tally,
 		rows,
 	};
@@ -147,16 +201,12 @@ async function main() {
 				`  ${r.verdict === "HOLDS" ? "✓" : r.verdict === "COULD-NOT-CHECK" ? "?" : "✗"} ${r.slug.padEnd(30)}${String(r.httpStatus ?? "-").padEnd(5)}${r.verdict.padEnd(17)}${r.reason}`,
 			);
 
+	// The label follows the exit code: blind first, then contradicted.
+	const blind = tally.checked === 0 || tally.couldNotCheck * 2 > tally.checked;
 	console.log(
-		`\n${tally.contradicted ? "RED" : tally.couldNotCheck * 2 > tally.checked ? "BLIND" : "GREEN"}: ${tally.holds} holds · ${tally.contradicted} contradicted · ${tally.couldNotCheck} could-not-check (of ${tally.checked} probed, pool ${tally.poolSize})`,
+		`\n${blind ? "BLIND" : tally.contradicted ? "RED" : "GREEN"}: ${tally.holds} holds · ${tally.contradicted} contradicted · ${tally.couldNotCheck} could-not-check (of ${tally.checked} probed, pool ${tally.poolSize}) · domain sweep ${tally.domainSweep.checked} more rows, ${tally.domainSweep.gone} gone, ${tally.domainSweep.unknown} unknown`,
 	);
-	process.exit(
-		tally.checked === 0 || tally.couldNotCheck * 2 > tally.checked
-			? 2
-			: tally.contradicted
-				? 1
-				: 0,
-	);
+	process.exit(blind ? 2 : tally.contradicted ? 1 : 0);
 }
 
 main().catch((e) => {

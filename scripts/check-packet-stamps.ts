@@ -32,9 +32,12 @@
  * A guard that cries wolf on a third of its rows is a guard nobody reads.
  *
  * Trinary, like the other guards: HOLDS / CONTRADICTED (or REVIVED) /
- * COULD-NOT-CHECK. A 403, a 429, a timeout or a DNS failure is never a
- * contradiction — a page we could not read says nothing about the product,
- * and reading it as red would train people to ignore red. Blind on more than
+ * COULD-NOT-CHECK. A 403, a 429, a timeout or a lookup that failed on this
+ * runner is never a contradiction: a page we could not read says nothing
+ * about the product, and reading it as red would train people to ignore red.
+ * The one exception is a host that two public resolvers both answer NXDOMAIN
+ * for (domainState): that name does not exist, which is a reading, not a
+ * failure to read. Blind on more than
  * half the rows exits 2, so a run that could not look is never green.
  *
  *   pnpm exec tsx scripts/check-packet-stamps.ts           # human table
@@ -44,6 +47,7 @@
  */
 
 import { writeFileSync } from "node:fs";
+import { isIP } from "node:net";
 import { registrableDomain } from "../src/lib/partner-project-identity";
 import { STATUS_FIX } from "./data/curation-maps";
 
@@ -323,6 +327,95 @@ const squash = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, "");
  * tested without a network, which is the only way the dashed-stats rule and
  * the app-store exception ever get exercised on purpose.
  */
+/** Node's fetch throws "fetch failed" and keeps the reason on error.cause.
+ *  Reading only the message lost every ENOTFOUND, so the DNS branch below
+ *  never fired in production (walletban, rampmedaddy: "fetch failed"). */
+export function errorText(e: unknown): string {
+	const err = e as {
+		message?: string;
+		cause?: { code?: string; message?: string };
+	};
+	return [err?.message ?? String(e), err?.cause?.code, err?.cause?.message]
+		.filter(Boolean)
+		.join(": ")
+		.slice(0, 200);
+}
+
+export function isDnsFailure(error?: string | null): boolean {
+	return (
+		!!error &&
+		/ENOTFOUND|EAI_AGAIN|getaddrinfo|dns|name not resolved/i.test(error)
+	);
+}
+
+/** The host to ask DNS about, or null when the stored website is not a public
+ *  name. Asked as a name, an IP address or a one-label string ("N/A" parses to
+ *  the host "n") is NXDOMAIN everywhere, which would report a live site gone. */
+export function lookupHost(url: string): string | null {
+	try {
+		const h = new URL(
+			/^https?:\/\//i.test(url) ? url : `https://${url}`,
+		).hostname
+			.replace(/^\[|\]$/g, "")
+			.replace(/\.$/, "");
+		// A public name has at least two labels and a real top-level domain:
+		// "n.a" and "N.A." are junk with a dot in it.
+		return isIP(h) || !/^(?:[^.]+\.)+(?:[a-z]{2,}|xn--[a-z0-9-]+)$/.test(h)
+			? null
+			: h;
+	} catch {
+		return null;
+	}
+}
+
+export type DomainState = "gone" | "exists" | "unknown";
+type Resolver = (
+	host: string,
+) => Promise<{ ok: boolean; json: () => Promise<unknown> }>;
+const DOH_TIMEOUT_MS = 10_000;
+/** Two independent public resolvers over HTTPS. A lookup that fails on the
+ *  runner (EAI_AGAIN, a resolver blip) proves nothing; the same NXDOMAIN from
+ *  both of these does. */
+export const PUBLIC_RESOLVERS: Resolver[] = [
+	(host) =>
+		fetch(
+			`https://dns.google/resolve?name=${encodeURIComponent(host)}&type=A`,
+			{ signal: AbortSignal.timeout(DOH_TIMEOUT_MS) },
+		),
+	(host) =>
+		fetch(
+			`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(host)}&type=A`,
+			{
+				headers: { accept: "application/dns-json" },
+				signal: AbortSignal.timeout(DOH_TIMEOUT_MS),
+			},
+		),
+];
+
+/** "gone" only when EVERY resolver answers NXDOMAIN (DNS status 3) and there
+ *  are at least two of them. NOERROR from any one means the name exists, even
+ *  with no address record. SERVFAIL, a timeout or one resolver down is
+ *  "unknown": a failed look, never an absence. */
+export async function domainState(
+	host: string,
+	resolvers: Resolver[] = PUBLIC_RESOLVERS,
+): Promise<DomainState> {
+	const answers = await Promise.all(
+		resolvers.map(async (ask) => {
+			try {
+				const res = await ask(host);
+				return res.ok ? ((await res.json()) as { Status?: number }) : null;
+			} catch {
+				return null;
+			}
+		}),
+	);
+	if (answers.some((a) => a?.Status === 0)) return "exists";
+	if (answers.length >= 2 && answers.every((a) => a?.Status === 3))
+		return "gone";
+	return "unknown";
+}
+
 export function judgeStamp(p: {
 	slug: string;
 	to: string;
@@ -341,6 +434,9 @@ export function judgeStamp(p: {
 	 *  ("healthy" HOLDS). A GET on an RPC host answers 401/405 and says nothing
 	 *  about the service — ankr and lightsail on the first re-tuned run. */
 	rpcHealth?: string | null;
+	/** Set by probe() after a DNS failure: what two public resolvers say about
+	 *  the host. Only "gone" (both NXDOMAIN) is a verdict. */
+	domain?: DomainState;
 }): { verdict: StampVerdict; reason: string } {
 	if (p.rpcHealth !== undefined && p.rpcHealth !== null) {
 		return p.rpcHealth === "healthy"
@@ -354,18 +450,29 @@ export function judgeStamp(p: {
 	// host refusing us, not the product dying, and a dead-looking silence is
 	// not evidence a retired site is still retired either.
 	if (p.error || p.httpStatus === null) {
-		// A domain that no longer resolves is a real death signal; a TLS or
-		// timeout failure is no verdict at all. Both arrive here as an
-		// exception, so the reason has to say which — the sweep that could not
+		// A name that two public resolvers both say does not exist is a fact
+		// about the product's own URL, not a failed look. It contradicts a Live
+		// stamp and holds an Inactive one. The row is still a queue for a human:
+		// a project can move hosts (the fix is then the link, not the status).
+		if (p.domain === "gone")
+			return {
+				verdict: p.to === "Inactive" ? "HOLDS" : "CONTRADICTED",
+				reason: "host does not exist (NXDOMAIN from two public resolvers)",
+			};
+		// A lookup that failed only from this runner is no verdict at all, and
+		// neither is a TLS or timeout failure. Both arrive here as an
+		// exception, so the reason has to say which: the sweep that could not
 		// tell them apart reported both as "unreachable".
-		const dns =
-			p.error &&
-			/ENOTFOUND|EAI_AGAIN|getaddrinfo|dns|name not resolved/i.test(p.error);
+		const dns = isDnsFailure(p.error);
 		return {
 			verdict: "COULD-NOT-CHECK",
-			reason: dns
-				? `${p.error} — domain does not resolve (a death signal for a human to confirm, never an auto-flip)`
-				: (p.error ?? "no response"),
+			reason: !dns
+				? (p.error ?? "no response")
+				: p.domain === "exists"
+					? `${p.error}: the name exists publicly; the lookup failed on this runner only`
+					: p.domain === "unknown"
+						? `${p.error}: domain does not resolve from this runner, and two public resolvers did not confirm it gone (a death signal for a human to confirm, never an auto-flip)`
+						: `${p.error}: domain does not resolve (a death signal for a human to confirm, never an auto-flip)`,
 		};
 	}
 	if (
@@ -592,7 +699,13 @@ export async function probe(s: {
 		finalUrl = res.url;
 		html = await res.text();
 	} catch (e) {
-		error = String((e as Error).message ?? e).slice(0, 140);
+		error = errorText(e);
+	}
+	let domain: DomainState | undefined;
+	if (isDnsFailure(error)) {
+		const host = lookupHost(s.sourceUrl);
+		// Not a public name: nothing to ask, and the reason must not say we did.
+		domain = host ? await domainState(host) : undefined;
 	}
 	const storeReleasedAt = /apps\.apple\.com/i.test(s.sourceUrl)
 		? await appleReleaseDate(s.sourceUrl)
@@ -615,6 +728,7 @@ export async function probe(s: {
 		finalUrl,
 		storeReleasedAt,
 		rpcHealth: health,
+		domain,
 	});
 	return {
 		slug: s.slug,
