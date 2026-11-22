@@ -305,13 +305,16 @@ export const Projects: CollectionConfig = {
 			],
 		},
 		{
-			// On-chain metrics (2026-07-20): populated by
-			// scripts/data/enrich-onchain-projects.ts from stellar.expert, join
-			// keys hand-verified in src/data/onchain-contracts.ts. Semantics:
-			// absence/null = not tracked here, NEVER "no activity". events and
-			// subinvocations are lifetime counts (stellar.expert's direct
-			// invocation counter is currently broken service-wide, so these are
-			// the honest activity signals available).
+			// On-chain readings: populated by
+			// scripts/data/enrich-onchain-projects.ts from Stellar Index, Horizon
+			// and the Soroban RPC (src/lib/onchain-sources.ts), join keys
+			// hand-verified in src/data/onchain-contracts.ts. Semantics:
+			// absence/null = not tracked or not readable, NEVER "no activity".
+			// A contract's last event proves use on that date; a contract with no
+			// recent event may still be called (13 of 68 tracked contracts were
+			// used by sub-calls alone in one week, 2026-11). The explorer this
+			// block read until 2026-11-03 went paid: its payment, trade, event
+			// total, sub-call and storage counts have no free source and are gone.
 			name: "onchain",
 			type: "group",
 			fields: [
@@ -320,12 +323,18 @@ export const Projects: CollectionConfig = {
 				{
 					name: "assetHolders",
 					type: "number",
-					admin: { description: "Trustline holders of the issued asset" },
+					admin: {
+						description:
+							"Accounts holding a balance of the issued asset now. Contracts that hold it (smart wallets, pools) are not counted",
+					},
 				},
 				{
 					name: "assetSupply",
 					type: "number",
-					admin: { description: "Circulating supply in whole asset units" },
+					admin: {
+						description:
+							"Units outside the issuer, in whole asset units: every trustline, claimable balance, liquidity pool and contract balance",
+					},
 				},
 				{
 					name: "contracts",
@@ -334,41 +343,43 @@ export const Projects: CollectionConfig = {
 						{ name: "address", type: "text" },
 						{ name: "label", type: "text" },
 						{
-							name: "events",
-							type: "number",
-							admin: { description: "Lifetime contract events emitted" },
+							name: "lastEventAt",
+							type: "date",
+							admin: {
+								description:
+									"The newest event the contract emitted. Proof of use on that date. Null = it never emitted one, which is NOT proof it is unused: a contract can be called without emitting an event",
+							},
 						},
 						{
-							name: "eventsDelta",
+							name: "activeLedgers",
 							type: "number",
 							admin: {
 								description:
-									"Events since the previous snapshot (over deltaDays). null until a second snapshot exists. NOT zero activity",
+									"Lifetime count of ledgers in which the contract emitted an event",
 							},
 						},
 						{
-							name: "subinvocationsDelta",
-							type: "number",
-							admin: {
-								description: "Subinvocations since the previous snapshot",
-							},
-						},
-						{
-							name: "subinvocations",
-							type: "number",
+							name: "ttlState",
+							type: "text",
 							admin: {
 								description:
-									"Lifetime times called as a subcall: low for contracts users hit directly; read WITH events",
+									"live, or archived when the contract's entry has outlived its TTL and must be restored before it can run",
 							},
 						},
-						{ name: "storageEntries", type: "number" },
-						{ name: "createdAt", type: "date" },
+						{
+							name: "createdAt",
+							type: "date",
+							admin: {
+								description:
+									"When the contract was created. Kept from the reading that first recorded it; null for a contract joined after 2026-11-03",
+							},
+						},
 						{
 							name: "verifiedRepo",
 							type: "text",
 							admin: {
 								description:
-									"GitHub repo from stellar.expert's wasm validation, when the team ran it",
+									"GitHub repo the contract's code comes from: the deployed WASM is attested to it (its build metadata names the repo, SEP-55, and GitHub lists a build attestation for that WASM there), or, for a WASM built without such metadata, a hand-verified seed names it (src/data/onchain-contracts.ts)",
 							},
 						},
 					],
@@ -376,44 +387,26 @@ export const Projects: CollectionConfig = {
 				{
 					name: "assetHoldersDelta",
 					type: "number",
-					admin: { description: "Holder change since the previous snapshot" },
+					admin: {
+						description:
+							"Holder change since the previous snapshot of the same source; null across a change of source",
+					},
 				},
 				{
 					name: "assetTrustlines",
 					type: "number",
 					admin: {
 						description:
-							"Accounts that have EVER opened a trustline to the asset (reach). Paired with assetHolders, which counts accounts holding a balance today (active); reach is always >= active, so never read this one as the active-address count",
+							"Open trustlines to the asset in every authorization state (reach): accounts that can hold it, whether or not they hold any now. Always >= assetHolders, so never read it as the holder count",
 					},
 				},
 				{
-					name: "assetPayments",
-					type: "number",
+					name: "assetLastMovedAt",
+					type: "date",
 					admin: {
 						description:
-							"Lifetime count of payment operations in this asset: the transaction-volume metric. A count, not an amount",
+							"The newest transfer, mint, burn or clawback of the asset, classic payments included. Null = none among its newest 100 events, or no event on record",
 					},
-				},
-				{
-					name: "assetPaymentsAmount",
-					type: "number",
-					admin: {
-						description:
-							"Lifetime payment volume in whole asset units (NOT USD; a unit count in the asset's own denomination, so it is not comparable across assets without a price)",
-					},
-				},
-				{
-					name: "assetPaymentsDelta",
-					type: "number",
-					admin: {
-						description:
-							"Payment-count change since the previous snapshot: the 'is it still being used' signal a lifetime total can't give",
-					},
-				},
-				{
-					name: "assetTrades",
-					type: "number",
-					admin: { description: "Lifetime count of trades in this asset" },
 				},
 				{ name: "source", type: "text" },
 				{ name: "asOf", type: "date" },
@@ -422,16 +415,6 @@ export const Projects: CollectionConfig = {
 					type: "date",
 					admin: {
 						description: "Timestamp of the snapshot the deltas compare against",
-					},
-				},
-				{
-					// DQ1: written by enrich-onchain (quietSinceFor in
-					// src/lib/status-checks.ts), read by the status checks.
-					name: "quietSince",
-					type: "date",
-					admin: {
-						description:
-							"Start of the unbroken run of snapshots in which no tracked contract's events or subinvocations moved. Null = moved in the latest window, or not measured.",
 					},
 				},
 				{

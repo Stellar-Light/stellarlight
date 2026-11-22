@@ -207,7 +207,7 @@
 			"workflow": "enrich-onchain.yml",
 			"cadence": "cron 0 6 * * 2",
 			"executeInput": "execute",
-			"writeSet": "projects.onchain per contract (lifetime events, subinvocations, storage entries, created date, wasm-validation repo) from stellar.expert, and onchain.quietSince, the start of the run of snapshots with no contract movement (since 2026-10-23)",
+			"writeSet": "projects.onchain: per asset holders, supply, trustlines and newest movement; per contract newest event, ledgers with an event, TTL state and the repo its WASM is attested to (Stellar Index, Horizon, Soroban RPC since 2026-11; the explorer it read before went paid); repos.codeInUse, the per-repo rollup, cleared when no contract is attributed to the repo after a run that read everything",
 			"since": null
 		},
 		{

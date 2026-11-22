@@ -28,7 +28,12 @@ const verified = {
 		"Pool.borrow(a: Address) -> i128",
 		"Pool.repay(a: Address) -> i128",
 	],
-	codeInUse: { contracts: 2, events: 500, eventsDelta: 40, asOf: "2026-08-10" },
+	codeInUse: {
+		contracts: 2,
+		activeLedgers: 500,
+		lastEventAt: "2026-08-09T12:00:00.000Z",
+		asOf: "2026-08-10",
+	},
 	successorRepo: null,
 	codeScannedAt: "2026-08-14",
 };
@@ -130,8 +135,8 @@ describe("an id a repo only cites is not listed as its contract", () => {
 				row("someone/app", "cited", {
 					codeInUse: {
 						contracts: 1,
-						events: 5,
-						eventsDelta: 1,
+						activeLedgers: 5,
+						lastEventAt: "2026-10-30T00:00:00.000Z",
 						asOf: "2026-11-01",
 					},
 				}),

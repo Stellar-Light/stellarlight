@@ -27,9 +27,9 @@ export interface ContractRow {
 	 * is here for live usage alone. */
 	contractId: string | null;
 	/** Every mainnet address on-chain enrichment attributed to THIS repo
-	 *  (stellar.expert names the repo as the contract's source), carried on the
-	 *  project row. Empty when nothing was attributed — never a claim that the
-	 *  repo deploys nothing. */
+	 *  (the deployed WASM is attested to the repo), carried on the project
+	 *  row. Empty when nothing was attributed, never a claim that the repo
+	 *  deploys nothing. */
 	verifiedContracts: Array<{
 		address: string;
 		label: string | null;
@@ -47,8 +47,8 @@ export interface ContractRow {
 	interfacePreview: string[];
 	codeInUse: {
 		contracts: number;
-		events: number | null;
-		eventsDelta: number | null;
+		activeLedgers: number | null;
+		lastEventAt: string | null;
 		asOf: string;
 	} | null;
 	audits: {
@@ -263,8 +263,8 @@ async function buildRegistryRows(payload: Payload): Promise<ContractRow[]> {
 				ciu?.asOf && typeof ciu.contracts === "number"
 					? {
 							contracts: ciu.contracts,
-							events: ciu.events ?? null,
-							eventsDelta: ciu.eventsDelta ?? null,
+							activeLedgers: ciu.activeLedgers ?? null,
+							lastEventAt: ciu.lastEventAt ?? null,
 							asOf: String(ciu.asOf),
 						}
 					: null,

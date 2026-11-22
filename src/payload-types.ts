@@ -435,11 +435,11 @@ export interface Project {
 		assetCode?: string | null;
 		issuer?: string | null;
 		/**
-		 * Trustline holders of the issued asset
+		 * Accounts holding a balance of the issued asset now. Contracts that hold it (smart wallets, pools) are not counted
 		 */
 		assetHolders?: number | null;
 		/**
-		 * Circulating supply in whole asset units
+		 * Units outside the issuer, in whole asset units: every trustline, claimable balance, liquidity pool and contract balance
 		 */
 		assetSupply?: number | null;
 		contracts?:
@@ -447,64 +447,46 @@ export interface Project {
 					address?: string | null;
 					label?: string | null;
 					/**
-					 * Lifetime contract events emitted
+					 * The newest event the contract emitted. Proof of use on that date. Null = it never emitted one, which is NOT proof it is unused: a contract can be called without emitting an event
 					 */
-					events?: number | null;
+					lastEventAt?: string | null;
 					/**
-					 * Events since the previous snapshot (over deltaDays). null until a second snapshot exists — NOT zero activity
+					 * Lifetime count of ledgers in which the contract emitted an event
 					 */
-					eventsDelta?: number | null;
+					activeLedgers?: number | null;
 					/**
-					 * Subinvocations since the previous snapshot
+					 * live, or archived when the contract's entry has outlived its TTL and must be restored before it can run
 					 */
-					subinvocationsDelta?: number | null;
+					ttlState?: string | null;
 					/**
-					 * Lifetime times called as a subcall — low for contracts users hit directly; read WITH events
+					 * When the contract was created. Kept from the reading that first recorded it; null for a contract joined after 2026-11-03
 					 */
-					subinvocations?: number | null;
-					storageEntries?: number | null;
 					createdAt?: string | null;
 					/**
-					 * GitHub repo from stellar.expert's wasm validation, when the team ran it
+					 * GitHub repo the contract's code comes from: the deployed WASM is attested to it (its build metadata names the repo, SEP-55, and GitHub lists a build attestation for that WASM there), or, for a WASM built without such metadata, a hand-verified seed names it (src/data/onchain-contracts.ts)
 					 */
 					verifiedRepo?: string | null;
 					id?: string | null;
 			  }[]
 			| null;
 		/**
-		 * Holder change since the previous snapshot
+		 * Holder change since the previous snapshot of the same source; null across a change of source
 		 */
 		assetHoldersDelta?: number | null;
 		/**
-		 * Accounts that have EVER opened a trustline to the asset (reach). Paired with assetHolders, which counts accounts holding a balance today (active) — reach is always >= active, so never read this one as the active-address count
+		 * Open trustlines to the asset in every authorization state (reach): accounts that can hold it, whether or not they hold any now. Always >= assetHolders, so never read it as the holder count
 		 */
 		assetTrustlines?: number | null;
 		/**
-		 * Lifetime count of payment operations in this asset — the transaction-volume metric. A count, not an amount
+		 * The newest transfer, mint, burn or clawback of the asset, classic payments included. Null = none among its newest 100 events, or no event on record
 		 */
-		assetPayments?: number | null;
-		/**
-		 * Lifetime payment volume in whole asset units (NOT USD — a unit count in the asset's own denomination, so it is not comparable across assets without a price)
-		 */
-		assetPaymentsAmount?: number | null;
-		/**
-		 * Payment-count change since the previous snapshot — the 'is it still being used' signal a lifetime total can't give
-		 */
-		assetPaymentsDelta?: number | null;
-		/**
-		 * Lifetime count of trades in this asset
-		 */
-		assetTrades?: number | null;
+		assetLastMovedAt?: string | null;
 		source?: string | null;
 		asOf?: string | null;
 		/**
 		 * Timestamp of the snapshot the deltas compare against
 		 */
 		prevAsOf?: string | null;
-		/**
-		 * Start of the unbroken run of snapshots in which no tracked contract's events or subinvocations moved. Null = moved in the latest window, or not measured.
-		 */
-		quietSince?: string | null;
 		/**
 		 * Days between snapshots (delta window length)
 		 */
@@ -1225,10 +1207,8 @@ export interface Repo {
 	 */
 	codeInUse?: {
 		contracts?: number | null;
-		events?: number | null;
-		eventsDelta?: number | null;
-		subinvocations?: number | null;
-		subinvocationsDelta?: number | null;
+		activeLedgers?: number | null;
+		lastEventAt?: string | null;
 		asOf?: string | null;
 	};
 	/**
@@ -3682,25 +3662,19 @@ export interface ProjectsSelect<T extends boolean = true> {
 					| {
 							address?: T;
 							label?: T;
-							events?: T;
-							eventsDelta?: T;
-							subinvocationsDelta?: T;
-							subinvocations?: T;
-							storageEntries?: T;
+							lastEventAt?: T;
+							activeLedgers?: T;
+							ttlState?: T;
 							createdAt?: T;
 							verifiedRepo?: T;
 							id?: T;
 					  };
 				assetHoldersDelta?: T;
 				assetTrustlines?: T;
-				assetPayments?: T;
-				assetPaymentsAmount?: T;
-				assetPaymentsDelta?: T;
-				assetTrades?: T;
+				assetLastMovedAt?: T;
 				source?: T;
 				asOf?: T;
 				prevAsOf?: T;
-				quietSince?: T;
 				deltaDays?: T;
 		  };
 	coverage?:
@@ -3930,10 +3904,8 @@ export interface ReposSelect<T extends boolean = true> {
 		| T
 		| {
 				contracts?: T;
-				events?: T;
-				eventsDelta?: T;
-				subinvocations?: T;
-				subinvocationsDelta?: T;
+				activeLedgers?: T;
+				lastEventAt?: T;
 				asOf?: T;
 		  };
 	priorTier?: T;

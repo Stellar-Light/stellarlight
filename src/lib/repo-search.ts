@@ -114,10 +114,8 @@ interface RepoDoc {
 	}> | null;
 	codeInUse?: {
 		contracts?: number | null;
-		events?: number | null;
-		eventsDelta?: number | null;
-		subinvocations?: number | null;
-		subinvocationsDelta?: number | null;
+		activeLedgers?: number | null;
+		lastEventAt?: string | null;
 		asOf?: string | null;
 	} | null;
 }
@@ -193,9 +191,10 @@ export interface RepoResult {
 		 * note has not yet been stamped with its pin by the backfill. */
 		sourceCheck: SourceCheck | null;
 	}>;
-	/** Mainnet usage rollup for contracts attributed to this repo (weekly,
-	 * stellar.expert). Lifetime events/subinvocations + deltas since the prior
-	 * snapshot (null until one exists). null = no verified contract joined —
+	/** Mainnet usage rollup for the contracts attributed to this repo
+	 * (weekly, Stellar Index): the ledgers in which they emitted an event and
+	 * the newest event. A contract can be in use with no event, so an old
+	 * lastEventAt is not proof of disuse. null = no verified contract joined,
 	 * NOT a claim the code is unused. */
 	successorRepo: string | null;
 	/** The renamed path the query named, when the index holds no row for it
@@ -210,10 +209,8 @@ export interface RepoResult {
 	supersessionKind: "archived" | "renamed" | "deprecated" | "superseded" | null;
 	codeInUse: {
 		contracts: number;
-		events: number | null;
-		eventsDelta: number | null;
-		subinvocations: number | null;
-		subinvocationsDelta: number | null;
+		activeLedgers: number | null;
+		lastEventAt: string | null;
 		asOf: string;
 	} | null;
 	project: { slug: string; name: string | null } | null;
@@ -1812,10 +1809,10 @@ export async function searchRepos(
 						? 1
 						: 0;
 			// Verified mainnet usage (code-truth 5): the repo's attributed
-			// contract has real lifetime events per stellar.expert. Coarse
-			// binary tier — the fact that it IS used, not how much.
+			// contract has emitted an event in at least one ledger. Coarse
+			// binary tier: the fact that it IS used, not how much.
 			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-			const inUse = ((r as any).codeInUse?.events ?? 0) > 0 ? 1 : 0;
+			const inUse = ((r as any).codeInUse?.activeLedgers ?? 0) > 0 ? 1 : 0;
 			// sls-064 analog: superseded generations rank below their successors
 			// and live peers at equal relevance — the relation is curated, the
 			// demotion is mechanical.
@@ -2007,10 +2004,8 @@ export async function searchRepos(
 					r.codeInUse?.asOf && typeof r.codeInUse.contracts === "number"
 						? {
 								contracts: r.codeInUse.contracts,
-								events: r.codeInUse.events ?? null,
-								eventsDelta: r.codeInUse.eventsDelta ?? null,
-								subinvocations: r.codeInUse.subinvocations ?? null,
-								subinvocationsDelta: r.codeInUse.subinvocationsDelta ?? null,
+								activeLedgers: r.codeInUse.activeLedgers ?? null,
+								lastEventAt: r.codeInUse.lastEventAt ?? null,
 								asOf: r.codeInUse.asOf,
 							}
 						: null,

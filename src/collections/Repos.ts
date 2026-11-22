@@ -652,11 +652,12 @@ export const Repos: CollectionConfig = {
 		},
 		{ name: "codeScannedAt", type: "date", admin: { position: "sidebar" } },
 		{
-			// Code-in-use (code-truth track): rollup of LIVE mainnet activity for
-			// contracts attributed to this repo (scanner-verified contract ids +
-			// stellar.expert wasm validation). Written ONLY by
-			// scripts/data/enrich-onchain-projects.ts (weekly). Deltas null until
-			// a second snapshot exists — never zero.
+			// Code-in-use (code-truth track): rollup of mainnet activity for the
+			// contracts attributed to this repo (the scanner's own-contract join,
+			// or the attestation of the deployed WASM). Written ONLY by
+			// scripts/data/enrich-onchain-projects.ts (weekly). lastEventAt is the
+			// newest event across those contracts; a contract can be in use with
+			// no event, so an old date is not proof of disuse.
 			name: "codeInUse",
 			type: "group",
 			admin: {
@@ -665,10 +666,8 @@ export const Repos: CollectionConfig = {
 			},
 			fields: [
 				{ name: "contracts", type: "number" },
-				{ name: "events", type: "number" },
-				{ name: "eventsDelta", type: "number" },
-				{ name: "subinvocations", type: "number" },
-				{ name: "subinvocationsDelta", type: "number" },
+				{ name: "activeLedgers", type: "number" },
+				{ name: "lastEventAt", type: "date" },
 				{ name: "asOf", type: "text" },
 			],
 		},

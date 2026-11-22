@@ -93,20 +93,42 @@ describe("code-truth signals in notes", () => {
 			"no commits since",
 		);
 	});
-	it("usage note appears only with a dated codeInUse and formats deltas", () => {
-		const notes = buildKnowledgeNotes("x/y", null, new Map(), {
-			codeInUse: {
-				contracts: 1,
-				events: 44447,
-				eventsDelta: 743,
-				asOf: "2026-08-13",
-			},
+	it("usage note appears only with a dated codeInUse and states what was seen", () => {
+		const note = (codeInUse: object) =>
+			buildKnowledgeNotes("x/y", null, new Map(), { codeInUse }).find(
+				(n) => n.source === "derived:usage",
+			);
+		const use = note({
+			contracts: 1,
+			activeLedgers: 44447,
+			lastEventAt: "2026-08-12T09:30:00.000Z",
+			asOf: "2026-08-13",
 		});
-		const use = notes.find((n) => n.source === "derived:usage");
 		expect(use?.note).toBe(
-			"Live on mainnet: 1 attributed contract, 44,447 lifetime events (+743 since the prior weekly snapshot) per stellar.expert.",
+			"On mainnet: 1 attributed contract, events in 44,447 ledgers, the newest on 2026-08-12 per Stellar Index.",
 		);
 		expect(use?.asOf).toBe("2026-08-13");
+		// A contract that never emitted an event is not called unused: the
+		// note names the contracts and stops.
+		expect(
+			note({
+				contracts: 2,
+				activeLedgers: null,
+				lastEventAt: null,
+				asOf: "2026-08-13",
+			})?.note,
+		).toBe("On mainnet: 2 attributed contracts per Stellar Index.");
+		// Several contracts: the ledger count is a sum, and says so.
+		expect(
+			note({
+				contracts: 3,
+				activeLedgers: 1024427,
+				lastEventAt: "2026-11-22T16:27:11.000Z",
+				asOf: "2026-11-22",
+			})?.note,
+		).toBe(
+			"On mainnet: 3 attributed contracts, 1,024,427 ledgers with an event summed over them, the newest on 2026-11-22 per Stellar Index.",
+		);
 	});
 	it("no usage note without codeInUse", () => {
 		const notes = buildKnowledgeNotes("x/y", null, new Map(), {});

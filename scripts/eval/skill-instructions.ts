@@ -76,7 +76,7 @@ const WRONG_FIELD_SPELLINGS: Array<{ wrong: RegExp; right: string }> = [
 	{ wrong: /\bscf\.awarded\b/, right: "scfAwarded" },
 	{ wrong: /\bscf\.awardedRounds\b/, right: "scfAwardedRounds" },
 	{ wrong: /\bscf\.totalAwardedUSD\b/, right: "scfTotalAwardedUSD" },
-	{ wrong: /\bonchain\.events\b/, right: "onchain.contracts[].events" },
+	{ wrong: /\bonchain\.events\b/, right: "onchain.contracts[].lastEventAt" },
 	// repos[0].lastCommitAt reads as "when this team last worked" and is not:
 	// repos[] is score-sorted, so [0] is the flagship, often the least recent.
 	{ wrong: /repos\[0\]\.lastCommitAt/, right: "lastActivityAt" },

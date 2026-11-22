@@ -74,9 +74,8 @@ export interface TrustReport {
 	};
 	usage: {
 		contracts: number;
-		events: number | null;
-		eventsDelta: number | null;
-		subinvocations: number | null;
+		activeLedgers: number | null;
+		lastEventAt: string | null;
 		asOf: string;
 	} | null;
 	audits: {
@@ -145,9 +144,8 @@ export async function buildTrustReport(
 		ciu?.asOf && typeof ciu.contracts === "number"
 			? {
 					contracts: ciu.contracts as number,
-					events: (ciu.events ?? null) as number | null,
-					eventsDelta: (ciu.eventsDelta ?? null) as number | null,
-					subinvocations: (ciu.subinvocations ?? null) as number | null,
+					activeLedgers: (ciu.activeLedgers ?? null) as number | null,
+					lastEventAt: (ciu.lastEventAt ?? null) as string | null,
 					asOf: String(ciu.asOf),
 				}
 			: null;

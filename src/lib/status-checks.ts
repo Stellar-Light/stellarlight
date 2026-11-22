@@ -17,9 +17,15 @@
  *                            2026-10-23, 63 still holding value).
  *   tvl-zero-onchain-quiet   an on-chain protocol type (ONCHAIN_USE_TYPES)
  *                            with a DefiLlama TVL of 0 read within
- *                            TVL_FRESH_DAYS and no event or sub-call on any
- *                            tracked contract for QUIET_DAYS of OBSERVED time
- *                            (enrich-onchain writes onchain.quietSince).
+ *                            TVL_FRESH_DAYS and no event from any tracked
+ *                            contract for QUIET_DAYS (enrich-onchain writes
+ *                            each contract's lastEventAt). An event proves
+ *                            use; no event does not prove silence, because a
+ *                            contract can be called without emitting one
+ *                            (13 of 68 tracked contracts in one week,
+ *                            2026-11), so the caveat says events, and a
+ *                            contract with no event on record decides
+ *                            nothing.
  *
  * Trinary, per check: hit, clear, or could-not-check. A read that failed,
  * never ran, or found a slug missing upstream is could-not-check, never a
@@ -33,8 +39,13 @@
 
 import { type FactConfidence, factConfidence } from "./fact-confidence";
 
-/** Days of observed contract silence the TVL check needs before it speaks. */
+/** Days without a contract event the TVL check needs before it speaks. */
 export const QUIET_DAYS = 60;
+
+/** An on-chain reading older than this cannot speak for today: enrich-onchain
+ * runs weekly, so this allows one missed run. The lane froze for three weeks
+ * in November 2026 when its source went paid. */
+export const ONCHAIN_FRESH_DAYS = 14;
 
 /** A TVL reading older than this cannot speak for today: enrich-tvl runs
  * weekly, so this allows one missed run (a renamed slug freezes the figure). */
@@ -547,56 +558,6 @@ export function doublecountedOf(
 	return listed.some((r) => r.id != null && ids.has(String(r.id)));
 }
 
-// ── writer side: enrich-onchain ─────────────────────────────────────────
-
-interface ContractDelta {
-	eventsDelta?: unknown;
-	subinvocationsDelta?: unknown;
-}
-
-const str = (v: unknown) => (typeof v === "string" && v ? v : null);
-
-/** "moved" when any measured delta is non-zero, "quiet" when every contract
- * has both deltas measured (events and sub-calls) and all are zero, null
- * when that cannot be said: a counter that was not read is not a zero
- * (review, 2026-10-31). */
-function windowState(contracts: unknown): "moved" | "quiet" | null {
-	if (!Array.isArray(contracts) || !contracts.length) return null;
-	const deltas = (contracts as ContractDelta[]).map((c) =>
-		[c?.eventsDelta, c?.subinvocationsDelta].filter(
-			(d): d is number => typeof d === "number",
-		),
-	);
-	if (deltas.some((d) => d.some((v) => v !== 0))) return "moved";
-	return deltas.every((d) => d.length === 2) ? "quiet" : null;
-}
-
-/** Start of the unbroken run of readings in which no tracked contract moved,
- * or null (moved in the latest window, or not measured). Silence is only
- * what two readings showed: with the prior window quiet too, the run reaches
- * back to that window's start. */
-export function quietSinceFor(
-	contracts: readonly ContractDelta[],
-	prior:
-		| {
-				asOf?: unknown;
-				prevAsOf?: unknown;
-				quietSince?: unknown;
-				contracts?: unknown;
-		  }
-		| null
-		| undefined,
-): string | null {
-	const priorAsOf = str(prior?.asOf);
-	if (!priorAsOf || windowState(contracts) !== "quiet") return null;
-	const carried = str(prior?.quietSince);
-	if (carried) return carried;
-	const prevAsOf = str(prior?.prevAsOf);
-	return windowState(prior?.contracts) === "quiet" && prevAsOf
-		? prevAsOf
-		: priorAsOf;
-}
-
 // ── serve side ──────────────────────────────────────────────────────────
 
 /** A stored date as an ISO string. Payload hands strings, but the semantic
@@ -778,40 +739,41 @@ function tvlQuietCheck(p: any, slugs: string[], now: Date): StatusCheck {
 			"could-not-check",
 			"TVL is $0, but no contract of this project is tracked, so its on-chain use could not be read.",
 		);
-	const state = windowState(contracts);
-	if (state === "moved")
+	const age = daysBetween(asOf, now.toISOString());
+	// An unparseable date is no reading: NaN <= 14 is false.
+	if (!(age <= ONCHAIN_FRESH_DAYS))
+		return result(
+			"could-not-check",
+			`TVL is $0, but the on-chain reading on record is ${Number.isFinite(age) ? `from ${day(asOf)}, older than ${ONCHAIN_FRESH_DAYS} days` : "undated"}, so it cannot speak for today.`,
+			day(asOf),
+		);
+	const n = contracts.length;
+	// biome-ignore lint/suspicious/noExplicitAny: stored array rows
+	const events: Array<string | null> = contracts.map((c: any) =>
+		iso(c?.lastEventAt),
+	);
+	const newest = events
+		.filter((t): t is string => t !== null)
+		.sort()
+		.at(-1);
+	const sinceNewest = newest ? daysBetween(newest, asOf) : Number.NaN;
+	if (newest && sinceNewest < QUIET_DAYS)
 		return result(
 			"clear",
-			`TVL is $0, but its tracked contracts moved in the window ending ${day(asOf)}.`,
+			`TVL is $0, but a tracked contract emitted an event on ${day(newest)}.`,
 			day(asOf),
 		);
-	const sinceAt: string | null =
-		state === "quiet" ? iso(o.quietSince) || iso(o.prevAsOf) : null;
-	const since = day(sinceAt);
-	if (!sinceAt || !since)
+	// No event on record is not a silent contract: it may never emit one.
+	const unread = events.filter((t) => t === null).length;
+	if (unread || !newest || !Number.isFinite(sinceNewest))
 		return result(
 			"could-not-check",
-			"TVL is $0; its contract activity has not been measured over a full window yet.",
-			day(asOf),
-		);
-	const quiet = daysBetween(sinceAt, asOf);
-	const n = contracts.length;
-	// An unparseable date is no window: NaN < 60 is false and fell to a hit.
-	if (!Number.isFinite(quiet))
-		return result(
-			"could-not-check",
-			"TVL is $0, but the dates of its contract readings could not be read.",
-			day(asOf),
-		);
-	if (quiet < QUIET_DAYS)
-		return result(
-			"could-not-check",
-			`TVL is $0 and its ${n} tracked contract${n === 1 ? " has" : "s have"} been quiet since ${since} (${quiet} days on record ${day(asOf)}); ${QUIET_DAYS} days of observed silence are needed.`,
+			`TVL is $0, but ${unread} of its ${n} tracked contract${n === 1 ? "" : "s"} ${unread === 1 ? "has" : "have"} no event on record, so events cannot show whether ${n === 1 ? "it is" : "they are"} in use.`,
 			day(asOf),
 		);
 	return result(
 		"hit",
-		`its DefiLlama TVL is $0${tvlAsOf ? ` (${tvlAsOf})` : ""} and its ${n} tracked contract${n === 1 ? " shows" : "s show"} no events or sub-calls since ${since} (${quiet} days, on record ${day(asOf)})`,
+		`its DefiLlama TVL is $0${tvlAsOf ? ` (${tvlAsOf})` : ""} and its ${n} tracked contract${n === 1 ? " has" : "s have"} emitted no event since ${day(newest)} (${sinceNewest} days, on record ${day(asOf)}); a call that emits no event is not counted`,
 		day(asOf),
 	);
 }

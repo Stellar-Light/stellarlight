@@ -12,8 +12,8 @@ name: Award onchain-activity basis (manual)
 
 on:
   # Its EVIDENCE refreshes on a schedule and this pass did not, so a row
-  # waited on somebody pressing a button — on-chain payments and
-  # subinvocations are re-read continuously; this turns them into a status
+  # waited on somebody pressing a button: asset movements and contract
+  # events are re-read every week; this turns them into a status
   # basis and, just as importantly, re-dates the ones already carrying it.
   # Dry run on 2026-09-15, after 10 days idle: 11 rows due a refresh,
   # including blend, aquarius, reflector and defindex.

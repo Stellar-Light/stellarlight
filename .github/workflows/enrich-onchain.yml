@@ -1,7 +1,10 @@
-# On-chain metrics enrichment (2026-07-20): populates projects.onchain
-# (contract events/subinvocations/storage + asset holders/supply) from
-# stellar.expert, join keys hand-verified in src/data/onchain-contracts.ts.
-# Weekly + dispatchable; dry-run by default on dispatch.
+# On-chain readings (2026-07-20): populates projects.onchain (per contract
+# the newest event, ledgers with an event, TTL state and attested source repo;
+# per asset holders, supply, trustlines and newest movement) from Stellar
+# Index, Horizon and the Soroban RPC, join keys hand-verified in
+# src/data/onchain-contracts.ts. The explorer it read until 2026-11-03 went
+# paid and the lane failed for three weeks. Weekly + dispatchable; dry-run by
+# default on dispatch.
 name: Enrich on-chain metrics
 on:
   schedule:
@@ -21,6 +24,9 @@ jobs:
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      # GitHub's build attestations are read for each contract's WASM
+      # (public repos); a token keeps the read off the anonymous rate limit.
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

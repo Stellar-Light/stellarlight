@@ -294,3 +294,78 @@ export function submoduleTargets(
 	}
 	return { targets, opaque };
 }
+
+/**
+ * The repo each contract's deployed WASM is attested to: its SEP-55
+ * `source_repo`, kept only when GitHub lists a build attestation for that
+ * WASM in that repo. This is what the explorer reported as a verified
+ * validation until its API went paid. The map holds every contract that
+ * could be read: the repo as owner/name, or null when the build names none,
+ * is not attested, or the contract is an asset contract with no build. A
+ * contract missing from the map could not be checked (the RPC does not list
+ * it, or a read failed): never read that as "no source".
+ */
+export async function attestedSourceRepos(
+	contractIds: string[],
+	rpcUrl = MAINNET_RPC,
+	fetchImpl: typeof fetch = fetch,
+): Promise<Map<string, string | null>> {
+	const out = new Map<string, string | null>();
+	const keyOf = new Map<string, string>();
+	for (const id of new Set(contractIds)) {
+		try {
+			keyOf.set(id, instanceKey(id));
+		} catch {
+			// not a contract address: nothing to check
+		}
+	}
+	const instances = await readLedgerEntries(
+		[...keyOf.values()],
+		rpcUrl,
+		fetchImpl,
+	);
+	if (!instances) return out;
+	const wasm = new Map<string, Buffer>();
+	for (const [id, key] of keyOf) {
+		const entry = instances.get(key);
+		if (!entry) continue;
+		try {
+			const executable = xdr.LedgerEntryData.fromXDR(entry.xdr, "base64")
+				.contractData()
+				.val()
+				.instance()
+				.executable();
+			if (executable.switch().name === "contractExecutableStellarAsset")
+				out.set(id, null);
+			else wasm.set(id, executable.wasmHash());
+		} catch {
+			// an entry that does not decode is a check that did not run
+		}
+	}
+	const codes = await readLedgerEntries(
+		[...wasm.values()].map(codeKey),
+		rpcUrl,
+		fetchImpl,
+	);
+	if (!codes) return out;
+	for (const [id, hash] of wasm) {
+		const code = codes.get(codeKey(hash));
+		if (!code) continue;
+		try {
+			const claimed = sourceRepo(
+				contractMeta(
+					xdr.LedgerEntryData.fromXDR(code.xdr, "base64").contractCode().code(),
+				),
+			);
+			if (!claimed) {
+				out.set(id, null);
+				continue;
+			}
+			const attested = await countAttestations(claimed, hash, fetchImpl);
+			if (attested !== null) out.set(id, attested > 0 ? claimed : null);
+		} catch {
+			// unreadable code entry: could not check
+		}
+	}
+	return out;
+}

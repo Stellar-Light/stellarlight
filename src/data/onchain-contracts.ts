@@ -5,9 +5,10 @@
  * A wrong link here silently misattributes on-chain activity, so entries
  * require a source URL and never come from memory or third-party guesses.
  *
- * Consumed by scripts/data/enrich-onchain-projects.ts, which fetches
- * per-contract activity (events/subinvocations/storage) and per-asset stats
- * (holders/supply) from stellar.expert and writes projects.onchain.
+ * Consumed by scripts/data/enrich-onchain-projects.ts, which reads each
+ * contract's newest event, ledgers with an event and TTL state and each
+ * asset's holders, supply and newest movement (src/lib/onchain-sources.ts)
+ * and writes projects.onchain.
  *
  * Growth levers (deliberate, verified-only):
  *  - repos' codeVerified.mainnetContractId (README-claimed + echo-verified)
@@ -24,11 +25,43 @@ export interface OnchainSeed {
 		label: string;
 		/** Primary source for this address when it is not the seed's source. */
 		source?: string;
+		/** owner/name of the GitHub repo whose code this contract runs, for a
+		 * contract whose WASM carries no build metadata (SEP-55 source_repo)
+		 * and so has nothing for an attestation to check. Hand-verified like
+		 * the address: say in a comment what names the repo, and when. A
+		 * contract with build metadata needs none; the lane reads it. */
+		sourceRepo?: string;
 	}>;
 	asset?: { code: string; issuer: string };
 	/** Primary source the addresses were read from. */
 	source: string;
 }
+
+/**
+ * Contracts that a repo link would file under a row whose product they are
+ * not. A repo is linked to a row by its organisation, an organisation can
+ * have several products, and nothing mechanical tells them apart: each entry
+ * is a curator's reading, with what settles it and the day it was read. The
+ * on-chain lane holds the address back from that row and no other join of
+ * the row. (A deployment retraction in DEPLOYMENT_VERIFIED does the same for
+ * the address its note names.) Drop an entry once the repo is linked to the
+ * row its product has.
+ */
+export const ONCHAIN_NOT_THIS_ROW: Array<{
+	slug: string;
+	address: string;
+	repo: string;
+	note: string;
+	checkedAt: string;
+}> = [
+	{
+		slug: "untangled",
+		address: "CA7IBD266HIHFDUIBZLPIAITJUA3DVY4JAG6K3QMGBKLZCXXLP5E2F7A",
+		repo: "untangledfinance/oz-policy-builder",
+		note: "the OpenZeppelin smart-account policy builder (npm @crediolabs/policy-synth) is CredioLabs.AI's, which has its own row, crediolabs-ai, described there as by the Untangled team and a distinct product; that row lists no repo, so this one stayed linked to untangled, the lending and vault product",
+		checkedAt: "2026-11-22",
+	},
+];
 
 export const ONCHAIN_SEEDS: OnchainSeed[] = [
 	{
@@ -78,15 +111,29 @@ export const ONCHAIN_SEEDS: OnchainSeed[] = [
 	},
 	{
 		// blend-capital/blend-utils mainnet.contracts.json (verified 2026-07-20)
+		// sourceRepo, both v1 contracts. Their WASM carries only rsver and
+		// rssdkver (RPC read, 2026-11-22), so no attestation can name a repo;
+		// the v2 pool below names its repo in its own build. What names
+		// blend-capital/blend-contracts, checkable today: its releases
+		// v1.0.0_pool-factory_v1.0.0.wasm (2,898 bytes) and
+		// v1.0.0_backstop_v1.0.0.wasm (27,518 bytes), published 2024-05-01
+		// the day before both contracts were created, are byte for byte the
+		// length of the deployed code (WASM sha256 0287f4ad7350… and
+		// 62f61b32fff9…; GitHub releases API and getLedgerEntries,
+		// 2026-11-22). The release files' own sha256 was not compared. The
+		// explorer's build validation named the same repo for both in the
+		// lane's last reading before that API went paid (2026-11-03).
 		slug: "blend",
 		contracts: [
 			{
 				address: "CCZD6ESMOGMPWH2KRO4O7RGTAPGTUPFWFQBELQSS7ZUK63V3TZWETGAG",
 				label: "pool factory",
+				sourceRepo: "blend-capital/blend-contracts",
 			},
 			{
 				address: "CAO3AGAMZVRMHITL36EJ2VZQWKYRPWMQAPDQD5YEOF3GIF7T44U4JAL3",
 				label: "backstop",
+				sourceRepo: "blend-capital/blend-contracts",
 			},
 			{
 				address: "CAJJZSGMMM3PD7N33TAPHGBUGTB43OC73HVIK2L2G6BNGGGYOSSYBXBD",

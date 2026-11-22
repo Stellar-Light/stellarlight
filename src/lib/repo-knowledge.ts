@@ -9552,10 +9552,8 @@ export interface RepoSignals {
 	lastCommitAt?: string | null;
 	codeInUse?: {
 		contracts?: number | null;
-		events?: number | null;
-		eventsDelta?: number | null;
-		subinvocations?: number | null;
-		subinvocationsDelta?: number | null;
+		activeLedgers?: number | null;
+		lastEventAt?: string | null;
 		asOf?: string | null;
 	} | null;
 }
@@ -9768,16 +9766,24 @@ export function buildKnowledgeNotes(
 			asOf: new Date().toISOString().slice(0, 10),
 		});
 	}
-	// Live-usage fact (code-truth): the repo's attributed mainnet contract(s)
-	// show real activity per stellar.expert — static depth plus live usage.
+	// Usage fact (code-truth): the repo's attributed mainnet contract(s) and
+	// the events they emitted, per Stellar Index: static depth plus use. No
+	// event is not disuse (a contract can be called without emitting one), so
+	// the note states what was seen and never "unused".
 	const use = signals?.codeInUse;
 	if (use?.asOf && typeof use.contracts === "number" && use.contracts > 0) {
-		const ev = typeof use.events === "number" ? use.events : null;
-		const evDelta =
-			typeof use.eventsDelta === "number" ? use.eventsDelta : null;
-		const fmt = (n: number) => n.toLocaleString("en-US");
+		const ledgers =
+			typeof use.activeLedgers === "number" && use.activeLedgers > 0
+				? use.activeLedgers
+				: null;
+		const last =
+			typeof use.lastEventAt === "string" && use.lastEventAt
+				? use.lastEventAt.slice(0, 10)
+				: null;
 		notes.push({
-			note: `Live on mainnet: ${use.contracts} attributed contract${use.contracts === 1 ? "" : "s"}${ev !== null ? `, ${fmt(ev)} lifetime events${evDelta !== null ? ` (${evDelta >= 0 ? "+" : ""}${fmt(evDelta)} since the prior weekly snapshot)` : ""}` : ""} per stellar.expert.`,
+			// The count is summed over the contracts: a ledger in which two of
+			// them emitted an event counts twice.
+			note: `On mainnet: ${use.contracts} attributed contract${use.contracts === 1 ? "" : "s"}${ledgers !== null ? (use.contracts === 1 ? `, events in ${ledgers.toLocaleString("en-US")} ledgers` : `, ${ledgers.toLocaleString("en-US")} ledgers with an event summed over them`) : ""}${last ? `, the newest on ${last}` : ""} per Stellar Index.`,
 			source: "derived:usage",
 			asOf: String(use.asOf).slice(0, 10),
 		});

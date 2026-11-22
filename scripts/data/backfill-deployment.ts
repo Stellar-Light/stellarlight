@@ -297,20 +297,20 @@ export function registrable(host: string): string | null {
  * HTML page is no toml), and a currency SEP-1 marks other than live (dead,
  * test, private) is no evidence, as in enrich-onchain: normalfinance.io marks
  * all its currencies dead. Its Horizon reads count toward a blind run. */
-export async function tomlChain(
+async function* tomlChainsOf(
 	website: string,
-): Promise<{ code: string; issuer: string; tomlUrl: string } | null> {
+): AsyncGenerator<{ code: string; issuer: string; tomlUrl: string }> {
 	// A page on somebody else's host (a Linktree, a GitHub repo, the SCF
 	// project page) has the host's toml at its origin, never the project's.
-	if (thirdPartyHost(website)) return null;
+	if (thirdPartyHost(website)) return;
 	const host = website
 		.replace(/^https?:\/\//, "")
 		.split(/[/?#]/)[0]
 		.replace(/^www\./, "");
-	if (!host) return null;
+	if (!host) return;
 	const tomlUrl = `https://${host}/.well-known/stellar.toml`;
 	const text = await fetchText(tomlUrl);
-	if (!text) return null;
+	if (!text) return;
 	const live = parseStellarToml(text).currencies.filter(
 		(c) => !c.status || c.status === "live",
 	);
@@ -324,9 +324,27 @@ export async function tomlChain(
 		const acct = await issuerDomain("mainnet", issuer);
 		const issuerReg = registrable(acct.domain ?? "");
 		if (issuerReg && issuerReg === registrable(host))
-			return { code, issuer, tomlUrl };
+			yield { code, issuer, tomlUrl };
 	}
+}
+
+/** The first currency of the project's toml that holds both ways, or null.
+ * Stops reading at the first, as it always did. */
+export async function tomlChain(
+	website: string,
+): Promise<{ code: string; issuer: string; tomlUrl: string } | null> {
+	for await (const chain of tomlChainsOf(website)) return chain;
 	return null;
+}
+
+/** Every currency of the project's toml (its first five live ones) that
+ * holds both ways: an issuer with several coins declares them all. */
+export async function tomlChains(
+	website: string,
+): Promise<Array<{ code: string; issuer: string; tomlUrl: string }>> {
+	const out = [];
+	for await (const chain of tomlChainsOf(website)) out.push(chain);
+	return out;
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: minimal doc shapes

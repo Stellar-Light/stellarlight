@@ -13,11 +13,11 @@
  * beside it.
  *
  * EVIDENCE RULES (a basis is only as good as its date — sls-024):
- *   A. asset MOVEMENT: onchain.asOf within MAX_MOVEMENT_AGE_DAYS and
- *      assetPaymentsDelta > 0 or assetTradesDelta > 0 — coins actually moved
- *      between two dated stellar.expert observations. Static holder/supply
- *      counts are NOT activity (a dead asset keeps its holders) and never
- *      qualify.
+ *   A. asset MOVEMENT: onchain.assetLastMovedAt within
+ *      MAX_MOVEMENT_AGE_DAYS: the newest transfer, mint, burn or clawback of
+ *      the asset, dated by the ledger it closed in (enrich-onchain reads it).
+ *      Static holder/supply counts are NOT activity (a dead asset keeps its
+ *      holders) and never qualify.
  *   B. verified TVL: tvlUSD > 0 from DeFiLlama with tvlAsOf within
  *      MAX_TVL_AGE_DAYS — third-party-verified value locked on Stellar now.
  *   A wins over B when both hold (a direct chain observation beats an
@@ -42,7 +42,7 @@ import { llamaCitationFor } from "../../src/lib/status-checks";
 import configPromise from "../../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
-const MAX_MOVEMENT_AGE_DAYS = 45; // enrich-onchain runs weekly; 45d = generous but current
+const MAX_MOVEMENT_AGE_DAYS = 45; // a movement older than this is not activity now
 const MAX_TVL_AGE_DAYS = 14; // the DeFiLlama refresh is scheduled ~daily
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -62,8 +62,7 @@ interface Row {
 	onchain?: {
 		assetCode?: string | null;
 		issuer?: string | null;
-		assetPaymentsDelta?: number | null;
-		assetTradesDelta?: number | null;
+		assetLastMovedAt?: string | null;
 		asOf?: string | null;
 	} | null;
 }
@@ -75,22 +74,21 @@ function evidenceFor(r: Row): {
 	note: string;
 } | null {
 	const o = r.onchain;
+	// A date that does not parse is no evidence: NaN <= 45 is false.
 	if (
-		o?.asOf &&
-		days(o.asOf) <= MAX_MOVEMENT_AGE_DAYS &&
-		((o.assetPaymentsDelta ?? 0) > 0 || (o.assetTradesDelta ?? 0) > 0)
-	) {
-		const asset = o.assetCode && o.issuer ? `${o.assetCode}-${o.issuer}` : null;
+		o?.assetLastMovedAt &&
+		o.assetCode &&
+		o.issuer &&
+		days(o.assetLastMovedAt) <= MAX_MOVEMENT_AGE_DAYS
+	)
 		return {
 			kind: "movement",
-			asOf: o.asOf,
-			// The exact page the numbers were read from — citable, dated.
-			url: asset
-				? `https://stellar.expert/explorer/public/asset/${asset}`
-				: "https://stellar.expert/explorer/public",
-			note: `payments Δ${o.assetPaymentsDelta ?? 0} / trades Δ${o.assetTradesDelta ?? 0}`,
+			// the ledger the movement closed in, never the day we read it
+			asOf: o.assetLastMovedAt,
+			// The asset's own page, where a reader sees the same movement.
+			url: `https://stellar.expert/explorer/public/asset/${o.assetCode}-${o.issuer}`,
+			note: `last moved ${o.assetLastMovedAt.slice(0, 10)}`,
 		};
-	}
 	if (
 		(r.tvlUSD ?? 0) > 0 &&
 		r.tvlSource === "defillama" &&
@@ -111,9 +109,9 @@ function evidenceFor(r: Row): {
 }
 
 /**
- * Evidence C — HORIZON RECENT ACTIVITY, the "now" path. Movement deltas (A)
- * need two weekly stellar.expert readings, so a freshly-joined asset key sits
- * a week from its first possible upgrade. Horizon can attest activity TODAY:
+ * Evidence C: HORIZON RECENT ACTIVITY, the "now" path. Movement (A) comes
+ * from the weekly enrich-onchain reading, so a freshly-joined asset key sits
+ * up to a week from its first possible upgrade. Horizon can attest activity TODAY:
  * the asset's most recent trade, dated by ledger close time — a direct,
  * citable on-chain observation (two parties moved value). Probed only for
  * weak rows that hold an asset key and passed neither A nor B; an asset with

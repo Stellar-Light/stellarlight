@@ -1,23 +1,30 @@
 /**
- * Populate projects.onchain from stellar.expert — the on-chain metrics the
- * Q2 review flagged as missing, scoped to what is VERIFIABLE today:
+ * Refresh projects.onchain: the on-chain readings of a directory row, from
+ * sources that answer without a key or a payment (src/lib/onchain-sources.ts
+ * says which, and what each can and cannot prove).
  *
- *   per contract: lifetime events, subinvocations, storage entries, created
- *     date, and the wasm-validation repo when the team ran validation.
- *     (stellar.expert's direct `invocations` counter is null service-wide —
- *     a known aggregation bug on their side — so events/subinvocations are
- *     the honest activity signals. We never serve a number we can't trust.)
- *   per asset: trustline holders and circulating supply in whole units
- *     (raw values are 7-decimal integers; we divide, we don't guess).
+ *   per asset:    accounts holding a balance, supply in whole units, open
+ *                 trustlines, and the date of the newest movement.
+ *   per contract: the newest event, the count of ledgers with an event, the
+ *                 TTL state, and the repo its deployed WASM is attested to.
  *
- * Join keys come from two verified-only sources:
- *   1. src/data/onchain-contracts.ts — hand-verified seeds (each with its
- *      primary-source URL).
- *   2. repos.codeVerified.mainnetContractId — README-claimed addresses the
- *      code scanner already echo-verified against stellar.expert, merged in
- *      for repos linked to a directory project.
+ * Until 2026-11-03 this lane read stellar.expert, whose API went paid on
+ * 2026-11-06; every row froze. The fields nothing free can supply (payment
+ * and trade counts of an asset, event totals, sub-calls and storage size of
+ * a contract) are gone, not zeroed. A contract's creation date does not
+ * change, so the date a row holds is kept; a contract that joins later has
+ * none until a ledger-proved source is wired in (improvements/TODO.md).
  *
- * Fetch failures SKIP the project (previous data stays; nothing zeroed).
+ * Join keys come from verified-only sources:
+ *   1. src/data/onchain-contracts.ts: hand-verified seeds, each with its
+ *      primary-source URL.
+ *   2. repos.codeVerified.mainnetContractId: the contract the code scan
+ *      proved to be a repo's own, for repos linked to a directory project.
+ *   3. partner records, the stablecoin registry and a project's own
+ *      stellar.toml, for the issued asset.
+ *
+ * A row is refreshed whole or left as it was: a read that fails skips the
+ * project, nothing is zeroed, and the run exits red.
  *
  * Usage:
  *   pnpm exec tsx scripts/data/enrich-onchain-projects.ts             # dry run
@@ -26,33 +33,61 @@
 
 import "../load-env";
 import { getPayload } from "payload";
-import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
+import {
+	ONCHAIN_NOT_THIS_ROW,
+	ONCHAIN_SEEDS,
+} from "../../src/data/onchain-contracts";
 import { STABLECOIN_REGISTRY } from "../../src/data/stablecoin-registry";
-import { quietSinceFor } from "../../src/lib/status-checks";
+import { attestedSourceRepos } from "../../src/lib/contract-ownership";
+import {
+	addressesIn,
+	repoContractJoins,
+	rollupRepoOf,
+	verifiedRepoOf,
+} from "../../src/lib/onchain-join";
+import {
+	type FetchJson,
+	indexHeadAt,
+	MAX_INDEX_LAG_MINUTES,
+	readAsset,
+	readContract,
+} from "../../src/lib/onchain-sources";
 import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
-import { domainOf, fetchText, parseStellarToml } from "../lib/stellar-toml";
+import { tomlChains } from "./backfill-deployment";
+import { DEPLOYMENT_VERIFIED } from "./curation-maps";
 
 const execute = process.argv.includes("--execute");
-const EXPERT = "https://api.stellar.expert/explorer/public";
-const PAUSE_MS = 400; // be polite — unauthenticated, unpublished rate limits
+/** Served as onchain.source. A delta is only taken between two readings of
+ * the same source: the explorer counted contracts that hold an asset as
+ * holders and the index counts accounts, so a delta across the switch would
+ * be the change of definition, not of holders. */
+const SOURCE = "stellarindex.io, horizon.stellar.org";
+const PAUSE_MS = 400; // be polite: keyless public APIs
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-// 2026-09-28: every run since at least 09-08 ended with 22-26 HTTP 429s from
-// stellar.expert and the same number of silent "SKIP … fetch failure" lines
-// (the last seed and every stablecoin asset after it), while the lane
-// reported success. A 429 is "slow down", not "no data": back off and retry,
-// honouring Retry-After when the server sends one.
+// A 429 or a 5xx is "slow down" or "try again", not "no data": back off and
+// retry, honouring Retry-After when the server sends one. Every run from
+// 2026-09-08 to 09-28 ended with 22 to 26 unanswered 429s and reported
+// success.
 const RETRY_DELAYS_MS = [5_000, 15_000, 45_000];
 
-async function fetchJson<T>(url: string): Promise<T | null> {
+const fetchJson: FetchJson = async (url) => {
 	for (let attempt = 0; ; attempt++) {
 		try {
 			const r = await fetch(url, {
-				headers: { "user-agent": "stellarlight-onchain-enrich" },
+				headers: {
+					"user-agent": "stellarlight-onchain-enrich",
+					accept: "application/json",
+				},
+				signal: AbortSignal.timeout(30_000),
 			});
-			if (r.ok) return (await r.json()) as T;
+			if (r.ok) {
+				const body = await r.json();
+				await sleep(PAUSE_MS);
+				return body;
+			}
 			const retryable = r.status === 429 || r.status >= 500;
 			if (retryable && attempt < RETRY_DELAYS_MS.length) {
 				const header = Number(r.headers.get("retry-after"));
@@ -69,55 +104,41 @@ async function fetchJson<T>(url: string): Promise<T | null> {
 			console.log(`    ✗ ${url} → HTTP ${r.status}`);
 			return null;
 		} catch (e) {
+			if (attempt < RETRY_DELAYS_MS.length) {
+				await sleep(RETRY_DELAYS_MS[attempt]);
+				continue;
+			}
 			console.log(`    ✗ ${url} → ${(e as Error).message}`);
 			return null;
 		}
 	}
-}
+};
 
-interface ExpertContract {
-	contract: string;
-	created?: number;
-	subinvocation?: number | null;
-	events?: number | null;
-	storage_entries?: number | null;
-	validation?: { status?: string; repository?: string };
-}
-
-interface ExpertAsset {
-	supply?: string | number;
-	/** Object {total, authorized, funded} on the current API (verified live
-	 * 2026-07-20 on AQUA); older/partner-era responses used an array. */
-	trustlines?: { total?: number; funded?: number } | number[] | number;
-	decimals?: number;
-	/** Lifetime count of payment operations — an unambiguous integer, so it is
-	 * the honest "transaction volume" for an asset. */
-	payments?: number | null;
-	/** Lifetime payment volume in RAW 7-decimal asset units. The /1e7 convention
-	 * is verified against `supply` on AQUA (both divide to the same magnitude as
-	 * the published circulating figure), so this is safe to convert. */
-	payments_amount?: string | number | null;
-	/** Lifetime count of trades — unambiguous integer. */
-	trades?: number | null;
-	/** NOT captured: `volume7d` and `traded_amount`. volume7d's denomination is
-	 * ambiguous on inspection (2.26e12 raw divides to either ~226k AQUA or
-	 * ~$226k USD, and the API does not state which). Shipping a number whose
-	 * unit we can't prove is the "ambiguous metric" bug class we already guard
-	 * against — left out until the denomination is confirmed upstream. */
-}
-
-/** 7-decimal raw integer → whole units (floored; display metric, not money math). */
-function toWholeUnits(raw: string | number | undefined): number | null {
-	if (raw == null) return null;
-	const n = typeof raw === "string" ? Number(raw) : raw;
-	if (!Number.isFinite(n)) return null;
-	return Math.floor(n / 1e7);
-}
+const day = (v: unknown) =>
+	typeof v === "string" && v ? v.slice(0, 10) : "none";
 
 async function run() {
-	const asOf = new Date().toISOString();
+	const now = new Date();
+	const asOf = now.toISOString();
 	console.log(execute ? "EXECUTE MODE" : "DRY RUN MODE");
-	console.log(`source: ${EXPERT}\n`);
+	console.log(`source: ${SOURCE}\n`);
+
+	// The index stamps every answer with the time it answered, not the age of
+	// its data, so a stalled ingestion would be written under today's date.
+	// The native asset moves in nearly every ledger: its newest event is the
+	// index's own clock. Behind by more than an hour, nothing is read.
+	const head = await indexHeadAt(fetchJson);
+	const lagMinutes = head
+		? (now.getTime() - Date.parse(head)) / 60_000
+		: Number.NaN;
+	if (!(lagMinutes <= MAX_INDEX_LAG_MINUTES)) {
+		console.error(
+			`RED: Stellar Index is behind or did not answer (newest native-asset event: ${head ?? "none read"}${Number.isFinite(lagMinutes) ? `, ${Math.round(lagMinutes)} minutes old` : ""}). Nothing was read or written.`,
+		);
+		process.exitCode = 1;
+		return;
+	}
+	console.log(`index head: ${head} (${Math.round(lagMinutes)} minutes old)\n`);
 
 	const payload = await getPayload({ config: configPromise });
 
@@ -125,28 +146,67 @@ async function run() {
 	const bySlug = new Map<
 		string,
 		{
-			contracts: Array<{ address: string; label: string; sourceRepo?: string }>;
+			contracts: Array<{
+				address: string;
+				label: string;
+				/** The repo this contract rolls up to: its seed names it, or the
+				 * scan proved the repo's source defines it. */
+				sourceRepo?: string;
+				/** Set from a seed only: the repo served as verifiedRepo where
+				 * the WASM carries no build metadata to attest. */
+				curatedRepo?: string;
+			}>;
 			asset?: { code: string; issuer: string };
 		}
 	>();
 	for (const seed of ONCHAIN_SEEDS) {
 		bySlug.set(seed.slug, {
-			contracts: [...(seed.contracts ?? [])],
+			contracts: (seed.contracts ?? []).map((c) => ({
+				address: c.address,
+				label: c.label,
+				...(c.sourceRepo
+					? { sourceRepo: c.sourceRepo, curatedRepo: c.sourceRepo }
+					: {}),
+			})),
 			asset: seed.asset,
 		});
 	}
 
-	const repos = await payload.find({
-		collection: "repos",
-		limit: 3000,
-		depth: 0,
-		select: {
-			fullName: true,
-			projectSlug: true,
-			codeVerified: true,
-			codeInUse: true,
-		},
-	});
+	// Every repo, a page at a time, two small fields each. A fixed limit of
+	// 3000 read the first fifth of the index (13,900 rows by 2026-11), so the
+	// write-back below could not find most repos and said only "no indexed
+	// repo matches".
+	type RepoRow = {
+		id: string | number;
+		fullName?: string | null;
+		projectSlug?: string | null;
+		mainnetContractId?: string | null;
+		mainnetContractBasis?: string | null;
+		codeScanState?: string | null;
+		// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+		codeInUse?: any;
+	};
+	const repoRows: RepoRow[] = [];
+	for (let page = 1; ; page++) {
+		const r = await payload.find({
+			collection: "repos",
+			limit: 1000,
+			page,
+			depth: 0,
+			select: {
+				fullName: true,
+				projectSlug: true,
+				mainnetContractId: true,
+				// isOwnContract reads an absent basis as not judged: select it, or
+				// a cited id passes as the repo's own.
+				mainnetContractBasis: true,
+				codeScanState: true,
+				codeInUse: true,
+			},
+		});
+		repoRows.push(...(r.docs as unknown as RepoRow[]));
+		if (!r.hasNextPage) break;
+	}
 	// Case-insensitive repo index for the codeInUse write-back (identity
 	// lesson: never trust iteration-spelling equality on fullName).
 	const repoIndex = new Map<
@@ -154,12 +214,7 @@ async function run() {
 		// biome-ignore lint/suspicious/noExplicitAny: stored group shape
 		{ id: string | number; fullName: string; codeInUse?: any }
 	>();
-	for (const r of repos.docs as unknown as Array<{
-		id: string | number;
-		fullName: string;
-		// biome-ignore lint/suspicious/noExplicitAny: stored group shape
-		codeInUse?: any;
-	}>) {
+	for (const r of repoRows) {
 		if (r.fullName)
 			repoIndex.set(r.fullName.toLowerCase(), {
 				id: r.id,
@@ -172,30 +227,58 @@ async function run() {
 		string,
 		{
 			contracts: number;
-			events: number;
-			eventsDelta: number | null;
-			subinvocations: number;
-			subinvocationsDelta: number | null;
+			activeLedgers: number | null;
+			lastEventAt: string | null;
 		}
 	>();
+	// Repo-derived contracts: the id the code scan proved to be a repo's own,
+	// joined by src/lib/onchain-join.ts under the rule the deployment pass
+	// uses. Until 2026-11 this read codeVerified.mainnetContractId, a path the
+	// scan had stopped writing, and joined nothing ("0 repo-derived" every
+	// week).
+	const seedOwner = new Map<string, string>();
+	for (const seed of ONCHAIN_SEEDS)
+		for (const c of seed.contracts ?? []) seedOwner.set(c.address, seed.slug);
+	// What a curator said is not a row's own: the artifact a deployment
+	// retraction names (DEPLOYMENT_VERIFIED, network "unknown": PayLoop's
+	// contract under the IDE row, AgentSmith's under the timelock row), and
+	// the contracts ONCHAIN_NOT_THIS_ROW lists. Only the named address is
+	// held back, so a deployment of the row's own that comes later joins.
+	// Hand-verified keys (seeds, partner records, the registry) are not
+	// derived and stay.
+	const heldBack = (slug: string): Set<string> => {
+		const entry = DEPLOYMENT_VERIFIED[slug];
+		return new Set([
+			...(entry?.network === "unknown" ? addressesIn(entry.note) : []),
+			...ONCHAIN_NOT_THIS_ROW.filter((x) => x.slug === slug).map(
+				(x) => x.address,
+			),
+		]);
+	};
+	const repoJoin = repoContractJoins(repoRows, { seedOwner, heldBack });
+	for (const j of repoJoin.retracted)
+		console.log(
+			`  held back: ${j.repo} ${j.address.slice(0, 8)}… is not joined to ${j.slug} (a curator named it as another product's)`,
+		);
+	for (const j of repoJoin.shared)
+		console.log(
+			`  shared: ${j.address.slice(0, 8)}… is held by repos of ${j.slugs.join(", ")}; joined to none (${j.repo})`,
+		);
 	let repoDerived = 0;
-	for (const r of repos.docs as unknown as Array<{
-		fullName: string;
-		projectSlug?: string | null;
-		codeVerified?: { mainnetContractId?: string | null } | null;
-	}>) {
-		const id = r.codeVerified?.mainnetContractId;
-		if (!id || !r.projectSlug) continue;
-		const entry = bySlug.get(r.projectSlug) ?? { contracts: [] };
-		if (!entry.contracts.some((c) => c.address === id)) {
+	for (const j of repoJoin.joins) {
+		const entry = bySlug.get(j.slug) ?? { contracts: [] };
+		const held = entry.contracts.find((c) => c.address === j.address);
+		if (held) {
+			held.sourceRepo ??= j.sourceRepo;
+		} else {
 			entry.contracts.push({
-				address: id,
-				label: `from ${r.fullName} README`,
-				sourceRepo: r.fullName,
+				address: j.address,
+				label: `from ${j.repo}`,
+				...(j.sourceRepo ? { sourceRepo: j.sourceRepo } : {}),
 			});
 			repoDerived += 1;
 		}
-		bySlug.set(r.projectSlug, entry);
+		bySlug.set(j.slug, entry);
 	}
 	// Partner-asset auto-join: partner records carry domain-matched, live
 	// on-chain assets (enrichment-owned, holders-sorted — the top entry is the
@@ -320,17 +403,17 @@ async function run() {
 		}
 	}
 
-	// stellar.toml auto-join (P4 evidence expansion, lane 2b — pays three gap-
-	// matrix rows at once: onchain evidence → strongBasis upgrades → deployment
-	// evidence): anchor/stablecoin-class rows publish their issuer accounts in
-	// their OWN domain's /.well-known/stellar.toml, so the join is precise by
-	// construction — the operator's own machine record names the asset. Only
-	// fills an EMPTY asset slot (every other source outranks); a currency block
-	// without a well-formed G-address contributes nothing; an unreachable or
-	// HTML soft-404 toml is a skip, never a guess. First (code, issuer) pair is
-	// taken as the canonical asset; the rest are logged so the dry run shows
-	// what a multi-asset issuer holds. The stellar.expert fetch downstream
-	// validates the issuer exists before anything is written.
+	// stellar.toml auto-join: anchor/stablecoin-class rows publish their
+	// issuer accounts in their OWN domain's /.well-known/stellar.toml. The
+	// join holds only when the chain holds BOTH ways (tomlChain): the
+	// project's toml declares a live currency, that code and issuer exist on
+	// Horizon, and the issuer account's home_domain points back at the
+	// project's domain. Until 2026-11 this join read one direction only, so a
+	// toml that copied another issuer's currency block keyed that issuer's
+	// asset to the row (found 2026-11-12, improvements/TODO.md). Only fills an
+	// EMPTY asset slot (every other source outranks); a page on a third-party
+	// host, an unreachable or HTML soft-404 toml, or a currency the operator
+	// marks dead is a skip, never a guess.
 	let tomlDerived = 0;
 	{
 		const candidates = await payload.find({
@@ -359,43 +442,92 @@ async function run() {
 			if (p.canonicalSlug) continue;
 			const existing = bySlug.get(p.slug);
 			if (existing?.asset) continue; // a stronger source already keyed it
-			const dom = p.links?.website ? domainOf(p.links.website) : null;
-			if (!dom) continue;
-			const text = await fetchText(`https://${dom}/.well-known/stellar.toml`);
-			await sleep(150); // be polite across many small operators
-			if (!text) continue;
-			const toml = parseStellarToml(text);
-			// SEP-1 status: an asset the operator marks dead, test or private is
-			// not the row's on-chain evidence, whatever its trustline count
-			// (normalfinance.io marks all ten of its currencies dead, 2026-09-28).
-			const usable = toml.currencies.filter(
-				(c) => !c.status || c.status === "live",
+			if (!p.links?.website) continue;
+			const named = heldBack(p.slug);
+			const chains = (await tomlChains(p.links.website)).filter(
+				(c) => !named.has(c.issuer),
 			);
-			if (!usable.length) {
-				if (toml.currencies.length)
-					console.log(
-						`  toml ${dom} → ${p.slug}: ${toml.currencies.length} currencies, none live (${toml.currencies.map((c) => `${c.code}:${c.status}`).join(", ")}) — skip`,
-					);
-				continue;
-			}
-			const [primary, ...rest] = usable;
+			await sleep(150); // be polite across many small operators
+			// An issuer with several coins keeps a row per coin on one domain
+			// (stablecoin.z.com: gyen and zusd): the row named like a currency
+			// takes that currency, any other row takes the first that holds.
+			const canon = (v: string) => v.toLowerCase().replace(/[^a-z0-9]/g, "");
+			const chain =
+				chains.find((c) => canon(c.code) === canon(p.slug ?? "")) ?? chains[0];
+			if (!chain) continue;
 			const entry = existing ?? { contracts: [] };
-			entry.asset = { code: primary.code, issuer: primary.issuer };
+			entry.asset = { code: chain.code, issuer: chain.issuer };
 			bySlug.set(p.slug, entry);
 			tomlDerived += 1;
 			console.log(
-				`  toml ${dom} → ${p.slug}: ${primary.code}-${primary.issuer.slice(0, 6)}…${rest.length ? ` (+${rest.length} more: ${rest.map((c) => c.code).join(", ")})` : ""}`,
+				`  toml ${chain.tomlUrl} → ${p.slug}: ${chain.code}-${chain.issuer.slice(0, 6)}… (the issuer's home_domain names the same domain)${chains.length > 1 ? `, of ${chains.map((c) => c.code).join(", ")}` : ""}`,
 			);
 		}
 	}
 
 	console.log(
-		`Join keys: ${ONCHAIN_SEEDS.length} seeded + ${repoDerived} repo-derived + ${partnerDerived} partner-asset + ${registryDerived} registry + ${tomlDerived} toml → ${bySlug.size} projects\n`,
+		`Join keys: ${ONCHAIN_SEEDS.length} seeded + ${repoDerived} repo-derived (${repoJoin.retracted.length} more held back, ${repoJoin.shared.length} shared by two rows) + ${partnerDerived} partner-asset + ${registryDerived} registry + ${tomlDerived} toml → ${bySlug.size} projects\n`,
 	);
+
+	// The repo each contract's deployed WASM is attested to, read once for
+	// every contract. A contract the RPC does not list is missing from the
+	// map: could not check, and the row keeps what it holds.
+	const attested = await attestedSourceRepos(
+		[...bySlug.values()].flatMap((k) => k.contracts.map((c) => c.address)),
+	);
+	const allContracts = new Set(
+		[...bySlug.values()].flatMap((k) => k.contracts.map((c) => c.address)),
+	);
+	console.log(
+		`source attestation: ${attested.size} of ${allContracts.size} contracts read, ${[...attested.values()].filter(Boolean).length} attested\n`,
+	);
+
+	// The repo a contract rolls up to and the verifiedRepo it is served with:
+	// one rule (src/lib/onchain-join.ts) for every reader below.
+	const evidenceOf = (
+		c: { address: string; sourceRepo?: string; curatedRepo?: string },
+		stored: unknown,
+	) => ({
+		// undefined = the code could not be read; null = read, names no repo
+		attested: attested.has(c.address)
+			? (attested.get(c.address) ?? null)
+			: undefined,
+		curatedRepo: c.curatedRepo,
+		sourceRepo: c.sourceRepo,
+		stored,
+	});
+	// When a project is not read (a failed read, or a join key whose slug no
+	// row has), each repo its contracts roll up to would get a rollup short
+	// of that project's contracts, so none of them is written or cleared.
+	const dirtyRepos = new Set<string>();
+	const markDirty = (
+		contracts: Array<{
+			address: string;
+			sourceRepo?: string;
+			curatedRepo?: string;
+		}>,
+		// biome-ignore lint/suspicious/noExplicitAny: stored array rows
+		stored: any[] = [],
+	) => {
+		for (const c of contracts) {
+			const repo = rollupRepoOf(
+				evidenceOf(
+					c,
+					stored.find((p) => p?.address === c.address)?.verifiedRepo,
+				),
+			);
+			if (repo) dirtyRepos.add(repo);
+		}
+	};
+	// Live contracts whose source could not be checked this run (the RPC did
+	// not list the code, or the attestation read failed): their verifiedRepo
+	// is kept as it was, and the run says so with its exit code.
+	const unreadLive: string[] = [];
+	const noRow: string[] = [];
 
 	let updated = 0;
 	let skipped = 0;
-	let fetchSkipped = 0; // projects left stale because stellar.expert did not answer
+	let fetchSkipped = 0; // projects left stale because a source did not answer
 	let projectReadBackFailed = 0; // onchain writes that did not persist as sent
 	for (const [slug, keys] of bySlug) {
 		const proj = await payload.find({
@@ -408,119 +540,66 @@ async function run() {
 		if (!proj.docs.length) {
 			console.log(`SKIP ${slug}: no directory project with this slug`);
 			skipped += 1;
+			noRow.push(slug);
+			markDirty(keys.contracts);
 			continue;
 		}
+		// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+		const prior: any = (proj.docs[0] as any)?.onchain;
+		// biome-ignore lint/suspicious/noExplicitAny: stored array rows
+		const priorContracts: any[] = Array.isArray(prior?.contracts)
+			? prior.contracts
+			: [];
 
 		const contracts: Array<Record<string, unknown>> = [];
 		let failed = false;
 		for (const c of keys.contracts) {
-			const d = await fetchJson<ExpertContract>(
-				`${EXPERT}/contract/${c.address}`,
-			);
-			await sleep(PAUSE_MS);
-			if (!d) {
+			const reading = await readContract(c.address, fetchJson, now);
+			if (!reading) {
 				failed = true;
 				break;
 			}
+			const old = priorContracts.find((p) => p?.address === c.address);
+			// A contract whose code the RPC did not list keeps the repo the row
+			// holds. For one archived on chain that is expected (its entries
+			// leave the live ledger state); for a live one it is a failed read.
+			if (!attested.has(c.address) && reading.ttlState !== "archived")
+				unreadLive.push(`${slug} ${c.label}`);
 			contracts.push({
 				address: c.address,
 				label: c.label,
-				events: typeof d.events === "number" ? d.events : null,
-				subinvocations:
-					typeof d.subinvocation === "number" ? d.subinvocation : null,
-				storageEntries:
-					typeof d.storage_entries === "number" ? d.storage_entries : null,
-				createdAt: d.created ? new Date(d.created * 1000).toISOString() : null,
-				verifiedRepo:
-					d.validation?.status === "verified"
-						? (d.validation.repository ?? null)
-						: null,
+				lastEventAt: reading.lastEventAt,
+				activeLedgers: reading.activeLedgers,
+				ttlState: reading.ttlState,
+				createdAt: old?.createdAt ?? null,
+				verifiedRepo: verifiedRepoOf(evidenceOf(c, old?.verifiedRepo)),
 			});
 		}
 
-		let assetHolders: number | null = null;
-		let assetSupply: number | null = null;
-		// Q2 deliverable gap (PG review 2026-07-17): "transaction volumes and
-		// active address counts on project profiles aren't evident." Both were
-		// already in the stellar.expert responses we fetch — we were discarding
-		// them. assetTrustlines = every account that ever opened a trustline;
-		// assetHolders (funded) = accounts actually holding a balance today.
-		// Keeping both is the honest pair: "reach" vs "active".
-		let assetPayments: number | null = null;
-		let assetPaymentsAmount: number | null = null;
-		let assetTrades: number | null = null;
-		let assetTrustlines: number | null = null;
-		if (!failed && keys.asset) {
-			const a = await fetchJson<ExpertAsset>(
-				`${EXPERT}/asset/${keys.asset.code}-${keys.asset.issuer}`,
-			);
-			await sleep(PAUSE_MS);
-			if (!a) failed = true;
-			else {
-				// Shape verified live 2026-07-20: object {total, authorized, funded}.
-				// funded = accounts actually holding the asset — the honest
-				// "holders" number. Array/number fallbacks for older shapes; a
-				// non-numeric result stays null, never a stringified object (the
-				// dry run caught exactly that).
-				const tl = a.trustlines;
-				const rawHolders =
-					tl && typeof tl === "object" && !Array.isArray(tl)
-						? (tl.funded ?? tl.total)
-						: Array.isArray(tl)
-							? tl[0]
-							: tl;
-				assetHolders = typeof rawHolders === "number" ? rawHolders : null;
-				assetSupply = toWholeUnits(a.supply);
-				assetTrustlines =
-					tl && typeof tl === "object" && !Array.isArray(tl)
-						? typeof tl.total === "number"
-							? tl.total
-							: null
-						: null;
-				assetPayments = typeof a.payments === "number" ? a.payments : null;
-				assetTrades = typeof a.trades === "number" ? a.trades : null;
-				assetPaymentsAmount = toWholeUnits(a.payments_amount ?? undefined);
-			}
-		}
+		const asset =
+			!failed && keys.asset
+				? await readAsset(keys.asset.code, keys.asset.issuer, fetchJson, now)
+				: null;
+		if (keys.asset && !asset) failed = true;
 
 		if (failed) {
-			console.log(`SKIP ${slug}: fetch failure — existing data left untouched`);
+			console.log(`SKIP ${slug}: a read failed, existing data left untouched`);
 			skipped += 1;
 			fetchSkipped += 1;
+			markDirty(keys.contracts, priorContracts);
 			continue;
 		}
 
-		// Deltas vs the previous snapshot (v2): activity-over-time is the signal
-		// lifetime counts can't give. null until a real prior snapshot exists.
-		// biome-ignore lint/suspicious/noExplicitAny: stored group shape
-		const prior: any = (proj.docs[0] as any)?.onchain;
-		const priorAsOf = prior?.asOf ? new Date(prior.asOf).getTime() : null;
+		const assetHolders = asset?.holders ?? null;
+		// Whole units, floored: a display figure, not money math.
+		const assetSupply = asset ? Math.floor(asset.supply) : null;
+		const assetTrustlines = asset?.trustlines ?? null;
+		const assetLastMovedAt = asset?.lastMovementAt ?? null;
+		const sameSource = prior?.source === SOURCE;
+		const priorAsOf =
+			sameSource && prior?.asOf ? new Date(prior.asOf).getTime() : null;
 		const deltaDays = priorAsOf
-			? Math.round(((Date.now() - priorAsOf) / 86_400_000) * 100) / 100
-			: null;
-		if (priorAsOf && Array.isArray(prior?.contracts)) {
-			for (const c of contracts) {
-				// biome-ignore lint/suspicious/noExplicitAny: stored array row
-				const old = prior.contracts.find((p: any) => p.address === c.address);
-				if (
-					old &&
-					typeof old.events === "number" &&
-					typeof c.events === "number"
-				)
-					c.eventsDelta = (c.events as number) - old.events;
-				if (
-					old &&
-					typeof old.subinvocations === "number" &&
-					typeof c.subinvocations === "number"
-				)
-					c.subinvocationsDelta =
-						(c.subinvocations as number) - old.subinvocations;
-			}
-		}
-		// DQ1: the start of the run of readings in which no contract moved,
-		// carried across runs; the status checks need 60 observed days of it.
-		const quietSince = contracts.length
-			? quietSinceFor(contracts, prior)
+			? Math.round(((now.getTime() - priorAsOf) / 86_400_000) * 100) / 100
 			: null;
 		const assetHoldersDelta =
 			priorAsOf &&
@@ -528,95 +607,80 @@ async function run() {
 			typeof assetHolders === "number"
 				? assetHolders - prior.assetHolders
 				: null;
-		// Payments-over-the-window is the actual "transaction volume" signal; the
-		// lifetime count alone can't answer "is this still being used?"
-		const assetPaymentsDelta =
-			priorAsOf &&
-			typeof prior?.assetPayments === "number" &&
-			typeof assetPayments === "number"
-				? assetPayments - prior.assetPayments
-				: null;
 
-		// codeInUse attribution: a contract rolls up to its repo when we know
-		// the repo either from the scanner join (sourceRepo) or stellar.expert
-		// wasm validation (verifiedRepo). Unattributed contracts roll to none.
-		const addrRepo = new Map(
-			keys.contracts.map((c) => [c.address, c.sourceRepo ?? null]),
-		);
+		// codeInUse attribution, by the one rule above.
 		for (const c of contracts) {
-			const viaValidation =
-				typeof c.verifiedRepo === "string"
-					? (c.verifiedRepo.match(
-							/github\.com\/([^/]+\/[^/.][^/]*?)(?:\.git)?(?:\/|$)/,
-						)?.[1] ?? null)
-					: null;
-			const full = addrRepo.get(c.address as string) ?? viaValidation;
-			if (!full) continue;
-			const k = full.toLowerCase();
+			const k = rollupRepoOf(
+				evidenceOf(
+					keys.contracts.find((x) => x.address === c.address) ?? {
+						address: String(c.address),
+					},
+					priorContracts.find((p) => p?.address === c.address)?.verifiedRepo,
+				),
+			);
+			if (!k) continue;
 			const cur = byRepo.get(k) ?? {
 				contracts: 0,
-				events: 0,
-				eventsDelta: null,
-				subinvocations: 0,
-				subinvocationsDelta: null,
+				activeLedgers: null,
+				lastEventAt: null,
 			};
 			cur.contracts += 1;
-			if (typeof c.events === "number") cur.events += c.events;
-			if (typeof c.subinvocations === "number")
-				cur.subinvocations += c.subinvocations;
-			if (typeof c.eventsDelta === "number")
-				cur.eventsDelta = (cur.eventsDelta ?? 0) + c.eventsDelta;
-			if (typeof c.subinvocationsDelta === "number")
-				cur.subinvocationsDelta =
-					(cur.subinvocationsDelta ?? 0) + c.subinvocationsDelta;
+			if (typeof c.activeLedgers === "number")
+				cur.activeLedgers = (cur.activeLedgers ?? 0) + c.activeLedgers;
+			if (
+				typeof c.lastEventAt === "string" &&
+				(!cur.lastEventAt || c.lastEventAt > cur.lastEventAt)
+			)
+				cur.lastEventAt = c.lastEventAt;
 			byRepo.set(k, cur);
 		}
 
-		const summary = [
-			contracts.length ? `${contracts.length} contracts` : null,
-			keys.asset
-				? `${keys.asset.code} holders=${assetHolders} trustlines=${assetTrustlines} payments=${assetPayments} trades=${assetTrades}`
-				: null,
-		]
-			.filter(Boolean)
-			.join(", ");
-		console.log(
-			`${execute ? "WRITE" : "would write"} ${slug}: ${summary}${quietSince ? ` (contracts quiet since ${quietSince.slice(0, 10)})` : ""}`,
-		);
-		for (const c of contracts) {
+		// The plan, old value beside new, so a dry run shows what would change.
+		console.log(`${execute ? "WRITE" : "would write"} ${slug}`);
+		if (!keys.asset && prior?.assetCode)
 			console.log(
-				`    ${String(c.label)}: events=${c.events} subinv=${c.subinvocations}${c.verifiedRepo ? " repo-verified" : ""}`,
+				`    ASSET DROPPED: ${String(prior.assetCode)}-${String(prior.issuer)} no longer joins to this row`,
+			);
+		if (keys.asset)
+			console.log(
+				`    ${keys.asset.code}: holders ${prior?.assetHolders ?? "none"} → ${assetHolders} | supply ${prior?.assetSupply ?? "none"} → ${assetSupply} | trustlines ${prior?.assetTrustlines ?? "none"} → ${assetTrustlines} | last moved ${day(assetLastMovedAt)}`,
+			);
+		for (const c of contracts) {
+			const old = priorContracts.find((p) => p?.address === c.address);
+			console.log(
+				`    ${String(c.label)}: last event ${day(c.lastEventAt)} | ${c.activeLedgers ?? "no"} active ledgers | ${c.ttlState ?? "ttl unread"}${old ? "" : " | NEW"}${c.createdAt ? "" : " | no creation date"}${(old?.verifiedRepo ?? null) !== c.verifiedRepo ? ` | source repo ${old?.verifiedRepo ?? "none"} → ${c.verifiedRepo ?? "none"}` : ""}`,
 			);
 		}
+		for (const gone of priorContracts.filter(
+			(p) => !contracts.some((c) => c.address === p?.address),
+		))
+			console.log(
+				`    DROPPED ${String(gone?.label)} ${String(gone?.address)}`,
+			);
 
 		if (execute) {
+			const onchain = {
+				assetCode: keys.asset?.code ?? null,
+				issuer: keys.asset?.issuer ?? null,
+				assetHolders,
+				assetSupply,
+				assetHoldersDelta,
+				assetTrustlines,
+				assetLastMovedAt,
+				contracts,
+				source: SOURCE,
+				asOf,
+				prevAsOf: priorAsOf ? new Date(priorAsOf).toISOString() : null,
+				deltaDays,
+			};
+			const projectId = (proj.docs[0] as { id: string | number }).id;
 			await payload.update({
 				collection: "projects",
-				id: (proj.docs[0] as { id: string | number }).id,
-				data: {
-					onchain: {
-						assetCode: keys.asset?.code ?? null,
-						issuer: keys.asset?.issuer ?? null,
-						assetHolders,
-						assetSupply,
-						assetHoldersDelta,
-						assetTrustlines,
-						assetPayments,
-						assetPaymentsAmount,
-						assetPaymentsDelta,
-						assetTrades,
-						contracts,
-						source: "stellar.expert",
-						asOf,
-						prevAsOf: priorAsOf ? new Date(priorAsOf).toISOString() : null,
-						deltaDays,
-						quietSince,
-					},
-				},
+				id: projectId,
+				data: { onchain },
 			});
-			// DQ1 review: read back what the status checks depend on. A field
-			// the schema lacks is dropped silently by payload.update (#615).
-			const projectId = (proj.docs[0] as { id: string | number }).id;
+			// Read back what was sent: a field the schema lacks is dropped
+			// silently by payload.update (#615).
 			const back = await payload.findByID({
 				collection: "projects",
 				id: projectId,
@@ -624,11 +688,31 @@ async function run() {
 			});
 			const mm = diffWritten(
 				slug,
-				{ asOf, quietSince },
+				onchain as unknown as Record<string, unknown>,
 				// biome-ignore lint/suspicious/noExplicitAny: stored group shape
 				(back as any).onchain,
-				["asOf", "quietSince"],
+				[
+					"asOf",
+					"source",
+					"assetHolders",
+					"assetSupply",
+					"assetTrustlines",
+					"assetLastMovedAt",
+				],
 			);
+			// biome-ignore lint/suspicious/noExplicitAny: stored array rows
+			const backContracts: any[] = (back as any).onchain?.contracts ?? [];
+			for (const c of contracts) {
+				const got = backContracts.find((b) => b?.address === c.address);
+				mm.push(
+					...diffWritten(`${slug} ${String(c.label)}`, c, got, [
+						"lastEventAt",
+						"activeLedgers",
+						"ttlState",
+						"verifiedRepo",
+					]),
+				);
+			}
 			if (mm.length) {
 				console.error(formatMismatches(mm));
 				projectReadBackFailed += 1;
@@ -638,93 +722,157 @@ async function run() {
 		}
 	}
 
+	// A row that holds an on-chain block and has no join key this run keeps
+	// its old block. Named here, never cleared: a join can also drop out
+	// because a toml or Horizon read failed, and a failed read is not
+	// evidence that the asset stopped being the row's.
+	const held = await payload.find({
+		collection: "projects",
+		where: { "onchain.asOf": { exists: true } },
+		limit: 2000,
+		depth: 0,
+		select: { slug: true, onchain: true },
+	});
+	let orphans = 0;
+	// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+	for (const d of held.docs as any[]) {
+		if (!d.slug || bySlug.has(d.slug)) continue;
+		orphans += 1;
+		console.log(
+			`ORPHAN ${d.slug}: holds ${d.onchain?.assetCode ? `${d.onchain.assetCode} ` : ""}${Array.isArray(d.onchain?.contracts) ? d.onchain.contracts.length : 0} contract(s) read ${day(d.onchain?.asOf)}, no join key this run; left as it was`,
+		);
+	}
+	if (orphans)
+		console.log(
+			`${orphans} row(s) hold an on-chain block with no join key: decide each by hand.`,
+		);
+
 	// codeInUse write-back: static depth says "serious code"; this says the
-	// deployed contract is LIVE with real activity. Only-changed, read-back
-	// verified; unmatched repos reported, never guessed.
+	// deployed contract is live on mainnet and when it last emitted an event.
+	// Only-changed, read-back verified; unmatched repos reported, never
+	// guessed.
 	let repoWrites = 0;
 	let repoUnchanged = 0;
 	let repoUnknown = 0;
 	let repoFailed = 0;
+	const writeCodeInUse = async (
+		hit: { id: string | number; fullName: string },
+		sent: Record<string, unknown>,
+	) => {
+		if (!execute) return true;
+		await payload.update({
+			collection: "repos",
+			id: hit.id,
+			data: { codeInUse: sent },
+		});
+		const back = await payload.findByID({
+			collection: "repos",
+			id: hit.id,
+			depth: 0,
+		});
+		const mm = diffWritten(
+			hit.fullName,
+			sent,
+			// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+			(back as any).codeInUse,
+			["contracts", "activeLedgers", "lastEventAt", "asOf"],
+		);
+		if (mm.length) console.error(formatMismatches(mm));
+		return mm.length === 0;
+	};
 	for (const [k, agg] of byRepo) {
+		if (dirtyRepos.has(k)) {
+			console.log(
+				`  ? codeInUse ${k}: a project that holds one of its contracts was not read, kept as it was`,
+			);
+			continue;
+		}
 		const hit = repoIndex.get(k);
 		if (!hit) {
 			console.log(`  ? codeInUse: no indexed repo matches ${k}`);
 			repoUnknown += 1;
 			continue;
 		}
-		const sent = {
-			contracts: agg.contracts,
-			events: agg.events,
-			eventsDelta: agg.eventsDelta,
-			subinvocations: agg.subinvocations,
-			subinvocationsDelta: agg.subinvocationsDelta,
-			asOf,
-		};
+		const sent = { ...agg, asOf };
 		const cur = hit.codeInUse ?? {};
 		if (
 			cur.contracts === sent.contracts &&
-			cur.events === sent.events &&
-			(cur.eventsDelta ?? null) === sent.eventsDelta &&
-			cur.subinvocations === sent.subinvocations &&
-			(cur.subinvocationsDelta ?? null) === sent.subinvocationsDelta
+			(cur.activeLedgers ?? null) === sent.activeLedgers &&
+			(cur.lastEventAt ?? null) === sent.lastEventAt
 		) {
 			repoUnchanged += 1;
 			continue;
 		}
 		console.log(
-			`${execute ? "WRITE" : "would write"} codeInUse ${hit.fullName}: contracts=${sent.contracts} events=${sent.events} (Δ${sent.eventsDelta ?? "–"}) subinv=${sent.subinvocations} (Δ${sent.subinvocationsDelta ?? "–"})`,
+			`${execute ? "WRITE" : "would write"} codeInUse ${hit.fullName}: contracts ${cur.contracts ?? "none"} → ${sent.contracts} | active ledgers ${sent.activeLedgers ?? "none"} | last event ${day(sent.lastEventAt)}`,
 		);
-		if (execute) {
-			await payload.update({
-				collection: "repos",
-				id: hit.id,
-				data: { codeInUse: sent },
-			});
-			const back = await payload.findByID({
-				collection: "repos",
-				id: hit.id,
-				depth: 0,
-			});
-			const mm = diffWritten(
-				hit.fullName,
-				sent as unknown as Record<string, unknown>,
-				// biome-ignore lint/suspicious/noExplicitAny: stored group shape
-				(back as any).codeInUse,
-				[
-					"contracts",
-					"events",
-					"eventsDelta",
-					"subinvocations",
-					"subinvocationsDelta",
-					"asOf",
-				],
+		if (await writeCodeInUse(hit, sent)) repoWrites += 1;
+		else repoFailed += 1;
+	}
+	// A repo that held a rollup and has no attributed contract now keeps a
+	// stale "N contracts in use" forever unless it is cleared. Only after a
+	// run that read every project and every attestation: a failed read is not
+	// evidence that an attribution ended.
+	let repoCleared = 0;
+	const wholeRun = fetchSkipped === 0 && noRow.length === 0;
+	for (const [k, hit] of repoIndex) {
+		if (
+			byRepo.has(k) ||
+			dirtyRepos.has(k) ||
+			typeof hit.codeInUse?.contracts !== "number"
+		)
+			continue;
+		if (!wholeRun) {
+			console.log(
+				`  ? codeInUse ${hit.fullName}: no attributed contract this run, kept (the run did not read everything)`,
 			);
-			if (mm.length) {
-				console.error(formatMismatches(mm));
-				repoFailed += 1;
-				continue;
-			}
+			continue;
 		}
-		repoWrites += 1;
+		console.log(
+			`${execute ? "CLEAR" : "would clear"} codeInUse ${hit.fullName}: contracts ${hit.codeInUse.contracts} → none (no contract is attributed to it now)`,
+		);
+		const cleared = {
+			contracts: null,
+			activeLedgers: null,
+			lastEventAt: null,
+			asOf: null,
+		};
+		if (await writeCodeInUse(hit, cleared)) repoCleared += 1;
+		else repoFailed += 1;
 	}
 	console.log(
-		`codeInUse: ${repoWrites} ${execute ? "written" : "would write"} · ${repoUnchanged} unchanged · ${repoUnknown} unmatched-repo · ${repoFailed} read-back failures`,
+		`codeInUse: ${repoWrites} ${execute ? "written" : "would write"} · ${repoCleared} ${execute ? "cleared" : "would clear"} · ${repoUnchanged} unchanged · ${repoUnknown} unmatched-repo · ${repoFailed} read-back failures`,
 	);
 	if (repoFailed) process.exitCode = 1;
 
 	console.log(
-		`\n${execute ? "Updated" : "Would update"}: ${execute ? updated : bySlug.size - skipped} | skipped: ${skipped} (${fetchSkipped} by fetch failure)`,
+		`\n${execute ? "Updated" : "Would update"}: ${execute ? updated : bySlug.size - skipped} | skipped: ${skipped} (${fetchSkipped} by a failed read)`,
 	);
 	if (projectReadBackFailed) {
 		console.error(
-			`RED: ${projectReadBackFailed} project onchain write(s) did not read back as sent (asOf, quietSince).`,
+			`RED: ${projectReadBackFailed} project onchain write(s) did not read back as sent.`,
+		);
+		process.exitCode = 1;
+	}
+	if (unreadLive.length) {
+		console.error(
+			`RED: the source of ${unreadLive.length} live contract(s) could not be checked: the RPC did not list the code or GitHub's attestation read failed (${unreadLive.slice(0, 5).join("; ")}${unreadLive.length > 5 ? "; ..." : ""}); their verifiedRepo was kept as it was.`,
+		);
+		process.exitCode = 1;
+	}
+	if (noRow.length) {
+		// A join key that names no row is a mistake in the key, not in the
+		// chain: it holds back every repo its contracts roll up to until it
+		// is corrected, so the run says so with its exit code.
+		console.error(
+			`RED: ${noRow.length} join key(s) name a slug no project row has: ${noRow.join(", ")}. Correct the seed or the repo link.`,
 		);
 		process.exitCode = 1;
 	}
 	if (fetchSkipped) {
 		// A stale row is a silent failure; the run says so with its exit code.
 		console.error(
-			`RED: ${fetchSkipped} project(s) kept stale on-chain data because stellar.expert did not answer after retries.`,
+			`RED: ${fetchSkipped} project(s) kept stale on-chain data because a source did not answer after retries.`,
 		);
 		process.exitCode = 1;
 	}
