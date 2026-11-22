@@ -338,20 +338,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 368,
+    "liveNoDatedSignal": 367,
     "liveStale365": 136,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 622,
+        "ageDays": 629,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 990,
+        "ageDays": 997,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -393,7 +393,7 @@
       {
         "slug": "lightecho",
         "name": "Lightecho",
-        "ageDays": 433,
+        "ageDays": 440,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -483,6 +483,6 @@
       }
     ]
   },
-  "generatedAt": "2026-11-15T16:16:58Z",
+  "generatedAt": "2026-11-22T17:05:46Z",
   "evalKey": "engine-b-sweeps"
 }

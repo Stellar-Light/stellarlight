@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-15T16:16:57Z",
+  "generatedAt": "2026-11-22T17:05:46Z",
   "frame": {
     "scf": 531,
     "directory": 1012,
-    "matched": 345,
-    "roundsChecked": 345
+    "matched": 344,
+    "roundsChecked": 344
   },
   "overstated": [],
   "understated": [],

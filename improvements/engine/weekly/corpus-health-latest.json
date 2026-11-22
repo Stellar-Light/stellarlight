@@ -1,7 +1,7 @@
 {
   "frame": {
-    "chunks": 18344,
-    "docs": 3238
+    "chunks": 18399,
+    "docs": 3256
   },
   "s5_junk_urls": {
     "count": 0,
@@ -13,29 +13,22 @@
     "sample": []
   },
   "s7_coverage": {
-    "dev-docs": {
-      "chunks": 5392,
-      "datedPct": 60,
-      "newestAgeDays": 26,
-      "undated": false,
-      "stalled": false
-    },
     "lumenloop-research": {
-      "chunks": 600,
+      "chunks": 611,
       "datedPct": 100,
       "newestAgeDays": 2,
       "undated": false,
       "stalled": false
     },
-    "audit": {
-      "chunks": 1237,
+    "sdf-blog": {
+      "chunks": 2489,
       "datedPct": 100,
-      "newestAgeDays": 26,
+      "newestAgeDays": 7,
       "undated": false,
       "stalled": false
     },
     "scf-proposal": {
-      "chunks": 5826,
+      "chunks": 5862,
       "datedPct": 0,
       "newestAgeDays": null,
       "undated": false,
@@ -43,24 +36,31 @@
       "reason": "SCF submission pages state no date; each document names its award round instead",
       "stalled": false
     },
-    "sdf-blog": {
-      "chunks": 2481,
+    "dev-docs": {
+      "chunks": 5392,
+      "datedPct": 60,
+      "newestAgeDays": 33,
+      "undated": false,
+      "stalled": false
+    },
+    "audit": {
+      "chunks": 1237,
       "datedPct": 100,
-      "newestAgeDays": 10,
+      "newestAgeDays": 33,
       "undated": false,
       "stalled": false
     },
     "release": {
       "chunks": 260,
       "datedPct": 100,
-      "newestAgeDays": 13,
+      "newestAgeDays": 20,
       "undated": false,
       "stalled": false
     },
     "cap": {
       "chunks": 959,
       "datedPct": 98,
-      "newestAgeDays": 26,
+      "newestAgeDays": 33,
       "undated": false,
       "stalled": false
     },
@@ -76,14 +76,14 @@
     "sep": {
       "chunks": 690,
       "datedPct": 99,
-      "newestAgeDays": 47,
+      "newestAgeDays": 7,
       "undated": false,
       "stalled": false
     },
     "ec-developer-report": {
       "chunks": 45,
       "datedPct": 100,
-      "newestAgeDays": 1415,
+      "newestAgeDays": 1422,
       "undated": false,
       "stalled": false
     },
@@ -99,35 +99,35 @@
     "sdf-org": {
       "chunks": 80,
       "datedPct": 29,
-      "newestAgeDays": 26,
+      "newestAgeDays": 33,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 193,
+      "newestAgeDays": 200,
       "undated": false,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 180,
+      "newestAgeDays": 187,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 155,
+      "newestAgeDays": 162,
       "undated": false,
       "stalled": false
     },
     "paper": {
       "chunks": 27,
       "datedPct": 100,
-      "newestAgeDays": 3917,
+      "newestAgeDays": 3924,
       "undated": false,
       "stalled": false
     }
@@ -139,9 +139,9 @@
     "meaning": "actionable mirror components only (republication candidates + ambiguous identical pairs). Template siblings and boilerplate overlap are distinct documents sharing text, enumerated below, never counted as dirt.",
     "informational": {
       "templateSiblings": 10,
-      "boilerplateOverlap": 163
+      "boilerplateOverlap": 164
     }
   },
-  "generatedAt": "2026-11-15T16:16:58Z",
+  "generatedAt": "2026-11-22T17:05:47Z",
   "evalKey": "corpus-health"
 }
