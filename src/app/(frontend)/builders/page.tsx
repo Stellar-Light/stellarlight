@@ -5,7 +5,6 @@ import {
 	type BuilderRowData,
 	BuildersDirectory,
 } from "@/components/builders-directory";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AMBASSADORS } from "@/data/stellar-ambassadors";
 import { builderCodeActivity, type CodeActivity } from "@/lib/builder-code";
@@ -24,6 +23,8 @@ import { findWholeSet } from "@/lib/whole-set";
 // on the list could 404 when clicked. Live Passport is only a fallback for
 // an empty mirror. ISR, not force-dynamic: the mirror moves once a day.
 export const revalidate = 300;
+
+const PASSPORT_URL = "https://demo.stellarpassport.xyz";
 
 export const metadata: Metadata = {
 	title: "Stellar Builders & Developers",
@@ -141,6 +142,10 @@ export default async function BuildersPage() {
 			if (re.test(loc)) return { code, name };
 		return null;
 	};
+	// Passport fields are free text: a location of "*" or a role of "." is
+	// an empty field somebody had to fill, not a place or a job.
+	const words = (v: string | null | undefined) =>
+		v && /\p{L}/u.test(v) ? v.trim() : null;
 	const rows: BuilderRowData[] = builders.map((b) => {
 		const a = act(b);
 		const handle = String(b.github_username);
@@ -148,9 +153,9 @@ export default async function BuildersPage() {
 			handle,
 			name: b.display_name || handle,
 			avatar: b.avatar_url ?? null,
-			role: b.role_title ?? null,
-			location: b.location ?? null,
-			bio: b.bio ?? null,
+			role: words(b.role_title),
+			location: words(b.location),
+			bio: words(b.bio),
 			twitter: b.twitter_handle ?? null,
 			website: b.website_url ?? null,
 			featured: !!b.is_featured,
@@ -178,6 +183,9 @@ export default async function BuildersPage() {
 		};
 	});
 
+	// the directory's size as the mirror counts it, even past the read ceiling
+	const count = total ?? builders.length;
+
 	return (
 		<div className="min-h-screen relative">
 			<main className="max-w-7xl mx-auto px-4 sm:px-6 py-16 pt-28">
@@ -189,35 +197,47 @@ export default async function BuildersPage() {
 					<span className="text-sm font-medium">Back to Home</span>
 				</Link>
 
-				<div className="mb-8">
-					<p className="text-xs font-medium uppercase tracking-wider text-neutral-500 mb-2">
-						Directory
-					</p>
-					<h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground mb-2">
-						Builders
-					</h1>
-					<p className="text-muted-foreground">
-						{(total ?? builders.length).toLocaleString("en-US")} developers
-						building on Stellar.
-						{total !== null && total > builders.length
-							? ` Showing the newest ${builders.length.toLocaleString("en-US")} of them.`
-							: ""}{" "}
-						Profiles from Stellar Passport, code activity from the repos we
-						index.
-						{syncedAt
-							? ` Profiles synced ${new Date(syncedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}.`
-							: ""}
-					</p>
-					{rows.length > 0 && !activityRead && (
-						<p className="text-sm text-muted-foreground mt-2">
-							Code activity could not be read just now, so repo and commit
-							counts here are unknown, not zero.
+				<div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
+					<div className="min-w-0 max-w-2xl">
+						<p className="text-xs font-medium uppercase tracking-wider text-neutral-500 mb-2">
+							Directory
 						</p>
-					)}
+						<h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground mb-3">
+							Builders
+						</h1>
+						<p className="text-muted-foreground">
+							The people building on Stellar, and what the code shows. Profiles
+							come from Stellar Passport; repos, commits and projects come from
+							the repositories we index.
+						</p>
+						<p className="text-xs text-muted-foreground/70 mt-2">
+							{total !== null && total > builders.length
+								? `Showing the newest ${builders.length.toLocaleString("en-US")} of ${total.toLocaleString("en-US")} profiles.`
+								: `${count.toLocaleString("en-US")} ${count === 1 ? "profile" : "profiles"}.`}
+							{syncedAt
+								? ` Synced ${new Date(syncedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}.`
+								: ""}
+						</p>
+						{rows.length > 0 && !activityRead && (
+							<p className="text-sm text-muted-foreground mt-2">
+								Code activity could not be read just now, so repo and commit
+								counts here are unknown, not zero.
+							</p>
+						)}
+					</div>
+					<a
+						href={PASSPORT_URL}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="h-10 px-4 inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-sm font-medium text-foreground transition-colors"
+					>
+						Create your profile
+						<ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+					</a>
 				</div>
 
 				{rows.length > 0 ? (
-					<BuildersDirectory rows={rows} />
+					<BuildersDirectory rows={rows} total={count} />
 				) : (
 					<Card className="border border-border/50 bg-card">
 						<CardContent className="py-16 text-center">
@@ -231,26 +251,26 @@ export default async function BuildersPage() {
 					</Card>
 				)}
 
-				{/* CTA */}
-				<div className="mt-16 text-center py-12 px-8 rounded-2xl border border-border bg-card">
-					<h3 className="text-2xl font-semibold mb-3">
-						Are you building on Stellar?
-					</h3>
-					<p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-						Create your Stellar Passport profile to showcase your work and
-						connect with the community
-					</p>
-					<Button asChild size="lg">
-						<a
-							href="https://demo.stellarpassport.xyz"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="flex items-center gap-2"
-						>
-							Create Your Profile
-							<ExternalLink className="w-4 h-4" />
-						</a>
-					</Button>
+				{/* Get-listed CTA, the partner directory's compact form */}
+				<div className="mt-12 rounded-2xl border border-border bg-card p-5 flex items-center justify-between gap-4 flex-wrap">
+					<div className="min-w-0">
+						<h3 className="text-sm font-semibold text-foreground mb-1">
+							Building on Stellar and not here?
+						</h3>
+						<p className="text-xs text-muted-foreground">
+							Create a Stellar Passport profile. It shows up here after the next
+							daily sync, with your repos and commits attached.
+						</p>
+					</div>
+					<a
+						href={PASSPORT_URL}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="h-10 px-4 inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-sm font-medium text-foreground transition-colors"
+					>
+						Create your profile
+						<ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+					</a>
 				</div>
 			</main>
 		</div>

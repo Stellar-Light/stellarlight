@@ -111,8 +111,9 @@ describe("builder pages say unknown, never zero or none", () => {
 		state.total = 1500;
 		const html = await directory();
 		state.total = 1;
-		expect(html).toContain("1,500 developers building on Stellar");
-		expect(html).toContain("Showing the newest 1 of them");
+		expect(html).toContain("Showing the newest 1 of 1,500 profiles.");
+		// the count tile reads the same total, not the rows that were read
+		expect(html).toMatch(/Builders<\/span><span[^>]*>1,500</);
 	});
 
 	it("/builders says code activity is unknown when its read fails", async () => {
