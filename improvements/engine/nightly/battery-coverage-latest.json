@@ -1,10 +1,10 @@
 {
-	"generatedAt": "2026-11-21T13:51:20.878Z",
+	"generatedAt": "2026-11-22T13:44:59.237Z",
 	"detector": "battery-coverage",
 	"failures": [
 		{
 			"probe": "battery:q-sdf-2026-strategy-priorities",
-			"note": "top 0.49 < 0.6 via research/confidence for \"What are SDF's stated strategic priorities for 2026, and where are its strategy \" (history-org-tokenomics); best: https://lumenloop.com/research/stellar-weekly-roundup-week-nov-13-2026",
+			"note": "top 0.50 < 0.6 via research/confidence for \"What are SDF's stated strategic priorities for 2026, and where are its strategy \" (history-org-tokenomics); best: https://lumenloop.com/research/scf-q4-2026-public-goods-award-results",
 			"surface": "corpus"
 		},
 		{
