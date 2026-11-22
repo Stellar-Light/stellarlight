@@ -101,6 +101,7 @@ describe("builderCodeActivity attribution", () => {
 			repos: [
 				repo("stellar/js-stellar-sdk", {
 					commits90d: 45,
+					stars: 700,
 					projectSlug: "stellar-development-foundation",
 				}),
 			],
@@ -120,6 +121,11 @@ describe("builderCodeActivity attribution", () => {
 		]);
 		expect(me?.commits90d).toBe(0);
 		expect(me?.contributedCommits12m).toBe(9);
+		// the SDK's 700 stars are the SDK's: the repo row keeps them, the
+		// person's total does not (2026-11-22: 3 one-repo contributors each
+		// read "146 stars", one read 6,821)
+		expect(me?.stars).toBe(0);
+		expect(me?.repos[0]?.stars).toBe(700);
 	});
 
 	it("owning the repo, or being the project's org, is what makes it 'builds'", async () => {

@@ -1,22 +1,39 @@
 "use client";
 
+/**
+ * Public builders directory. One job: find a person and see what they ship.
+ *
+ * Three parts, top to bottom: a pulse strip of counts that double as the
+ * filters people reach for first, a toolbar (search, sort, country), and a
+ * card grid. A card says who the person is, what they say about themselves,
+ * which listed projects they build, and what the repos we index show.
+ *
+ * A profile with nothing to show (no bio, no role, no indexed repo, no
+ * project) is held back behind "view more profiles", the same quality gate
+ * the partner directory uses: 99 of 419 profiles on 2026-11-22.
+ *
+ * Human twin of GET /api/builders.
+ */
+
 import {
-	Briefcase,
-	Code2,
-	GitBranch,
-	Github,
+	ArrowRight,
+	ArrowUpDown,
+	ChevronDown,
 	Globe,
-	MapPin,
 	Search,
-	Twitter,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { useMemo, useState } from "react";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useQueryState } from "@/hooks/use-query-state";
-import { ago, agoSentence } from "@/lib/builder-code";
+import { agoSentence } from "@/lib/builder-code";
+import { cn } from "@/lib/utils";
 
 /** Serializable row the server builds from Passport + our repos index. */
 export type BuilderRowData = {
@@ -50,27 +67,69 @@ const flag = (code: string) =>
 		...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65),
 	);
 
-type SortKey = "active" | "repos" | "stars" | "recent" | "name";
+type SortKey = "top" | "active" | "repos" | "stars" | "recent" | "name";
 const SORTS: Array<{ key: SortKey; label: string }> = [
-	{ key: "active", label: "Most active" },
+	{ key: "top", label: "Top builders" },
+	{ key: "active", label: "Most commits" },
 	{ key: "recent", label: "Recently active" },
 	{ key: "repos", label: "Most repos" },
 	{ key: "stars", label: "Most stars" },
 	{ key: "name", label: "A to Z" },
 ];
-
 const SORT_KEYS = SORTS.map((s) => s.key);
 
+/** How many cards a page of the grid holds before "show more". */
+const PAGE = 48;
+
 const heat = (r: BuilderRowData) => r.commits30d * 3 + (r.commits90d ?? 0);
+/** The default order. Raw commit counts put automated committers first (one
+ * profile: 5,713 commits in 90 days across two repos, 2026-11-22), so each
+ * count is log-damped: ten times the commits is a few points, not ten times
+ * the weight. Building a listed project counts for more than committing to
+ * one, and a written bio breaks near ties. No clock in it, so the server and
+ * the browser sort alike. */
+const top = (r: BuilderRowData) =>
+	Math.log2(1 + heat(r)) +
+	Math.log2(1 + (r.stars ?? 0)) +
+	(r.projects.length > 0 ? 4 : r.contributesTo.length > 0 ? 2 : 0) +
+	(r.bio ? 1 : 0);
 // an unknown count sorts below every known one, zero included
 const known = (n: number | null) => n ?? -1;
-const recentCut = () => Date.now() - 90 * 86_400_000;
+const within = (iso: string | null, days: number) =>
+	Date.parse(iso ?? "") > Date.now() - days * 86_400_000;
 const isRecent = (r: BuilderRowData) =>
-	heat(r) > 0 || Date.parse(r.lastCommitAt ?? "") > recentCut();
+	heat(r) > 0 || within(r.lastCommitAt, 90);
+const onListedProject = (r: BuilderRowData) =>
+	r.projects.length > 0 || r.contributesTo.length > 0;
+/** Something a visitor can use: words about the person, code, a project or
+ * recent commits. An unknown repo count is not a zero, so it never hides a
+ * profile. Everything a pulse tile counts passes, so a tile's number and the
+ * list its filter shows agree by construction. */
+const hasSubstance = (r: BuilderRowData) =>
+	!!r.bio ||
+	!!r.role ||
+	r.repos === null ||
+	r.repos > 0 ||
+	r.commits30d > 0 ||
+	onListedProject(r) ||
+	r.passportProjects > 0 ||
+	!!r.ambassador;
 
-export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
+// The site-wide filter-button shell (leaderboard/directory pattern).
+const btnBase =
+	"h-11 px-4 inline-flex items-center justify-between gap-2 rounded-xl bg-card border border-border/50 text-foreground hover:bg-white/[0.04] transition-colors";
+
+export function BuildersDirectory({
+	rows,
+	total,
+}: {
+	rows: BuilderRowData[];
+	/** the directory's size as its source counts it; rows can be fewer when
+	 * the read stops at its ceiling */
+	total: number;
+}) {
 	const [q, setQ] = useQueryState("q", "");
-	const [sort, setSort] = useQueryState("sort", "active", SORT_KEYS);
+	const [sort, setSort] = useQueryState("sort", "top", SORT_KEYS);
 	const [active, setActive] = useQueryState("active", "");
 	const onlyActive = active === "1";
 	const [projectsOnly, setProjectsOnly] = useQueryState("projects", "");
@@ -82,31 +141,45 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 	const onlyAmbassadors = ambassadorsOnly === "1";
 	const [countryParam, setCountry] = useQueryState("country", "");
 	const country = countryParam || null;
+	const [shownAll, setShownAll] = useQueryState("all", "");
+	const showAll = shownAll === "1";
+	const [pages, setPages] = useState(1);
 
-	const hasAmbassadors = rows.some((r) => r.ambassador);
-	// the regions people are in, most common first (round flag toggles)
-	const countries = useMemo(() => {
-		const c = new Map<string, { code: string; name: string; n: number }>();
+	// The counts in the pulse strip describe the whole directory, whatever
+	// the filters say, so each one names what its filter would show.
+	const pulse = useMemo(() => {
+		const countries = new Map<
+			string,
+			{ code: string; name: string; n: number }
+		>();
+		let activeN = 0;
+		let listedN = 0;
+		let ambassadorN = 0;
 		for (const r of rows) {
-			if (!r.country) continue;
-			const e = c.get(r.country.code) ?? { ...r.country, n: 0 };
-			e.n += 1;
-			c.set(r.country.code, e);
+			if (isRecent(r)) activeN += 1;
+			if (onListedProject(r)) listedN += 1;
+			if (r.ambassador) ambassadorN += 1;
+			if (r.country) {
+				const e = countries.get(r.country.code) ?? { ...r.country, n: 0 };
+				e.n += 1;
+				countries.set(r.country.code, e);
+			}
 		}
-		return [...c.values()].sort((a, b) => b.n - a.n).slice(0, 8);
+		return {
+			activeN,
+			listedN,
+			ambassadorN,
+			countries: [...countries.values()].sort(
+				(a, b) => b.n - a.n || a.name.localeCompare(b.name),
+			),
+		};
 	}, [rows]);
 
-	const shown = useMemo(() => {
+	const matches = useMemo(() => {
 		const needle = q.trim().toLowerCase();
-		let list = rows.filter((r) => {
+		return (r: BuilderRowData) => {
 			if (onlyActive && !isRecent(r)) return false;
-			if (
-				onlyProjects &&
-				r.projects.length === 0 &&
-				r.contributesTo.length === 0 &&
-				r.passportProjects === 0
-			)
-				return false;
+			if (onlyProjects && !onListedProject(r)) return false;
 			if (onlyAmbassadors && !r.ambassador) return false;
 			if (country && r.country?.code !== country) return false;
 			if (needle) {
@@ -115,12 +188,22 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 				if (!hay.includes(needle)) return false;
 			}
 			return true;
-		});
+		};
+	}, [q, onlyActive, onlyProjects, onlyAmbassadors, country]);
+
+	// A search by name should find the person even when their profile is
+	// empty, so the gate only applies while nobody is typing.
+	const gated = !showAll && q.trim() === "";
+	const shown = useMemo(() => {
 		const t = (iso: string | null) => Date.parse(iso ?? "0") || 0;
 		const cmp: Record<
 			SortKey,
 			(a: BuilderRowData, b: BuilderRowData) => number
 		> = {
+			top: (a, b) =>
+				top(b) - top(a) ||
+				t(b.lastCommitAt) - t(a.lastCommitAt) ||
+				a.name.localeCompare(b.name),
 			active: (a, b) =>
 				heat(b) - heat(a) ||
 				t(b.lastCommitAt) - t(a.lastCommitAt) ||
@@ -133,271 +216,510 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 				known(b.stars) - known(a.stars) || known(b.repos) - known(a.repos),
 			name: (a, b) => a.name.localeCompare(b.name),
 		};
-		list = [...list].sort(
-			(a, b) => Number(b.featured) - Number(a.featured) || cmp[sort](a, b),
-		);
-		return list;
-	}, [rows, q, sort, onlyActive, onlyProjects, onlyAmbassadors, country]);
-
-	const chip = (on: boolean, onClick: () => void, label: string) => (
-		<button
-			type="button"
-			onClick={onClick}
-			aria-pressed={on}
-			className={`rounded-full border px-3 py-1 text-xs transition-colors ${on ? "border-white/40 bg-white/[0.08] text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-white/25"}`}
-		>
-			{label}
-		</button>
+		return rows
+			.filter((r) => matches(r) && (!gated || hasSubstance(r)))
+			.sort(
+				(a, b) => Number(b.featured) - Number(a.featured) || cmp[sort](a, b),
+			);
+	}, [rows, matches, gated, sort]);
+	const heldBack = useMemo(
+		() =>
+			gated ? rows.filter((r) => matches(r) && !hasSubstance(r)).length : 0,
+		[rows, matches, gated],
 	);
+
+	const hasFilters =
+		q.trim() !== "" ||
+		onlyActive ||
+		onlyProjects ||
+		onlyAmbassadors ||
+		country !== null;
+	const clear = () => {
+		setQ("");
+		setActive("");
+		setProjectsOnly("");
+		setAmbassadorsOnly("");
+		setCountry("");
+		setPages(1);
+	};
+	const visible = shown.slice(0, pages * PAGE);
+	const sortLabel = SORTS.find((s) => s.key === sort)?.label ?? "Top builders";
+	const countryPicked = pulse.countries.find((c) => c.code === country);
 
 	return (
 		<div>
-			{/* toolbar */}
-			<div className="mb-6 space-y-3">
-				<div className="flex flex-col md:flex-row gap-3 md:items-center">
-					<div className="relative w-full md:max-w-md">
-						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-						<input
-							value={q}
-							onChange={(e) => setQ(e.target.value)}
-							placeholder="Search builders"
-							aria-label="Search builders"
-							className="w-full rounded-xl border border-border bg-card pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-white/30"
-						/>
-					</div>
-					<div className="flex flex-wrap items-center gap-1.5">
-						<span className="text-xs text-muted-foreground mr-1">Sort</span>
-						{SORTS.map((s) =>
-							chip(sort === s.key, () => setSort(s.key), s.label),
-						)}
-					</div>
+			{/* Pulse: the directory in four numbers; three of them filter it */}
+			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+				<PulseTile
+					value={total}
+					label="Builders"
+					hint="every profile in the directory"
+					pressed={!hasFilters}
+					onClick={clear}
+				/>
+				<PulseTile
+					value={pulse.activeN}
+					label="Active in 90 days"
+					hint="pushed code we can see"
+					pressed={onlyActive}
+					onClick={() => {
+						setActive(onlyActive ? "" : "1");
+						setPages(1);
+					}}
+					live
+				/>
+				<PulseTile
+					value={pulse.listedN}
+					label="On a listed project"
+					hint="build or contribute to one"
+					pressed={onlyProjects}
+					onClick={() => {
+						setProjectsOnly(onlyProjects ? "" : "1");
+						setPages(1);
+					}}
+				/>
+				{pulse.ambassadorN > 0 ? (
+					<PulseTile
+						value={pulse.ambassadorN}
+						label="Ambassadors"
+						hint="Stellar ambassador programme"
+						pressed={onlyAmbassadors}
+						onClick={() => {
+							setAmbassadorsOnly(onlyAmbassadors ? "" : "1");
+							setPages(1);
+						}}
+					/>
+				) : (
+					<PulseTile
+						value={pulse.countries.length}
+						label="Countries"
+						hint="read from profile locations"
+					/>
+				)}
+			</div>
+
+			{/* Toolbar */}
+			<div className="flex flex-col md:flex-row gap-3 mb-8">
+				<div className="relative flex-1">
+					<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+					<input
+						type="text"
+						value={q}
+						onChange={(e) => {
+							setQ(e.target.value);
+							setPages(1);
+						}}
+						placeholder="Search name, project, language or place"
+						aria-label="Search builders"
+						className="w-full h-11 pl-11 pr-4 bg-card text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-white/30 focus-visible:shadow-[0_0_0_2px_#171717,0_0_0_4px_rgba(255,255,255,0.6)]"
+					/>
 				</div>
-				<div className="flex flex-wrap items-center gap-2">
-					{chip(
-						onlyActive,
-						() => setActive(onlyActive ? "" : "1"),
-						"Active in 90 days",
+				<div className="grid grid-cols-2 md:flex gap-3">
+					<DropdownMenu>
+						<DropdownMenuTrigger className={cn(btnBase, "md:min-w-[190px]")}>
+							<ArrowUpDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+							<span className="flex-1 text-left text-sm truncate">
+								{sortLabel}
+							</span>
+							<ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+						</DropdownMenuTrigger>
+						<DropdownMenuContent className="w-[190px]">
+							{SORTS.map((s) => (
+								<DropdownMenuItem
+									key={s.key}
+									onClick={() => setSort(s.key)}
+									className={
+										sort === s.key
+											? "bg-white/10 text-foreground"
+											: "text-foreground hover:bg-white/5"
+									}
+								>
+									{s.label}
+								</DropdownMenuItem>
+							))}
+						</DropdownMenuContent>
+					</DropdownMenu>
+					<DropdownMenu>
+						<DropdownMenuTrigger className={cn(btnBase, "md:min-w-[190px]")}>
+							<Globe className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+							<span className="flex-1 text-left text-sm truncate">
+								{countryPicked
+									? `${flag(countryPicked.code)} ${countryPicked.name}`
+									: "All countries"}
+							</span>
+							<ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+						</DropdownMenuTrigger>
+						<DropdownMenuContent className="w-[230px] max-h-[400px] overflow-y-auto">
+							<DropdownMenuItem
+								onClick={() => {
+									setCountry("");
+									setPages(1);
+								}}
+								className={
+									country === null
+										? "bg-white/10 text-foreground"
+										: "text-foreground hover:bg-white/5"
+								}
+							>
+								All countries
+							</DropdownMenuItem>
+							{pulse.countries.map((c) => (
+								<DropdownMenuItem
+									key={c.code}
+									onClick={() => {
+										setCountry(c.code);
+										setPages(1);
+									}}
+									className={cn(
+										"flex items-center justify-between gap-3",
+										country === c.code
+											? "bg-white/10 text-foreground"
+											: "text-foreground hover:bg-white/5",
+									)}
+								>
+									<span>
+										{flag(c.code)} {c.name}
+									</span>
+									<span className="text-xs text-muted-foreground tabular-nums">
+										{c.n}
+									</span>
+								</DropdownMenuItem>
+							))}
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
+			</div>
+
+			{/* Results header */}
+			<div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 mb-4">
+				<div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+					<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground tabular-nums">
+						{shown.length === 0
+							? "No builders match"
+							: `${shown.length.toLocaleString("en-US")} builder${shown.length === 1 ? "" : "s"}`}
+					</h2>
+					{sort === "top" && shown.length > 1 && (
+						<p className="text-xs text-muted-foreground/70">
+							ordered by recent commits, stars on their own repos and listed
+							projects
+						</p>
 					)}
-					{chip(
-						onlyProjects,
-						() => setProjectsOnly(onlyProjects ? "" : "1"),
-						"Has projects",
-					)}
-					{hasAmbassadors &&
-						chip(
-							onlyAmbassadors,
-							() => setAmbassadorsOnly(onlyAmbassadors ? "" : "1"),
-							"Ambassadors",
-						)}
-					{countries.length > 0 && <span className="mx-1 h-4 w-px bg-border" />}
-					{countries.map((c) => (
+				</div>
+				<div className="flex items-center gap-4 text-xs text-muted-foreground">
+					{heldBack > 0 && shown.length > 0 && (
 						<button
-							key={c.code}
 							type="button"
-							onClick={() => setCountry(country === c.code ? "" : c.code)}
-							aria-pressed={country === c.code}
-							title={`${c.name} (${c.n})`}
-							aria-label={`Only ${c.name}`}
-							className={`h-8 w-8 rounded-full border text-base leading-none flex items-center justify-center transition-colors ${country === c.code ? "border-white/50 bg-white/[0.08]" : "border-border hover:border-white/25"}`}
+							onClick={() => setShownAll("1")}
+							className="hover:text-foreground transition-colors"
 						>
-							{flag(c.code)}
+							Show {heldBack} empty {heldBack === 1 ? "profile" : "profiles"}
 						</button>
-					))}
+					)}
+					{showAll && (
+						<button
+							type="button"
+							onClick={() => setShownAll("")}
+							className="hover:text-foreground transition-colors"
+						>
+							Hide empty profiles
+						</button>
+					)}
+					{hasFilters && (
+						<button
+							type="button"
+							onClick={clear}
+							className="hover:text-foreground transition-colors"
+						>
+							Clear filters
+						</button>
+					)}
 				</div>
-				<p className="text-xs text-muted-foreground tabular-nums">
-					{shown.length === rows.length
-						? `${rows.length} builders`
-						: `${shown.length} of ${rows.length} builders`}
-				</p>
 			</div>
 
 			{shown.length === 0 ? (
-				<Card className="border border-border/50 bg-card">
-					<CardContent className="py-14 text-center text-sm text-muted-foreground">
-						No one matches that yet. Clear a filter, or try a project or
-						language name.
-					</CardContent>
-				</Card>
+				<div className="rounded-2xl border border-border bg-card p-10 text-center">
+					<p className="text-muted-foreground text-sm">
+						No one matches that yet.{" "}
+						{heldBack > 0 ? (
+							<button
+								type="button"
+								onClick={() => setShownAll("1")}
+								className="text-foreground underline"
+							>
+								View {heldBack} more {heldBack === 1 ? "profile" : "profiles"}
+							</button>
+						) : (
+							"Clear a filter, or try a project or language name."
+						)}
+					</p>
+				</div>
 			) : (
-				<div className="space-y-3">
-					{shown.map((r) => (
+				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+					{visible.map((r) => (
 						<BuilderCard key={r.handle} r={r} />
 					))}
+				</div>
+			)}
+
+			{visible.length < shown.length && (
+				<div className="mt-8 text-center">
+					<button
+						type="button"
+						onClick={() => setPages((p) => p + 1)}
+						className={cn(btnBase, "justify-center text-sm")}
+					>
+						Show {Math.min(PAGE, shown.length - visible.length)} more
+						<span className="text-muted-foreground tabular-nums">
+							{visible.length} of {shown.length.toLocaleString("en-US")}
+						</span>
+					</button>
+				</div>
+			)}
+
+			{/* Quiet view-all: profiles with nothing to show yet */}
+			{heldBack > 0 && shown.length > 0 && visible.length >= shown.length && (
+				<div className="mt-8 text-center">
+					<button
+						type="button"
+						onClick={() => setShownAll("1")}
+						className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+					>
+						view {heldBack} more {heldBack === 1 ? "profile" : "profiles"} with
+						no bio, code or project yet
+					</button>
 				</div>
 			)}
 		</div>
 	);
 }
 
-function BuilderCard({ r }: { r: BuilderRowData }) {
-	const twitterUrl = r.twitter
-		? `https://twitter.com/${r.twitter.replace("@", "").replace("https://x.com/", "").replace("https://twitter.com/", "")}`
-		: null;
+/** One number about the directory. With onClick it is also a filter. */
+function PulseTile({
+	value,
+	label,
+	hint,
+	pressed,
+	onClick,
+	live = false,
+}: {
+	value: number;
+	label: string;
+	hint: string;
+	pressed?: boolean;
+	onClick?: () => void;
+	live?: boolean;
+}) {
+	const body = (
+		<>
+			<span className="flex items-center gap-2 text-xs text-muted-foreground">
+				{live && (
+					<span
+						className="h-1.5 w-1.5 rounded-full bg-emerald-400"
+						aria-hidden
+					/>
+				)}
+				{label}
+			</span>
+			<span className="mt-1.5 block text-2xl md:text-3xl font-semibold tracking-tight tabular-nums text-foreground">
+				{value.toLocaleString("en-US")}
+			</span>
+			<span className="mt-1 block text-[11px] text-muted-foreground/70">
+				{hint}
+			</span>
+		</>
+	);
+	const shell =
+		"flex h-full flex-col items-start rounded-xl border p-4 text-left transition-colors";
+	if (!onClick)
+		return <div className={cn(shell, "border-border/50 bg-card")}>{body}</div>;
 	return (
-		<Card
-			className={`relative border ${r.featured ? "border-white/20 bg-card" : "border-border/50 bg-card"} hover:border-white/25 hover:bg-white/[0.02] transition-colors duration-150`}
+		<button
+			type="button"
+			onClick={onClick}
+			aria-pressed={!!pressed}
+			className={cn(
+				shell,
+				pressed
+					? "border-white/40 bg-white/[0.06]"
+					: "border-border/50 bg-card hover:border-white/25 hover:bg-white/[0.03]",
+			)}
 		>
-			<Link
-				href={`/builders/${r.handle}`}
-				className="absolute inset-0 rounded-xl"
-				aria-label={`${r.name}'s profile`}
-			/>
-			<CardContent className="p-5">
-				<div className="flex items-center gap-4">
-					<div className="flex-shrink-0">
-						{r.avatar ? (
-							<Image
-								src={r.avatar}
-								alt={r.name}
-								width={48}
-								height={48}
-								className="rounded-full"
-							/>
-						) : (
-							<div className="w-12 h-12 bg-white/[0.06] border border-border rounded-full flex items-center justify-center text-neutral-300 text-lg font-semibold">
-								{r.name.charAt(0).toUpperCase()}
-							</div>
-						)}
-					</div>
-					<div className="flex-1 min-w-0">
-						<div className="flex items-center gap-2 flex-wrap">
-							<h3 className="font-semibold text-foreground truncate">
+			{body}
+		</button>
+	);
+}
+
+/** "Founder · 🇨🇱 Chile", or the handle when the profile says neither. */
+function tagline(r: BuilderRowData): string {
+	const place = r.location
+		? `${r.country ? `${flag(r.country.code)} ` : ""}${r.location}`
+		: null;
+	return [r.role, place].filter(Boolean).join(" · ") || `@${r.handle}`;
+}
+
+function BuilderCard({ r }: { r: BuilderRowData }) {
+	const [avatarFailed, setAvatarFailed] = useState(false);
+	// builds first: a project of their own says more than one they commit to
+	const projects = [
+		...r.projects.map((p) => ({ ...p, own: true })),
+		...r.contributesTo.map((p) => ({ ...p, own: false })),
+	];
+	const activeNow = r.commits30d > 0 || within(r.lastCommitAt, 30);
+	// a bio that only repeats the role line above it says nothing twice
+	const flat = (v: string | null) => (v ?? "").toLowerCase().trim();
+	const bio = r.bio && flat(r.role).startsWith(flat(r.bio)) ? null : r.bio;
+	const facts: Array<{ value: string; label: string; title?: string }> = [];
+	if (r.repos !== null && r.repos > 0) {
+		facts.push({
+			value: r.repos.toLocaleString("en-US"),
+			label: r.repos === 1 ? "Stellar repo" : "Stellar repos",
+		});
+		facts.push({
+			value: (r.stars ?? 0).toLocaleString("en-US"),
+			label: r.stars === 1 ? "star" : "stars",
+		});
+	}
+	if (r.commits30d > 0)
+		facts.push({
+			value: r.commits30d.toLocaleString("en-US"),
+			label: "commits, 30d",
+			title: "their commits in the last 30 days, from Stellar Passport",
+		});
+	else if (r.commits90d !== null && r.commits90d > 0)
+		facts.push({
+			value: r.commits90d.toLocaleString("en-US"),
+			label: "commits, 90d",
+			title: "commits on the repos they own, last 90 days",
+		});
+	else if (r.passportProjects > 0)
+		facts.push({
+			value: String(r.passportProjects),
+			label: r.passportProjects === 1 ? "project" : "projects",
+		});
+
+	return (
+		<Link href={`/builders/${r.handle}`} className="block h-full group">
+			<div className="idea-card rounded-xl p-5 cursor-pointer flex flex-col h-full">
+				{/* Who */}
+				<div className="flex items-start gap-3.5">
+					{r.avatar && !avatarFailed ? (
+						<Image
+							src={r.avatar}
+							alt=""
+							width={52}
+							height={52}
+							onError={() => setAvatarFailed(true)}
+							className="w-[52px] h-[52px] rounded-full object-cover border border-border/50 flex-shrink-0 transition-colors duration-150 group-hover:border-white/30"
+						/>
+					) : (
+						<div className="w-[52px] h-[52px] rounded-full border border-border/50 bg-white/[0.04] flex items-center justify-center text-lg font-semibold text-muted-foreground flex-shrink-0">
+							{r.name.charAt(0).toUpperCase()}
+						</div>
+					)}
+					<div className="min-w-0 flex-1 pt-0.5">
+						<div className="flex items-center gap-2">
+							<h3 className="text-base font-semibold text-foreground group-hover:text-white transition-colors duration-150 leading-tight truncate">
 								{r.name}
 							</h3>
 							{r.featured && (
-								<Badge variant="outline" className="text-xs text-neutral-300">
+								<span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-white text-[#171717] flex-shrink-0">
 									Featured
-								</Badge>
-							)}
-							{r.ambassador && (
-								<Badge
-									variant="outline"
-									className="text-xs text-neutral-300"
-									title={`Stellar Ambassador${r.ambassador.region ? `, ${r.ambassador.region}` : ""}`}
-								>
-									Ambassador · {r.ambassador.tier}
-								</Badge>
-							)}
-							{r.languages.slice(0, 2).map((l) => (
-								<span
-									key={l}
-									className="text-[10px] px-1.5 py-0.5 rounded-md border border-border text-muted-foreground"
-								>
-									{l}
-								</span>
-							))}
-						</div>
-						<div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground flex-wrap">
-							{r.role && (
-								<span className="flex items-center gap-1 truncate">
-									<Briefcase className="w-3 h-3" />
-									{r.role}
-								</span>
-							)}
-							{r.location && (
-								<span className="flex items-center gap-1">
-									<MapPin className="w-3 h-3" />
-									{r.location}
-								</span>
-							)}
-							{r.commits30d > 0 && (
-								<span className="flex items-center gap-1">
-									<GitBranch className="w-3 h-3" />
-									{r.commits30d} commits / 30d
-								</span>
-							)}
-							{r.passportProjects > 0 && (
-								<span className="flex items-center gap-1">
-									<Code2 className="w-3 h-3" />
-									{r.passportProjects} project
-									{r.passportProjects !== 1 ? "s" : ""}
-								</span>
-							)}
-							{r.repos !== null && r.repos > 0 && (
-								<span className="flex items-center gap-1 tabular-nums">
-									<GitBranch className="w-3 h-3" />
-									{r.repos} Stellar {r.repos === 1 ? "repo" : "repos"}
-									{r.stars ? `, ${r.stars.toLocaleString()} stars` : ""}
-									{r.lastCommitAt
-										? `, last commit ${agoSentence(r.lastCommitAt)}`
-										: ""}
 								</span>
 							)}
 						</div>
-						{r.projects.length > 0 && (
-							<div className="relative z-10 mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
-								<span className="text-muted-foreground">builds</span>
-								{r.projects.slice(0, 4).map((p) => (
-									<Link
-										key={p.slug}
-										href={`/project/${p.slug}`}
-										className="rounded-md border border-border bg-white/[0.03] px-1.5 py-0.5 text-foreground/90 hover:border-white/25 transition-colors"
-									>
-										{p.name}
-									</Link>
-								))}
-								{r.projects.length > 4 && (
-									<span className="text-muted-foreground">
-										+{r.projects.length - 4} more
-									</span>
+						<p className="mt-1 text-xs text-muted-foreground truncate">
+							{tagline(r)}
+						</p>
+					</div>
+					{activeNow && (
+						<span className="flex items-center gap-1.5 px-2 py-0.5 text-[11px] rounded-full border border-border/60 text-emerald-400/90 flex-shrink-0">
+							<span
+								className="h-1.5 w-1.5 rounded-full bg-emerald-400"
+								aria-hidden
+							/>
+							Active
+						</span>
+					)}
+				</div>
+
+				{/* What they say */}
+				{bio && (
+					<p className="mt-4 text-sm text-muted-foreground line-clamp-2 leading-relaxed group-hover:text-foreground/80 transition-colors duration-150">
+						{bio}
+					</p>
+				)}
+
+				{/* What they ship */}
+				{projects.length > 0 && (
+					<div className="mt-4 flex flex-wrap items-center gap-1.5">
+						{projects.slice(0, 3).map((p) => (
+							<span
+								key={`${p.own ? "b" : "c"}-${p.slug}`}
+								title={p.own ? "builds" : "contributes to"}
+								className={cn(
+									"px-2 py-0.5 text-xs rounded-md border whitespace-nowrap",
+									p.own
+										? "border-border bg-white/[0.06] text-foreground/90"
+										: "border-border/60 text-muted-foreground",
 								)}
-							</div>
+							>
+								{p.name}
+							</span>
+						))}
+						{projects.length > 3 && (
+							<span className="text-xs text-muted-foreground">
+								+{projects.length - 3}
+							</span>
 						)}
 					</div>
-					{r.contributesTo.length > 0 && (
-						<div className="relative z-10 mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
-							<span className="text-muted-foreground">contributes to</span>
-							{r.contributesTo.slice(0, 3).map((p) => (
-								<Link
-									key={p.slug}
-									href={`/project/${p.slug}`}
-									className="rounded-md border border-border/60 px-1.5 py-0.5 text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
-								>
-									{p.name}
-								</Link>
-							))}
-							{r.contributesTo.length > 3 && (
-								<span className="text-muted-foreground">
-									+{r.contributesTo.length - 3} more
-								</span>
-							)}
-						</div>
-					)}
-					<div className="relative z-10 flex items-center gap-2 flex-shrink-0">
-						<a
-							href={`https://github.com/${r.handle}`}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="p-2 rounded-lg hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors"
-							aria-label="GitHub"
-						>
-							<Github className="w-4 h-4" />
-						</a>
-						{twitterUrl && (
-							<a
-								href={twitterUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="p-2 rounded-lg hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors"
-								aria-label="Twitter"
-							>
-								<Twitter className="w-4 h-4" />
-							</a>
+				)}
+				{r.ambassador && (
+					<p className="mt-3 text-xs text-muted-foreground">
+						Stellar Ambassador · {r.ambassador.tier}
+						{r.ambassador.region ? ` · ${r.ambassador.region}` : ""}
+					</p>
+				)}
+
+				{/* What the code shows */}
+				{facts.length > 0 && (
+					<dl
+						className={cn(
+							"mt-4 grid gap-2",
+							facts.length >= 3 ? "grid-cols-3" : "grid-cols-2",
 						)}
-						{r.website && (
-							<a
-								href={r.website}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="p-2 rounded-lg hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors"
-								aria-label="Website"
+					>
+						{facts.slice(0, 3).map((f) => (
+							<div
+								key={f.label}
+								title={f.title}
+								className="rounded-lg bg-white/[0.03] border border-border/40 px-2.5 py-2"
 							>
-								<Globe className="w-4 h-4" />
-							</a>
-						)}
+								<dd className="text-sm font-semibold tabular-nums text-foreground">
+									{f.value}
+								</dd>
+								<dt className="text-[10px] text-muted-foreground truncate">
+									{f.label}
+								</dt>
+							</div>
+						))}
+					</dl>
+				)}
+
+				{/* Footer: languages, last commit, the way in */}
+				<div className="mt-auto pt-4">
+					<div className="flex items-center justify-between gap-3 pt-4 border-t border-border group-hover:border-white/20 transition-colors duration-150">
+						<span className="min-w-0 truncate text-xs text-muted-foreground">
+							{r.languages.slice(0, 2).join(" · ") ||
+								(r.lastCommitAt ? "" : "View profile")}
+							{r.languages.length > 0 && r.lastCommitAt ? " · " : ""}
+							{r.lastCommitAt
+								? `last commit ${agoSentence(r.lastCommitAt)}`
+								: ""}
+						</span>
+						<ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all duration-150 flex-shrink-0" />
 					</div>
 				</div>
-			</CardContent>
-		</Card>
+			</div>
+		</Link>
 	);
 }

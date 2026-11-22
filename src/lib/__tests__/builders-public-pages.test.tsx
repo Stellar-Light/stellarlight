@@ -69,7 +69,7 @@ describe("only public builder profiles are served", () => {
 		state.passport = passport;
 		expect(html).toContain("/builders/pubdev");
 		expect(html).not.toContain("privdev");
-		expect(html).toContain("1 developers building on Stellar");
+		expect(html).toContain("1 profile.");
 	});
 
 	it("/builders falls back to Passport without its private profiles", async () => {

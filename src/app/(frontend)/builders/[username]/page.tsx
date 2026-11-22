@@ -376,7 +376,9 @@ export default async function BuilderProfilePage({
 							<p className="text-sm text-muted-foreground">
 								From the Stellar repos we index: {code.repos.length}{" "}
 								{code.repos.length === 1 ? "repo" : "repos"}
-								{code.stars > 0 ? `, ${code.stars.toLocaleString()} stars` : ""}
+								{code.stars > 0
+									? `, ${code.stars.toLocaleString()} stars on the ones they own`
+									: ""}
 								{code.commits90d > 0
 									? `, ${code.commits90d.toLocaleString()} commits on their own repos in the last 90 days`
 									: ""}

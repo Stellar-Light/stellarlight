@@ -30,6 +30,7 @@ export type CodeRepo = {
 
 export type CodeActivity = {
 	repos: CodeRepo[];
+	/** stars across repos this person OWNS, by the same rule as commits90d */
 	stars: number;
 	lastCommitAt: string | null;
 	/**
@@ -206,12 +207,14 @@ export async function builderCodeActivity(
 			via: owns ? "owner" : (d?.via ?? "declared"),
 			myCommits12m: owns ? undefined : d?.myCommits12m,
 		});
-		e.stars += Number(r.stars ?? 0);
-		// Only their own repos' activity goes under their name. A repo they
-		// merely committed to counts through myCommits12m — their share, not
-		// the org's total.
-		if (owns) e.commits90d += commits90d;
-		else e.contributedCommits12m += Number(d?.myCommits12m ?? 0);
+		// Only their own repos' activity and stars go under their name. A
+		// repo they merely committed to counts through myCommits12m: their
+		// share, not the org's total. Stars have no per-person share, so a
+		// contributed repo's stars stay on its row in `repos`.
+		if (owns) {
+			e.commits90d += commits90d;
+			e.stars += Number(r.stars ?? 0);
+		} else e.contributedCommits12m += Number(d?.myCommits12m ?? 0);
 		if (r.primaryLanguage) {
 			const m = langCount.get(login) ?? new Map<string, number>();
 			m.set(
