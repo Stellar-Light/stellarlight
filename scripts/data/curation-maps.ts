@@ -258,6 +258,54 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://triiyo.com/",
 		note: 'Weak-basis sweep 2026-09-07: triiyo.com redirects to HugeDomains — "Triiyo.com … This domain is for sale: $10,795", rendered read plus a receipt matching "for sale" in the served text. SCF #22, $50,303 — the award stands, the product does not.',
 	},
+	// -- Weak-basis sweep 2026-11-22, the first run with the domain check
+	// (Actions run 45053394104, and the same reading from a second network).
+	// A host that two public resolvers both answer NXDOMAIN for does not
+	// exist; each row below was also checked for another live home (repo
+	// homepage, the project's other links) and has none. Owner-approved
+	// 2026-11-23. komet was flagged by the same run and is NOT here: its
+	// subdomain is gone but its repository was active in August, so that is
+	// a link fix (WEBSITE_FIXES), not a product that ended.
+	walletban: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://walletban.xyz/",
+		note: "Weak-basis sweep 2026-11-22: walletban.xyz does not exist (NXDOMAIN from two public resolvers), and it is the only home the project and its repository give. Newest commit 2023-09-18. SCF #20, $20,000: the award stands, the product does not.",
+	},
+	subs: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://stellar.subsprotocol.com/",
+		note: "Weak-basis sweep 2026-11-22: stellar.subsprotocol.com and subsprotocol.com do not exist (NXDOMAIN from two public resolvers). Newest commit across its repositories 2025-11-11. SCF #30, $139,480: the award stands, the product does not.",
+	},
+	devtrak: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://devtrak.build/",
+		note: "Weak-basis sweep 2026-11-22: devtrak.build does not exist (NXDOMAIN from two public resolvers). The organisation's repositories carry other products; none is DevTrak's home. SCF #25, $14,000: the award stands, the product does not.",
+	},
+	"expand-network": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://expand.network/",
+		note: "Weak-basis sweep 2026-11-22: expand.network does not exist (NXDOMAIN from two public resolvers). Newest commit across its repositories 2025-12-09. SCF #24 and #26, $137,000: the awards stand, the product does not.",
+	},
+	"command-robotics": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://adaptive-goal-management.herokuapp.com/",
+		note: 'Weak-basis sweep 2026-11-22: the only home the project gives answers HTTP 404 with the hosting platform\'s "No such app" page. Newest commit 2025-02-28. SCF #9, $5,000: the award stands, the product does not.',
+	},
 	// -- Weak-basis dormant sweep, tranche 2 (2026-09-06): rows re-probed at
 	// their own surfaces after the first tranche. A default page TITLE is not a
 	// verdict — zilt's title is the unedited "Create Next App" while the page
@@ -3810,6 +3858,13 @@ export const WEBSITE_FIXES: Record<string, string> = {
 	// one the folded soroban-elk row linked. It answered 429 to two reads
 	// that day, a rate limit, which is no verdict either way.
 	"stellar-command-insights": "https://voluble-fairy-844611.netlify.app/",
+	// 2026-11-23, from the weak-basis sweep's first run with the domain check
+	// (Actions run 45053394104): komet.runtimeverification.com does not exist
+	// (NXDOMAIN from two public resolvers). The tool is alive: its repository
+	// was pushed in August and its documentation answers 200 at
+	// docs.runtimeverification.com/komet, titled "README | komet". Same
+	// product, new address. Owner-approved 2026-11-23.
+	komet: "https://docs.runtimeverification.com/komet",
 };
 
 /** Curated seeds — create-if-missing directory entries with human-verified
