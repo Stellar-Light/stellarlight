@@ -16,14 +16,14 @@ import {
 const ALL: readonly ArtifactKind[] = [
 	"deployment.sourceUrl",
 	"receipt",
-	"asset payments",
+	"asset movement",
 ];
 
 describe("artifactSupports", () => {
-	it("asset payments back onchain-activity and nothing else", () => {
-		expect(artifactSupports("onchain-activity", "asset payments")).toBe(true);
-		expect(artifactSupports("human-verified", "asset payments")).toBe(false);
-		expect(artifactSupports("product-integration", "asset payments")).toBe(
+	it("an asset movement backs onchain-activity and nothing else", () => {
+		expect(artifactSupports("onchain-activity", "asset movement")).toBe(true);
+		expect(artifactSupports("human-verified", "asset movement")).toBe(false);
+		expect(artifactSupports("product-integration", "asset movement")).toBe(
 			false,
 		);
 	});
@@ -66,6 +66,6 @@ describe("operator-toml translation", () => {
 	});
 
 	it("translation never reaches human-verified from an on-chain artifact", () => {
-		expect(artifactSupports("human-verified", "asset payments")).toBe(false);
+		expect(artifactSupports("human-verified", "asset movement")).toBe(false);
 	});
 });

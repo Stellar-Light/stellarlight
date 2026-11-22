@@ -775,9 +775,10 @@ function pickAvailability(
 }
 
 /**
- * On-chain metrics passthrough (2026-07-20). null = not tracked in our
- * registry — NEVER "no on-chain activity". Rows serve only when the enrich
- * pipeline populated the group (asOf present).
+ * On-chain readings passthrough. null = not tracked in our registry or not
+ * readable, NEVER "no on-chain activity": a contract with no recent event can
+ * still be in use (src/lib/onchain-sources.ts). Rows serve only when the
+ * enrich pipeline populated the group (asOf present).
  */
 /** PG Award passthrough: null = not a confirmed recipient at our source —
  * NEVER "not a public good". */
@@ -801,35 +802,24 @@ function pickOnchain(o: any) {
 		assetHoldersDelta:
 			typeof o.assetHoldersDelta === "number" ? o.assetHoldersDelta : null,
 		assetSupply: typeof o.assetSupply === "number" ? o.assetSupply : null,
-		// Q2 deliverable (PG review): transaction volume + active-address counts.
-		// These are in the DB and on the project profile — projecting them here so
-		// the AGENT-facing API exposes them too, not just the human page. (Absent
-		// from this whitelist = silently dropped, the thin-projection trap.)
+		// Every field the project profile shows is projected here too, so the
+		// agent-facing API carries what the human page does. (Absent from this
+		// whitelist = silently dropped, the thin-projection trap.) The payment,
+		// trade, event-total, sub-call and storage counts left in 1.9.151: their
+		// source went paid and nothing free holds them.
 		assetTrustlines:
 			typeof o.assetTrustlines === "number" ? o.assetTrustlines : null,
-		assetPayments: typeof o.assetPayments === "number" ? o.assetPayments : null,
-		assetPaymentsAmount:
-			typeof o.assetPaymentsAmount === "number" ? o.assetPaymentsAmount : null,
-		assetPaymentsDelta:
-			typeof o.assetPaymentsDelta === "number" ? o.assetPaymentsDelta : null,
-		assetTrades: typeof o.assetTrades === "number" ? o.assetTrades : null,
+		assetLastMovedAt: o.assetLastMovedAt ?? null,
 		contracts: Array.isArray(o.contracts)
 			? o.contracts.map(
 					// biome-ignore lint/suspicious/noExplicitAny: Payload array row
 					(c: any) => ({
 						address: c.address ?? null,
 						label: c.label ?? null,
-						events: typeof c.events === "number" ? c.events : null,
-						eventsDelta:
-							typeof c.eventsDelta === "number" ? c.eventsDelta : null,
-						subinvocationsDelta:
-							typeof c.subinvocationsDelta === "number"
-								? c.subinvocationsDelta
-								: null,
-						subinvocations:
-							typeof c.subinvocations === "number" ? c.subinvocations : null,
-						storageEntries:
-							typeof c.storageEntries === "number" ? c.storageEntries : null,
+						lastEventAt: c.lastEventAt ?? null,
+						activeLedgers:
+							typeof c.activeLedgers === "number" ? c.activeLedgers : null,
+						ttlState: typeof c.ttlState === "string" ? c.ttlState : null,
 						createdAt: c.createdAt ?? null,
 						verifiedRepo: c.verifiedRepo ?? null,
 					}),

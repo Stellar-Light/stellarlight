@@ -695,8 +695,8 @@ describe("usage-aware ranking (code-truth 5)", () => {
 			repoScore: 40,
 			codeInUse: {
 				contracts: 1,
-				events: 44447,
-				eventsDelta: 743,
+				activeLedgers: 44447,
+				lastEventAt: "2026-08-12T09:30:00.000Z",
 				asOf: "2026-08-13",
 			},
 		});
@@ -715,7 +715,7 @@ describe("usage-aware ranking (code-truth 5)", () => {
 			codeScanState: "scanned",
 			stellarProof: "cargo-sdk",
 			repoScore: 70,
-			codeInUse: { contracts: 3, events: 36033, asOf: "2026-10-19" },
+			codeInUse: { contracts: 3, activeLedgers: 36033, asOf: "2026-10-19" },
 		});
 		const better = doc({
 			fullName: "team/react-frontend-template",
@@ -749,8 +749,8 @@ describe("usage-aware ranking (code-truth 5)", () => {
 			stellarProof: "cargo-sdk",
 			codeInUse: {
 				contracts: 1,
-				events: 44447,
-				eventsDelta: 743,
+				activeLedgers: 44447,
+				lastEventAt: "2026-08-12T09:30:00.000Z",
 				asOf: "2026-08-13",
 			},
 		});
@@ -765,7 +765,7 @@ describe("usage-aware ranking (code-truth 5)", () => {
 		const usedNoEvidence = doc({
 			fullName: "evmcorp/amm",
 			description: "amm contracts",
-			codeInUse: { contracts: 1, events: 999, asOf: "2026-08-13" },
+			codeInUse: { contracts: 1, activeLedgers: 999, asOf: "2026-08-13" },
 		});
 		const verified = doc({
 			fullName: "stellarteam/amm",
@@ -861,7 +861,7 @@ describe("a repo with a known successor sits below it (2026-10-23)", () => {
 				v1({
 					description: "Pool contracts",
 					repoScore: 40,
-					codeInUse: { contracts: 2, events: 36033, asOf: "2026-10-19" },
+					codeInUse: { contracts: 2, activeLedgers: 36033, asOf: "2026-10-19" },
 				}),
 				other,
 				v2(),
@@ -880,7 +880,7 @@ describe("a repo with a known successor sits below it (2026-10-23)", () => {
 			mockPayload([
 				v1({
 					description: "Pool contracts",
-					codeInUse: { contracts: 2, events: 36033, asOf: "2026-10-19" },
+					codeInUse: { contracts: 2, activeLedgers: 36033, asOf: "2026-10-19" },
 				}),
 				v2(),
 			]),

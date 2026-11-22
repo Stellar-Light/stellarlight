@@ -35,14 +35,15 @@
  *       1. deployment.sourceUrl        — the citation the deployment pass kept
  *       2. improvements/receipts/<slug>-deployment-*.json — its receipt; the
  *          receipt's own url and fetchedAt are used, not the row's
- *       3. onchain.assetPayments > 0 with assetCode + issuer — payments are an
- *          observation, and stellar.expert is where a reader re-checks it
+ *       3. onchain.assetLastMovedAt with assetCode + issuer: a movement of
+ *          the asset is an observation, and its explorer page is where a
+ *          reader re-checks it
  *     A row with none of the three is reported as COULD-NOT-PROPAGATE with the
  *     reason and is NOT written. It is never counted as done.
  *   - the artifact must SUPPORT the tier it licenses. An artifact is evidence
  *     of one KIND of fact, and a strong-sounding label does not turn it into
  *     evidence of another:
- *       asset payments        -> onchain-activity, and nothing else
+ *       asset movement        -> onchain-activity, and nothing else
  *       deployment.sourceUrl  -> human-verified, product-integration
  *       receipt               -> human-verified, product-integration
  *     A receipt that records its own `basis` is evidence for THAT basis only.
@@ -50,7 +51,7 @@
  *     activity. When no available artifact supports the basis the row is
  *     reported as COULD-NOT-PROPAGATE and nothing is written.
  *     (2026-09-05: the 13 rows the first run wrote were already consistent
- *     under this gate — every asset-payment row was onchain-activity and every
+ *     under this gate: every asset-payment row was onchain-activity and every
  *     toml/receipt row human-verified — so it changes none of them, and they
  *     are NOT re-written.)
  *
@@ -104,13 +105,13 @@ const isStatusBasis = (v: string): v is StatusBasis =>
 	(STATUS_BASES as readonly string[]).includes(v);
 
 /** The kinds of artifact this lane accepts, and the tiers each one can back.
- *  Payments observed on-chain are onchain-activity and nothing else; a citation
+ *  A movement observed on-chain is onchain-activity and nothing else; a citation
  *  or a receipt is somebody having looked, which is human-verified or
  *  product-integration. Nothing backs repo-activity. */
 export type ArtifactKind =
 	| "deployment.sourceUrl"
 	| "receipt"
-	| "asset payments";
+	| "asset movement";
 /**
  * A deployment basis that is not itself a statusBasis option, but whose
  * evidence the status enum already recognises under another name.
@@ -135,7 +136,7 @@ const BASIS_TRANSLATION: Record<string, string> = {
 const SUPPORTS: Record<ArtifactKind, readonly string[]> = {
 	"deployment.sourceUrl": ["human-verified", "product-integration"],
 	receipt: ["human-verified", "product-integration"],
-	"asset payments": ["onchain-activity"],
+	"asset movement": ["onchain-activity"],
 };
 /** Can this artifact license this tier? Pure, so it is unit-tested. */
 export const artifactSupports = (basis: string, kind: ArtifactKind): boolean =>
@@ -180,8 +181,8 @@ type Evidence = { url: string; asOf: string; via: string; kind: ArtifactKind };
  *  could-not-propagate reason (a string).
  *
  *  Precedence order, but only among artifacts that actually SUPPORT the basis:
- *  an onchain-activity row that has both a sourceUrl and observed payments is
- *  backed by the payments, not by the URL that happens to rank first. */
+ *  an onchain-activity row that has both a sourceUrl and an observed movement
+ *  is backed by the movement, not by the URL that happens to rank first. */
 // biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 function evidenceOf(
 	d: any,
@@ -219,10 +220,10 @@ function evidenceOf(
 			kind: "receipt",
 			via: "receipt",
 		});
-	const { assetPayments, assetCode, issuer } = d.onchain ?? {};
+	const { assetLastMovedAt, assetCode, issuer } = d.onchain ?? {};
 	if (
-		typeof assetPayments === "number" &&
-		assetPayments > 0 &&
+		typeof assetLastMovedAt === "string" &&
+		!Number.isNaN(Date.parse(assetLastMovedAt)) &&
 		assetCode &&
 		issuer &&
 		depAsOf
@@ -230,12 +231,12 @@ function evidenceOf(
 		candidates.push({
 			url: `https://stellar.expert/explorer/public/asset/${assetCode}-${issuer}`,
 			asOf: depAsOf,
-			kind: "asset payments",
-			via: `${assetPayments} asset payments`,
+			kind: "asset movement",
+			via: `asset moved ${assetLastMovedAt.slice(0, 10)}`,
 		});
 
 	if (!candidates.length)
-		return "no deployment.sourceUrl, no receipt, no asset payments";
+		return "no deployment.sourceUrl, no receipt, no asset movement";
 	return (
 		candidates.find((c) => artifactSupports(targetBasis, c.kind)) ??
 		`${targetBasis} not supported by ${candidates.map((c) => c.kind).join(" / ")}`

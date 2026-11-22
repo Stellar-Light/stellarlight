@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { ONCHAIN_SEEDS } from "../../data/onchain-contracts";
+import {
+	ONCHAIN_NOT_THIS_ROW,
+	ONCHAIN_SEEDS,
+} from "../../data/onchain-contracts";
 
 // The seed map is a hand-verified join table — malformed entries would
 // silently misattribute on-chain activity, so shape is CI-enforced.
@@ -57,5 +60,33 @@ describe("onchain seed map", () => {
 			"CBKGPWGKSKZF52CFHMTRR23TBWTPMRDIYZ4O2P5VS65BMHYH4DXMCJZC",
 		]);
 		for (const c of sourced) expect(c.source).toMatch(/^https:\/\//);
+	});
+});
+
+// A seed may name the repo a contract's code comes from, and a curator may
+// take a contract away from a row: both decide attribution, so both carry
+// what settles them.
+describe("curated attribution carries its evidence", () => {
+	it("a seed's sourceRepo is owner/name", () => {
+		for (const s of ONCHAIN_SEEDS)
+			for (const c of s.contracts ?? [])
+				if (c.sourceRepo !== undefined)
+					expect(c.sourceRepo, c.address).toMatch(/^[\w.-]+\/[\w.-]+$/);
+	});
+	it("every contract held back from a row names the row, the repo, the reason and the day", () => {
+		for (const x of ONCHAIN_NOT_THIS_ROW) {
+			expect(x.address).toMatch(/^C[A-Z2-7]{55}$/);
+			expect(x.repo).toMatch(/^[\w.-]+\/[\w.-]+$/);
+			expect(x.slug.length).toBeGreaterThan(0);
+			expect(x.note.length).toBeGreaterThan(40);
+			expect(x.checkedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+		}
+		// a seed gives a contract to a row by hand: it cannot also be held back there
+		for (const x of ONCHAIN_NOT_THIS_ROW)
+			for (const s of ONCHAIN_SEEDS.filter((s) => s.slug === x.slug))
+				expect(
+					(s.contracts ?? []).map((c) => c.address),
+					x.slug,
+				).not.toContain(x.address);
 	});
 });

@@ -20,7 +20,6 @@ import {
 	ONCHAIN_USE_TYPES,
 	protocolListProblem,
 	QUIET_DAYS,
-	quietSinceFor,
 	STATUS_CHECKS,
 	statusChecksFor,
 	stellarDoublecountedIds,
@@ -505,54 +504,6 @@ describe("tvlStaleOf: a reading past the weekly refresh says so", () => {
 	});
 });
 
-describe("quietSinceFor: silence is only what two readings showed", () => {
-	const quiet = [{ eventsDelta: 0, subinvocationsDelta: 0 }];
-	it("a contract that moved ends the quiet run", () => {
-		expect(
-			quietSinceFor([{ eventsDelta: 3, subinvocationsDelta: 0 }], {
-				asOf: "2026-10-20",
-				quietSince: "2026-08-01",
-			}),
-		).toBeNull();
-	});
-	it("no prior reading: nothing is known", () => {
-		expect(quietSinceFor(quiet, null)).toBeNull();
-	});
-	it("a contract never measured leaves the run unknown", () => {
-		expect(
-			quietSinceFor(
-				[...quiet, { eventsDelta: null, subinvocationsDelta: null }],
-				{
-					asOf: "2026-10-20",
-				},
-			),
-		).toBeNull();
-	});
-	it("a quiet window after a quiet window reaches back to its start", () => {
-		expect(
-			quietSinceFor(quiet, {
-				asOf: "2026-10-20",
-				prevAsOf: "2026-10-13",
-				contracts: quiet,
-			}),
-		).toBe("2026-10-13");
-	});
-	it("a quiet window after an active one starts at the prior reading", () => {
-		expect(
-			quietSinceFor(quiet, {
-				asOf: "2026-10-20",
-				prevAsOf: "2026-10-13",
-				contracts: [{ eventsDelta: 9, subinvocationsDelta: 0 }],
-			}),
-		).toBe("2026-10-20");
-	});
-	it("a stored quietSince carries forward", () => {
-		expect(
-			quietSinceFor(quiet, { asOf: "2026-10-20", quietSince: "2026-07-01" }),
-		).toBe("2026-07-01");
-	});
-});
-
 // The Allbridge row as served on 1.9.101, plus the listing the enrich-tvl
 // lane writes for allbridge-core.
 const allbridge = {
@@ -571,9 +522,10 @@ const allbridge = {
 	onchain: {
 		asOf: "2026-10-20T11:18:39.690Z",
 		prevAsOf: "2026-10-13T13:59:10.392Z",
+		// the last event each contract emitted: the exploit was 2026-07-19
 		contracts: [
-			{ eventsDelta: 0, subinvocationsDelta: 0 },
-			{ eventsDelta: 0, subinvocationsDelta: 0 },
+			{ lastEventAt: "2026-07-19T08:00:00.000Z" },
+			{ lastEventAt: "2026-07-10T00:00:00.000Z" },
 		],
 	},
 };
@@ -617,18 +569,21 @@ describe("statusChecksFor: the guard on served status", () => {
 		});
 	});
 
-	it("TVL 0 with only a week of observed silence could not be checked", () => {
+	// The first version of this check needed 60 days of its own weekly
+	// readings before it could speak; the last event is dated by the chain.
+	it("Allbridge: TVL 0 and no contract event since the exploit is a hit of its own", () => {
 		const out = statusChecksFor(allbridge, NOW);
 		expect(byCheck(out, "tvl-zero-onchain-quiet")).toMatchObject({
-			result: "could-not-check",
+			result: "hit",
 		});
 		expect(byCheck(out, "tvl-zero-onchain-quiet")?.detail).toMatch(
-			/2026-10-13/,
+			/no event since 2026-07-19 \(93 days, on record 2026-10-20\)/,
 		);
 	});
 
 	it("no listing stored yet: could not check, no caveat, confidence unchanged", () => {
-		const { llamaListing: _, ...noListing } = allbridge;
+		// a positive TVL keeps the other check clear, so this reads the listing alone
+		const { llamaListing: _, ...noListing } = { ...allbridge, tvlUSD: 1200 };
 		const out = statusChecksFor(noListing, NOW);
 		expect(byCheck(out, "defillama-listing")?.result).toBe("could-not-check");
 		expect(out.statusCaveat).toBeNull();
@@ -694,6 +649,7 @@ describe("statusChecksFor: the guard on served status", () => {
 		const out = statusChecksFor(
 			{
 				...allbridge,
+				tvlUSD: 1200,
 				llamaListing: {
 					state: "listed",
 					deadFrom: null,
@@ -710,38 +666,65 @@ describe("statusChecksFor: the guard on served status", () => {
 		...allbridge,
 		llamaListing: { state: "listed", deadFrom: null, checkedAt: "2026-10-26" },
 	};
-	it(`TVL 0 and ${QUIET_DAYS}+ days of observed contract silence caveats an on-chain protocol`, () => {
-		const out = statusChecksFor(
-			{
-				...listed,
-				onchain: { ...listed.onchain, quietSince: "2026-08-20T00:00:00.000Z" },
-			},
-			NOW,
-		);
+	const lastEvent = (...at: Array<string | null>) => ({
+		...listed,
+		onchain: {
+			...listed.onchain,
+			contracts: at.map((t) => (t ? { lastEventAt: t } : {})),
+		},
+	});
+	it(`TVL 0 and ${QUIET_DAYS}+ days without a contract event caveats an on-chain protocol`, () => {
+		const out = statusChecksFor(listed, NOW);
 		expect(byCheck(out, "tvl-zero-onchain-quiet")?.result).toBe("hit");
 		expect(out.statusCaveat).toMatch(/TVL is \$0/);
-		expect(out.statusCaveat).toMatch(/since 2026-08-20/);
+		// the newest event across the tracked contracts, not the first row's
+		expect(out.statusCaveat).toMatch(/emitted no event since 2026-07-19/);
+		// 2026-11: 13 of 68 tracked contracts were used by sub-calls alone
+		expect(out.statusCaveat).toMatch(
+			/a call that emits no event is not counted/,
+		);
 		expect(out.statusConfidence?.label).toBe("low");
 	});
-	it("59 days of silence is not yet enough", () => {
+	it("an event 59 days before the reading is use; 60 days is the line", () => {
+		// the reading is 2026-10-20T11:18:39Z
+		const at59 = statusChecksFor(lastEvent("2026-08-22T12:00:00.000Z"), NOW);
+		expect(byCheck(at59, "tvl-zero-onchain-quiet")?.result).toBe("clear");
+		expect(byCheck(at59, "tvl-zero-onchain-quiet")?.detail).toMatch(
+			/emitted an event on 2026-08-22/,
+		);
+		expect(at59.statusCaveat).toBeNull();
+		const at60 = statusChecksFor(lastEvent("2026-08-21T11:00:00.000Z"), NOW);
+		expect(byCheck(at60, "tvl-zero-onchain-quiet")?.result).toBe("hit");
+	});
+	it("a contract with no event on record decides nothing: it may never emit one", () => {
+		// KALE's farm took 20 million calls in a week and emitted no event.
 		const out = statusChecksFor(
-			{
-				...listed,
-				onchain: { ...listed.onchain, quietSince: "2026-08-22T00:00:00.000Z" },
-			},
+			lastEvent("2026-07-19T08:00:00.000Z", null),
 			NOW,
 		);
-		expect(byCheck(out, "tvl-zero-onchain-quiet")?.result).toBe(
-			"could-not-check",
+		const check = byCheck(out, "tvl-zero-onchain-quiet");
+		expect(check?.result).toBe("could-not-check");
+		expect(check?.detail).toMatch(
+			/1 of its 2 tracked contracts has no event on record/,
 		);
 		expect(out.statusCaveat).toBeNull();
 	});
+	it("an on-chain reading older than 14 days cannot speak for today", () => {
+		// The lane's source went paid and every row froze at 2026-11-03.
+		const out = statusChecksFor(
+			{
+				...listed,
+				onchain: { ...listed.onchain, asOf: "2026-10-05T00:00:00.000Z" },
+			},
+			NOW,
+		);
+		const check = byCheck(out, "tvl-zero-onchain-quiet");
+		expect(check?.result).toBe("could-not-check");
+		expect(check?.detail).toMatch(/from 2026-10-05, older than 14 days/);
+		expect(out.statusCaveat).toBeNull();
+	});
 	it("a TVL reading older than 14 days could not be checked, 0 or not", () => {
-		const quiet = {
-			...listed,
-			onchain: { ...listed.onchain, quietSince: "2026-08-20T00:00:00.000Z" },
-		};
-		const stale = statusChecksFor({ ...quiet, tvlAsOf: "2026-10-01" }, NOW);
+		const stale = statusChecksFor({ ...listed, tvlAsOf: "2026-10-01" }, NOW);
 		expect(byCheck(stale, "tvl-zero-onchain-quiet")?.result).toBe(
 			"could-not-check",
 		);
@@ -770,17 +753,11 @@ describe("statusChecksFor: the guard on served status", () => {
 			)?.result,
 		).toBe("clear");
 	});
-	it("TVL 0 with contracts that moved is clear; with no contracts, could not check", () => {
-		const moved = {
-			...listed,
-			onchain: {
-				...listed.onchain,
-				contracts: [
-					{ eventsDelta: 0, subinvocationsDelta: 0 },
-					{ eventsDelta: 4, subinvocationsDelta: 0 },
-				],
-			},
-		};
+	it("TVL 0 with one contract in recent use is clear; with no contracts, could not check", () => {
+		const moved = lastEvent(
+			"2026-07-19T08:00:00.000Z",
+			"2026-10-18T00:00:00.000Z",
+		);
 		expect(
 			byCheck(statusChecksFor(moved, NOW), "tvl-zero-onchain-quiet")?.result,
 		).toBe("clear");
@@ -809,10 +786,9 @@ describe("statusChecksFor: the guard on served status", () => {
 	it("served text carries no em or en dashes", () => {
 		const texts = [
 			statusChecksFor(allbridge, NOW),
-			statusChecksFor(
-				{ ...listed, onchain: { ...listed.onchain, quietSince: "2026-08-01" } },
-				NOW,
-			),
+			statusChecksFor(listed, NOW),
+			statusChecksFor(lastEvent("2026-10-18T00:00:00.000Z"), NOW),
+			statusChecksFor(lastEvent(null), NOW),
 			statusChecksFor({ ...listed, tvlUSD: null, llamaListing: null }, NOW),
 		].flatMap((o) => [
 			o.statusCaveat ?? "",
@@ -833,12 +809,12 @@ describe("every serving point carries the guard, and the spec declares it", () =
 		expect(route).not.toMatch(/statusConfidence: factConfidence\(/);
 		expect((route.match(/\.\.\.statusChecksFor\(\w+\)/g) ?? []).length).toBe(3);
 	});
-	it("enrich-onchain reads quietSince back after it writes it", () => {
+	it("enrich-onchain reads each contract's last event back after it writes it", () => {
 		const script = readFileSync(
 			join(process.cwd(), "scripts/data/enrich-onchain-projects.ts"),
 			"utf8",
 		);
-		expect(script).toMatch(/diffWritten\([^;]*"quietSince"/s);
+		expect(script).toMatch(/diffWritten\([^;]*"lastEventAt"/s);
 	});
 	it("the semantic projection reads the stored listing (the F3 projection class)", () => {
 		expect(route).toMatch(/llamaListing: 1/);
@@ -908,7 +884,7 @@ describe("every serving point carries the guard, and the spec declares it", () =
 
 // Review 2026-10-31 (another model family), each case reproduced first.
 describe("statusChecksFor: what a reading must hold before it decides", () => {
-	// A Live DEX, listed on DefiLlama, $0 TVL this week, quiet since August.
+	// A Live DEX, listed on DefiLlama, $0 TVL this week, no event since August.
 	const dex = {
 		status: "Live",
 		statusBasis: "human-verified",
@@ -920,29 +896,28 @@ describe("statusChecksFor: what a reading must hold before it decides", () => {
 		llamaListing: { state: "listed", checkedAt: "2026-10-26T00:00:00.000Z" },
 		onchain: {
 			asOf: "2026-10-26T00:00:00.000Z",
-			quietSince: "2026-08-01T00:00:00.000Z",
-			contracts: [{ eventsDelta: 0, subinvocationsDelta: 0 }],
+			contracts: [{ lastEventAt: "2026-08-01T00:00:00.000Z" }],
 		},
 	};
 	const tvl = (row: object) =>
 		byCheck(statusChecksFor(row, NOW), "tvl-zero-onchain-quiet");
 
-	it("control: both counters silent for 60 days with $0 TVL is a hit", () => {
+	it("control: no event for 60 days with $0 TVL is a hit", () => {
 		expect(tvl(dex)?.result).toBe("hit");
 	});
 
-	it("a contract with one counter read is not quiet: the other may have moved", () => {
-		const one = {
-			...dex,
-			onchain: { ...dex.onchain, contracts: [{ eventsDelta: 0 }] },
-		};
+	it("a contract with no event on record is not quiet", () => {
+		const one = { ...dex, onchain: { ...dex.onchain, contracts: [{}] } };
 		expect(tvl(one)?.result).toBe("could-not-check");
-		expect(
-			quietSinceFor([{ eventsDelta: 0 }], {
-				asOf: "2026-10-19T00:00:00.000Z",
-				quietSince: "2026-08-01T00:00:00.000Z",
-			}),
-		).toBeNull();
+	});
+
+	it("an unparseable event date is no event on record, never a hit", () => {
+		const bad = {
+			...dex,
+			onchain: { ...dex.onchain, contracts: [{ lastEventAt: "nope" }] },
+		};
+		expect(tvl(bad)?.result).toBe("could-not-check");
+		expect(tvl(bad)?.detail).not.toMatch(/NaN/);
 	});
 
 	it("an unparseable reading date is no window, never a hit", () => {
@@ -975,6 +950,9 @@ describe("statusChecksFor: what a reading must hold before it decides", () => {
 				...allbridge.onchain,
 				asOf: new Date(allbridge.onchain.asOf),
 				prevAsOf: new Date(allbridge.onchain.prevAsOf),
+				contracts: allbridge.onchain.contracts.map((c) => ({
+					lastEventAt: new Date(c.lastEventAt),
+				})),
 			},
 		};
 		const out = statusChecksFor(raw, NOW);
@@ -1003,10 +981,6 @@ describe("Derivatives rows are held to the on-chain checks (sls-113, 2026-11-07)
 					state: "listed",
 					deadFrom: null,
 					checkedAt: "2026-10-26",
-				},
-				onchain: {
-					...allbridge.onchain,
-					quietSince: "2026-08-20T00:00:00.000Z",
 				},
 			},
 			NOW,

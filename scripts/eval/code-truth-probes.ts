@@ -139,8 +139,11 @@ const PROBES: Probe[] = [
 			if ((r.audits?.count ?? 0) < 3) return `audits ${r.audits?.count}`;
 			for (const want of ["live-on-mainnet", "multi-audited", "scanned"])
 				if (!(r.signals ?? []).includes(want)) return `signal ${want} missing`;
-			if (!(r.usage?.subinvocations > 100_000))
-				return `usage.subinvocations ${r.usage?.subinvocations}`;
+			// Reflector's two oracle contracts emitted events in about 789,000
+			// ledgers by 2026-11-22; the floor only has to tell "in use" from
+			// "not read".
+			if (!(r.usage?.activeLedgers > 100_000))
+				return `usage.activeLedgers ${r.usage?.activeLedgers}`;
 			return null;
 		},
 	},
@@ -186,8 +189,8 @@ const PROBES: Probe[] = [
 				return `codeScanState ${d.codeScanState}`;
 			if (!(Array.isArray(d.codeDomains) && d.codeDomains.includes("oracle")))
 				return `codeDomains ${JSON.stringify(d.codeDomains)}`;
-			if (!((d.codeInUse?.subinvocations ?? 0) > 100_000))
-				return `codeInUse.subinvocations ${d.codeInUse?.subinvocations}`;
+			if (!((d.codeInUse?.activeLedgers ?? 0) > 100_000))
+				return `codeInUse.activeLedgers ${d.codeInUse?.activeLedgers}`;
 			return null;
 		},
 	},

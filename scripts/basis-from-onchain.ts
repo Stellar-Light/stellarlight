@@ -6,18 +6,21 @@
  * curation; the 41 the board names as eligible had no lane to travel. This is
  * that lane.
  *
- * The evidence is the enrich-onchain snapshot, which already stores a dated
- * window: `onchain.prevAsOf` -> `onchain.asOf`, with per-window deltas. A
- * positive delta is activity OBSERVED between two dates — categorically
- * stronger than site-liveness, which only says a page answered.
+ * The evidence is the enrich-onchain reading: the newest movement of the
+ * row's asset and the newest event of each of its contracts, each dated by
+ * the ledger it closed in, and the holder change between two readings. An
+ * event is activity on its date, categorically stronger than site-liveness,
+ * which only says a page answered. (Until 2026-11-03 the evidence was a
+ * per-window delta of the explorer's counters; its API went paid.)
  *
  * Rules, in the order they matter:
  *   - Never downgrade. Only weak -> onchain-activity, never the reverse, and
  *     human-verified is never touched: a person outranks a probe.
- *   - No evidence is not counter-evidence. A zero delta means the window was
- *     quiet, which is not proof of death — those rows are left exactly alone.
+ *   - No evidence is not counter-evidence. A contract with no event may
+ *     still be called (13 of 68 tracked contracts in one week, 2026-11), so
+ *     a row with nothing recent is left exactly alone.
  *   - The award carries its own date and source, so a reader can age it.
- *   - An observation older than MAX_EVIDENCE_AGE_DAYS cannot support a claim
+ *   - An event older than MAX_EVIDENCE_AGE_DAYS cannot support a claim
  *     about the product NOW, so it is skipped rather than backdated.
  *
  * Dry-run by default; --execute writes.
@@ -26,7 +29,7 @@ import "./load-env";
 import { STRONG_STATUS_BASES } from "../src/lib/project-status";
 
 const EXECUTE = process.argv.includes("--execute");
-/** Beyond this, the snapshot describes a product we haven't seen recently. */
+/** Beyond this, the evidence describes a product we haven't seen recently. */
 const MAX_EVIDENCE_AGE_DAYS = 90;
 /** The strong bases this lane may replace, and only these. Each is a
  *  documented upgrade: the statusBasis spec ranks onchain-activity above
@@ -53,49 +56,101 @@ export const NEVER_OVERWRITE: ReadonlySet<string> = new Set(
 	),
 );
 
-/** `url` cites the exact thing observed — the asset or the specific contract
- *  whose delta moved. A citation that points somewhere else is not evidence. */
-type Ev = { kind: string; detail: string; url: string | null };
+/** `url` cites the exact thing observed: the asset, or the specific contract
+ *  whose event it is. A citation that points somewhere else is not evidence.
+ *  `at` is when it happened. */
+export type Ev = {
+	kind: string;
+	detail: string;
+	url: string | null;
+	at: string;
+};
 
-/** What moved in the snapshot window, or null when nothing did. */
+/** The newest dated activity the reading holds, or null when it holds none. */
 // biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-function evidenceOf(onchain: any): Ev | null {
-	const num = (v: unknown) => (typeof v === "number" ? v : 0);
+export function evidenceOf(onchain: any): Ev | null {
+	const when = (v: unknown) =>
+		typeof v === "string" && !Number.isNaN(Date.parse(v)) ? v : null;
 	const assetUrl =
 		onchain?.assetCode && onchain?.issuer
 			? `https://stellar.expert/explorer/public/asset/${onchain.assetCode}-${onchain.issuer}`
 			: null;
-	if (num(onchain?.assetPaymentsDelta) > 0)
-		return {
-			kind: "asset-payments",
-			detail: `${onchain.assetPaymentsDelta} payments of ${onchain.assetCode} in the window`,
+	const dated: Ev[] = [];
+	const moved = when(onchain?.assetLastMovedAt);
+	if (moved && assetUrl)
+		dated.push({
+			kind: "asset-movement",
+			detail: `${onchain.assetCode} moved on ${moved.slice(0, 10)}`,
 			url: assetUrl,
-		};
-	if (num(onchain?.assetHoldersDelta) !== 0)
+			at: moved,
+		});
+	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+	for (const c of (onchain?.contracts ?? []) as any[]) {
+		const at = when(c?.lastEventAt);
+		if (!at || typeof c?.address !== "string" || !c.address) continue;
+		dated.push({
+			kind: "contract-event",
+			detail: `event from ${c.address.slice(0, 10)}… on ${at.slice(0, 10)}`,
+			url: `https://stellar.expert/explorer/public/contract/${c.address}`,
+			at,
+		});
+	}
+	if (dated.length)
+		return dated.reduce((a, b) =>
+			Date.parse(b.at) > Date.parse(a.at) ? b : a,
+		);
+	// A holder change is seen between two readings, so it is dated by the
+	// later one.
+	const asOf = when(onchain?.asOf);
+	if (
+		typeof onchain?.assetHoldersDelta === "number" &&
+		onchain.assetHoldersDelta !== 0 &&
+		asOf
+	)
 		return {
 			kind: "asset-holders",
 			detail: `holders moved by ${onchain.assetHoldersDelta} (${onchain.assetCode})`,
 			url: assetUrl,
+			at: asOf,
 		};
-	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-	for (const c of (onchain?.contracts ?? []) as any[]) {
-		const cUrl = c?.address
-			? `https://stellar.expert/explorer/public/contract/${c.address}`
-			: null;
-		if (num(c?.subinvocationsDelta) > 0)
-			return {
-				kind: "contract-subinvocations",
-				detail: `${c.subinvocationsDelta} subinvocations on ${String(c.address).slice(0, 10)}…`,
-				url: cUrl,
-			};
-		if (num(c?.eventsDelta) > 0)
-			return {
-				kind: "contract-events",
-				detail: `${c.eventsDelta} events on ${String(c.address).slice(0, 10)}…`,
-				url: cUrl,
-			};
-	}
 	return null;
+}
+
+export type Verdict =
+	| "award"
+	| "refresh"
+	| "up-to-date"
+	| "kept-fresher"
+	| "stale"
+	| "no-date";
+
+/**
+ * What the lane does with a row that holds evidence. Pure, so it is tested.
+ * The evidence carries its own date, and that date can be OLDER than the one
+ * the row holds (last week's award cited one contract, this week's newest
+ * event is another's and earlier). A strong basis is never re-dated
+ * backwards: not this lane's own award, whatever it cites now, and not a
+ * fresher repo, package or product observation it would otherwise replace.
+ * A weak basis is a label with no observation behind it, so a dated event
+ * replaces it at any age inside the window.
+ */
+export function verdictFor(
+	row: { statusBasis?: unknown; statusAsOf?: unknown },
+	ev: Ev,
+	nowMs: number,
+): Verdict {
+	const at = Date.parse(ev.at);
+	if (Number.isNaN(at)) return "no-date";
+	if ((nowMs - at) / 86_400_000 > MAX_EVIDENCE_AGE_DAYS) return "stale";
+	const basis = String(row.statusBasis ?? "");
+	const stored = row.statusAsOf
+		? Date.parse(String(row.statusAsOf))
+		: Number.NaN;
+	const newer = Number.isNaN(stored) || at > stored;
+	if (basis === "onchain-activity") return newer ? "refresh" : "up-to-date";
+	if ((REPLACES_STRONG as readonly string[]).includes(basis))
+		return newer ? "award" : "kept-fresher";
+	return "award";
 }
 
 async function main() {
@@ -130,6 +185,7 @@ async function main() {
 		awarded: 0,
 		refreshed: 0,
 		upToDate: 0,
+		keptFresher: 0,
 		alreadyStrong: 0,
 		noEvidence: 0,
 		stale: 0,
@@ -148,34 +204,40 @@ async function main() {
 			t.alreadyStrong++;
 			continue;
 		}
-		const asOf = d.onchain?.asOf
-			? Date.parse(String(d.onchain.asOf))
-			: Number.NaN;
-		if (Number.isNaN(asOf)) {
-			t.noDate++;
-			continue;
-		}
-		const ageDays = (Date.now() - asOf) / 86_400_000;
 		const ev = evidenceOf(d.onchain);
 		if (!ev) {
 			t.noEvidence++;
 			continue;
 		}
-		if (ageDays > MAX_EVIDENCE_AGE_DAYS) {
+		// The evidence carries its own date: the ledger an event closed in,
+		// or the reading that observed a holder change.
+		const verdict = verdictFor(d, ev, Date.now());
+		const asOf = Date.parse(ev.at);
+		if (verdict === "no-date") {
+			t.noDate++;
+			continue;
+		}
+		if (verdict === "stale") {
 			t.stale++;
 			console.log(
-				`  STALE ${d.slug} — ${ev.kind}, but observed ${Math.round(ageDays)}d ago; not backdating a live claim`,
+				`  STALE ${d.slug}: ${ev.kind}, but dated ${Math.round((Date.now() - asOf) / 86_400_000)}d ago; not backdating a live claim`,
 			);
 			continue;
 		}
-		// Refreshing an existing award only moves FORWARD: a snapshot older
-		// than the stored date would silently walk the evidence backwards.
-		const storedAsOf = d.statusAsOf ? Date.parse(String(d.statusAsOf)) : 0;
-		const isRefresh = basis === "onchain-activity";
-		if (isRefresh && !(asOf > storedAsOf) && d.statusSourceUrl === ev.url) {
+		if (verdict === "up-to-date") {
 			t.upToDate++;
 			continue;
 		}
+		if (verdict === "kept-fresher") {
+			// Not an award and not current onchain-activity: the row keeps a
+			// repo, package or product observation dated after the event.
+			t.keptFresher++;
+			console.log(
+				`  KEPT    ${String(d.slug).padEnd(30)} ${basis} of ${String(d.statusAsOf).slice(0, 10)} is fresher than its newest on-chain evidence (${ev.at.slice(0, 10)})`,
+			);
+			continue;
+		}
+		const isRefresh = verdict === "refresh";
 		if (isRefresh) t.refreshed++;
 		else t.awarded++;
 		console.log(
@@ -195,7 +257,7 @@ async function main() {
 			});
 	}
 	console.log(
-		`\nawarded ${t.awarded} | refreshed ${t.refreshed} | already current ${t.upToDate} | human-verified (untouched) ${t.alreadyStrong} | no movement in window ${t.noEvidence} | evidence too old ${t.stale} | undated ${t.noDate} | shadows skipped ${t.shadow}`,
+		`\nawarded ${t.awarded} | refreshed ${t.refreshed} | already current ${t.upToDate} | fresher basis kept ${t.keptFresher} | human-verified (untouched) ${t.alreadyStrong} | no movement in window ${t.noEvidence} | evidence too old ${t.stale} | undated ${t.noDate} | shadows skipped ${t.shadow}`,
 	);
 	process.exit(0);
 }

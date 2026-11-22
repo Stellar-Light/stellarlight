@@ -121,9 +121,8 @@ const trust = (over: Partial<TrustReport> = {}): TrustReport => ({
 	},
 	usage: {
 		contracts: 1,
-		events: 1000,
-		eventsDelta: 10,
-		subinvocations: 50,
+		activeLedgers: 1000,
+		lastEventAt: "2026-08-16T00:00:00.000Z",
 		asOf: "2026-08-17",
 	},
 	audits: {

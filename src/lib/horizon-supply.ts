@@ -51,6 +51,25 @@ export function supplyOfAssetRecord(record: unknown): number | null {
 	return Number(total / STROOPS) + Number(total % STROOPS) / 1e7;
 }
 
+/** Open trustlines to the asset in every authorization state: the accounts
+ * that can hold it, whether or not they hold any now. Null when a count is
+ * not a readable number. */
+export function trustlinesOfAssetRecord(record: unknown): number | null {
+	const accounts = (record as { accounts?: Record<string, unknown> } | null)
+		?.accounts;
+	if (!accounts || typeof accounts !== "object") return null;
+	const parts = [
+		accounts.authorized,
+		accounts.authorized_to_maintain_liabilities,
+		accounts.unauthorized,
+	];
+	if (
+		!parts.every((n) => typeof n === "number" && Number.isInteger(n) && n >= 0)
+	)
+		return null;
+	return (parts as number[]).reduce((a, b) => a + b, 0);
+}
+
 /**
  * The asset's supply now, with the time it was read. A failed read, an empty
  * record set (Horizon knows no such asset for this issuer) or an unreadable

@@ -387,9 +387,10 @@ each probe is a read-only request.
   hosts. No served row rests on such a join today: of the 27 rows with an
   onchain asset, every one whose issuer's home_domain names another domain
   is human-verified or curated (`curl
-  https://horizon.stellar.org/accounts/<issuer>`, 2026-11-12). The lane
-  writes nothing while api.stellar.expert answers 402. Done when the join
-  calls tomlChain and the fix that unblinds the lane carries it.
+  https://horizon.stellar.org/accounts/<issuer>`, 2026-11-12). Fixed with
+  the change that moved the lane off the paid explorer (spec 1.9.151): the
+  join calls tomlChain. Done when the lane's first run on the new sources
+  has been read: its plan prints every asset that no longer joins.
 - Six rows served before this lane carry `statusBasis` unverified with a
   `statusSourceUrl`, though the spec defines unverified as having no citable
   source (`/api/projects?where[statusBasis][equals]=unverified`, 2026-11-12):
@@ -972,9 +973,37 @@ Found 2026-10-23 by the dead-protocol guard round
   Core pending audit (read 2026-10-23).
 - `view=compact` project rows do not carry `statusCaveat`; adding it gives
   every compact row a new null key.
-- The TVL rule of the status checks cannot speak until enrich-onchain has
-  stored 60 days of `onchain.quietSince`; today no row has more than 7 days of
-  observed silence on record.
+- The TVL rule of the status checks reads each contract's `lastEventAt`
+  since spec 1.9.151 and no longer waits for 60 days of its own readings. It
+  sees events only: 13 of 68 tracked contracts were used by sub-calls alone
+  in one week (2026-11-22, against the explorer's last deltas), and no free
+  source counts sub-calls. A contract with no event on record makes the rule
+  answer could-not-check.
+- A contract that joins `projects.onchain` after 2026-11-03 has no
+  `createdAt`: the lane keeps the date a row already holds and reads none.
+  Stellar Index's first code version is later than the recorded creation on
+  6 of 64 contracts, so it cannot stand in. The proof is the CREATED entry of
+  the contract instance in the creation ledger's own metadata (an archive
+  RPC `getLedgers` read); wire it in as a lane, or as a data file of proved
+  dates.
+- enrich-onchain names rows that hold an on-chain block and have no join key
+  any more (ORPHAN lines) and leaves them as they were, because a join can
+  also drop out on a failed toml or Horizon read. Each needs a decision by
+  hand until the join reports "could not read" apart from "does not hold".
+- untangledfinance/oz-policy-builder is linked to the `untangled` row; its
+  product has its own row, `crediolabs-ai` ("by the Untangled team; distinct
+  product"), which lists no repo. The on-chain lane holds the repo's
+  contract (CA7IBD26...) back from `untangled` through ONCHAIN_NOT_THIS_ROW
+  (src/data/onchain-contracts.ts). Done when the repo is linked to
+  `crediolabs-ai` and that entry is dropped. The same class, a repo of one
+  organisation linked to a row of another of its products, was found three
+  times in one dry run (PayLoop, AgentSmith, this one), each by reading; no
+  check finds it.
+- The explorer's API still feeds refresh-rwa, the stablecoin pipeline
+  (src/lib/stablecoin-pipeline.ts), reconcile-rwa-issuers, award-voters and
+  enrich-partner-onchain (dispatch only, last run 2026-07-20); each answers
+  402 since 2026-11-06. src/lib/onchain-sources.ts holds readers for the
+  same facts from Horizon and Stellar Index.
 - The status checks see only the 18 of 1,005 public rows with a DefiLlama
   link; a dead product with no link (or a stale slug, above) is not checked.
 - enrich-onchain writes `projects.onchain` without reading it back (only

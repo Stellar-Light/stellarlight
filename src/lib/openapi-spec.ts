@@ -984,30 +984,31 @@ const VET_BLOCK_SCHEMA = {
 	},
 };
 
-/** TrustReport["usage"] — on-chain enrichment rollup (null = no attributed
- * on-chain activity on record). */
+/** TrustReport["usage"]: on-chain enrichment rollup (null = no attributed
+ * contract on record). */
 const TRUST_USAGE_SCHEMA = {
 	type: "object",
 	nullable: true,
+	description:
+		"On-chain usage of the contract(s) attributed to the repo: contracts = how many; activeLedgers = ledgers in which they emitted an event, summed (lifetime); lastEventAt = the newest event across them. A contract can be in use with no event, so a null or old lastEventAt is NOT proof of disuse. null = no attributed contract on record, never 'unused'.",
 	properties: {
 		contracts: { type: "integer" },
-		events: { type: "integer", nullable: true },
-		eventsDelta: { type: "integer", nullable: true },
-		subinvocations: { type: "integer", nullable: true },
+		activeLedgers: { type: "integer", nullable: true },
+		lastEventAt: { type: "string", format: "date-time", nullable: true },
 		asOf: { type: "string", format: "date-time" },
 	},
 };
 
-/** ContractRow["codeInUse"] — same enrichment rollup minus subinvocations. */
+/** ContractRow["codeInUse"]: the same enrichment rollup. */
 const CONTRACT_CODE_IN_USE_SCHEMA = {
 	type: "object",
 	nullable: true,
 	description:
-		"On-chain usage attributed to the repo's contract(s); null = no attributed activity on record, never 'unused'.",
+		"On-chain usage attributed to the repo's contract(s): contracts = how many; activeLedgers = ledgers in which they emitted an event, summed (lifetime); lastEventAt = the newest event across them. A contract can be in use with no event, so a null or old lastEventAt is NOT proof of disuse. null = no attributed contract on record, never 'unused'.",
 	properties: {
 		contracts: { type: "integer" },
-		events: { type: "integer", nullable: true },
-		eventsDelta: { type: "integer", nullable: true },
+		activeLedgers: { type: "integer", nullable: true },
+		lastEventAt: { type: "string", format: "date-time", nullable: true },
 		asOf: { type: "string", format: "date-time" },
 	},
 };
@@ -7688,7 +7689,7 @@ export const spec: OpenAPISpec = {
 													verifiedContracts: {
 														type: "array",
 														description:
-															"Every mainnet address on-chain enrichment attributed to this repo (stellar.expert names it as the source), with the enrichment's label and the reading date that attributed it. Empty = nothing attributed, never a claim the repo deploys nothing.",
+															"Every mainnet address on-chain enrichment attributed to this repo (the deployed WASM names the repo as its source and GitHub lists a build attestation for it there, or a hand-verified seed names the repo for a WASM built without such metadata), with the enrichment's label and the reading date that attributed it. Empty = nothing attributed, never a claim the repo deploys nothing.",
 														items: {
 															type: "object",
 															properties: {
@@ -10056,7 +10057,7 @@ export const spec: OpenAPISpec = {
 						"most-starred projects; which projects shipped recently (last 30d)",
 						"how many active Stellar devs / how does Stellar's dev activity look (EC 28-day active / Stellar-only / multichain splits)",
 						"top DeFi protocols by TVL (sort=tvl, e.g. with type=DEX,Lending): DefiLlama-verified, dated per-row by tvlAsOf",
-						"biggest stablecoin / issued asset by circulating supply (sort=supply, pair with type=Stablecoin): assetSupply + assetHolders from stellar.expert",
+						"biggest stablecoin / issued asset by circulating supply (sort=supply, pair with type=Stablecoin): assetSupply + assetHolders",
 						"a CSV/Dune-style export of ranked projects (default top 50, max 300)",
 					],
 					notFor: [
@@ -11840,7 +11841,7 @@ export const spec: OpenAPISpec = {
 					},
 					statusChecks: {
 						type: "array",
-						description: `Checks of the status label against stored upstream facts, present only on rows with a DefiLlama link (llamaSlugs); absent means the row has no DefiLlama link, so neither check applies. defillama-listing: hit when DefiLlama marks every linked slug dead (a deadFrom date, or deprecated with nothing locked and no live listing in its parentProtocol family), clear when it lists one as active, could-not-check when it was not read yet, a slug is missing upstream (a rename or removal), or a deprecated slug looks superseded (no deadFrom while value is still locked or a family listing is live): deprecated alone is never a hit. tvl-zero-onchain-quiet, only for ${ONCHAIN_USE_TYPES_TEXT} rows: hit when a DefiLlama TVL of 0 read within the last 14 days, over a listing that found every linked slug, meets 60 or more days of observed time in which no tracked contract emitted an event or took a sub-call (both counters read for every contract), clear when a fresh TVL is above 0 or a contract moved in the latest window, could-not-check otherwise (no TVL figure or one that is negative, a TVL reading older than 14 days, a listing with a linked slug missing upstream, no tracked contract, a counter not read, a reading date that cannot be read, or under 60 days observed). A could-not-check result is not a clean bill.`,
+						description: `Checks of the status label against stored upstream facts, present only on rows with a DefiLlama link (llamaSlugs); absent means the row has no DefiLlama link, so neither check applies. defillama-listing: hit when DefiLlama marks every linked slug dead (a deadFrom date, or deprecated with nothing locked and no live listing in its parentProtocol family), clear when it lists one as active, could-not-check when it was not read yet, a slug is missing upstream (a rename or removal), or a deprecated slug looks superseded (no deadFrom while value is still locked or a family listing is live): deprecated alone is never a hit. tvl-zero-onchain-quiet, only for ${ONCHAIN_USE_TYPES_TEXT} rows: hit when a DefiLlama TVL of 0 read within the last 14 days, over a listing that found every linked slug, meets 60 or more days in which no tracked contract emitted an event (each contract's lastEventAt, on an on-chain reading no older than 14 days), clear when a fresh TVL is above 0 or a tracked contract emitted an event within those 60 days, could-not-check otherwise (no TVL figure or one that is negative, a TVL reading older than 14 days, a listing with a linked slug missing upstream, no tracked contract, an on-chain reading older than 14 days or undated, or a tracked contract with no event on record). The hit speaks of events only: a contract can be called without emitting one. A could-not-check result is not a clean bill.`,
 						items: {
 							type: "object",
 							required: ["check", "result", "detail", "asOf", "sourceUrl"],
@@ -12330,7 +12331,7 @@ export const spec: OpenAPISpec = {
 					onchain: {
 						type: ["object", "null"],
 						description:
-							"On-chain metrics from stellar.expert for hand-verified contract/asset join keys. null = not tracked in our registry. NEVER 'no on-chain activity'. contracts[]: {address, label, events, subinvocations, storageEntries, createdAt, verifiedRepo}; events and subinvocations are LIFETIME counts (a contract users call directly at top level can show low subinvocations despite heavy use; read events alongside). Asset-issuer activity: assetHolders = accounts holding a balance TODAY (the active-address count); assetTrustlines = accounts that have EVER opened a trustline (reach, always >= assetHolders; do NOT read it as the active count); assetPayments = lifetime count of payment operations (the transaction-volume metric); assetTrades = lifetime trade count; assetPaymentsAmount = lifetime payment volume in WHOLE ASSET UNITS, not USD (a same-denomination count, not comparable across assets without a price); assetSupply = whole asset units. From the second weekly snapshot, delta fields activate: per-contract eventsDelta/subinvocationsDelta, assetHoldersDelta, assetPaymentsDelta, with prevAsOf + deltaDays defining the window; null deltas mean no prior snapshot yet, NOT zero activity. source + asOf date every payload.",
+							"On-chain readings for hand-verified contract/asset join keys, from Stellar Index, Horizon and the Soroban RPC. null = not tracked in our registry. NEVER 'no on-chain activity'. contracts[]: {address, label, lastEventAt, activeLedgers, ttlState, createdAt, verifiedRepo}. lastEventAt = the newest event the contract emitted: proof of use on that date. A contract can be called without emitting an event, so a null or old lastEventAt is NOT proof it is unused. activeLedgers = lifetime count of ledgers in which it emitted an event. ttlState = 'live', or 'archived' when the contract's entry has outlived its TTL and must be restored before it can run. createdAt = when the contract was created, kept from the reading that first recorded it; null for a contract joined after 2026-11-03. verifiedRepo = the GitHub repo the contract's code comes from: the deployed WASM is attested to it (its build metadata names the repo and GitHub lists a build attestation for that WASM there), or, for a WASM built without such metadata, a hand-verified seed names it; where the contract's code could not be read this time (a contract archived on chain may leave the live ledger state, or a read failed), the value the row already holds is kept, which for a row first read before 2026-11-06 can be the old explorer's validation; null = none of these, never a claim about the code. Asset-issuer readings: assetHolders = accounts holding a balance now (contracts that hold the asset, such as smart wallets and pools, are not counted); assetTrustlines = open trustlines in every authorization state (reach, always >= assetHolders; do NOT read it as the holder count); assetSupply = units outside the issuer in whole asset units; assetLastMovedAt = the newest transfer, mint, burn or clawback of the asset, classic payments included (null = none among its newest 100 events, or no event on record). assetHoldersDelta = holder change since the previous reading of the same source, with prevAsOf + deltaDays defining the window; null = no comparable prior reading, NOT zero change. source + asOf date every payload. Gone since 1.9.151, because their source went paid and no free source holds them: assetPayments, assetPaymentsAmount, assetPaymentsDelta, assetTrades, and per contract events, eventsDelta, subinvocations, subinvocationsDelta and storageEntries.",
 					},
 					publicGoods: {
 						type: ["object", "null"],
@@ -13104,13 +13105,11 @@ export const spec: OpenAPISpec = {
 					codeInUse: {
 						type: ["object", "null"],
 						description:
-							"Mainnet usage rollup for contracts attributed to this repo (scanner-verified contract ids + stellar.expert wasm validation; refreshed weekly): contracts = attributed contract count; events/subinvocations = LIFETIME counts summed across them; eventsDelta/subinvocationsDelta = change since the prior weekly snapshot (null until one exists; NOT zero activity). null object = no verified mainnet contract joined to this repo: absence of a join, never a claim the code is unused. The dynamic half of code truth: codeDepth says the code is serious, codeInUse says it is LIVE.",
+							"Mainnet usage rollup for the contracts attributed to this repo (the deployed WASM is attested to it, the code scan proved the repo's own source defines the contract, or a hand-verified seed names it; refreshed weekly): contracts = attributed contract count; activeLedgers = ledgers in which those contracts emitted an event, summed across them (lifetime; a ledger in which two of them emitted counts twice); lastEventAt = the newest event across them. A contract can be in use with no event, so a null or old lastEventAt is NOT proof of disuse. null object = no verified mainnet contract joined to this repo: absence of a join, never a claim the code is unused. The dynamic half of code truth: codeDepth says the code is serious, codeInUse says it is on mainnet and when it last emitted an event.",
 						properties: {
 							contracts: { type: "integer" },
-							events: { type: ["integer", "null"] },
-							eventsDelta: { type: ["integer", "null"] },
-							subinvocations: { type: ["integer", "null"] },
-							subinvocationsDelta: { type: ["integer", "null"] },
+							activeLedgers: { type: ["integer", "null"] },
+							lastEventAt: { type: ["string", "null"], format: "date-time" },
 							asOf: { type: "string" },
 						},
 					},
@@ -14021,19 +14020,19 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"Code of the project's issued on-chain asset (USDC, CETES, …), from stellar.expert. Null = no verified issued asset in our on-chain seed set.",
+							"Code of the project's issued on-chain asset (USDC, CETES, …). Null = no verified issued asset in our on-chain seed set.",
 					},
 					assetSupply: {
 						type: "number",
 						nullable: true,
 						description:
-							"Circulating supply of the issued asset in whole asset units (sort=supply orders by this). null = NOT TRACKED; never 'zero supply'; untracked issuers sort below every tracked one.",
+							"Supply of the issued asset outside its issuer, in whole asset units, from Horizon (sort=supply orders by this). null = NOT TRACKED; never 'zero supply'; untracked issuers sort below every tracked one.",
 					},
 					assetHolders: {
 						type: "number",
 						nullable: true,
 						description:
-							"Trustline holder count of the issued asset. Null when untracked.",
+							"Accounts holding a balance of the issued asset now; contracts that hold it are not counted. Null when untracked.",
 					},
 					github: {
 						type: "object",
