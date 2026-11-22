@@ -559,6 +559,9 @@ const KIND_OF: Record<string, FindingKind> = {
 	"raven-drift|op-missing-from-catalog": "instrument",
 	"raven-drift|could-not-check": "instrument", // the drift guard could not look
 	"repo-redirects|redirect-unjudged": "instrument", // our read of the redirect came back partial
+	// check-media-files: a served row points at a media record whose file
+	// answers 404. The file never reached our store, so the serving is ours.
+	"media-files|media-file-missing": "instrument",
 };
 
 export const isKindMapped = (source: string, failureMode: string): boolean =>

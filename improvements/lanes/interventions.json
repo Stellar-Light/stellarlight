@@ -66,6 +66,12 @@
 			"lane": "enrich-tvl",
 			"what": "The lane stores tvlUSD 0 for allbridge (slug allbridge-core, tvlAsOf 2026-10-19) while DefiLlama serves that protocol's tvl as null (deprecated, deadFrom 2026-08-31; read 2026-10-23): a missing figure was coerced to 0, against the lane's own rule that null means not tracked, never zero. Fixed: a row with neither a Stellar slice nor a total is null; allbridge is repointed to allbridge-next (no TVL figure upstream), and a figure stored under slugs the map no longer names is cleared; the lane also records DefiLlama's listing verdict (llamaListing) for the status checks.",
 			"source": "lane DQ1 branch lane/dq1-dead-protocol-guard (improvements/rounds/2026-10-23-dead-protocol-guard.md); PR number added when it is opened"
+		},
+		{
+			"date": "2026-11-13",
+			"lane": "enrich-scf",
+			"what": "Seven executes of the lane (2026-06-14, 2026-08-03, 2026-08-08, 2026-08-31, 2026-09-01 twice, 2026-09-06) uploaded SCF thumbnails from a runner with no file store: the workflow named four R2 secrets the repository did not hold until 2026-09-23, so each arrived empty, the S3 adapter was not loaded and Payload wrote the file to the runner's disk. 160 media records were left with no file, and 137 project rows still served one as their logo on 2026-11-13 (GET 404). The sync step logged \"THUMBNAIL: <n>KB\" and exited 0 each time (the last of the seven runs, 34045568830, then failed on its Idempotence step). Fixed: the Media collection refuses an upload with no file store, the lane refuses to execute without one, a daily probe files a served row with a missing file to the ledger, and repair-missing-logos.yml re-fetches the image from the row's own SCF page where the page confirms the row.",
+			"source": "lane branch lane/r1113-media-missing; run logs 33432705400 (2026-08-31, R2 variables printed empty, 17 THUMBNAIL lines, 17 records with no file) and 37106737266 (2026-10-03, variables masked, 12 THUMBNAIL lines, 12 files served); gh api repos/Stellar-Light/stellarlight/actions/secrets (R2_* created 2026-09-23T17:10Z); PR number added when it is opened"
 		}
 	]
 }
