@@ -26,6 +26,7 @@ import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { RESOLUTION_POOL_WHERE } from "@/lib/project-status";
 import { type ResolvableProject, resolveProject } from "@/lib/resolve-project";
+import { STATUS_CHECK_SELECT, statusChecksFor } from "@/lib/status-checks";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -92,6 +93,19 @@ export async function GET(req: NextRequest) {
 	});
 
 	const resolution = resolveProject(q, found.docs as ResolvableProject[]);
+	// sls-121: the subject's status checks, the same searchProjects serves,
+	// read on its own row so the 5,000-row pool select stays light.
+	if (resolution.evidence && resolution.subject) {
+		const row = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: resolution.subject.slug } },
+			limit: 1,
+			depth: 0,
+			select: STATUS_CHECK_SELECT,
+		});
+		resolution.evidence.statusCaveat =
+			statusChecksFor(row.docs[0] ?? {}).statusCaveat ?? null;
+	}
 
 	logApiHit({
 		req,

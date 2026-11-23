@@ -33,11 +33,26 @@
  * status itself never moves here (a dead upstream listing can mean the product
  * moved, as Allbridge moved to Allbridge Next).
  *
- * Checks apply only to rows with a DefiLlama link; every other row is served
- * exactly as before, the same keys and values.
+ * A third check reads no upstream source (sls-121, 2026-11-23):
+ *   availability-check       the row's own availabilityCheck (the curate
+ *                            lane's dated read of the operator's sources,
+ *                            sls-033) found none (none-found) and is newer
+ *                            than the label's observation. Only a basis
+ *                            that reads the product itself (human-verified,
+ *                            onchain-activity: PRODUCT_OBSERVED_BASES) dates
+ *                            an observation; a check on or before that day
+ *                            is clear, the newer reading stands. Any other
+ *                            basis (a page that answered, a probe, a repo,
+ *                            the operator's word, a seed list) never makes
+ *                            the label newer than the check.
+ *
+ * The DefiLlama checks apply only to rows with a DefiLlama link, the
+ * availability check only to rows that serve an availabilityCheck; every
+ * other row is served exactly as before, the same keys and values.
  */
 
 import { type FactConfidence, factConfidence } from "./fact-confidence";
+import { pickAvailabilityCheck } from "./wallet-coverage";
 
 /** Days without a contract event the TVL check needs before it speaks. */
 export const QUIET_DAYS = 60;
@@ -86,7 +101,26 @@ export type LlamaListingState = (typeof LLAMA_LISTING_STATES)[number];
 export const STATUS_CHECKS = [
 	"defillama-listing",
 	"tvl-zero-onchain-quiet",
+	"availability-check",
 ] as const;
+
+/** The stored fields statusChecksFor reads, as a Payload select, for the
+ * serving paths that read a row through a select (verify, resolve): a field
+ * left out reads as no fact and silently drops its check. */
+export const STATUS_CHECK_SELECT = {
+	slug: true,
+	status: true,
+	statusBasis: true,
+	statusAsOf: true,
+	types: true,
+	tvlUSD: true,
+	tvlAsOf: true,
+	llamaSlugs: true,
+	llamaListing: true,
+	onchain: true,
+	availability: true,
+	availabilityCheck: true,
+} as const;
 export const CHECK_RESULTS = ["hit", "clear", "could-not-check"] as const;
 
 export interface StatusCheck {
@@ -97,7 +131,8 @@ export interface StatusCheck {
 	/** Date of the reading the result rests on (YYYY-MM-DD), null when none. */
 	asOf: string | null;
 	/** The DefiLlama page that shows the linked rows (llamaPageFor, the
-	 * row's tvlMethodUrl), else the first linked protocol's page. */
+	 * row's tvlMethodUrl), else the first linked protocol's page; for the
+	 * availability check, the first source it read. */
 	sourceUrl: string;
 }
 
@@ -778,6 +813,80 @@ function tvlQuietCheck(p: any, slugs: string[], now: Date): StatusCheck {
 	);
 }
 
+/** The bases whose statusAsOf dates a reading of the product itself, the
+ * only ones that can stand against a newer-or-equal none-found check:
+ * human-verified (a person looked at the product) and onchain-activity (the
+ * product's own contracts or assets moved on that date). Every other basis
+ * is a reading of something else: site-liveness (a page answered; the
+ * liveness lane can stamp it on a later date, which would silently clear
+ * the check), product-integration (a machine probe of a page's references,
+ * never a claim the product works), operator-announcement (the operator's
+ * word, which can describe plans), repo-activity and package-release (code
+ * moved; a repo is not a product), source-inherited and unverified (no
+ * reading at all). */
+const PRODUCT_OBSERVED_BASES: readonly unknown[] = [
+	"human-verified",
+	"onchain-activity",
+];
+
+/** sls-121: the row's served availabilityCheck read against the label's
+ * observation (see the header). Null when the row serves no check: none
+ * stored, or availability rows beside it (pickAvailabilityCheck, the rule
+ * the row builders serve by). */
+// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
+function availabilityCheckOf(p: any): StatusCheck | null {
+	const stored: Array<{ platform?: unknown; state?: unknown } | null> =
+		Array.isArray(p.availability) ? p.availability : [];
+	const rows = stored.filter(
+		(r) => typeof r?.platform === "string" && typeof r?.state === "string",
+	);
+	const c = pickAvailabilityCheck(p.availabilityCheck, rows);
+	if (!c) return null;
+	// checkedAt is free text: only a leading YYYY-MM-DD day can be ordered.
+	const checked = /^\d{4}-\d{2}-\d{2}/.test(c.checkedAt)
+		? c.checkedAt.slice(0, 10)
+		: null;
+	const base = {
+		check: "availability-check" as const,
+		asOf: checked,
+		sourceUrl: c.sources[0] ?? `https://stellarlight.xyz/project/${p.slug}`,
+	};
+	const note = c.note.replace(/\.$/, "");
+	if (!checked)
+		return {
+			...base,
+			result: "could-not-check",
+			detail:
+				"An availability check is on record, but it carries no YYYY-MM-DD date, so it cannot be read against the label.",
+		};
+	if (c.result !== "none-found")
+		return {
+			...base,
+			result: "could-not-check",
+			detail: `A check of the operator's sources on ${checked} could not read one: ${note}.`,
+		};
+	const observing = PRODUCT_OBSERVED_BASES.includes(p.statusBasis);
+	const observed = observing
+		? (parseDate(p.statusAsOf)?.slice(0, 10) ?? null)
+		: null;
+	if (observed && checked <= observed)
+		return {
+			...base,
+			result: "clear",
+			detail: `A check of the operator's sources on ${checked} found no product (${note}), but the status was observed on ${observed} (${p.statusBasis}), the same day or later.`,
+		};
+	const why = observed
+		? `after the label was observed on ${observed} (${p.statusBasis})`
+		: observing
+			? `and the label is undated (${p.statusBasis})`
+			: `and the label rests on no reading of the product (basis ${p.statusBasis ?? "unrecorded"})`;
+	return {
+		...base,
+		result: "hit",
+		detail: `a check of the operator's sources on ${checked} found no product, ${why}: ${note}`,
+	};
+}
+
 function halved(c: FactConfidence | null): FactConfidence | null {
 	if (!c) return null;
 	const score = Math.round(c.score * 50) / 100;
@@ -786,9 +895,9 @@ function halved(c: FactConfidence | null): FactConfidence | null {
 }
 
 /** The served status fields a row's own facts decide: statusConfidence on
- * every row, and on a row with a DefiLlama link its statusChecks and
- * statusCaveat. A row without a link gets exactly the confidence it got
- * before, and no other key. */
+ * every row, and on a row with a DefiLlama link or a served availabilityCheck
+ * its statusChecks and statusCaveat. A row with neither gets exactly the
+ * confidence it got before, and no other key. */
 export function statusChecksFor(
 	// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
 	p: any,
@@ -800,13 +909,16 @@ export function statusChecksFor(
 } {
 	const statusConfidence = factConfidence(p.statusBasis, p.statusAsOf, now);
 	const slugs = linkedSlugs(p.llamaSlugs);
-	if (!slugs) return { statusConfidence };
+	const availability = availabilityCheckOf(p);
+	if (!slugs && !availability) return { statusConfidence };
 	const types: unknown[] = Array.isArray(p.types) ? p.types : [];
 	const statusChecks = [
-		listingCheck(p, slugs),
-		...(types.some((t) => (ONCHAIN_USE_TYPES as readonly unknown[]).includes(t))
+		...(slugs ? [listingCheck(p, slugs)] : []),
+		...(slugs &&
+		types.some((t) => (ONCHAIN_USE_TYPES as readonly unknown[]).includes(t))
 			? [tvlQuietCheck(p, slugs, now)]
 			: []),
+		...(availability ? [availability] : []),
 	];
 	const hits = statusChecks.filter((c) => c.result === "hit");
 	if (p.status !== "Live" || !hits.length)

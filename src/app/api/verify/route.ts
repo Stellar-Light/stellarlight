@@ -13,6 +13,7 @@ import { noteScanOf, noteSourceCheck } from "@/lib/note-pins";
 import { RESOLUTION_POOL_WHERE } from "@/lib/project-status";
 import { type ResolvableProject, resolveProject } from "@/lib/resolve-project";
 import { retirementOf } from "@/lib/stablecoins";
+import { STATUS_CHECK_SELECT } from "@/lib/status-checks";
 import { getAppUrl } from "@/lib/utils/app-url";
 import {
 	type AuditEvidenceRow,
@@ -199,23 +200,14 @@ export async function GET(req: NextRequest) {
 			limit: 1,
 			depth: 0,
 			select: {
-				slug: true,
+				// DQ1, sls-121: what the status checks read (src/lib/status-checks.ts)
+				...STATUS_CHECK_SELECT,
 				name: true,
-				status: true,
-				statusBasis: true,
-				statusAsOf: true,
 				statusSourceUrl: true,
-				types: true,
 				links: true,
 				prominence: true,
 				verificationLevel: true,
 				supportedNetworks: true,
-				// DQ1: what the status checks read (src/lib/status-checks.ts)
-				tvlUSD: true,
-				tvlAsOf: true,
-				llamaSlugs: true,
-				llamaListing: true,
-				onchain: true,
 			},
 		});
 		full = r.docs[0] ?? null;
@@ -316,6 +308,8 @@ export async function GET(req: NextRequest) {
 			llamaSlugs: full?.llamaSlugs ?? null,
 			llamaListing: full?.llamaListing ?? null,
 			onchain: full?.onchain ?? null,
+			availability: full?.availability ?? null,
+			availabilityCheck: full?.availabilityCheck ?? null,
 		});
 		logApiHit({
 			req,

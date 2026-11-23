@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
 		surfaces: ["api", "skill"],
+		version: "spec@1.9.154",
+		type: "fixed",
+		summary:
+			"A Live status no longer reads as plainly Live when the row's own `availabilityCheck` found no product after the label was observed (stellar-raven sls-121). `statusChecks` gains a third check, `availability-check`, on every row that serves an `availabilityCheck`: hit when its result is none-found and it is newer than the label's reading of the product, clear when a human-verified or onchain-activity label was observed on the check's day or later, could-not-check when the check could not read a source or carries no date. A hit on a Live row adds `statusCaveat` and halves `statusConfidence`, as the DefiLlama checks do; the status itself never moves. The same caveat now reaches verifyClaim type=live, resolveProject (`evidence.statusCaveat`, new), compact searchProjects rows (`statusCaveat`, new in the compact key list) and the project page.",
+		detail:
+			"Measured on 2026-11-23 over the 1,012 public rows (status Live 820, Development 58, Pre-Release 16, Inactive 118): 10 rows serve an `availabilityCheck`, all of type Wallet, and each gains an availability-check entry. Six are Live with a hit and gain the caveat: spatium, freelii and bebop (statusBasis source-inherited, statusAsOf 2026-08-19), sentit and elsa (site-liveness, 2026-08-17), each with a none-found check of 2026-11-11, and ben-wallet. Only a human-verified or onchain-activity basis dates a reading of the product itself, so only such a label observed on the check's day or later clears it. Every other basis reads something else: site-liveness that a page answered (sentit.io and elsa.care still answer, and the liveness lane can stamp that basis on a later date), product-integration a page's references, operator-announcement the operator's word, repo-activity and package-release code, source-inherited and unverified nothing. A later date on one of those does not make the label newer than the check: ben-wallet's statusAsOf (2026-11-12) is after its check, but its basis is unverified, and that date records the day a third-party-host basis was withdrawn. Three non-Live rows hit without a caveat (two Development, one Inactive), and one Live row's check could not read a source, which changes nothing. `statusChecks` was present only on DefiLlama-linked rows (20 on 2026-11-23); it is now also present on rows that serve an `availabilityCheck`. No status, statusAsOf or statusBasis is written by this change.",
+	},
+	{
+		date: "2026-11-23",
+		surfaces: ["api", "skill"],
 		version: "spec@1.9.153",
 		type: "added",
 		summary:
