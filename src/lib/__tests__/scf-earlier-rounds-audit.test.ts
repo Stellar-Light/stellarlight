@@ -13,6 +13,7 @@ import {
 	SCF_SHARED_CLAIMS,
 	SCF_SLUG_OVERRIDES,
 	STRANDED_CEILING,
+	sharedClaimMatches,
 	strandedAwards,
 	strandedWrites,
 } from "../../../scripts/data/scf-joins";
@@ -22,6 +23,7 @@ import {
 	storedLastRound,
 	storedTotal,
 } from "../../../scripts/eval/scf-official";
+import { unsourcedAwards } from "../scf-round-counts";
 
 type Row = JoinRow & {
 	scf?: { awarded?: boolean; slug?: string | null; awardedRounds?: number[] };
@@ -260,5 +262,88 @@ describe("re-audit (2026-11-12): the flag must name the count, and a shared clai
 		expect(countedRows(own)).toEqual(own);
 		// a stored page that could not be read is not the claim's page
 		expect(countedRows([{ slug: "peer" }])).toEqual([{ slug: "peer" }]);
+	});
+});
+
+describe("every award cites its page and a date, a shared claim included (sls-116, 2026-11-17)", () => {
+	const PAGE = "https://communityfund.stellar.org/project/";
+	const claim = SCF_SHARED_CLAIMS.peer.page;
+	// the listing entry the enrich joins to honey-coin (SCF_SLUG_OVERRIDES)
+	const page = { id: "rec-peer", slug: claim, title: "Peer (by Honeycoin)" };
+	const honey = { slug: "honey-coin", scf: { slug: claim } };
+	const peer = { slug: "peer", scf: { slug: claim } };
+	const bySlug = new Map([
+		["honey-coin", honey],
+		["peer", peer],
+	]);
+
+	it("the claiming row is written from the page its own row is written from", () => {
+		const out = sharedClaimMatches([{ scf: page, ours: honey }], bySlug);
+		expect(out).toEqual([{ scf: page, ours: peer, scfOnly: true }]);
+	});
+
+	it("the claiming row takes only the scf group, never the page owner's logo, description or links", () => {
+		// a claiming row with none of them would otherwise be filled from the
+		// page, and the page's site and repositories are honey-coin's
+		const bare = { slug: "peer", scf: { slug: claim } };
+		const [m] = sharedClaimMatches(
+			[
+				{
+					scf: { ...page, thumbnail: { url: "https://x/logo.png" } },
+					ours: honey,
+				},
+			],
+			new Map([["peer", bare]]),
+		);
+		expect(m?.scfOnly).toBe(true);
+	});
+
+	it("no write when the row stores another page, has a page of its own, or the page joins nothing", () => {
+		const moved = new Map([["peer", { slug: "peer", scf: { slug: "x-1ab" } }]]);
+		expect(sharedClaimMatches([{ scf: page, ours: honey }], moved)).toEqual([]);
+		const own = { scf: { slug: "peer-wallet-abc" }, ours: peer };
+		expect(
+			sharedClaimMatches([{ scf: page, ours: honey }, own], bySlug),
+		).toEqual([]);
+		expect(sharedClaimMatches([], bySlug)).toEqual([]);
+	});
+
+	it("the round count names an awarded row with no page or no date, peer as served 2026-11-23", () => {
+		const served = [
+			{
+				slug: "honey-coin",
+				scfAwardedRounds: [22, 26],
+				scfSourceUrl: PAGE + claim,
+				scfAsOf: "2026-08-12",
+			},
+			{
+				slug: "peer",
+				scfAwardedRounds: [22, 26],
+				scfSourceUrl: null,
+				scfAsOf: null,
+				// the stored page the CLI reads for a shared claim
+				scf: { slug: claim },
+			},
+			{
+				slug: "dated-nowhere",
+				scfAwardedRounds: [9],
+				scfSourceUrl: "https://example.com/award",
+				scfAsOf: "2026-11-13",
+			},
+			{
+				slug: "page-no-date",
+				scfAwardedRounds: [9],
+				scfSourceUrl: `${PAGE}page-no-date-1ab`,
+				scfAsOf: null,
+			},
+		];
+		expect(unsourcedAwards(served)).toEqual([
+			"peer",
+			"dated-nowhere",
+			"page-no-date",
+		]);
+		// countedRows drops peer from the round count, so the check must read
+		// every row, not the counted ones
+		expect(unsourcedAwards(countedRows(served))).not.toContain("peer");
 	});
 });

@@ -294,6 +294,26 @@ export function compareRoundCounts(input: {
 }
 
 /**
+ * Awarded rows that cite no SCF project page or no date: an award nobody can
+ * check against SCF. Read over every awarded row, a reviewed shared claim
+ * included (sls-116: peer served SCF #22 and #26 with neither, and the round
+ * count, which counts that award once on its page's own row, never saw it).
+ */
+export function unsourcedAwards(
+	rows: ReadonlyArray<OurAwardedRow & { scfAsOf?: unknown }>,
+): string[] {
+	return rows
+		.filter(
+			(r) =>
+				typeof r.scfSourceUrl !== "string" ||
+				!r.scfSourceUrl.startsWith(PAGE) ||
+				typeof r.scfAsOf !== "string" ||
+				!r.scfAsOf,
+		)
+		.map((r) => String(r.slug));
+}
+
+/**
  * The ratchet (scripts/eval/scf-round-shortfalls.json): a dated, reviewed
  * list of the rounds known to be short, so the check reds on what changed and
  * not on every run. Without it the check was red on every execute: 34 rounds

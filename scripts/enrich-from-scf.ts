@@ -33,6 +33,7 @@ import {
 	SCF_SHARED_CLAIMS,
 	SCF_SLUG_OVERRIDES,
 	STRANDED_CEILING,
+	sharedClaimMatches,
 	strandedAwards,
 	strandedWrites,
 } from "./data/scf-joins";
@@ -475,7 +476,7 @@ async function main() {
 		list.push(m);
 		byRow.set(m.ours.slug, list);
 	}
-	const folded: { scf: any; ours: any }[] = [];
+	const folded: { scf: any; ours: any; scfOnly?: boolean }[] = [];
 	for (const list of byRow.values()) {
 		if (list.length === 1) {
 			folded.push(list[0]);
@@ -548,9 +549,18 @@ async function main() {
 		);
 		folded.push({ scf: { ...primary, lastAwardedRound, detail }, ours });
 	}
+	// A reviewed shared claim keeps its copy of the award, written from the
+	// page as the page's own row is, so it cites the page and its date. Only
+	// the scf group: the page's logo, description and links are its owner's.
+	for (const m of sharedClaimMatches(matched, bySlug)) {
+		console.log(
+			`  ${m.ours.slug}: written from ${m.scf.slug} too (reviewed shared claim)`,
+		);
+		folded.push(m);
+	}
 
 	// 5. Enrich matched projects
-	for (const { scf, ours } of folded) {
+	for (const { scf, ours, scfOnly } of folded) {
 		console.log(
 			`  ${ours.name} ← SCF "${scf.title}" (round ${scf.lastAwardedRound})`,
 		);
@@ -716,7 +726,7 @@ async function main() {
 		}
 
 		// --- Thumbnail: use SCF image if project has no logo ---
-		if (!ours.logo && scf.thumbnail) {
+		if (!scfOnly && !ours.logo && scf.thumbnail) {
 			const imgUrl =
 				scf.thumbnail.url ||
 				scf.thumbnail.file?.thumbnails?.large?.url ||
@@ -756,7 +766,7 @@ async function main() {
 		}
 
 		// --- Use scraped detail page for richer data ---
-		if (detail) {
+		if (detail && !scfOnly) {
 			// Add description if we don't have one
 			if (detail.description && !ours.shortDescription) {
 				updateData.shortDescription = detail.description;

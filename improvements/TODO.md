@@ -625,7 +625,8 @@ here as #1900 to #1905; each issue carries its read-only probes.
     row's site is Amber Group's) and soracleorg-posted-bdt (#22; both the
     soracle and posted-app rows could be it). Default: unjoined.
   - No row: soroban-contract-source-verification-service-bax (#44, $73,500,
-    an RFP award), mythforge-3tz (#10, #11), boss-money-former-leaf-global-hxt (#7;
+    an RFP award; its team is 57Blocks, whose rows agentsmith-x402 and
+    tokenpad are other products, so neither joins it), mythforge-3tz (#10, #11), boss-money-former-leaf-global-hxt (#7;
     two rows, boss-pay and boss-revolution, both list bossmoney.com: a
     duplicate to resolve first), optionblox-yieldblox-4mn (#7, Script3's
     2021 award; the yieldblox row is the later DAO), ayadee-trak-j7v (#6),
@@ -635,10 +636,22 @@ here as #1900 to #1905; each issue carries its read-only probes.
   - SCF lists two awards with no project page: submission recjsi9sxCFtNeYwi
     (#18) and rec52b54tNWXJ3tI3 (#15).
   - Peer by HoneyCoin's page joins the honey-coin row (SCF_SLUG_OVERRIDES),
-    and the peer row, the product the award funded, keeps its uncited copy
-    of #22 and #26 (SCF_SHARED_CLAIMS in scripts/data/scf-joins.ts): the sync
-    changes neither row and the round-count check counts the award once.
-    Default: leave both; the owner decides which row carries the award.
+    and the peer row, the product the award funded, keeps its copy of #22
+    and #26 (SCF_SHARED_CLAIMS in scripts/data/scf-joins.ts); the
+    round-count check counts the award once. Until lane/r1123-scf-award-rounds
+    the sync never wrote peer, so it served the award with no scfSourceUrl or
+    scfAsOf, the only one of 711 awarded rows on 2026-11-23. That branch
+    writes peer's SCF record from the page too (its scf group only), and the
+    Round counts step fails on any awarded row with no SCF page or date.
+    Both rows serve the award, so served SCF funding sums (analyze,
+    analytics, clusters) count its $145,000 twice until the owner decides.
+    Default: leave both rows awarded; the owner decides which row carries
+    the award.
+  - The Round counts step (its unsourced-award check included) runs only on
+    a manual enrich-scf dispatch with execute=true; no schedule or PR check
+    runs it, so an award that loses its source between syncs goes unseen.
+    A scheduled read-only run of scripts/eval/scf-round-counts.ts would
+    catch it. Default: none until the owner asks.
   - smilepay's SCF record is now titled PaySome.ai (paysomeai-7gh, joined to
     the smilepay row by its record id). Default: the row keeps its name
     until the owner decides on a rename.
