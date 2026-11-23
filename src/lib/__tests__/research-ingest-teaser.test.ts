@@ -5,7 +5,40 @@
  * every request; the ingester must cut it or the same chunk re-embeds daily.
  */
 import { describe, expect, it } from "vitest";
-import { slpChunks, stripTrailingTeaser } from "../research-ingest";
+import {
+	dropH2Sections,
+	missingH2Sections,
+	slpChunks,
+	stripTrailingTeaser,
+} from "../research-ingest";
+
+describe("dropH2Sections", () => {
+	// stellar.org/community's shape: a newest-posts list mid-page, FAQ after.
+	const page =
+		"# Unlocking our potential\nIntro.\n\n## Grow with Stellar\nSCF.\n\n## Onchain updates\nNovember 16, 2026\n### Q3 2026: The rail, put to work\n\n## Common questions\nSDF cannot recover funds.";
+
+	it("drops the named section and keeps what follows it", () => {
+		const out = dropH2Sections(page, ["Onchain updates"]);
+		expect(out).not.toContain("Onchain updates");
+		expect(out).not.toContain("The rail, put to work");
+		expect(out).toContain("## Grow with Stellar\nSCF.");
+		expect(out).toContain("## Common questions\nSDF cannot recover funds.");
+	});
+
+	it("matches whole headings only and leaves other pages untouched", () => {
+		expect(dropH2Sections(page, ["Onchain"])).toBe(page);
+		expect(dropH2Sections(page, [])).toBe(page);
+	});
+
+	it("names a heading to drop that the page no longer has", () => {
+		expect(missingH2Sections(page, ["Onchain updates"])).toEqual([]);
+		expect(missingH2Sections(page, ["Onchain"])).toEqual(["Onchain"]);
+		const demoted = page.replace("## Onchain updates", "### Onchain updates");
+		expect(missingH2Sections(demoted, ["Onchain updates"])).toEqual([
+			"Onchain updates",
+		]);
+	});
+});
 
 const article =
 	"Perps on Stellar would let traders hedge exposure in leveraged trading. It uses…";

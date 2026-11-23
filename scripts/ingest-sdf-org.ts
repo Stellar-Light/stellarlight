@@ -48,7 +48,9 @@ import {
 } from "../src/lib/canonical-pages";
 import {
 	chunkMarkdown,
+	dropH2Sections,
 	loadExistingChunks,
+	missingH2Sections,
 	type ResearchChunk,
 	stripHtml,
 	upsertChunks,
@@ -127,6 +129,19 @@ async function run() {
 		// Drop the in-page nav scaffold stellar.org renders at the top of <main>
 		// ("Jump to...") so it never leads a chunk.
 		let md = stripHtml(main).replace(/^Jump to\.\.\.\s*/i, "");
+		if (row.dropSections) {
+			// A section to drop that is not there was renamed or demoted: the
+			// block it hid would be ingested and re-embedded on every change.
+			const absent = missingH2Sections(md, row.dropSections);
+			if (absent.length) {
+				console.error(
+					`  ✗ section to drop not found (${absent.join(", ")}): renamed or demoted; SKIPPED, stored rows kept`,
+				);
+				skips.push(`${row.id}: drop section not found`);
+				continue;
+			}
+			md = dropH2Sections(md, row.dropSections);
+		}
 
 		// Richer extraction: pages whose quotable facts live in embedded page
 		// data (the Team page's leadership/board ROLES live only in the

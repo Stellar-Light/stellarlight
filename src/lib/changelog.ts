@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-23",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.153",
+		type: "added",
+		summary:
+			"searchResearch source 'sdf-org' gains seven SDF pages: the 2026 strategy (stellar.org/foundation/strategy), the product roadmap (stellar.org/foundation/roadmap, which still shows 2025; its title says so), the north stars, the code of conduct, the next-gen education page, the service-provider directory (stellar.org/ecosystem/service-providers) and the community page with its FAQ (stellar.org/community, e.g. SDF cannot recover funds sent without a memo).",
+		detail:
+			"The sdf-org page list had been written from the questions of one earlier finding, not from SDF's own /foundation/ section, so the strategy and roadmap pages were never listed. Every /foundation/ page in the stellar.org sitemap of 2026-11-22 is now listed except careers (job listings) and the previous-mandate address (the same document as /foundation/mandate/2017). Each page carries verbatim phrases checked on the live page on 2026-11-22; the daily coverage check reds if a page or phrase goes missing, and the strategy and roadmap phrases pin the year each page shows. These pages state no date, so their rows carry no publishedAt. The community page's list of newest blog posts is left out, so it does not change the page's rows each time SDF posts. The `source` description and the searchResearch use-when line now list these pages. Rows arrive with the next research-corpus refresh after deploy.",
+	},
+	{
 		date: "2026-11-22",
 		surfaces: ["api", "mcp", "skill"],
 		version: "spec@1.9.152",

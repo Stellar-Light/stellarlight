@@ -712,6 +712,34 @@ export function stripTrailingTeaser(body: string): string {
 		.trimEnd();
 }
 
+/**
+ * Drop whole H2 sections (heading through the line before the next H2) by
+ * exact heading text, using the same H2 test chunkMarkdown splits on. For a
+ * "latest posts" block rendered mid-page, where stripTrailingTeaser's cut at
+ * the end would also drop the content after it (stellar.org/community lists
+ * new blog posts above its FAQ).
+ */
+/** The headings in `headings` that `md` has no H2 for: a renamed or demoted
+ * section would otherwise be ingested in silence. */
+export function missingH2Sections(md: string, headings: string[]): string[] {
+	const h2s = new Set(
+		md.split("\n").map((line) => line.match(/^##\s+(.+)/)?.[1].trim()),
+	);
+	return headings.filter((h) => !h2s.has(h));
+}
+
+export function dropH2Sections(md: string, headings: string[]): string {
+	let dropping = false;
+	return md
+		.split("\n")
+		.filter((line) => {
+			const h2 = line.match(/^##\s+(.+)/);
+			if (h2) dropping = headings.includes(h2[1].trim());
+			return !dropping;
+		})
+		.join("\n");
+}
+
 export function stripHtml(html: string): string {
 	return (
 		html

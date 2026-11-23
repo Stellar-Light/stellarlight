@@ -81,6 +81,36 @@ describe("CANONICAL_PAGES registry", () => {
 		expect(byId("mandate-2017").family).toBe("mandate");
 	});
 
+	it("carries the sls-117 pages: strategy, roadmap, north stars, service providers, community", () => {
+		const want: Record<string, string> = {
+			strategy: "https://stellar.org/foundation/strategy",
+			roadmap: "https://stellar.org/foundation/roadmap",
+			"north-stars": "https://stellar.org/foundation/north-stars",
+			"code-of-conduct": "https://stellar.org/foundation/code-of-conduct",
+			"next-gen": "https://stellar.org/foundation/next-gen",
+			"service-providers": "https://stellar.org/ecosystem/service-providers",
+			community: "https://stellar.org/community",
+		};
+		for (const [id, url] of Object.entries(want)) {
+			const row = canonicalPage(id);
+			expect(row.url, id).toBe(url);
+			expect(row.source, id).toBe("sdf-org");
+			expect(row.ingestedBy, id).toBe("ingest-sdf-org.ts");
+		}
+		// The year the page shows is in the title AND pinned by a signature,
+		// so next year's page reds the guard rather than serving a stale title.
+		expect(canonicalPage("strategy").title).toContain("2026");
+		expect(canonicalPage("strategy").signatures.join(" ")).toContain("2026");
+		expect(canonicalPage("roadmap").title).toContain("2025");
+		expect(canonicalPage("roadmap").signatures.join(" ")).toContain("2025");
+		expect(canonicalPage("community").signatures).toContain(
+			"SDF cannot recover funds",
+		);
+		expect(canonicalPage("community").dropSections).toEqual([
+			"Onchain updates",
+		]);
+	});
+
 	it("canonicalPage throws on an unknown id (URL drift is loud)", () => {
 		expect(() => canonicalPage("nope")).toThrow(/no registry row/);
 	});
