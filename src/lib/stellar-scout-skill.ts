@@ -24,7 +24,7 @@ description: Scouts the Stellar ecosystem before you build. Validates ideas agai
 
 A research skill for **the strategic layer** of building on Stellar: what's already been shipped, what got funded, what RFPs are open right now, and whether a new idea has a real gap. Works for hackathon entrants, SCF grant applicants, and independent builders or teams alike.
 
-For *how to build* (Rust on Soroban, SEP standards, agentic payments, ZK, etc.), defer to the Stellar Foundation's official skills at **https://skills.stellar.org/** (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards). Scout chains into them via \`/api/skills\` when the user moves from "what should I build" to "how do I build it".
+For *how to build* (Rust on Soroban, SEP standards, agentic payments, ZK, etc.), defer to the Stellar Foundation's official skills at **https://skills.stellar.org/**. Scout chains into them via \`/api/skills\` (\`?source=sdf\` lists the current set) when the user moves from "what should I build" to "how do I build it".
 
 ## When to use this skill
 
@@ -100,8 +100,8 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 
    **Crowdedness score** (1-10): the easiest path is to call \`/api/clusters?dimension=types\` and read the \`.crowdedness\` for the type that matches the user's idea. The endpoint uses a log-scaled formula (\`round(log₂(size+1) + log₂(scfFunded+1) + 0.5×log₂(winners+1))\`) so the score actually differentiates: SDK / Payments / Security max out at 10, Lending / DEX ~9, Bridge / Social Impact ~8, Gaming / Anchor / NFT ~7, AI ~6, Indexer ~5, Explorer ~4. Surface with one-line justification: *"Crowdedness 6/10 (AI cluster): 10 projects, 6 SCF-funded. Real momentum, niche still has room."*
 4. **Competitor list.** Top 3-5 from step 2, with: name, what they shipped, hackathon they came from (if any), SCF funding (if any), GitHub link. Distinguish *direct* vs *adjacent*.
-5. **SDK / skill recommendation.** Map the idea to the right \`skills.stellar.org\` skill (smart-contracts, dapp, assets, data, standards, agentic-payments, zk-proofs, cross-chain; \`GET /api/skills?source=sdf\` lists the current set). Tell the user to grab that skill next.
-6. **Teammate candidates.** Hit \`/api/builders?q={skill_keyword}\` for builders who've shipped in this category. **The Builders directory is small and growing** (opt-in profiles synced from Stellar Passport; a few hundred profiles, many of them sparse; \`.meta.counts.total\` gives the live size). Surface every match with name, GitHub, location. If you get fewer than 3 hits, tell the user explicitly and suggest fallback channels: *"the public Builders directory is still growing; for more candidates check Stellar Discord #builders, the Stellar GitHub org, or recent SCF Round announcements."*
+5. **SDK / skill recommendation.** Map the idea to the right \`skills.stellar.org\` skill: \`GET /api/skills?source=sdf\` lists the current set, and each entry's \`install\` field says how to install it. Tell the user to grab that skill next.
+6. **Teammate candidates.** Hit \`/api/builders?q={skill_keyword}\` for builders who've shipped in this category. **The Builders directory is small and growing** (only opt-in profiles synced from Stellar Passport, many of them sparse; the \`builders\` entry in \`GET /api/status\` \`sources[]\` gives the current size). Surface every match with name, GitHub, location. If you get fewer than 3 hits, tell the user explicitly and suggest fallback channels: *"the public Builders directory is still growing; for more candidates check Stellar Discord #builders, the Stellar GitHub org, or recent SCF Round announcements."*
 7. **Funding signal.** What's been funded in this area? Filter \`/api/projects/search?q={keywords}&scfAwarded=1\` and surface total SCF dollars + recipients. Cross-reference active SCF rounds if visible.
 8. **Suggested next steps.** Concrete:
    - (a) Which upcoming hackathon to enter (\`/api/hackathons?status=upcoming\`).
@@ -250,8 +250,8 @@ Full docs in \`references/api-reference.md\`. Quick lookup table:
 | \`/api/projects/search\` | GET | Project search (tiered \`matchMode\`): each result includes its GitHub **repos** + a graded **\`codeReferences\`** list |
 | \`/api/repos/search\` | GET | The Stellar repo/code index (2,000+ repos), ranked by \`repoScore\` (code we read: tests, CI, releases, SDK currency, plus adoption and independent corroboration; funding is one input, not a gate) |
 | \`/api/rfps\` | GET | Open + closed SCF-funded sponsor briefs |
-| \`/api/skills\` | GET | SDF skills catalog (skills.stellar.org) |
-| \`/api/skills/{name}\` | GET | Full content of one SDF skill |
+| \`/api/skills\` | GET | Merged skills catalog: SDF's skills.stellar.org set plus Stellar Light, LumenLoop, community and external entries; \`.meta.counts\` has the current totals |
+| \`/api/skills/{name}\` | GET | One catalog entry: full SKILL.md content where its source ships one, metadata only otherwise |
 | \`/api/research\` | GET | Vector search over ~4,700-chunk research corpus (14 sources incl. audits, incidents, core/SDK release notes) |
 | \`/api/audits\` | GET | Enumerable audit registry: one row per published report, hand-verified project links, findings counts where deterministically extracted |
 | \`/api/vet-idea\` | GET | **Composite:** competitors + verified maturity + hackathon prior art + supply-side gap + SCF presence for one idea (\`?q=\`, 3-200 chars). \`gap\` = coverage, not demand |
@@ -266,14 +266,14 @@ Full docs in \`references/api-reference.md\`. Quick lookup table:
 
 All endpoints rate-limited per IP. All return \`.meta.counts\` + \`.meta.source\` for traceability.
 
-**Optional write: feedback.** Everything above is read-only. One endpoint writes: \`POST /api/feedback\` sends a curator a bug, missing data, a wrong answer or a suggestion. Some hosts expose only read operations; if yours does not offer it, skip it and tell the user what looked wrong instead. Details are in the API reference, under "Optional write".
-
 ## References (load these on demand)
 
 Lean SKILL.md keeps the core workflow + output contract. The two reference files load when the user asks how an endpoint behaves or for example workflows:
 
 - **\`references/api-reference.md\`**: full per-endpoint docs (params, return shapes, score thresholds, fallback channels, edge cases). Load when the user query needs an unusual filter combo or you need the full response schema.
 - **\`references/examples.md\`**: 13 worked example sessions covering all builder types (hackathon entrant / SCF applicant / indie / security-conscious / macro analyst). Load when the user query matches one of the example patterns + you want the proven endpoint sequence.
+
+This skill is read-only. \`references/feedback.md\` is a separate opt-in companion that writes to stellarlight.xyz; load it only when your host allows writes and the user wants to report a problem.
 
 **If you were pasted in manually** (without the full directory): both reference files are also fetchable as raw markdown:
 - \`https://stellarlight.xyz/skills/references/api-reference.md\`
@@ -323,7 +323,7 @@ When in doubt, query \`/api/skills?kind=sdk\` and filter on the user's intent (p
 ## Companion skills
 
 - **\`stellar-developer-activity\`**: for ecosystem-wide stats (active dev count, commit volume, country breakdown, peer L1 comparisons). Available at \`https://stellarlight.xyz/skills/stellar-developer-activity.md\`.
-- **\`skills.stellar.org\` skills**: for *how to build*. The official SDF skills (smart-contracts, dapp, assets, data, standards, agentic-payments, zk-proofs, cross-chain); \`GET /api/skills?source=sdf\` lists the current set. Install them as needed when the user moves from "what should I build" to "how do I build it".
+- **\`skills.stellar.org\` skills**: for *how to build*. The official SDF skills: \`GET /api/skills?source=sdf\` lists the current set, and each entry's \`install\` field says how to install it. Install them as needed when the user moves from "what should I build" to "how do I build it".
 
 ## Attribution
 

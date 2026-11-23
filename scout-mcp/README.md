@@ -131,7 +131,7 @@ All 28 tools wrap stellarlight.xyz public APIs. They're rate-limited but require
 | `locate_source` | Where in Stellar source code a CLI flag or command, config option default, SDK or host function, contract interface or trait implementation is defined: scored pointers (file, symbol or heading, line, commit, pinned GitHub URL) into nine allowlisted repos (eight Stellar repos and OpenZeppelin/stellar-contracts), never file content. `repo` / `kind` / `page` filters. `pointers: []` = searched, no match; `null` = could not search. |
 | `get_rfps` | Open + closed Stellar RFPs (SCF-funded sponsor briefs). Quarter-aware. |
 | `list_skills` | Catalog of Stellar agent skills: the official [skills.stellar.org](https://skills.stellar.org) set plus community and Stellar Light skills. |
-| `get_skill` | Full content of one SDF skill. |
+| `get_skill` | One catalog entry: full SKILL.md content where its source ships one, metadata only otherwise. |
 | `get_leaderboard` | Ecosystem dev activity (28-day active devs, commits, peer L1 comparison). `type` filter (project types, comma-separated). |
 | `get_status` | Scout API health + freshness per data source + endpoint enumeration. |
 | `submit_feedback` | In-skill feedback loop. Lands in stellarlight's curator queue. |
@@ -177,5 +177,5 @@ MIT. Built as a public good for Stellar builders by [stellarlight.xyz](https://s
 
 - [stellarlight.xyz/scout](https://stellarlight.xyz/scout) — the Scout landing page
 - [GitHub: Stellar-Light/stellar-scout](https://github.com/Stellar-Light/stellar-scout) — the SKILL.md mirror
-- [skills.stellar.org](https://skills.stellar.org) — SDF's 7 official Stellar skills
+- [skills.stellar.org](https://skills.stellar.org): SDF's official Stellar skills (`list_skills` returns the current set: the entries whose `source` is `sdf`)
 - [Model Context Protocol](https://modelcontextprotocol.io) — the spec this implements

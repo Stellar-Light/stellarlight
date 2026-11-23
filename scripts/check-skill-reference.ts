@@ -24,7 +24,14 @@ const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 
 async function main() {
 	console.log(`Skill-reference coverage — ${BASE}\n`);
-	const ref = readFileSync("public/skills/references/api-reference.md", "utf8");
+	// The feedback operations live in their own opt-in companion (sk-019), so
+	// the reference set is the read-only reference plus that file.
+	const ref = [
+		"public/skills/references/api-reference.md",
+		"public/skills/references/feedback.md",
+	]
+		.map((f) => readFileSync(f, "utf8"))
+		.join("\n");
 	const spec = (await (
 		await fetch(`${BASE}/api/openapi.json`, {
 			headers: { "User-Agent": "stellarlight-skill-ref-guard" },
@@ -101,7 +108,7 @@ async function main() {
 			else {
 				failures++;
 				console.log(
-					`  ✗ ${o.operationId} — no "${heading}" section in api-reference.md (sk-018 class)`,
+					`  ✗ ${o.operationId}: no "${heading}" section in api-reference.md or feedback.md (sk-018 class)`,
 				);
 			}
 		}

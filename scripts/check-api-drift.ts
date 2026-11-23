@@ -516,19 +516,34 @@ async function main() {
 		!/\b\d{3,}\+? curated/i.test(infoDesc) && !/~?741/.test(infoDesc),
 		"counts drift — source them from /api/status instead",
 	);
-	const skillDoc = await (
-		await fetch(`${BASE}/skills/stellar-scout.md`)
-	).text();
-	for (const stale of [
-		"currently empty pending",
-		"~1,900",
-		"7 official Stellar Foundation",
+	// The read-only skill and its two references. Raven sk-027, sk-028 and
+	// sk-019: no fixed SDF skill list or `soroban` slug, no fixed Builders
+	// size, and no feedback operation (that lives in references/feedback.md).
+	for (const doc of [
+		"skills/stellar-scout.md",
+		"skills/references/api-reference.md",
+		"skills/references/examples.md",
 	]) {
-		check(
-			`skill doc free of stale phrase "${stale}"`,
-			!skillDoc.includes(stale),
-			"served skill doc still carries a stale claim",
-		);
+		const skillDoc = await (await fetch(`${BASE}/${doc}`)).text();
+		for (const stale of [
+			"currently empty pending",
+			"~1,900",
+			"7 official Stellar Foundation",
+			"(soroban, dapp",
+			"Also recommend `soroban`",
+			"one SDF skill",
+			"SDF skills catalog",
+			"in the dozens",
+			"~110 profiles",
+			"a few hundred profiles",
+			"/api/feedback",
+		]) {
+			check(
+				`${doc} free of stale phrase "${stale}"`,
+				!skillDoc.includes(stale),
+				"served skill doc still carries a stale claim",
+			);
+		}
 	}
 
 	// ── 9. Every JSON endpoint parses under a STRICT parser ─────────────────

@@ -882,6 +882,7 @@ async function main() {
 				"references/api-reference.md",
 			],
 			["public/skills/references/examples.md", "references/examples.md"],
+			["public/skills/references/feedback.md", "references/feedback.md"],
 		];
 		for (const [local, remote] of MIRRORS) {
 			const ours = (await readFile(local, "utf8")).trim();

@@ -74,15 +74,16 @@ jobs:
           git config user.name "stellarlight-bot"
           git config user.email "bot@stellarlight.xyz"
 
-          if git diff --quiet; then
-            echo "SKILL.md is already in sync — nothing to push."
+          # Stage BOTH targets. This used to be `git add SKILL.md` alone, so
+          # references/api-reference.md (the file Raven pins for sk-018)
+          # could never have synced even with a token. Stage before the
+          # check: `git diff --quiet` does not see a new, untracked file, so
+          # a push that only added a reference file was skipped.
+          git add SKILL.md references
+          if git diff --cached --quiet; then
+            echo "SKILL.md is already in sync: nothing to push."
             exit 0
           fi
-
-          # Stage BOTH targets. This used to be `git add SKILL.md` alone, so
-          # references/api-reference.md — the file Raven pins for sk-018 —
-          # could never have synced even with a token.
-          git add SKILL.md references
           # Commit message kept to one line — multi-line strings inside a
           # YAML literal block are fragile (a blank line at lower indent
           # ends the block). The commit SHA + workflow trigger live in the

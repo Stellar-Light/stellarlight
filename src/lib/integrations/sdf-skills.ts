@@ -237,7 +237,7 @@ function parseFrontmatter(md: string): {
 	return { frontmatter: fm, body };
 }
 
-function urlForSkill(
+export function urlForSkill(
 	name: string,
 	registryRawUrl?: string,
 ): { rawUrl: string; url: string } {
@@ -247,11 +247,12 @@ function urlForSkill(
 	const gh = rawUrl.match(
 		/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(?:(.+)\/)?[^/]+\.md$/,
 	);
+	// A skill on skills.stellar.org has no page of its own: the directory
+	// (<BASE>/skills/<name>/) answers 404 and the site's index links the
+	// SKILL.md itself (2026-11-23), so that is its homepage.
 	const url = gh
 		? `https://github.com/${gh[1]}/${gh[2]}/tree/${gh[3]}${gh[4] ? `/${gh[4]}` : ""}`
-		: rawUrl.startsWith(`${BASE}/`)
-			? `${BASE}/skills/${name}/`
-			: rawUrl;
+		: rawUrl;
 	return { rawUrl, url };
 }
 

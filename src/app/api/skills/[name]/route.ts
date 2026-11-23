@@ -6,9 +6,9 @@
  * Resolves the slug across the same three sources as the parent
  * /api/skills list endpoint:
  *
- *   1. SDF skills (soroban, dapp, assets, data, agentic-payments,
- *      zk-proofs, standards) — full markdown content fetched live from
- *      skills.stellar.org and surfaced under `.skill.content`.
+ *   1. Skills listed on skills.stellar.org (the current set comes from its
+ *      llms.txt, never a fixed list): full markdown content fetched live
+ *      from where the registry links it, surfaced under `.skill.content`.
  *   2. Curated entries from src/lib/integrations/curated-skills.ts —
  *      metadata always returned. Two of our own (stellar-scout,
  *      stellar-developer-activity) ship the full SKILL.md inlined via a

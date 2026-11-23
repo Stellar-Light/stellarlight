@@ -701,7 +701,7 @@ async function main() {
 			pass(`returns ${data.skills.length} skills`);
 		else fail("returns 5+ skills", `got ${data?.skills?.length}`);
 
-		const sample = data?.skills?.[0]?.name ?? "soroban";
+		const sample = data?.skills?.[0]?.name ?? "smart-contracts";
 		const { data: skill } = await callTool("get_skill", { name: sample });
 		if (skill?.content || skill?.skill?.content)
 			pass(`get_skill returns content for '${sample}'`);
