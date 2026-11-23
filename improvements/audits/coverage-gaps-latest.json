@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-11-16T17:34:36.003Z",
+  "asOf": "2026-11-23T19:34:41.886Z",
   "source": "scripts/report-coverage-gaps.ts",
   "scf": {
     "total": 531,
@@ -394,7 +394,7 @@
     "missingScf": 9,
     "missingScfAwarded": 9,
     "partnerDocsWithoutOwnContent": 3,
-    "staleCollections": 0,
+    "staleCollections": 1,
     "staleOrEmptyResearchSources": 0,
     "refreshUnmeasurableSources": 2
   }
