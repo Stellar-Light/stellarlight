@@ -38,6 +38,22 @@ export const RESOLVABLE_PROJECT_STATUSES = [
 	"Inactive",
 ] as const satisfies readonly ProjectStatus[];
 
+/** The rows any public surface may name: the ones with a public page. A
+ *  Draft is admin-only, so a lookup, a check or a change feed that reads the
+ *  collection without this answers about rows nobody can open. */
+export const PUBLISHED_PROJECT_WHERE = {
+	status: { in: [...RESOLVABLE_PROJECT_STATUSES] },
+};
+
+/** What a name lookup reads: the published rows, plus lineage shadows
+ *  (a row with a canonical pointer, Draft included) so an old name still
+ *  leads to the record it was merged into. The same rows the project page
+ *  admits for its redirect; resolveProject serves a hidden row only as a
+ *  pointer to a published one. */
+export const RESOLUTION_POOL_WHERE = {
+	or: [PUBLISHED_PROJECT_WHERE, { canonicalSlug: { exists: true } }],
+};
+
 /** Never public. */
 export const HIDDEN_PROJECT_STATUSES = [
 	"Draft",

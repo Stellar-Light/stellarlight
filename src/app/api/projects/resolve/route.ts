@@ -24,6 +24,7 @@ import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { RESOLUTION_POOL_WHERE } from "@/lib/project-status";
 import { type ResolvableProject, resolveProject } from "@/lib/resolve-project";
 
 export const dynamic = "force-dynamic";
@@ -75,6 +76,7 @@ export async function GET(req: NextRequest) {
 	// without the substring trap.
 	const found = await payload.find({
 		collection: "projects",
+		where: RESOLUTION_POOL_WHERE,
 		limit: 5000,
 		depth: 0,
 		select: {

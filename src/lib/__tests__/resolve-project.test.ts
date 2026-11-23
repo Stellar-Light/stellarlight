@@ -154,3 +154,35 @@ describe("a Draft shadow still resolves to its canonical", () => {
 		expect(r.subject?.status).toBe("Draft"); // hidden, and said so — not dead
 	});
 });
+
+describe("resolveProject: Draft rows are pointers only", () => {
+	const POOL: ResolvableProject[] = [
+		P({ slug: "coca", name: "Coca" }),
+		P({
+			slug: "coca-wallet",
+			name: "COCA Wallet",
+			status: "Draft",
+			canonicalSlug: "coca",
+			statusSourceUrl: "https://coca.xyz/",
+		}),
+		// a hidden row whose pointer leads nowhere published
+		P({ slug: "orphan", status: "Draft", canonicalSlug: "gone" }),
+		P({ slug: "twin", status: "Draft", canonicalSlug: "hidden-target" }),
+		P({ slug: "hidden-target", status: "Draft" }),
+	];
+
+	it("an old name resolves to the record it was merged into", () => {
+		for (const q of ["coca-wallet", "COCA Wallet"]) {
+			const r = resolveProject(q, POOL);
+			expect(r.found, q).toBe(true);
+			expect(r.superseded, q).toBe(true);
+			expect(r.current?.slug, q).toBe("coca");
+		}
+	});
+
+	it("a hidden row whose pointer reaches no published record is not found", () => {
+		expect(resolveProject("orphan", POOL).found).toBe(false);
+		expect(resolveProject("twin", POOL).found).toBe(false);
+		expect(resolveProject("hidden-target", POOL).found).toBe(false);
+	});
+});
