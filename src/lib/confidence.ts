@@ -35,8 +35,14 @@ const AUTHORITY: Record<string, number> = {
 	paper: 0.92,
 	audit: 0.9,
 	// A real exploit/incident is the single most safety-relevant signal for a
-	// "is it safe to build on?" question — at least as authoritative as an audit.
-	incident: 0.9,
+	// "is it safe to build on?" question. Same tier as slp (2026-11-23): each
+	// curated record is checked against the ledger and the validators' own
+	// proposal, and at 0.9 the SLP that froze the attacker's accounts
+	// outranked the incident record on "yieldblox oracle incident" by
+	// authority alone (both rows at the 0.8 lexical floor). That SLP opens
+	// "Created: 2026-05-07" and never states the event date. At equal
+	// authority the closer embedding breaks the tie.
+	incident: 1.0,
 	// SDF's controlling bug-bounty / vulnerability-disclosure policy (the
 	// HackerOne program page + curated supersession records). Policy-grade —
 	// same tier as audits/incidents. NOT evergreen: which program is current

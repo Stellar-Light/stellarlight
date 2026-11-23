@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
 		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"Research: the curated YieldBlox incident record leads the query 'yieldblox oracle incident' again. Since SLP-0006 joined the corpus (source slp, authority 1.0) it led that query over the incident record (authority 0.9) on authority alone, both rows sitting at the same lexical relevance floor, and SLP-0006 opens with its creation date, 2026-05-07, not the event date. Source incident now has authority 1.0, so the closer embedding decides between them. The incident source also gains a second record, the Mercado Bitcoin wallet drain of 2026-11-02 that SLP-0008 froze, and the YieldBlox record is restated from primary records only.",
+		detail:
+			"Both records were checked on 2026-11-23 against the ledger (Horizon), the SLP texts and the live frozen ledger keys entry (Soroban RPC getLedgerEntries, three providers). YieldBlox: drained 2026-02-22, 61,249,278.3064502 XLM and 1,000,196.7040837 USDC, with both transaction hashes; quarantined by Tier 1 validators, then frozen by SLP-0006; the three frozen accounts held 48,069,119.80 XLM on 2026-11-23. The record no longer gives a USD total, the USTRY price levels or where the rest of the funds went: no primary record states them, and the 10.2 million USD estimate it carried does not match the Stellar DEX price that hour (about 10.8 million). Mercado Bitcoin: 6,717,490 XLM, plus USDC and EURC, paid on 2026-11-02 to an account SLP-0008 froze, still holding those funds on 2026-11-23; per SLP-0008 the transfers were signed with the exchange's own keys, not an exploit of Stellar or of a contract. The records reach the corpus on the next refresh-research-corpus run.",
+	},
+	{
+		date: "2026-11-23",
+		surfaces: ["api"],
 		type: "added",
 		summary:
 			"getStablecoins carries Ethena's USDe (`USDE-GDJ5BNU5`, code USDE, issuer GDJ5BNU5...CH47, SAC CCNOV6XV...4JJN) from the next six-hourly refresh, with supply and trustlines read from Horizon like every other row. Its class is Crypto-Backed, from Ethena's own documentation. The issuer account sets no home_domain and Ethena publishes no Stellar address, so `issuerOfRecord` stays null with `issuerOfRecordCheck` not-named and a note on what identifies the asset: LayerZero's token metadata maps its contract to Ethena's USDe on Ethereum.",

@@ -1395,3 +1395,62 @@ describe("one row per SCF project unless scf-proposal is asked for (2026-10-20)"
 		expect(urls(out)).toEqual(["recA", "recB"]);
 	});
 });
+
+// Golden yieldblox-incident-facts, red from 2026-11-23 (guard D run
+// 45248655319): once SLP-0006 joined the corpus as source slp (authority 1.0)
+// it outranked the curated incident record (0.9) on "yieldblox oracle
+// incident". Both rows sat at the 0.8 full-lexical floor, so authority alone
+// decided, although the incident row's embedding was closer (0.741 vs 0.690,
+// the live scores). The SLP row opens "Created: 2026-05-07" and never states
+// the event date, the sls-022 misdating hazard the probe guards.
+describe("incident record against its freeze proposal", () => {
+	const slp = {
+		url: "https://github.com/stellar/stellar-protocol/blob/master/limits/slp-0006.md",
+		source: "slp",
+		title: "Freeze YieldBlox Exploit Stellar Accounts",
+		publishedAt: "2026-05-07T00:00:00.000Z",
+		score: 0.6903,
+		content:
+			"SLP-0006: Freeze YieldBlox Exploit Stellar Accounts. Status: Final. Created: 2026-05-07. This account is identified as the account that conducted the USTRY oracle manipulation exploit. The exploiter borrowed about 61M XLM against USTRY. For additional information, please review the transaction log in the Script3 incident report. Another account is included because it received large payments from the exploit account.",
+	};
+	const incident = {
+		url: "https://www.blockaid.io/blog/73-quarantined-how-blockaid-and-stellar-validators-contained-a-10m-price-manipulation-attack",
+		source: "incident",
+		title:
+			"YieldBlox (Blend V2 pool) incident: USTRY oracle manipulation drain on 2026-02-22, attacker accounts frozen",
+		protocol: "YieldBlox",
+		publishedAt: "2026-05-20",
+		score: 0.7408,
+		content:
+			"Event date: 2026-02-22 (UTC). The pool contract paid the attacker account 1,000,196.7040837 USDC and 61,249,278.3064502 XLM, borrowed against inflated USTRY collateral and never repaid. An attacker manipulated the USTRY price feed used by the Stellar DEX Reflector oracle. Tier 1 validators quarantined the attacker accounts, then SLP-0006 froze them.",
+	};
+
+	it("the closer incident record leads when both rows sit at the lexical floor", () => {
+		const out = rankResearchChunks([slp, incident], {
+			limit: 8,
+			mode: "vector",
+			query: "yieldblox oracle incident",
+			now: NOW,
+		});
+		expect(out.map((r) => r.source)).toEqual(["incident", "slp"]);
+		// Same floored relevance, same authority: the raw score broke the tie.
+		expect(out[0].confidence.relevance).toBe(out[1].confidence.relevance);
+		expect(out[0].confidence.authority).toBe(out[1].confidence.authority);
+	});
+
+	it("a freeze proposal the embedding prefers still leads", () => {
+		const out = rankResearchChunks(
+			[
+				{ ...slp, score: 0.8 },
+				{ ...incident, score: 0.62 },
+			],
+			{
+				limit: 8,
+				mode: "vector",
+				query: "yieldblox oracle incident",
+				now: NOW,
+			},
+		);
+		expect(out[0].source).toBe("slp");
+	});
+});
