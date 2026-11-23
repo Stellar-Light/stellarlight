@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-11-23T02:26:37.551Z",
+	"asOf": "2026-11-23T03:30:46.636Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 112,
 	"healthy": 104,
@@ -42,7 +42,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "73 failed run(s) since its last green 68d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "74 failed run(s) since its last green 68d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -304,7 +304,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T02:24:04Z",
+			"lastSuccessAt": "2026-11-23T03:25:13Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -315,7 +315,7 @@
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-22T23:49:17Z",
+			"lastSuccessAt": "2026-11-23T03:28:22Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -326,7 +326,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T02:24:17Z",
+			"lastSuccessAt": "2026-11-23T03:28:22Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -569,10 +569,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T03:20:14Z",
-			"ageDays": 82,
+			"ageDays": 83,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 82d ago (manual tool — age not judged)"
+			"why": "last green 83d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "fix-zenex.yml",
@@ -580,10 +580,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-14T03:00:41Z",
-			"ageDays": 161,
+			"ageDays": 162,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 161d ago (manual tool — age not judged)"
+			"why": "last green 162d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "generated-recall.yml",
@@ -602,10 +602,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-22T02:25:42Z",
-			"ageDays": 92,
+			"ageDays": 93,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 92d ago (manual tool — age not judged)"
+			"why": "last green 93d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "ingest-dora-evals.yml",
@@ -744,7 +744,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T02:14:15Z",
+			"lastSuccessAt": "2026-11-23T03:25:13Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 90,
@@ -766,7 +766,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-22T23:49:17Z",
+			"lastSuccessAt": "2026-11-23T03:28:22Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -810,7 +810,7 @@
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T02:24:17Z",
+			"lastSuccessAt": "2026-11-23T03:28:22Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -821,7 +821,7 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-22T23:49:17Z",
+			"lastSuccessAt": "2026-11-23T02:24:17Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 79,
@@ -833,10 +833,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-11-13T03:15:53Z",
-			"ageDays": 9,
+			"ageDays": 10,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 9d ago (manual tool — age not judged)"
+			"why": "last green 10d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "publish-packages.yml",
@@ -927,17 +927,6 @@
 			"why": "last green 0d ago"
 		},
 		{
-			"file": "refresh-research-corpus.yml",
-			"name": "Refresh Scout research corpus",
-			"cron": "0 6 * * *",
-			"state": "ok",
-			"lastSuccessAt": "2026-11-20T14:46:04Z",
-			"ageDays": 2,
-			"graceDays": 4,
-			"runs": 39,
-			"why": "last green 2d ago"
-		},
-		{
 			"file": "refresh-rwa.yml",
 			"name": "Refresh RWA measurements",
 			"cron": "37 */6 * * *",
@@ -947,6 +936,17 @@
 			"graceDays": 4,
 			"runs": 100,
 			"why": "36 failed run(s) since its last green 16d ago — it is trying and losing, not idle; dies at \"Run pnpm exec tsx scripts/refresh-rwa.ts --execute\""
+		},
+		{
+			"file": "refresh-stablecoins.yml",
+			"name": "Refresh stablecoins",
+			"cron": "25 */6 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-11-23T02:26:38Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 2,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "regrade-repos.yml",
@@ -975,7 +975,7 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-22T20:45:02Z",
+			"lastSuccessAt": "2026-11-23T02:53:34Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 95,
@@ -997,10 +997,10 @@
 			"name": "Secret scan",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T02:24:17Z",
+			"lastSuccessAt": "2026-11-23T03:28:22Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1031,10 +1031,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-29T03:29:14Z",
-			"ageDays": 85,
+			"ageDays": 86,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 85d ago (manual tool — age not judged)"
+			"why": "last green 86d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "self-audit.yml",
@@ -1140,10 +1140,10 @@
 			"name": "Sync Stellar Scout skill to distribution repo",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-22T23:49:17Z",
+			"lastSuccessAt": "2026-11-23T03:28:22Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 51,
+			"runs": 52,
 			"why": "last green 0d ago (nothing under public/skills/stellar-scout.md, public/skills/references/** has changed since — nothing to do, not stale)"
 		},
 		{
@@ -1184,10 +1184,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T02:24:17Z",
+			"lastSuccessAt": "2026-11-23T03:25:13Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 98,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1239,7 +1239,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-22T23:45:48Z",
+			"lastSuccessAt": "2026-11-23T03:25:13Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -1276,7 +1276,7 @@
 			"ageDays": 68,
 			"graceDays": 21,
 			"runs": 93,
-			"why": "73 failed run(s) since its last green 68d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "74 failed run(s) since its last green 68d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
