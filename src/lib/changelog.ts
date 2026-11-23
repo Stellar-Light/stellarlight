@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.159",
+		type: "changed",
+		summary:
+			'searchResearch: a CAP, SEP or SLP number written as an id (CAP-0077, cap-77, SEP 10, SLP-0006: a hyphen, or the prefix in capitals and a space) is now an exact key like a finding id, a CVE or GHSA id, or a release tag. Every chunk of that proposal\'s own document lists it in `exactKeys`, in canonical form; a chunk of another document that only cites it carries `[]`, a neighbour. A named proposal the scope does not hold is listed in `meta.exactMiss`. Lowercase prose such as "market cap 100" or "sep 41" is not an id and never makes a miss (it still pins a matching proposal, as before), and "Sep 2026" is a date. If the proposal lookup fails, or a query names more than 5 proposals the pool lacks, the page is `partial` with `failedReads` naming "research proposal lookup", and the miss is unchecked.',
+		detail:
+			'sls-118 had this as partial: the named proposal was already fetched and pinned first, but the row did not say it was the record. The research corpus also stops storing text that changes between two reads of an unchanged page, which turned the daily refresh\'s re-plan red: render-time ages on lumenloop news headers ("September 24, 20262mo ago" now reads "September 24, 2026"; 221 rows on 2026-11-23) and in the SCF Handbook footer ("Last updated 10 days ago" now reads "Last updated 2026-11-13", the page\'s own date; 40 rows), and the live account balance tables on SDF\'s Mandate pages (current and 2019), which sdf-org rows now replace with one sentence pointing at the page for the current figures (9 rows; the 2019 tables also listed each account\'s original allocation, which leaves with them). stellar.org pages are read past a stale render to the one the server calls fresh.',
+	},
+	{
+		date: "2026-11-23",
 		surfaces: ["api"],
 		type: "added",
 		summary:
