@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-11-23T22:30:25.610Z",
+	"asOf": "2026-11-23T23:55:48.298Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 112,
 	"healthy": 104,
@@ -42,7 +42,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "77 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "78 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -151,10 +151,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-15T22:34:25Z",
-			"ageDays": 99,
+			"ageDays": 100,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 99d ago (manual tool — age not judged)"
+			"why": "last green 100d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-knowledge-notes.yml",
@@ -195,10 +195,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-11T22:32:16Z",
-			"ageDays": 103,
+			"ageDays": 104,
 			"graceDays": 45,
 			"runs": 8,
-			"why": "last green 103d ago (manual tool — age not judged)"
+			"why": "last green 104d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-triage-tags.yml",
@@ -272,10 +272,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-13T23:34:58Z",
-			"ageDays": 162,
+			"ageDays": 163,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 162d ago (manual tool — age not judged)"
+			"why": "last green 163d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "check-links.yml",
@@ -304,7 +304,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T22:27:37Z",
+			"lastSuccessAt": "2026-11-23T23:53:04Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -315,7 +315,7 @@
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T22:27:37Z",
+			"lastSuccessAt": "2026-11-23T23:53:05Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -326,7 +326,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T22:27:37Z",
+			"lastSuccessAt": "2026-11-23T23:53:04Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -465,17 +465,6 @@
 			"why": "last green 0d ago"
 		},
 		{
-			"file": "enrich-onchain.yml",
-			"name": "Enrich on-chain metrics",
-			"cron": "0 6 * * 2",
-			"state": "ok",
-			"lastSuccessAt": "2026-11-22T23:55:11Z",
-			"ageDays": 0,
-			"graceDays": 21,
-			"runs": 2,
-			"why": "last green 0d ago"
-		},
-		{
 			"file": "enrich-partner-onchain.yml",
 			"name": "Enrich partner on-chain (manual)",
 			"cron": null,
@@ -524,10 +513,10 @@
 			"name": "Enrich SCF data (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T04:14:46Z",
+			"lastSuccessAt": "2026-11-23T23:12:35Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 4,
+			"runs": 5,
 			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
@@ -744,7 +733,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T22:21:43Z",
+			"lastSuccessAt": "2026-11-23T23:47:16Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 96,
@@ -766,10 +755,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T22:27:37Z",
+			"lastSuccessAt": "2026-11-23T23:53:04Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -810,7 +799,7 @@
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T22:27:37Z",
+			"lastSuccessAt": "2026-11-23T23:53:04Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -821,7 +810,7 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T21:27:43Z",
+			"lastSuccessAt": "2026-11-23T23:26:15Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 76,
@@ -927,6 +916,17 @@
 			"why": "last green 0d ago"
 		},
 		{
+			"file": "refresh-research-corpus.yml",
+			"name": "Refresh Scout research corpus",
+			"cron": "0 6 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-11-23T23:26:27Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 2,
+			"why": "last green 0d ago"
+		},
+		{
 			"file": "refresh-rwa.yml",
 			"name": "Refresh RWA measurements",
 			"cron": "37 */6 * * *",
@@ -997,7 +997,7 @@
 			"name": "Secret scan",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T22:29:22Z",
+			"lastSuccessAt": "2026-11-23T23:53:04Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1009,10 +1009,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-14T23:41:25Z",
-			"ageDays": 100,
+			"ageDays": 101,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 100d ago (manual tool — age not judged)"
+			"why": "last green 101d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "seed-partners.yml",
@@ -1140,10 +1140,10 @@
 			"name": "Sync Stellar Scout skill to distribution repo",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T22:27:37Z",
+			"lastSuccessAt": "2026-11-23T23:53:04Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 2,
+			"runs": 3,
 			"why": "last green 0d ago (nothing under public/skills/stellar-scout.md, public/skills/references/** has changed since — nothing to do, not stale)"
 		},
 		{
@@ -1184,10 +1184,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T22:27:37Z",
+			"lastSuccessAt": "2026-11-23T23:53:04Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1239,10 +1239,10 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T22:21:43Z",
+			"lastSuccessAt": "2026-11-23T23:47:16Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1275,8 +1275,8 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 69,
 			"graceDays": 21,
-			"runs": 93,
-			"why": "77 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 94,
+			"why": "78 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
