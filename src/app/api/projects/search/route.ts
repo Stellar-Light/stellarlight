@@ -118,6 +118,16 @@ async function semanticProjectRows(
 	// to 0.6: a below-distribution-but-close match beats an empty page, and
 	// meta.semantic + the label tell the caller how the results were found.
 	floor = 0.68,
+	// The caller's structured filters as $match clauses. The vector index has
+	// no filter fields, so they match after the vector stage; with any set,
+	// that stage keeps a pool near the whole collection (~1.2k rows,
+	// 2026-11-23) and $limit re-trims after the match, so a selective filter
+	// still fills the page. Left out of this read, ?scfAwarded=true served 7
+	// unawarded rows of 10 (q=ethena, live 2026-11-23).
+	// ponytail: pool of 1000 nearest, add the fields as `filter` paths of
+	// project_vector_index and filter inside $vectorSearch if the
+	// collection outgrows it.
+	filters: Record<string, unknown> = {},
 ) {
 	// No key = the rung is OFF, not a backend failure: [] here, so the caller's
 	// degraded-read warning fires only when embed / $vectorSearch actually fail.
@@ -126,14 +136,16 @@ async function semanticProjectRows(
 	const db = payload.db?.connection?.db;
 	const collection = db?.collection("projects");
 	if (!collection) return [];
+	const filtered = Object.keys(filters).length > 0;
+	const numCandidates = Math.max(filtered ? 1000 : 200, limit * 15);
 	const pipeline = [
 		{
 			$vectorSearch: {
 				index: "project_vector_index",
 				path: "embedding",
 				queryVector: queryEmbedding,
-				numCandidates: Math.max(200, limit * 15),
-				limit: limit * 3,
+				numCandidates,
+				limit: filtered ? numCandidates : limit * 3,
 			},
 		},
 		// Inactive stays searchable (so a name lookup like "keybase" still finds
@@ -142,8 +154,10 @@ async function semanticProjectRows(
 		{
 			$match: {
 				status: { $in: [...RESOLVABLE_PROJECT_STATUSES] },
+				...filters,
 			},
 		},
+		...(filtered ? [{ $limit: limit * 3 }] : []),
 		{
 			$project: {
 				_id: 1,
@@ -1009,6 +1023,23 @@ async function handle(req: NextRequest) {
 			{ status: 400 },
 		);
 	}
+	// Every structured filter as one test of a served row. The keyword read
+	// applies them in its where clause; a row that arrives any other way (the
+	// semantic rung, a canonical the fold swaps in for a shadow) is held to
+	// the same five here. category and scfAwarded were left out of each of
+	// those checks, so the semantic rung served off-filter rows.
+	const holdsFilters = (r: {
+		status?: string | null;
+		types?: unknown;
+		venueRole?: string | null;
+		category?: string | null;
+		scfAwarded?: boolean;
+	}) =>
+		(!statusParam || r.status === statusParam) &&
+		(!typeParam || (Array.isArray(r.types) && r.types.includes(typeParam))) &&
+		(!venueRoleParam || r.venueRole === venueRoleParam) &&
+		(!category || r.category === category) &&
+		(!scfAwardedOnly || r.scfAwarded === true);
 
 	// Guard content-less calls: no query AND no filters. This is almost always a
 	// malformed agent call (the term was sent under a field name we dropped, or
@@ -1391,7 +1422,11 @@ async function handle(req: NextRequest) {
 				),
 			];
 			if (
-				(statusParam || typeParam || venueRoleParam) &&
+				(statusParam ||
+					typeParam ||
+					venueRoleParam ||
+					category ||
+					scfAwardedOnly) &&
 				shadowTargets.length
 			) {
 				const canon = await degradedRead(
@@ -1407,6 +1442,8 @@ async function handle(req: NextRequest) {
 								status: true,
 								types: true,
 								venueRole: true,
+								category: true,
+								scf: { awarded: true },
 							},
 						}),
 					null,
@@ -1421,6 +1458,8 @@ async function handle(req: NextRequest) {
 								status?: string;
 								types?: string[] | null;
 								venueRole?: string | null;
+								category?: string | null;
+								scf?: { awarded?: boolean | null } | null;
 							}>
 						).map((c) => [c.slug, c]),
 					);
@@ -1429,13 +1468,7 @@ async function handle(req: NextRequest) {
 							? bySlug.get(d.canonicalSlug as string)
 							: null;
 						// dangling pointer: the fold keeps the shadow, so it counts
-						return (
-							!c ||
-							((!statusParam || c.status === statusParam) &&
-								(!typeParam ||
-									(Array.isArray(c.types) && c.types.includes(typeParam))) &&
-								(!venueRoleParam || c.venueRole === venueRoleParam))
-						);
+						return !c || holdsFilters({ ...c, scfAwarded: !!c.scf?.awarded });
 					});
 				}
 			}
@@ -2153,24 +2186,22 @@ async function handle(req: NextRequest) {
 					q,
 					limit,
 					scored.length === 0 ? 0.6 : 0.68,
+					{
+						...(statusParam ? { status: statusParam } : {}),
+						...(category ? { category } : {}),
+						...(scfAwardedOnly ? { "scf.awarded": true } : {}),
+					},
 				),
 				DEFAULT_READ_TIMEOUT_MS,
 			);
 			const have = new Set(scored.map((r) => r.id));
 			semanticAdds = sem
 				.filter((r) => !have.has(r.id))
-				// ?status= is a hard contract — the vector index has no status
-				// filter, so enforce it here AT THE SOURCE. Filtering later (post
-				// count/slice) produced phantom counts and under-filled pages
-				// (re-measure 2026-07-11: total=1 with projects=[]).
-				.filter((r) => !statusParam || r.status === statusParam)
-				// ?type= is the same hard contract (sls-033): semantic rows carry
-				// types[], so enforce exact membership at the source too.
-				.filter(
-					(r) =>
-						!typeParam ||
-						(Array.isArray(r.types) && r.types.includes(typeParam)),
-				)
+				// Every filter is a hard contract AT THE SOURCE: matched in the
+				// vector read above and held here on the mapped rows. Filtering
+				// later (post count/slice) produced phantom counts and under-filled
+				// pages (re-measure 2026-07-11: total=1 with projects=[]).
+				.filter(holdsFilters)
 				.slice(0, limit - scored.length);
 		} catch (e) {
 			// index not ready / embed call down — degrade to keyword-only, said
@@ -2382,30 +2413,15 @@ async function handle(req: NextRequest) {
 						: null;
 				const c = target ? canBySlug.get(target) : null;
 				// dangling pointer → keep the shadow rather than lose the hit
-				let effective = target && c ? swapped(row, c) : row;
-				// ?status= is a hard contract: if the swap would smuggle in a
-				// canonical of a DIFFERENT status (Inactive shadow → Live
-				// canonical under ?status=Inactive), drop the row entirely — a
-				// merged-away shadow is not a real record for a status browse.
-				// Dropping here (not post-count) keeps counts and page size
-				// honest (re-measure 2026-07-11: returned=5 with 4 rows).
-				if (statusParam && effective.status !== statusParam) {
-					if (effective !== row) continue; // swapped to other status → drop
-					effective = row; // shadow itself off-status can't happen (DB-filtered)
-				}
-				// ?type= mirrors the status contract (sls-033): a swap must not
-				// smuggle in a canonical that lacks the filtered type.
-				if (typeParam && effective !== row) {
-					const tps = Array.isArray(effective.types) ? effective.types : [];
-					if (!tps.includes(typeParam)) continue;
-				}
-				// ...and ?venueRole= the same way (sls-113).
-				if (
-					venueRoleParam &&
-					effective !== row &&
-					effective.venueRole !== venueRoleParam
-				)
-					continue;
+				const effective = target && c ? swapped(row, c) : row;
+				// Every filter is a hard contract: if the swap would smuggle in a
+				// canonical off the filter (Inactive shadow → Live canonical under
+				// ?status=Inactive, an awarded shadow's unawarded canonical under
+				// ?scfAwarded=true), drop the row entirely: a merged-away shadow
+				// is not a real record for a filtered browse. Dropping here (not
+				// post-count) keeps counts and page size honest (re-measure
+				// 2026-07-11: returned=5 with 4 rows).
+				if (effective !== row && !holdsFilters(effective)) continue;
 				if (seen.has(effective.slug)) continue;
 				seen.add(effective.slug);
 				folded.push(effective);
@@ -2425,25 +2441,12 @@ async function handle(req: NextRequest) {
 	baseProjects = baseProjects.filter(
 		(p) => !(HIDDEN_PROJECT_STATUSES as readonly string[]).includes(p.status),
 	);
-	// Belt-and-suspenders on the ?status= contract: keyword candidates are
-	// DB-filtered and semanticAdds are filtered at source, so this should be a
-	// no-op — but any row that still slips through must not be served. (Counts
-	// are recomputed from the final rows at serialization, so this can no
-	// longer produce phantom totals.)
-	if (statusParam) {
-		baseProjects = baseProjects.filter((p) => p.status === statusParam);
-	}
-	// Same belt-and-suspenders for ?type= (sls-033): keyword candidates are
-	// DB-filtered and semanticAdds are filtered at source, so this should be a
-	// no-op — but a row without the filtered type must never be served.
-	if (typeParam) {
-		baseProjects = baseProjects.filter(
-			(p) => Array.isArray(p.types) && p.types.includes(typeParam),
-		);
-	}
-	if (venueRoleParam) {
-		baseProjects = baseProjects.filter((p) => p.venueRole === venueRoleParam);
-	}
+	// Belt-and-suspenders on every filter: keyword candidates are DB-filtered
+	// and semanticAdds are filtered at source, so this should be a no-op, but
+	// a row that still slips through must not be served. (Counts are
+	// recomputed from the final rows at serialization, so this can no longer
+	// produce phantom totals.)
+	baseProjects = baseProjects.filter(holdsFilters);
 	// Final liveness float across the FULL assembled list (keyword + semantic
 	// augmentation). A dead project that was the sole strict keyword match must
 	// not sit above the live semantic neighbours appended after it — e.g.
@@ -2818,7 +2821,8 @@ async function handle(req: NextRequest) {
 				counts: {
 					returned: returnedCount,
 					total: totalCount,
-					semantic: semanticAdds.length,
+					// served rows, so a semantic row the fold dropped is not counted
+					semantic: projectsWithOrg.filter((p) => p.via === "semantic").length,
 				},
 				// `semantic: true` means the keyword pass was thin and we filled
 				// the page with vector-search matches the literal filter missed
