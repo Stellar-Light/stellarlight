@@ -77,7 +77,10 @@ export const metadata: Metadata = {
 	openGraph: {
 		type: "website",
 		locale: "en_US",
-		url: appUrl,
+		// No `url` here: every page that sets none inherited the home page's,
+		// so a shared directory, event or builder link previewed as the home
+		// page. A page that knows its own URL sets it; without one, a reader
+		// uses the URL it fetched.
 		siteName: "StellarLight",
 		title: "StellarLight - Stellar Ecosystem Directory",
 		description:

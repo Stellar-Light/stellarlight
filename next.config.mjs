@@ -83,6 +83,19 @@ const nextConfig = {
 
 		return webpackConfig;
 	},
+	async redirects() {
+		// One host. www.stellarlight.xyz served the whole site as a second copy
+		// (200, no redirect), so every page existed twice for crawlers and for
+		// links people shared. Permanent, path and query kept.
+		return [
+			{
+				source: "/:path*",
+				has: [{ type: "host", value: "www.stellarlight.xyz" }],
+				destination: "https://stellarlight.xyz/:path*",
+				permanent: true,
+			},
+		];
+	},
 	async headers() {
 		// CORS + version header for the PUBLIC Scout API only.
 		//

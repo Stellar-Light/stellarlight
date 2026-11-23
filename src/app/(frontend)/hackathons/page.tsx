@@ -346,6 +346,15 @@ export default async function HackathonsPage({
 
 	const findCurated = (title: string) =>
 		curatedMap.get(normalizeForMatch(title));
+	// Every event has its own page: a Payload-curated one under its slug, any
+	// other under its uname (the detail page finds DoraHacks events in the
+	// feed and file-curated events in CURATED_HACKATHONS). Only an event with
+	// no uname links out.
+	const eventPage = (h: (typeof hackathons)[number]): string | null => {
+		const curated = findCurated(h.title);
+		if (curated) return `/hackathons/${curated.slug}`;
+		return h.uname ? `/hackathons/${encodeURIComponent(h.uname)}` : null;
+	};
 
 	// Cross-hackathon aggregate stats.
 	const totalHackathons = hackathons.length;
@@ -472,7 +481,119 @@ export default async function HackathonsPage({
 								const tags = parseThemes(hackathon.field);
 								const upcoming = hackathon.start_time > nowSec;
 
-								return (
+								const page = eventPage(hackathon);
+								const body = (
+									<div
+										key={hackathon.id}
+										className="rounded-xl border border-white/15 bg-card overflow-hidden hover:border-white/30 transition-colors duration-200"
+									>
+										{/* Banner: full width, aspect ratio for consistency */}
+										<HackathonCover
+											src={hackathon.image_url}
+											title={hackathon.title}
+											organization={hackathon.organization?.name}
+											aspect="aspect-[3/1] sm:aspect-[4/1]"
+											sizes="100vw"
+										>
+											<Badge className="absolute top-3 right-3 bg-neutral-100 text-black border-0 shadow-md">
+												{upcoming ? "Upcoming" : "Open"}
+											</Badge>
+										</HackathonCover>
+
+										<div className="p-5 sm:p-6">
+											{/* Title + Org */}
+											<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
+												<h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+													{hackathon.title}
+												</h3>
+												{hackathon.kind && hackathon.kind !== "hackathon" && (
+													<span className="inline-flex flex-shrink-0 self-start rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+														{EVENT_KIND_LABEL[hackathon.kind]}
+													</span>
+												)}
+												{hackathon.organization && (
+													<div className="flex items-center gap-1.5 text-sm text-muted-foreground flex-shrink-0">
+														{hackathon.organization.logo && (
+															<Image
+																src={hackathon.organization.logo}
+																alt={hackathon.organization.name}
+																width={16}
+																height={16}
+																className="rounded-full"
+															/>
+														)}
+														<span>{hackathon.organization.name}</span>
+													</div>
+												)}
+											</div>
+
+											{/* Stats row: wraps naturally on mobile */}
+											<div className="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-4">
+												<span className="flex items-center gap-1.5">
+													<DollarSign className="w-4 h-4 text-neutral-400" />
+													<span className="font-semibold text-foreground">
+														{hackathon.bonus_price > 0
+															? formatPrize(hackathon.bonus_price)
+															: "Prizes TBA"}
+													</span>
+												</span>
+												<span className="flex items-center gap-1.5 text-muted-foreground">
+													<Clock className="w-4 h-4" />
+													{upcoming
+														? `Starts ${formatShortDate(hackathon.start_time)}`
+														: daysRemaining > 0
+															? `${daysRemaining} days left`
+															: "Ending soon"}
+												</span>
+												{hackathon.hackers_count > 0 && (
+													<span className="flex items-center gap-1.5 text-muted-foreground">
+														<Users className="w-4 h-4" />
+														{hackathon.hackers_count} participants
+													</span>
+												)}
+												<span className="flex items-center gap-1.5 text-muted-foreground">
+													<Calendar className="w-4 h-4" />
+													{upcoming
+														? `${formatShortDate(hackathon.start_time)} to ${formatShortDate(hackathon.end_time)}`
+														: `Ends ${formatShortDate(hackathon.end_time)}`}
+												</span>
+												{hackathon.source === "curated" && (
+													<span
+														className="flex items-center gap-1.5 text-muted-foreground"
+														title="Not on DoraHacks; hand-tracked from the organizer's page"
+													>
+														{hackathon.external_url
+															? new URL(hackathon.external_url).host.replace(
+																	/^www\./,
+																	"",
+																)
+															: "organizer page"}
+													</span>
+												)}
+											</div>
+
+											{/* Tags */}
+											{tags.length > 0 && (
+												<div className="flex flex-wrap gap-2">
+													{tags.slice(0, 6).map((tag, i) => (
+														<span
+															// biome-ignore lint/suspicious/noArrayIndexKey: themes can repeat
+															key={i}
+															className="inline-block px-2.5 py-1 text-xs font-medium rounded-full bg-white/10 text-foreground border border-border"
+														>
+															{tag}
+														</span>
+													))}
+												</div>
+											)}
+										</div>
+									</div>
+								);
+								return page ? (
+									<Link key={hackathon.id} href={page} className="block group">
+										{body}
+									</Link>
+								) : (
 									<a
 										key={hackathon.id}
 										href={getHackathonUrl(hackathon)}
@@ -480,107 +601,7 @@ export default async function HackathonsPage({
 										rel="noopener noreferrer"
 										className="block group"
 									>
-										<div className="rounded-xl border border-white/15 bg-card overflow-hidden hover:border-white/30 transition-colors duration-200">
-											{/* Banner — full width, aspect-ratio for consistency */}
-											<HackathonCover
-												src={hackathon.image_url}
-												title={hackathon.title}
-												organization={hackathon.organization?.name}
-												aspect="aspect-[3/1] sm:aspect-[4/1]"
-												sizes="100vw"
-											>
-												<Badge className="absolute top-3 right-3 bg-neutral-100 text-black border-0 shadow-md">
-													{upcoming ? "Upcoming" : "Open"}
-												</Badge>
-											</HackathonCover>
-
-											<div className="p-5 sm:p-6">
-												{/* Title + Org */}
-												<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
-													<h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-														{hackathon.title}
-													</h3>
-													{hackathon.kind && hackathon.kind !== "hackathon" && (
-														<span className="inline-flex flex-shrink-0 self-start rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
-															{EVENT_KIND_LABEL[hackathon.kind]}
-														</span>
-													)}
-													{hackathon.organization && (
-														<div className="flex items-center gap-1.5 text-sm text-muted-foreground flex-shrink-0">
-															{hackathon.organization.logo && (
-																<Image
-																	src={hackathon.organization.logo}
-																	alt={hackathon.organization.name}
-																	width={16}
-																	height={16}
-																	className="rounded-full"
-																/>
-															)}
-															<span>{hackathon.organization.name}</span>
-														</div>
-													)}
-												</div>
-
-												{/* Stats row — wraps naturally on mobile */}
-												<div className="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-4">
-													<span className="flex items-center gap-1.5">
-														<DollarSign className="w-4 h-4 text-neutral-400" />
-														<span className="font-semibold text-foreground">
-															{hackathon.bonus_price > 0
-																? formatPrize(hackathon.bonus_price)
-																: "Prizes TBA"}
-														</span>
-													</span>
-													<span className="flex items-center gap-1.5 text-muted-foreground">
-														<Clock className="w-4 h-4" />
-														{upcoming
-															? `Starts ${formatShortDate(hackathon.start_time)}`
-															: daysRemaining > 0
-																? `${daysRemaining} days left`
-																: "Ending soon"}
-													</span>
-													{hackathon.hackers_count > 0 && (
-														<span className="flex items-center gap-1.5 text-muted-foreground">
-															<Users className="w-4 h-4" />
-															{hackathon.hackers_count} participants
-														</span>
-													)}
-													<span className="flex items-center gap-1.5 text-muted-foreground">
-														<Calendar className="w-4 h-4" />
-														{upcoming
-															? `${formatShortDate(hackathon.start_time)} to ${formatShortDate(hackathon.end_time)}`
-															: `Ends ${formatShortDate(hackathon.end_time)}`}
-													</span>
-													{hackathon.source === "curated" && (
-														<span
-															className="flex items-center gap-1.5 text-muted-foreground"
-															title="Not on DoraHacks; hand-tracked from the organizer's page"
-														>
-															{hackathon.external_url
-																? new URL(hackathon.external_url).host.replace(
-																		/^www\./,
-																		"",
-																	)
-																: "organizer page"}
-														</span>
-													)}
-												</div>
-
-												{/* Tags */}
-												{tags.length > 0 && (
-													<div className="flex flex-wrap gap-2">
-														{tags.slice(0, 6).map((tag, i) => (
-															<span
-																key={i}
-																className="inline-block px-2.5 py-1 text-xs font-medium rounded-full bg-white/10 text-foreground border border-border"
-															>
-																{tag}
-															</span>
-														))}
-													</div>
-												)}
-											</div>
-										</div>
+										{body}
 									</a>
 								);
 							})}
@@ -800,12 +821,9 @@ export default async function HackathonsPage({
 								const cardClass =
 									"group flex flex-col rounded-2xl border border-border/50 hover:border-border bg-card overflow-hidden transition-colors";
 
-								return curated ? (
-									<Link
-										key={hackathon.id}
-										href={`/hackathons/${curated.slug}`}
-										className={cardClass}
-									>
+								const page = eventPage(hackathon);
+								return page ? (
+									<Link key={hackathon.id} href={page} className={cardClass}>
 										{cardInner}
 									</Link>
 								) : (
