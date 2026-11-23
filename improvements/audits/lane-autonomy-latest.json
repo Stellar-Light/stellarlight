@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-16T17:27:21.016Z",
+	"generatedAt": "2026-11-23T19:30:19.277Z",
 	"source": "scripts/check-lane-autonomy.ts",
 	"registry": "improvements/lanes/lanes.json",
 	"interventionLog": "improvements/lanes/interventions.json",
@@ -11,7 +11,7 @@
 		"lanes": 81,
 		"ok": 64,
 		"couldNotCheck": 17,
-		"eligibleForStage2": 15,
+		"eligibleForStage2": 14,
 		"atStage2": 4,
 		"demotedSincePromotion": 1,
 		"jobsApiCalls": 27
@@ -25,7 +25,7 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 56,
+			"unattendedRuns": 57,
 			"attendedRuns": 0,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
@@ -34,7 +34,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "57 completed run(s) in window · 56 successful run(s) the lane started itself, 0 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "57 completed run(s) in window · 57 successful run(s) the lane started itself, 0 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "apply-content-pass",
@@ -83,7 +83,7 @@
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
 			"unattendedRuns": 0,
-			"attendedRuns": 39,
+			"attendedRuns": 12,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 0,
@@ -91,7 +91,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "41 completed run(s) in window · 0 successful run(s) the lane started itself, 39 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "12 completed run(s) in window · 0 successful run(s) the lane started itself, 12 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "award-publish",
@@ -102,7 +102,7 @@
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
 			"unattendedRuns": 0,
-			"attendedRuns": 7,
+			"attendedRuns": 3,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 0,
@@ -110,7 +110,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "8 completed run(s) in window · 0 successful run(s) the lane started itself, 7 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "3 completed run(s) in window · 0 successful run(s) the lane started itself, 3 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "award-reconcile",
@@ -120,8 +120,8 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 55,
-			"attendedRuns": 19,
+			"unattendedRuns": 56,
+			"attendedRuns": 9,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 8,
@@ -129,7 +129,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "79 completed run(s) in window · 55 successful run(s) the lane started itself, 19 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "66 completed run(s) in window · 56 successful run(s) the lane started itself, 9 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "award-round",
@@ -140,7 +140,7 @@
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
 			"unattendedRuns": 0,
-			"attendedRuns": 63,
+			"attendedRuns": 19,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 0,
@@ -148,7 +148,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "77 completed run(s) in window · 0 successful run(s) the lane started itself, 63 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "21 completed run(s) in window · 0 successful run(s) the lane started itself, 19 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "award-test-setup",
@@ -159,7 +159,7 @@
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
 			"unattendedRuns": 0,
-			"attendedRuns": 24,
+			"attendedRuns": 6,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 0,
@@ -167,7 +167,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "24 completed run(s) in window · 0 successful run(s) the lane started itself, 24 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "6 completed run(s) in window · 0 successful run(s) the lane started itself, 6 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "backfill-code-domains",
@@ -215,16 +215,16 @@
 			"lastInterventionAt": "2026-09-05",
 			"lastInterventionWhat": "The nightly step was gated to workflow_dispatch, so the 3 scheduled runs since the cron was added on 2026-09-02 executed nothing (18 completed runs in total, most manual dispatches; corrected 2026-09-05 from the runs' job steps); the gate was removed so schedule runs write. Found by the lane-autonomy counter's first run.",
 			"lastInterventionSource": "PR night/notes-nightly (this fix); runs 33851502654 and 33731681303 show the step skipped",
-			"unattendedRuns": 47,
+			"unattendedRuns": 41,
 			"attendedRuns": 1,
 			"executesAreLowerBound": false,
 			"spanBasis": "last logged intervention",
-			"interventionFreeWeeks": 8,
-			"stage": "eligible-for-2",
+			"interventionFreeWeeks": 0,
+			"stage": 1,
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "58 completed run(s) in window · 47 successful run(s) the lane started itself, 1 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: last logged intervention (2026-09-05)"
+			"why": "58 completed run(s) in window · 41 successful run(s) the lane started itself, 1 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: last logged intervention (2026-09-05)"
 		},
 		{
 			"id": "backfill-lifecycle",
@@ -368,7 +368,7 @@
 			"lastInterventionWhat": "The lane's writes were correct, its read-back was not: STRONG_BASES still listed only three tiers, so the 58 rows this lane awarded `product-integration` were counted as weak and the board read the completed work as failed.",
 			"lastInterventionSource": "PR #1297 — fix(quality): the strong-basis metric ignored two new evidence tiers (merged 2026-09-04T16:24Z); written up as Lesson 1 in QUALITY.md by PR #1310",
 			"unattendedRuns": 8,
-			"attendedRuns": 0,
+			"attendedRuns": 1,
 			"executesAreLowerBound": false,
 			"spanBasis": "last logged intervention",
 			"interventionFreeWeeks": 8,
@@ -376,7 +376,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "8 completed run(s) in window · 8 successful run(s) the lane started itself, 0 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: last logged intervention (2026-09-04)"
+			"why": "9 completed run(s) in window · 8 successful run(s) the lane started itself, 1 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: last logged intervention (2026-09-04)"
 		},
 		{
 			"id": "basis-from-repo",
@@ -405,16 +405,16 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 24,
+			"unattendedRuns": 31,
 			"attendedRuns": 2,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
-			"interventionFreeWeeks": 4,
+			"interventionFreeWeeks": 5,
 			"stage": 1,
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "26 completed run(s) in window · 24 successful run(s) the lane started itself, 2 a human dispatched (they earn nothing) · 4 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "33 completed run(s) in window · 31 successful run(s) the lane started itself, 2 a human dispatched (they earn nothing) · 5 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "check-links",
@@ -463,7 +463,7 @@
 			"lastInterventionWhat": "A July STATUS_FIX entry for blend (Live→Live, basis site-liveness) re-stamped site-liveness on every execute, erasing the onchain-activity the basis lane awards; 16 entries carry a weak basis. Fixed: a weak curated basis never overwrites a strong lane-earned one when the status is unchanged.",
 			"lastInterventionSource": "basis-from-onchain dry run 2026-09-05 (AWARD blend site-liveness → onchain-activity, again); fix PR in this session",
 			"unattendedRuns": 8,
-			"attendedRuns": 51,
+			"attendedRuns": 38,
 			"executesAreLowerBound": false,
 			"spanBasis": "last logged intervention",
 			"interventionFreeWeeks": 8,
@@ -471,7 +471,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "60 completed run(s) in window · 8 successful run(s) the lane started itself, 51 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: last logged intervention (2026-09-05)"
+			"why": "46 completed run(s) in window · 8 successful run(s) the lane started itself, 38 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: last logged intervention (2026-09-05)"
 		},
 		{
 			"id": "curated-builds",
@@ -580,12 +580,12 @@
 			"attendedRuns": 0,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
-			"interventionFreeWeeks": 1,
+			"interventionFreeWeeks": 2,
 			"stage": 1,
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "8 completed run(s) in window · 6 successful run(s) the lane started itself, 0 a human dispatched (they earn nothing) · 1 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "8 completed run(s) in window · 6 successful run(s) the lane started itself, 0 a human dispatched (they earn nothing) · 2 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "enrich-builder-repos",
@@ -648,12 +648,12 @@
 			"id": "enrich-onchain",
 			"workflow": "enrich-onchain.yml",
 			"cadence": "cron 0 6 * * 2",
-			"writeSet": "projects.onchain per contract (lifetime events, subinvocations, storage entries, created date, wasm-validation repo) from stellar.expert, and onchain.quietSince, the start of the run of snapshots with no contract movement (since 2026-10-23)",
+			"writeSet": "projects.onchain: per asset holders, supply, trustlines and newest movement; per contract newest event, ledgers with an event, TTL state and the repo its WASM is attested to (Stellar Index, Horizon, Soroban RPC since 2026-11; the explorer it read before went paid); repos.codeInUse, the per-repo rollup, cleared when no contract is attributed to the repo after a run that read everything",
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 7,
-			"attendedRuns": 5,
+			"unattendedRuns": 6,
+			"attendedRuns": 7,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 0,
@@ -661,7 +661,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "14 completed run(s) in window · 7 successful run(s) the lane started itself, 5 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "16 completed run(s) in window · 6 successful run(s) the lane started itself, 7 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "enrich-partner-onchain",
@@ -729,15 +729,15 @@
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
 			"unattendedRuns": 3,
-			"attendedRuns": 4,
+			"attendedRuns": 8,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
-			"interventionFreeWeeks": 0,
+			"interventionFreeWeeks": 1,
 			"stage": 1,
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "263 completed run(s) in window · 3 successful run(s) the lane started itself, 4 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "274 completed run(s) in window · 3 successful run(s) the lane started itself, 8 a human dispatched (they earn nothing) · 1 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "enrich-scf",
@@ -748,7 +748,7 @@
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
 			"unattendedRuns": 0,
-			"attendedRuns": 10,
+			"attendedRuns": 12,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 0,
@@ -756,7 +756,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "10 completed run(s) in window · 0 successful run(s) the lane started itself, 10 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "12 completed run(s) in window · 0 successful run(s) the lane started itself, 12 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "enrich-tvl",
@@ -770,12 +770,12 @@
 			"attendedRuns": 6,
 			"executesAreLowerBound": false,
 			"spanBasis": "last logged intervention",
-			"interventionFreeWeeks": 3,
+			"interventionFreeWeeks": 4,
 			"stage": "2→1 (intervention after promotion)",
 			"promotedAt": "2026-09-13",
 			"endStateClaim": "read-back of every written row via verifyWrites (src/lib/utils/read-back) against the exact payload sent, fields tvlUSD / tvlAsOf / llamaSlugs / tvlUnavailable / tvlSource / tvlMethod / llamaListing; exit 1 on any field that did not persist as sent, and on any mapped slug DefiLlama's list does not hold or a family it publishes a Stellar figure for only in part; nothing written from a list with fewer than 20 Stellar rows; skipped rows counted and printed",
 			"state": "ok",
-			"why": "15 completed run(s) in window · 9 successful run(s) the lane started itself, 6 a human dispatched (they earn nothing) · 3 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: last logged intervention (2026-10-23)"
+			"why": "15 completed run(s) in window · 9 successful run(s) the lane started itself, 6 a human dispatched (they earn nothing) · 4 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: last logged intervention (2026-10-23)"
 		},
 		{
 			"id": "fix-dev-docs-titles",
@@ -870,7 +870,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "61 completed run(s) in window · 0 successful run(s) the lane started itself, 0 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "59 completed run(s) in window · 0 successful run(s) the lane started itself, 0 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "import-replit-stablecoin-history",
@@ -937,16 +937,16 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 6,
+			"unattendedRuns": 7,
 			"attendedRuns": 3,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
-			"interventionFreeWeeks": 0,
+			"interventionFreeWeeks": 1,
 			"stage": 1,
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "11 completed run(s) in window · 6 successful run(s) the lane started itself, 3 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "12 completed run(s) in window · 7 successful run(s) the lane started itself, 3 a human dispatched (they earn nothing) · 1 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "link-canonical-slug",
@@ -1089,8 +1089,8 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 41,
-			"attendedRuns": 2,
+			"unattendedRuns": 35,
+			"attendedRuns": 1,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 0,
@@ -1098,7 +1098,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "62 completed run(s) in window · 41 successful run(s) the lane started itself, 2 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "60 completed run(s) in window · 35 successful run(s) the lane started itself, 1 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "refresh-oracle-feeds",
@@ -1108,16 +1108,16 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 10,
+			"unattendedRuns": 24,
 			"attendedRuns": 2,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
-			"interventionFreeWeeks": 1,
+			"interventionFreeWeeks": 2,
 			"stage": 1,
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "12 completed run(s) in window · 10 successful run(s) the lane started itself, 2 a human dispatched (they earn nothing) · 1 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "26 completed run(s) in window · 24 successful run(s) the lane started itself, 2 a human dispatched (they earn nothing) · 2 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "refresh-research-corpus",
@@ -1128,7 +1128,7 @@
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
 			"unattendedRuns": 17,
-			"attendedRuns": 3,
+			"attendedRuns": 4,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 8,
@@ -1136,7 +1136,7 @@
 			"promotedAt": "2026-09-13",
 			"endStateClaim": "post-execute re-plan of every ingester (--replan: the same fetch, the same DB diff, no write) must print writes=0 — new + updated + metadata-only + pending deletes/prunes; an ingester with no plan line is could-not-check, named, never counted clean (Idempotence step); then every canonical page present with its signature text intact (exit 1 / could-not-look 2)",
 			"state": "ok",
-			"why": "61 completed run(s) in window · 17 successful run(s) the lane started itself, 3 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "62 completed run(s) in window · 17 successful run(s) the lane started itself, 4 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "refresh-rwa",
@@ -1146,7 +1146,7 @@
 			"lastInterventionAt": "2026-09-05",
 			"lastInterventionWhat": "The sls-023 close-out on issue #494 was overclaimed — 11 of the finding's 61 rows were treated as closing the whole probe. Recorded as a violated lesson (\"verify before advertise (#494, twice)\"); the close-out itself has not yet been reframed upstream, so this stays open as a correction against the lane that now owns those rows.",
 			"lastInterventionSource": "PR #1310 — quality: program audit wrap (merged 2026-09-05T04:04Z), QUALITY.md Lessons 2026-09-05",
-			"unattendedRuns": 151,
+			"unattendedRuns": 124,
 			"attendedRuns": 0,
 			"executesAreLowerBound": false,
 			"spanBasis": "last logged intervention",
@@ -1155,7 +1155,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "175 completed run(s) in window · 151 successful run(s) the lane started itself, 0 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: last logged intervention (2026-09-05)"
+			"why": "162 completed run(s) in window · 124 successful run(s) the lane started itself, 0 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: last logged intervention (2026-09-05)"
 		},
 		{
 			"id": "refresh-stablecoins",
@@ -1165,8 +1165,8 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 149,
-			"attendedRuns": 0,
+			"unattendedRuns": 125,
+			"attendedRuns": 4,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 0,
@@ -1174,7 +1174,7 @@
 			"promotedAt": "2026-09-14",
 			"endStateClaim": "read-back of every row whose write resolved via verifyWrites (src/lib/utils/read-back) against the exact payload sent, on every key of that payload, in both collections — stablecoins (current rows and retirements, keyed on assetId) and stablecoin-snapshots (keyed on assetId:day) — with a single-key re-fetch before a row is called missing; exit 1 on any field that did not persist, any write that threw, or the rate-limit pacing finding; exit 2 when more than half the live-tracked roster came back unmeasured (could-not-look, dry runs included); kept-forward / unmeasured / retired counts printed every run",
 			"state": "ok",
-			"why": "178 completed run(s) in window · 149 successful run(s) the lane started itself, 0 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "169 completed run(s) in window · 125 successful run(s) the lane started itself, 4 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "regrade-repos",
@@ -1222,16 +1222,16 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 78,
+			"unattendedRuns": 92,
 			"attendedRuns": 4,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
-			"interventionFreeWeeks": 4,
+			"interventionFreeWeeks": 5,
 			"stage": 1,
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "82 completed run(s) in window · 78 successful run(s) the lane started itself, 4 a human dispatched (they earn nothing) · 4 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "96 completed run(s) in window · 92 successful run(s) the lane started itself, 4 a human dispatched (they earn nothing) · 5 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "scan-repo-code",
@@ -1241,8 +1241,8 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 219,
-			"attendedRuns": 23,
+			"unattendedRuns": 210,
+			"attendedRuns": 45,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 8,
@@ -1250,7 +1250,7 @@
 			"promotedAt": "2026-09-13",
 			"endStateClaim": "read-back of every row the wave wrote via verifyWrites against the exact payload sent (codeScanState, codeScannedAt, stellarProof, codeDepth, farmScore, codeScanNote, codeScanError, mainnetContractId); exit 1 on any field that did not persist; zero-work waves already exit 1; skipped-triaged count printed",
 			"state": "ok",
-			"why": "250 completed run(s) in window · 219 successful run(s) the lane started itself, 23 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "261 completed run(s) in window · 210 successful run(s) the lane started itself, 45 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "seed-blog-posts",
@@ -1393,16 +1393,16 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 44,
+			"unattendedRuns": 51,
 			"attendedRuns": 1,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
-			"interventionFreeWeeks": 7,
+			"interventionFreeWeeks": 8,
 			"stage": 1,
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "45 completed run(s) in window · 44 successful run(s) the lane started itself, 1 a human dispatched (they earn nothing) · 7 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "52 completed run(s) in window · 51 successful run(s) the lane started itself, 1 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "sync-hackathon-builds",
@@ -1412,16 +1412,16 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 42,
+			"unattendedRuns": 49,
 			"attendedRuns": 23,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
-			"interventionFreeWeeks": 6,
+			"interventionFreeWeeks": 7,
 			"stage": "eligible-for-2",
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "65 completed run(s) in window · 42 successful run(s) the lane started itself, 23 a human dispatched (they earn nothing) · 6 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "72 completed run(s) in window · 49 successful run(s) the lane started itself, 23 a human dispatched (they earn nothing) · 7 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "sync-lumenloop",
@@ -1431,7 +1431,7 @@
 			"lastInterventionAt": null,
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
-			"unattendedRuns": 53,
+			"unattendedRuns": 52,
 			"attendedRuns": 3,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
@@ -1440,7 +1440,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "ok",
-			"why": "60 completed run(s) in window · 53 successful run(s) the lane started itself, 3 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
+			"why": "60 completed run(s) in window · 52 successful run(s) the lane started itself, 3 a human dispatched (they earn nothing) · 8 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window"
 		},
 		{
 			"id": "tansu-anchor",
@@ -1451,7 +1451,7 @@
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
 			"unattendedRuns": 0,
-			"attendedRuns": 14,
+			"attendedRuns": 11,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 0,
@@ -1459,7 +1459,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "14 completed run(s) in window · 0 successful run(s) the lane started itself, 14 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "11 completed run(s) in window · 0 successful run(s) the lane started itself, 11 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "task-lane",
@@ -1527,7 +1527,7 @@
 			"lastInterventionWhat": null,
 			"lastInterventionSource": null,
 			"unattendedRuns": 0,
-			"attendedRuns": 2,
+			"attendedRuns": 0,
 			"executesAreLowerBound": false,
 			"spanBasis": "start of the 8-week observation window",
 			"interventionFreeWeeks": 0,
@@ -1535,7 +1535,7 @@
 			"promotedAt": null,
 			"endStateClaim": null,
 			"state": "could-not-check",
-			"why": "2 completed run(s) in window · 0 successful run(s) the lane started itself, 2 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
+			"why": "0 completed run(s) in window · 0 successful run(s) the lane started itself, 0 a human dispatched (they earn nothing) · 0 consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: start of the 8-week observation window · NOT IN improvements/lanes/lanes.json: nobody has written down what this lane writes, so its autonomy is not checkable"
 		},
 		{
 			"id": "verify-published-packages",
@@ -1559,31 +1559,6 @@
 	],
 	"classifierVersion": 2,
 	"runCache": {
-		"36309636503": "success",
-		"36313128719": "success",
-		"36309058795": "success",
-		"36310699694": "success",
-		"35734622064": "success",
-		"35735860360": "success",
-		"35739639714": "success",
-		"35738027897": "success",
-		"36305697753": "success",
-		"35728845033": "success",
-		"35711762791": "success",
-		"36318400593": "success",
-		"35720974222": "success",
-		"36311243413": "success",
-		"35613643320": "success",
-		"35589473424": "success",
-		"36321594494": "success",
-		"36236455648": "success",
-		"36352161991": "success",
-		"35786674750": "success",
-		"36357605896": "success",
-		"36319342422": "success",
-		"35735803303": "success",
-		"36311409132": "success",
-		"35715143291": "success",
 		"37194199869": "success",
 		"37197826819": "success",
 		"37193563955": "success",
@@ -1604,7 +1579,6 @@
 		"37118119547": "success",
 		"37237834299": "success",
 		"37236830575": "success",
-		"36351703170": "success",
 		"37243147162": "success",
 		"37197637958": "success",
 		"37203736832": "success",
@@ -1779,6 +1753,33 @@
 		"43447711836": "success",
 		"42857020257": "success",
 		"43711937073": "success",
-		"42827201622": "success"
+		"42827201622": "success",
+		"45019913800": "success",
+		"45027684472": "success",
+		"45021620821": "success",
+		"44141097889": "success",
+		"44143051444": "success",
+		"44153224111": "success",
+		"44150711405": "success",
+		"45026932058": "success",
+		"45009581135": "success",
+		"44131745003": "success",
+		"45046333786": "success",
+		"44100208166": "success",
+		"45034591813": "success",
+		"45023346719": "success",
+		"43920487301": "success",
+		"43876082342": "success",
+		"43869683543": "success",
+		"45063816024": "success",
+		"44756618336": "success",
+		"45063332102": "success",
+		"45068186477": "success",
+		"45027012842": "success",
+		"45024531211": "success",
+		"45035509636": "success",
+		"44142993950": "success",
+		"45023727805": "success",
+		"44107647502": "success"
 	}
 }
