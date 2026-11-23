@@ -196,3 +196,102 @@ describe("exact-key report", () => {
 		expect(note).not.toMatch(/infer content/);
 	});
 });
+
+// sls-118: a proposal number (SLP-0006, CAP-0077, SEP-0010) names a whole
+// document, so every chunk of that proposal carries it, and a chunk of another
+// document that cites it does not: the citation is a neighbour, not the record.
+describe("proposal numbers are exact keys", () => {
+	const slpHeader = {
+		url: "https://github.com/stellar/stellar-protocol/blob/master/limits/slp-0006.md",
+		title: "Freeze YieldBlox Exploit Stellar Accounts",
+		content:
+			"SLP-0006: Freeze YieldBlox Exploit Stellar Accounts. Status: Final. Created: 2026-05-07.",
+	};
+	const slpBody = {
+		...slpHeader,
+		content:
+			"## Rationale\n\nThe frozen ledger keys stop the exploit accounts.",
+	};
+	const cap = {
+		url: "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0077.md",
+		title: "CAP-0077: Ability to freeze ledger keys via network configuration",
+		content: "Used on Mainnet by SLP-0006 and SLP-0008.",
+	};
+	const sep = {
+		url: "https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md",
+		title: "Stellar Web Authentication",
+		content: "This SEP defines the standard way for clients to authenticate.",
+	};
+
+	it("every chunk of the named proposal carries its number", () => {
+		expect(exactKeysOf("SLP-0006 freeze YieldBlox", slpHeader)).toEqual([
+			"SLP-0006",
+		]);
+		expect(exactKeysOf("slp-6", slpBody)).toEqual(["SLP-0006"]);
+		expect(exactKeysOf("sep-10 web auth", sep)).toEqual(["SEP-0010"]);
+	});
+
+	it("a document that cites the number is a neighbour", () => {
+		expect(exactKeysOf("SLP-0006", cap)).toEqual([]);
+		expect(exactKeysOf("CAP-0077 SLP-0006", cap)).toEqual(["CAP-0077"]);
+		expect(exactKeysOf("CAP-0077 SLP-0006", slpBody)).toEqual(["SLP-0006"]);
+	});
+
+	it("a proposal the scope lacks is a miss, one held off the page is said", () => {
+		const r = exactKeyReport({
+			query: "CAP-0099 SEP-0010",
+			scope: [sep],
+			served: [],
+			lookupFailed: false,
+		});
+		expect(r.heldNotServed).toEqual(["SEP-0010"]);
+		expect(r.exactMiss?.identifiers).toEqual(["CAP-0099"]);
+		expect(r.exactMiss?.note).toMatch(/No proposal document CAP-0099/);
+		expect(r.exactMiss?.note).not.toMatch(/verbatim/);
+		const failed = exactKeyReport({
+			query: "CAP-0099",
+			scope: [],
+			served: [],
+			lookupFailed: true,
+		});
+		expect(failed.exactMiss?.note).toMatch(/unknown/);
+	});
+
+	it("only a hyphen, or a capital prefix and a space, names a proposal", () => {
+		const capRow = {
+			url: "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0100.md",
+			title: "CAP-0100",
+			content: "",
+		};
+		const sep41 = {
+			url: "https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0041.md",
+			title: "Soroban Token Interface",
+			content: "",
+		};
+		for (const q of ["cap-100", "CAP-0100", "CAP 100", "what is Cap-100?"])
+			expect(exactKeysOf(q, capRow)).toEqual(["CAP-0100"]);
+		for (const q of ["sep-41", "SEP 41", "SEP-0041 token interface"])
+			expect(exactKeysOf(q, sep41)).toEqual(["SEP-0041"]);
+		expect(exactKeysOf("SLP-0006", slpHeader)).toEqual(["SLP-0006"]);
+		// Lowercase prose with a space is not an id: no key, so no miss.
+		for (const q of [
+			"market cap 100",
+			"sep 41 tokens",
+			"slp 6",
+			"Cap 100",
+			"cap100",
+		]) {
+			expect(exactKeysOf(q, capRow)).toBeNull();
+			expect(
+				exactKeyReport({ query: q, scope: [], served: [], lookupFailed: false })
+					.exactMiss,
+			).toBeNull();
+		}
+	});
+
+	it("a month and year is not a SEP number", () => {
+		expect(exactKeysOf("stellar news sep 2026", sep)).toBeNull();
+		expect(exactKeysOf("SEP 24 in Sep 2026", sep)).toBeNull();
+		expect(exactKeysOf("SEP 2026 roadmap", sep)).toBeNull();
+	});
+});

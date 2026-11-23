@@ -613,10 +613,20 @@ async function research(
 	// stage pins them to the top (see identifierTargets in research-rank.ts).
 	// One read per missing id, so one id's chunks cannot fill another's;
 	// at most five, so a query listing forty ids is not forty reads.
-	const missingIds = identifiersMissingFrom(
+	// sls-118: each id is an exact key, so an id this lookup failed or skipped
+	// is a failed read (its miss unchecked), never an absence.
+	const allMissingIds = identifiersMissingFrom(
 		q,
 		chunks.map((c) => c.url),
-	).slice(0, 5);
+	);
+	const missingIds = allMissingIds.slice(0, 5);
+	let proposalLookupWarning: string | null =
+		allMissingIds.length > missingIds.length
+			? degradedWarning(
+					"research proposal lookup",
+					`read ${missingIds.length} of ${allMissingIds.length} named proposals; at most 5 per request`,
+				)
+			: null;
 	if (missingIds.length) {
 		try {
 			const reads = await Promise.allSettled(
@@ -636,6 +646,12 @@ async function research(
 					}),
 				),
 			);
+			const failed = reads.find((r) => r.status === "rejected");
+			if (failed)
+				proposalLookupWarning = degradedWarning(
+					"research proposal lookup",
+					failed.reason,
+				);
 			const docs = reads.flatMap((r) =>
 				r.status === "fulfilled" ? r.value.docs : [],
 			);
@@ -680,8 +696,9 @@ async function research(
 					// exact-ID matches, and the pin sets the rank.
 				});
 			}
-		} catch {
-			// direct lookup is best-effort — the pool result still serves
+		} catch (e) {
+			// the pool result still serves; the named ids are unchecked
+			proposalLookupWarning = degradedWarning("research proposal lookup", e);
 		}
 	}
 
@@ -1118,15 +1135,16 @@ async function research(
 		}
 	}
 
-	// sls-071, sls-090: a finding id, an advisory id or a repo-qualified
-	// release tag is on the page, held but left off it, or a miss. Vector
+	// sls-071, sls-090, sls-118: a finding id, an advisory id, a
+	// repo-qualified release tag or a CAP/SEP/SLP number is on the page, held
+	// but left off it, or a miss. Vector
 	// search never goes empty, so without this an absent id returns its
 	// nearest neighbours, scored as though they matched.
 	const { exactMiss, heldNotServed } = exactKeyReport({
 		query: q,
 		scope: exactScope,
 		served: results,
-		lookupFailed: !!exactLookupWarning,
+		lookupFailed: !!exactLookupWarning || !!proposalLookupWarning,
 	});
 	const heldNote = heldNotServed.length
 		? `${heldNotServed.join(", ")}: held in the searched scope but not on this page (a filter or the page limit left ${heldNotServed.length === 1 ? "it" : "them"} out). Raise limit or drop the filter to read ${heldNotServed.length === 1 ? "it" : "them"}.`
@@ -1143,6 +1161,7 @@ async function research(
 		vectorNote,
 		sourceEmptyNote,
 		exactLookupWarning,
+		proposalLookupWarning,
 		heldNote,
 	].filter((w): w is string => !!w);
 	log({
