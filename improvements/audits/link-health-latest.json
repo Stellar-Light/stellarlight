@@ -1,6 +1,6 @@
 {
- "generatedAt": "2026-11-22T09:58:25.141Z",
- "asOf": "2026-11-22T09:58:25.141Z",
+ "generatedAt": "2026-11-23T10:58:01.373Z",
+ "asOf": "2026-11-23T10:58:01.373Z",
  "source": "scripts/check-links.ts",
  "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
  "checked": 2863,
@@ -18,17 +18,6 @@
    ]
   },
   {
-   "url": "https://adaptive-goal-management.herokuapp.com",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/command-robotics.links.website"
-   ],
-   "citedByStatus": [
-    "command-robotics: Live"
-   ]
-  },
-  {
    "url": "https://blaqshyd.me",
    "httpStatus": null,
    "reason": "fetch failed",
@@ -40,17 +29,6 @@
    ]
   },
   {
-   "url": "https://devtrak.build",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/devtrak.links.website"
-   ],
-   "citedByStatus": [
-    "devtrak: Live"
-   ]
-  },
-  {
    "url": "https://dropzey.com",
    "httpStatus": 404,
    "reason": "Not Found",
@@ -59,19 +37,6 @@
    ],
    "citedByStatus": [
     "dropzey: Live"
-   ]
-  },
-  {
-   "url": "https://expand.network",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/expand.links.website",
-    "projects/expand-network.links.website"
-   ],
-   "citedByStatus": [
-    "expand: Draft",
-    "expand-network: Live"
    ]
   },
   {
@@ -119,6 +84,17 @@
    ]
   },
   {
+   "url": "https://github.com/Neftwerk/Neftwerk",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/neftwerk.links.github"
+   ],
+   "citedByStatus": [
+    "neftwerk: Live"
+   ]
+  },
+  {
    "url": "https://github.com/SarthakKshirsagar01",
    "httpStatus": 404,
    "reason": "Not Found",
@@ -149,17 +125,6 @@
    ],
    "citedByStatus": [
     "6ac1eb6db12fc3232727a3c0: n/a"
-   ]
-  },
-  {
-   "url": "https://komet.runtimeverification.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/komet.links.website"
-   ],
-   "citedByStatus": [
-    "komet: Live"
    ]
   },
   {
@@ -209,6 +174,17 @@
    ]
   },
   {
+   "url": "https://seevcash.com",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/seevcash.links.website"
+   ],
+   "citedByStatus": [
+    "seevcash: Live"
+   ]
+  },
+  {
    "url": "https://spacemeet.co",
    "httpStatus": null,
    "reason": "fetch failed",
@@ -217,17 +193,6 @@
    ],
    "citedByStatus": [
     "6ac099ed9349b8542e29cfdd: n/a"
-   ]
-  },
-  {
-   "url": "https://stellar.subsprotocol.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/subs.links.website"
-   ],
-   "citedByStatus": [
-    "subs: Live"
    ]
   },
   {
@@ -253,17 +218,6 @@
    ]
   },
   {
-   "url": "https://walletban.xyz",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/walletban.links.website"
-   ],
-   "citedByStatus": [
-    "walletban: Live"
-   ]
-  },
-  {
    "url": "https://winszn.xyz",
    "httpStatus": null,
    "reason": "fetch failed",
@@ -286,6 +240,270 @@
    ]
   },
   {
+   "url": "https://x.com/airswifttech",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/airswift.links.twitter"
+   ],
+   "citedByStatus": [
+    "airswift: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/artizen",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/artizen.links.twitter"
+   ],
+   "citedByStatus": [
+    "artizen: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/bebopcash",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/bebop.links.twitter"
+   ],
+   "citedByStatus": [
+    "bebop: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/boundless_xyz",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/boundless.links.twitter"
+   ],
+   "citedByStatus": [
+    "boundless: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/catalyst_bm",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "entities/intellecteu.links.twitter"
+   ],
+   "citedByStatus": [
+    "intellecteu: n/a"
+   ]
+  },
+  {
+   "url": "https://x.com/coalapay",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/coala-pay.links.twitter"
+   ],
+   "citedByStatus": [
+    "coala-pay: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/contentdaoapp",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/content-dao.links.twitter"
+   ],
+   "citedByStatus": [
+    "content-dao: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/copperxhq",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/copperx.links.twitter"
+   ],
+   "citedByStatus": [
+    "copperx: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/createplayearn",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/katagames.links.twitter"
+   ],
+   "citedByStatus": [
+    "katagames: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/DAOstar_One",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/opengrants.links.twitter"
+   ],
+   "citedByStatus": [
+    "opengrants: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/decentriolabs",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/decentrio.links.twitter"
+   ],
+   "citedByStatus": [
+    "decentrio: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/dropzeyofficial",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/dropzey.links.twitter"
+   ],
+   "citedByStatus": [
+    "dropzey: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/emigrofi",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/emigro.links.twitter"
+   ],
+   "citedByStatus": [
+    "emigro: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/janusfreight",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/janus.links.twitter"
+   ],
+   "citedByStatus": [
+    "janus: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/luanlabs",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/fluxity.links.twitter"
+   ],
+   "citedByStatus": [
+    "fluxity: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/lumenswap",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/lumenswap.links.twitter"
+   ],
+   "citedByStatus": [
+    "lumenswap: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/myshopcatlog",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/catlog.links.twitter"
+   ],
+   "citedByStatus": [
+    "catlog: Development"
+   ]
+  },
+  {
+   "url": "https://x.com/nearxschool",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/nearx.links.twitter"
+   ],
+   "citedByStatus": [
+    "nearx: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/nectar_xlm",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/nectar-network.links.twitter"
+   ],
+   "citedByStatus": [
+    "nectar-network: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/ondofinance",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/ondo.links.twitter"
+   ],
+   "citedByStatus": [
+    "ondo: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/spaceandtimedb",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/space-and-time.links.twitter"
+   ],
+   "citedByStatus": [
+    "space-and-time: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/stridesocials",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/stride.links.twitter"
+   ],
+   "citedByStatus": [
+    "stride: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/tauvlo",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/tauvlo.links.twitter"
+   ],
+   "citedByStatus": [
+    "tauvlo: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/usepaykit",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/paykit.links.twitter"
+   ],
+   "citedByStatus": [
+    "paykit: Live"
+   ]
+  },
+  {
    "url": "https://youtube.com/@RobertoSanzCriptomonedas",
    "httpStatus": 404,
    "reason": "Not Found",
@@ -299,14 +517,14 @@
  ],
  "brokenOnRetired": [
   {
-   "url": "https://assetdesk.xyz",
-   "httpStatus": null,
-   "reason": "fetch failed",
+   "url": "https://adaptive-goal-management.herokuapp.com",
+   "httpStatus": 404,
+   "reason": "Not Found",
    "targets": [
-    "projects/assetdesk.links.website"
+    "projects/command-robotics.links.website"
    ],
    "citedByStatus": [
-    "assetdesk: Inactive"
+    "command-robotics: Inactive"
    ]
   },
   {
@@ -332,6 +550,17 @@
    ]
   },
   {
+   "url": "https://devtrak.build",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/devtrak.links.website"
+   ],
+   "citedByStatus": [
+    "devtrak: Inactive"
+   ]
+  },
+  {
    "url": "https://docking.zone",
    "httpStatus": null,
    "reason": "fetch failed",
@@ -351,6 +580,19 @@
    ],
    "citedByStatus": [
     "eascrow: Inactive"
+   ]
+  },
+  {
+   "url": "https://expand.network",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/expand.links.website",
+    "projects/expand-network.links.website"
+   ],
+   "citedByStatus": [
+    "expand: Draft",
+    "expand-network: Inactive"
    ]
   },
   {
@@ -391,6 +633,17 @@
    ]
   },
   {
+   "url": "https://stellar.subsprotocol.com",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/subs.links.website"
+   ],
+   "citedByStatus": [
+    "subs: Inactive"
+   ]
+  },
+  {
    "url": "https://stellartpad-production.up.railway.app",
    "httpStatus": 404,
    "reason": "Not Found",
@@ -399,6 +652,74 @@
    ],
    "citedByStatus": [
     "stellartpad: Draft"
+   ]
+  },
+  {
+   "url": "https://walletban.xyz",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/walletban.links.website"
+   ],
+   "citedByStatus": [
+    "walletban: Inactive"
+   ]
+  },
+  {
+   "url": "https://x.com/multiclique_org",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/multiclique.links.twitter"
+   ],
+   "citedByStatus": [
+    "multiclique: Draft"
+   ]
+  },
+  {
+   "url": "https://x.com/sorobanlearning",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/soroban-learn.links.twitter"
+   ],
+   "citedByStatus": [
+    "soroban-learn: Inactive"
+   ]
+  },
+  {
+   "url": "https://x.com/thehub_dao",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/the-hub.links.twitter"
+   ],
+   "citedByStatus": [
+    "the-hub: Draft"
+   ]
+  },
+  {
+   "url": "https://x.com/venture23xyz",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/localcoin.links.twitter"
+   ],
+   "citedByStatus": [
+    "localcoin: Inactive"
+   ]
+  },
+  {
+   "url": "https://x.com/vibrantwallet",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/vibrant.links.twitter",
+    "entities/sunship-inc.links.twitter"
+   ],
+   "citedByStatus": [
+    "vibrant: Draft",
+    "sunship-inc: n/a"
    ]
   }
  ],
