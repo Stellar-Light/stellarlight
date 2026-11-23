@@ -20,7 +20,12 @@
  */
 import { factConfidence } from "./fact-confidence";
 import type { SourceCheck } from "./note-pins";
-import { namedIssuingParty, partyWords, sameParty } from "./stablecoins";
+import {
+	disclosedIssuer,
+	namedIssuingParty,
+	partyWords,
+	sameParty,
+} from "./stablecoins";
 import { statusChecksFor } from "./status-checks";
 
 export type ClaimType = "audited" | "live" | "maintained" | "issued";
@@ -491,10 +496,13 @@ const GENERIC_NAME_WORDS = new Set([
  * registry world, stated); unsupported = ticker not in the registry at all.
  *
  * A claim matches a row on its brand (`company`), on the issuer of record its
- * own stellar.toml names, or on the party that toml's desc says issues it
- * (MGUSD: Bridge, on behalf of MoneyGram), and only on a whole name (a bare
- * "Ltd" or a fragment never matches). Matching the brand alone contradicted
- * the issuer of record itself (sls-107: "is AUDD issued by AUDC PTY LTD"
+ * own stellar.toml names, or on the party its issuer-of-record note quotes
+ * as issuing it (the toml's desc for MGUSD: Bridge, on behalf of MoneyGram;
+ * Circle's EURC terms: Circle Internet Financial Europe SAS), and only on a
+ * whole name (a bare "Ltd" or a fragment never matches). Where the issuer's
+ * own terms name another issuer, the toml's ORG_NAME is contradicted, not
+ * matched (EURC: the LLC those terms call a reseller). Matching the brand
+ * alone contradicted the issuer of record itself (sls-107: "is AUDD issued by AUDC PTY LTD"
  * came back contradicted). So a contradiction now needs every row of the
  * ticker to have an issuer of record its toml named; a brand alone, or a
  * claim that shares a word with a name on record without being it, is
@@ -520,7 +528,9 @@ export function issuedVerdict(o: {
 			? `issuer of record ${r.issuerOfRecord} (ORG_NAME in ${r.issuerOfRecordSourceUrl ?? "its stellar.toml"}, read ${day(r.issuerOfRecordAsOf)})${r.issuerOfRecordNote ? `; ${r.issuerOfRecordNote}` : ""}`
 			: r.issuerOfRecordCheck === "not-named"
 				? `no issuer of record named by its stellar.toml (checked ${day(r.issuerOfRecordAsOf)}: ${r.issuerOfRecordNote ?? "no reason recorded"})`
-				: "issuer of record not read from its stellar.toml yet";
+				: r.issuerOfRecordCheck === "could-not-read"
+					? `issuer of record not read: its stellar.toml could not be read (tried ${day(r.issuerOfRecordAsOf)}: ${r.issuerOfRecordNote ?? "no reason recorded"})`
+					: "issuer of record not read from its stellar.toml yet";
 	// Dated by the toml check where there was one, not by the row's
 	// measurement time: the brand is curated, the issuer of record is read.
 	const dated = (r: StablecoinIssuerRow) =>
@@ -544,11 +554,20 @@ export function issuedVerdict(o: {
 			named(r) ? r.issuerOfRecord : null,
 			named(r) ? namedIssuingParty(r.issuerOfRecordNote) : null,
 		].filter((n): n is string => !!n);
+	// sls-119: where the issuer's own terms name another issuing party (EURC:
+	// Circle Internet Financial Europe SAS), the toml's ORG_NAME (the LLC
+	// those terms call a reseller) is not who issues it, so a claim that it
+	// does is contradicted by those terms, never supported by the toml.
+	const overruled = (r: StablecoinIssuerRow) =>
+		!!disclosedIssuer(r) &&
+		!!r.issuerOfRecord &&
+		sameParty(r.issuerOfRecord, o.company);
 	// The name on record a claim matched, spelled as the record spells it,
 	// and what that name is: an answer quotes the record, not the claim.
 	const hitOf = (r: StablecoinIssuerRow) => {
 		if (r.company && sameParty(r.company, o.company))
 			return { name: r.company, kind: "the brand on record" };
+		if (overruled(r)) return null;
 		if (named(r) && r.issuerOfRecord && sameParty(r.issuerOfRecord, o.company))
 			return {
 				name: r.issuerOfRecord,
@@ -558,7 +577,9 @@ export function issuedVerdict(o: {
 		if (party && sameParty(party, o.company))
 			return {
 				name: party,
-				kind: "the party its stellar.toml's desc names as issuing it",
+				kind: disclosedIssuer(r)
+					? "the issuer its own terms name"
+					: "the party its stellar.toml's desc names as issuing it",
 			};
 		return null;
 	};
@@ -583,6 +604,14 @@ export function issuedVerdict(o: {
 			...(multi ? { auditorsOnRecord: others } : {}),
 		};
 	}
+	const reseller = tickerRows.find(overruled);
+	if (reseller)
+		return {
+			verdict: "contradicted",
+			statement: `The issuer's own terms say ${disclosedIssuer(reseller)} issues ${o.ticker.toUpperCase()} (issuer account ${reseller.issuer ?? "?"}); ${reseller.issuerOfRecord} is the organization its stellar.toml names, not the issuer those terms name. The ${record(reseller)}.`,
+			evidence: tickerRows.map(ev),
+			confidence: factConfidence("human-verified", dated(reseller)),
+		};
 	const onRecord = [
 		...new Set(
 			tickerRows.map(

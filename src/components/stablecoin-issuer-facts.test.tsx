@@ -86,6 +86,23 @@ describe("IssuerFacts: each value labelled for what it is", () => {
 			/>,
 		);
 		expect(screen.getByText("Not read from its stellar.toml yet")).toBeTruthy();
+		cleanup();
+		render(
+			<IssuerFacts
+				coin={{
+					...coin,
+					issuerOfRecord: null,
+					issuerOfRecordCheck: "could-not-read",
+					issuerOfRecordNote: "fetch failed",
+				}}
+			/>,
+		);
+		expect(
+			screen.getByText(
+				"Its stellar.toml could not be read (tried Nov 5, 2026)",
+			),
+		).toBeTruthy();
+		expect(screen.getByText("fetch failed")).toBeTruthy();
 	});
 });
 

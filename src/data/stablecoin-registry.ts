@@ -96,6 +96,22 @@ export interface StablecoinAsset {
 	 */
 	noHomeDomainNote?: string;
 	/**
+	 * Served as the issuer-of-record reason, after the failed read, only while
+	 * that read fails because `host`, the issuer account's home_domain, does
+	 * not resolve, and no completed check is stored: what the registry found
+	 * elsewhere, with the URLs and day checked (BRLT). Never an issuer of
+	 * record itself.
+	 */
+	unresolvableHomeDomain?: { host: string; note: string };
+	/**
+	 * The issuer's own terms, quoted with their URL and the day read, where
+	 * they say an entity other than the toml's ORG_NAME issues the asset
+	 * (EURC). Served as the issuer-of-record note on a named check while the
+	 * party after its "issued by" is not that ORG_NAME. The ORG_NAME stays
+	 * the issuer of record.
+	 */
+	issuerDisclosure?: string;
+	/**
 	 * Horizon's /assets index omits a few live assets. Skipping validation
 	 * keeps a real asset in the list rather than dropping it on a false
 	 * negative — the Replit service learned this the hard way with AUDD.
@@ -340,6 +356,11 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 			checkedOn: "2026-11-11",
 			note: "Circle states EURC is backed 100% by euro held at regulated financial institutions in the EEA and redeemable 1:1 for euro.",
 		},
+		// sls-119: the toml's ORG_NAME is the US entity, which these terms call
+		// a reseller, and they also say EURC "is issued and redeemed by Circle
+		// Europe". (USDC's terms, read the same day, name the LLC as issuer.)
+		issuerDisclosure:
+			'Circle\'s EURC terms (https://www.circle.com/legal/eurc-terms, read 2026-11-23) say "EURC is a digital token issued by Circle Internet Financial Europe SAS, (“Circle Europe”) that operates on each of the blockchains listed here" and "Circle Internet Financial, LLC (“Circle”) is an affiliate of Circle Europe and acts as a reseller of EURC to those having a Circle Mint account."',
 		// Circle's toml serves no usable currency image, so the API served
 		// logoUrl: null for the biggest coin on the page. The explorer already
 		// covers it client-side with a bundled mark; this pins the same mark so
@@ -447,6 +468,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 			note: "Checked 2026-11-11: the issuer account's home_domain, sep.stablex.cloud, does not resolve, so its stellar.toml cannot be read, and Settle Network's site names BRLT without saying what backs it.",
 		},
 		note: "The issuer account's home_domain, sep.stablex.cloud, did not resolve when checked on 2026-11-11, so its stellar.toml cannot be read: neither the issuer of record nor the toml's listing of the account can be checked.",
+		// sls-120: the account still points at sep.stablex.cloud (Horizon,
+		// 2026-11-23), which answers NXDOMAIN; the ARST row's toml lists it.
+		unresolvableHomeDomain: {
+			host: "sep.stablex.cloud",
+			note: "The stellar.toml at https://pubnet-sep.latamex.com/.well-known/stellar.toml (read 2026-11-23) names ORG_NAME Relay Tech Services Ltd and lists this account as the BRLT issuer, but the account's home_domain, sep.stablex.cloud, does not point there, so the link cannot be confirmed from the account side",
+		},
 		useCountryFlag: true,
 	},
 	{

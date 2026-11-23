@@ -14135,33 +14135,33 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"The legal issuer as the issuer publishes it: ORG_NAME in the stellar.toml at the issuer account's home_domain (from Horizon), counted only when that toml lists the account in ACCOUNTS or as a currency issuer, so both sides of the link agree (SEP-1). AUDD: AUDC PTY LTD. Set only when issuerOfRecordCheck is named; read by the 6-hourly writer, never at request time, and never derived from company. Cite it with issuerOfRecordAsOf.",
+							"The organization the issuer's own stellar.toml names: ORG_NAME in the stellar.toml at the issuer account's home_domain (from Horizon), counted only when that toml lists the account in ACCOUNTS or as a currency issuer, so both sides of the link agree (SEP-1). AUDD: AUDC PTY LTD. It is the legal issuer unless the issuer's own disclosure names another entity: ORG_NAME names the toml's publisher, and where the issuer's terms say a different entity issues this currency, issuerOfRecordNote quotes them and that entity is the legal issuer (EURC: Circle's EURC terms name Circle Internet Financial Europe SAS as issuer and Circle Internet Financial, LLC, the ORG_NAME, as a reseller). Set only when issuerOfRecordCheck is named; read by the 6-hourly writer, never at request time, and never derived from company. Cite it with issuerOfRecordAsOf.",
 					},
 					issuerOfRecordCheck: {
 						type: "string",
 						nullable: true,
 						enum: [...ISSUER_OF_RECORD_CHECKS],
 						description:
-							"What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account is not on Horizon, sets no home_domain or one that is not a plain host name, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made changes nothing, so the stored check and its date stay as they were: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body). A toml read that cannot answer changes nothing either: an ORG_NAME in a form the parser cannot read, or an account the toml does not list where it holds a listing the parser cannot read (a currency linked to its own toml, a code it cannot read).",
+							"What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account is not on Horizon, sets no home_domain or one that is not a plain host name, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. could-not-read = a read was tried and could not be made, and no named or not-named check is stored: issuerOfRecordAsOf dates the latest try and issuerOfRecordNote says what failed (BRLT: the account's home_domain does not resolve); it is not a checked absence. null = never tried. After a named or not-named check, a read that could not be made changes nothing, so the stored check and its date stay as they were. A read that could not be made: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body). A toml read that cannot answer changes nothing either: an ORG_NAME in a form the parser cannot read, or an account the toml does not list where it holds a listing the parser cannot read (a currency linked to its own toml, a code it cannot read).",
 					},
 					issuerOfRecordSourceUrl: {
 						type: "string",
 						nullable: true,
 						description:
-							"The stellar.toml URL the stored check read, after same-host https redirects (https://<home_domain>/.well-known/stellar.toml unless the host moved it); re-verify there. Null when the account sets no home_domain or nothing was read yet.",
+							"The stellar.toml URL the stored check read, after same-host https redirects (https://<home_domain>/.well-known/stellar.toml unless the host moved it); re-verify there. Null when the account sets no home_domain, when no toml could be read (could-not-read), or nothing was read yet.",
 					},
 					issuerOfRecordAsOf: {
 						type: "string",
 						format: "date-time",
 						nullable: true,
 						description:
-							"When the stored check was made. A failed read does not move it, so a date well before updatedAt means the latest runs could not reach the toml. Date issuerOfRecord by this, not by updatedAt. Null = never read.",
+							"When the stored check was made; on could-not-read, when the latest read was tried. A failed read does not move a named or not-named check's date, so a date well before updatedAt means the latest runs could not reach the toml. Date issuerOfRecord by this, not by updatedAt. Null = never tried.",
 					},
 					issuerOfRecordNote: {
 						type: "string",
 						nullable: true,
 						description:
-							"On a named check: that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'), else null. On a not-named check: why no issuer of record was named, with what that leaves unconfirmed where the registry has checked it (USDT0: the toml at usdt0.to names Everdawn Labs Limited and lists the account, but the account sets no home_domain pointing there, so the link is not confirmed from the account side).",
+							"On a named check: the issuer's own terms, quoted with their URL and the day read, where they say an entity other than issuerOfRecord issues this currency (EURC: 'issued by Circle Internet Financial Europe SAS'), and that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'); else null. On a could-not-read check: what failed, with what the registry found elsewhere where it has checked (BRLT: the toml at pubnet-sep.latamex.com names Relay Tech Services Ltd and lists the account, but the account's home_domain does not point there, so the link is not confirmed from the account side). On a not-named check: why no issuer of record was named, with what that leaves unconfirmed where the registry has checked it (USDT0: the toml at usdt0.to names Everdawn Labs Limited and lists the account, but the account sets no home_domain pointing there, so the link is not confirmed from the account side).",
 					},
 					website: { type: "string", nullable: true },
 					peg: {

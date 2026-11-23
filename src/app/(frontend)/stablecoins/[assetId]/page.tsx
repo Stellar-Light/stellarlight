@@ -15,6 +15,8 @@ import {
 	pegFlag,
 } from "@/lib/stablecoin-view";
 import {
+	issuerOfRecordLine,
+	issuingParty,
 	retirementOf,
 	type StoreRow,
 	storeRowToApi,
@@ -73,7 +75,7 @@ export async function generateMetadata({
 		// A retired page is not measured any more and says so.
 		description: retirement
 			? `${row.ticker} is no longer tracked: retired from this stablecoin registry${retirement.reason ? `. ${retirement.reason}` : "."} Its figures are the last ones measured.`
-			: `${row.ticker}, a ${row.company ?? "Stellar"} stablecoin${row.issuerOfRecordCheck === "named" && row.issuerOfRecord ? ` issued by ${row.issuerOfRecord}` : ""}, pegged to ${row.peg ?? "an unstated currency"}. Market cap, supply, holders and issuer details, measured every six hours.`,
+			: `${row.ticker}, a ${row.company ?? "Stellar"} stablecoin${issuingParty(row) ? ` issued by ${issuingParty(row)}` : ""}, pegged to ${row.peg ?? "an unstated currency"}. Market cap, supply, holders and issuer details, measured every six hours.`,
 	};
 }
 
@@ -147,12 +149,7 @@ export default async function StablecoinDetailPage({
 				timeZone: "UTC",
 			})
 		: null;
-	const issuerLine =
-		row.issuerOfRecordCheck === "named" && row.issuerOfRecord
-			? `Issued by ${row.issuerOfRecord}, per its stellar.toml as read ${checkedLabel ?? "on an unrecorded date"}`
-			: row.issuerOfRecordCheck === "not-named"
-				? `No issuer of record named by its stellar.toml (checked ${checkedLabel ?? "on an unrecorded date"})`
-				: "Issuer of record not read from its stellar.toml yet";
+	const issuerLine = issuerOfRecordLine(row, checkedLabel);
 
 	const measuredLabel = row.updatedAt
 		? `${new Date(row.updatedAt).toLocaleString("en-US", {
@@ -297,7 +294,11 @@ export default async function StablecoinDetailPage({
 								: "-"}
 							{checkedLabel && (
 								<span className="block text-xs text-muted-foreground mt-1">
-									{row.issuerOfRecordCheck === "named" ? "read" : "checked"}{" "}
+									{row.issuerOfRecordCheck === "named"
+										? "read"
+										: row.issuerOfRecordCheck === "could-not-read"
+											? "could not be read, tried"
+											: "checked"}{" "}
 									{checkedLabel}
 								</span>
 							)}

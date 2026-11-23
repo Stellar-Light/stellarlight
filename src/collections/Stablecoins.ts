@@ -75,7 +75,8 @@ export const Stablecoins: CollectionConfig = {
 		// The issuer of record: the latest check of the stellar.toml at the
 		// issuer account's home_domain, written by refresh-stablecoins.ts only
 		// while STABLECOIN_ISSUER_OF_RECORD_WRITE is on. A read that could not
-		// be made leaves the stored check as it was. Never filled from `company`.
+		// be made leaves a stored named or not-named check as it was, and is
+		// stored as could-not-read otherwise. Never filled from `company`.
 		{
 			name: "issuerOfRecord",
 			type: "text",
@@ -90,7 +91,7 @@ export const Stablecoins: CollectionConfig = {
 			options: [...ISSUER_OF_RECORD_CHECKS],
 			admin: {
 				description:
-					"What the stored check found: named, or not-named (read, and no issuer of record named; the note says why). Empty = never read.",
+					"What the stored check found: named, not-named (read, and no issuer of record named; the note says why), or could-not-read (tried, and no read could be made, with nothing completed stored; the note says what failed). Empty = never tried.",
 			},
 		},
 		{
@@ -106,7 +107,7 @@ export const Stablecoins: CollectionConfig = {
 			type: "date",
 			admin: {
 				description:
-					"When the stored check was made; a failed read does not move it",
+					"When the stored check was made, or on could-not-read the latest try; a failed read does not move a named or not-named check",
 			},
 		},
 		{
@@ -114,7 +115,7 @@ export const Stablecoins: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"Named: the toml's desc for this currency, quoted, when it names another issuing party (MGUSD: Bridge). Not named: why.",
+					"Named: the issuer's own terms or the toml's desc for this currency, quoted, when they name another issuing party (EURC: Circle Internet Financial Europe SAS; MGUSD: Bridge). Otherwise: why.",
 			},
 		},
 		{ name: "domain", type: "text" },

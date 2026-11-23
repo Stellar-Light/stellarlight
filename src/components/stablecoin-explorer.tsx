@@ -91,7 +91,7 @@ export interface CoinView {
 	/** The curated domain; not always the issuer account's home_domain. */
 	issuerDomain: string;
 	issuerOfRecord: string | null;
-	issuerOfRecordCheck: "named" | "not-named" | null;
+	issuerOfRecordCheck: "named" | "not-named" | "could-not-read" | null;
 	issuerOfRecordAsOf: string | null;
 	issuerOfRecordNote: string | null;
 	/** The peg currency's country, not the issuer's. */
@@ -346,6 +346,8 @@ export function issuerOfRecordText(
 		return `${c.issuerOfRecord} (stellar.toml, read ${when})`;
 	if (c.issuerOfRecordCheck === "not-named")
 		return `None named by its stellar.toml (checked ${when})`;
+	if (c.issuerOfRecordCheck === "could-not-read")
+		return `Its stellar.toml could not be read (tried ${when})`;
 	return "Not read from its stellar.toml yet";
 }
 

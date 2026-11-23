@@ -72,8 +72,9 @@ export interface IssuerOfRecordFields {
  * One attempt to read the issuer of record. Three outcomes, each written
  * differently: named (the toml at the account's home_domain lists the account
  * and gives an ORG_NAME), not-named (that read completed and named nobody: a
- * checked absence), could-not-read (no answer to judge by: the stored check
- * stays as it was).
+ * checked absence), could-not-read (no answer to judge by: a stored named or
+ * not-named check stays as it was; with neither stored, the failure is
+ * stored, dated by `at`).
  */
 export type IssuerOfRecordRead =
 	| {
@@ -84,7 +85,7 @@ export type IssuerOfRecordRead =
 			note: string | null;
 	  }
 	| { outcome: "not-named"; at: string; sourceUrl: string | null; why: string }
-	| { outcome: "could-not-read"; why: string };
+	| { outcome: "could-not-read"; at: string; why: string };
 
 export interface MeasuredStablecoin {
 	/** This run's issuer-of-record read; the writer turns it into fields with
@@ -523,7 +524,12 @@ export async function readIssuerToml(host: string): Promise<IssuerTomlRead> {
 					headers: { "user-agent": "stellarlight-stablecoins" },
 				});
 			} catch (err) {
-				lastError = String((err as Error).message).slice(0, 80);
+				// A name that does not resolve is said in so many words: a
+				// curated note on an unresolvable home_domain keys on it (BRLT).
+				lastError =
+					(err as { cause?: { code?: unknown } }).cause?.code === "ENOTFOUND"
+						? HOST_NOT_FOUND
+						: String((err as Error).message).slice(0, 80);
 				if (attempt < 2) await sleep(500 * 2 ** attempt);
 			}
 		}
@@ -590,6 +596,7 @@ export async function readIssuerOfRecord(
 	} catch (err) {
 		return {
 			outcome: "could-not-read",
+			at: new Date().toISOString(),
 			why: `issuer-of-record read failed: ${String((err as Error).message).slice(0, 80)}`,
 		};
 	}
@@ -616,6 +623,7 @@ async function readIssuerOfRecordOnce(
 	} catch (err) {
 		return {
 			outcome: "could-not-read",
+			at: at(),
 			why: `could not read the issuer account: ${String((err as Error).message).slice(0, 80)}`,
 		};
 	}
@@ -636,17 +644,19 @@ async function readIssuerOfRecordOnce(
 		};
 	const read = await readIssuerToml(home);
 	if (read.kind === "failed")
-		return { outcome: "could-not-read", why: read.why };
+		return { outcome: "could-not-read", at: at(), why: read.why };
 	// A 404 does not prove the issuer stopped issuing: a lapsed home_domain
 	// parked on a host that 404s looks the same. Keep the stored check.
 	if (read.kind === "absent")
 		return {
 			outcome: "could-not-read",
+			at: at(),
 			why: `${read.url} answered not found; kept as a failed read, since a lapsed or parked domain answers the same`,
 		};
 	const r = issuerOfRecordFromToml(read.text, asset.code, asset.issuer);
 	// Unknown keeps the stored check, like a failed read.
-	if ("unread" in r) return { outcome: "could-not-read", why: r.unread };
+	if ("unread" in r)
+		return { outcome: "could-not-read", at: at(), why: r.unread };
 	if ("miss" in r)
 		return {
 			outcome: "not-named",
@@ -666,6 +676,9 @@ async function readIssuerOfRecordOnce(
 /** The not-named reason for an issuer account with no home_domain. */
 export const NO_HOME_DOMAIN = "the issuer account sets no home_domain";
 
+/** A failed toml read's reason when DNS has no such host (ENOTFOUND). */
+export const HOST_NOT_FOUND = "the host name does not resolve (ENOTFOUND)";
+
 /** A stored field as an ISO string or null (Payload may hand back a Date). */
 function storedText(v: unknown): string | null {
 	if (typeof v === "string") return v;
@@ -677,9 +690,11 @@ function storedText(v: unknown): string | null {
  * The issuer-of-record fields the writer stores for one row, per outcome:
  * named writes the new read with its date; not-named writes a dated checked
  * absence (no name, the reason in the note), so a toml that stops listing the
- * account clears the name; could-not-read writes the stored check back whole,
- * its date unchanged, so a failed read never moves a date or clears a name.
- * Null until a first check; never derived from `company`.
+ * account clears the name; could-not-read writes a stored named or not-named
+ * check back whole, its date unchanged, so a failed read never moves a date
+ * or clears a name, and with neither stored writes the failure, dated, with
+ * no name (sls-120: null means only never tried). Never derived from
+ * `company`.
  */
 export function carryIssuerOfRecord(
 	read: IssuerOfRecordRead,
@@ -702,13 +717,20 @@ export function carryIssuerOfRecord(
 			issuerOfRecordNote: read.why,
 		};
 	const check = prev?.issuerOfRecordCheck;
+	if (check === "named" || check === "not-named")
+		return {
+			issuerOfRecord: storedText(prev?.issuerOfRecord),
+			issuerOfRecordCheck: check,
+			issuerOfRecordSourceUrl: storedText(prev?.issuerOfRecordSourceUrl),
+			issuerOfRecordAsOf: storedText(prev?.issuerOfRecordAsOf),
+			issuerOfRecordNote: storedText(prev?.issuerOfRecordNote),
+		};
 	return {
-		issuerOfRecord: storedText(prev?.issuerOfRecord),
-		issuerOfRecordCheck:
-			check === "named" || check === "not-named" ? check : null,
-		issuerOfRecordSourceUrl: storedText(prev?.issuerOfRecordSourceUrl),
-		issuerOfRecordAsOf: storedText(prev?.issuerOfRecordAsOf),
-		issuerOfRecordNote: storedText(prev?.issuerOfRecordNote),
+		issuerOfRecord: null,
+		issuerOfRecordCheck: "could-not-read",
+		issuerOfRecordSourceUrl: null,
+		issuerOfRecordAsOf: read.at,
+		issuerOfRecordNote: read.why,
 	};
 }
 
@@ -978,6 +1000,46 @@ async function urlResolves(url: string): Promise<boolean> {
 	}
 }
 
+/**
+ * The registry's curated issuer-of-record notes on this run's read, each
+ * only while what it was written for holds: USDT0's after the reason while
+ * the account sets no home_domain, BRLT's after the reason while its
+ * home_domain does not resolve, and EURC's issuer terms as the note of a named check
+ * (before any desc note) while the party they say issues it is not the
+ * ORG_NAME the toml names.
+ */
+function withRegistryNotes(
+	read: IssuerOfRecordRead,
+	asset: StablecoinAsset,
+): IssuerOfRecordRead {
+	if (
+		read.outcome === "not-named" &&
+		read.why === NO_HOME_DOMAIN &&
+		asset.noHomeDomainNote
+	)
+		return { ...read, why: `${read.why}: ${asset.noHomeDomainNote}` };
+	const dead = asset.unresolvableHomeDomain;
+	if (
+		read.outcome === "could-not-read" &&
+		dead &&
+		read.why ===
+			`https://${dead.host}/.well-known/stellar.toml: ${HOST_NOT_FOUND}`
+	)
+		return { ...read, why: `${read.why}. ${dead.note}` };
+	const party = namedIssuingParty(asset.issuerDisclosure);
+	if (
+		read.outcome === "named" &&
+		asset.issuerDisclosure &&
+		party &&
+		!sameParty(party, read.name)
+	)
+		return {
+			...read,
+			note: [asset.issuerDisclosure, read.note].filter(Boolean).join(" "),
+		};
+	return read;
+}
+
 /** Measure one asset. Never throws: a failure comes back as an unmeasured row. */
 export async function measureStablecoin(
 	asset: StablecoinAsset,
@@ -985,16 +1047,10 @@ export async function measureStablecoin(
 	const now = new Date().toISOString();
 	// Read for every row, whatever happens to its metrics below: who issues
 	// an asset does not depend on whether its supply could be measured.
-	const read = await readIssuerOfRecord(asset);
-	// A row whose account sets no home_domain can carry a curated note on
-	// what that leaves unconfirmed (USDT0); it is the served reason only
-	// while the account still sets none.
-	const issuerOfRecordRead =
-		read.outcome === "not-named" &&
-		read.why === NO_HOME_DOMAIN &&
-		asset.noHomeDomainNote
-			? { ...read, why: `${read.why}: ${asset.noHomeDomainNote}` }
-			: read;
+	const issuerOfRecordRead = withRegistryNotes(
+		await readIssuerOfRecord(asset),
+		asset,
+	);
 	// The curated caveat rides after an urgent measurement note, never
 	// instead of it: a reader sees what went wrong first, and the caveat too.
 	const withCaveat = (urgent: string) =>
