@@ -114,3 +114,28 @@ describe("every Stellar id literal in src/lib passes its checksum", () => {
 	}
 	it("has no corrupted id", () => expect(bad).toEqual([]));
 });
+
+/** Ethena's USDe on Stellar: 14 other accounts issue a USDE and 26 others a
+ * USDe (Horizon, 2026-11-23), so the row must be pinned to the right one. */
+describe("Ethena's USDe resolves to Ethena's issuer, never a decoy", () => {
+	const ETHENA = "GDJ5BNU5NN6NQ54D7OX6NQTUYNBZ42CAT33QGM5BIQ2QIYADAC5ICH47";
+
+	it("USDE is carried from Ethena's issuer, and its SAC is the contract LayerZero names", () => {
+		const row = STABLECOIN_REGISTRY.find((a) => a.code === "USDE");
+		expect(row?.issuer).toBe(ETHENA);
+		// Code casing is identity: USDe (lowercase e) from the same account
+		// is another asset, with another contract and no supply.
+		expect(row && sacContractId(row.code, row.issuer)).toBe(
+			"CCNOV6XVI2O5BSTA3232GIRUQULDEBV7IWGKM6QKI6II5OIIQTU24JJN",
+		);
+		expect(row?.assetType).toBe("Crypto-Backed");
+	});
+
+	it("every USDe or sUSDe row, in any casing, is Ethena's; sUSDe and ENA stay out", () => {
+		expect(
+			STABLECOIN_REGISTRY.filter((a) => /^(s?usde|ena)$/i.test(a.code)).map(
+				(a) => `${a.code}:${a.issuer}`,
+			),
+		).toEqual([`USDE:${ETHENA}`]);
+	});
+});

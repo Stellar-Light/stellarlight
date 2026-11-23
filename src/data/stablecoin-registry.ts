@@ -330,6 +330,38 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		preferFallbackLogo: true,
 	},
 	{
+		// Ethena's USDe, bridged to Stellar as a LayerZero OFT like USDT0 above.
+		// Ethena publishes no Stellar address (its docs never mention Stellar)
+		// and this account sets no home_domain, so no toml closes the chain.
+		// Identity rests on LayerZero's token metadata, which maps this asset's
+		// SAC (CCNOV6XV..., the contract_id Horizon reports for USDE:GDJ5...)
+		// to Ethena's USDe on Ethereum, 0x4c9e...68b3, an address Ethena's own
+		// key-addresses page lists (all read 2026-11-23). The code is USDE in
+		// capitals: USDe from this same account (lowercase e) is another asset
+		// with no supply, and 14 other accounts issue a USDE and 26 others a
+		// USDe (Horizon, 2026-11-23). Match on (code, issuer), never ticker.
+		//
+		// NOT added from this account: SUSDE (sUSDe) is the staked form of USDe,
+		// whose USDe value Ethena says rises as rewards accrue (a yield wrapper
+		// on an asset carried here, the yUSDC rule below), and ENA is Ethena's
+		// governance token, not a dollar.
+		code: "USDE",
+		issuer: "GDJ5BNU5NN6NQ54D7OX6NQTUYNBZ42CAT33QGM5BIQ2QIYADAC5ICH47",
+		domain: "ethena.fi",
+		company: "Ethena",
+		// No toml to read a display name from: Ethena's own spelling.
+		name: "USDe",
+		peg: "USD",
+		assetType: "Crypto-Backed",
+		assetTypeSource: {
+			url: "https://docs.ethena.fi/",
+			checkedOn: "2026-11-23",
+			note: "Ethena calls USDe a synthetic dollar backed with crypto assets and corresponding short futures positions, and says it is not the same as a fiat stablecoin like USDC or USDT. Only approved market making counterparties can redeem it directly for the backing assets.",
+		},
+		noHomeDomainNote:
+			"Ethena publishes no Stellar address (its documentation at https://docs.ethena.fi, read 2026-11-23, does not mention Stellar). LayerZero's token metadata (https://metadata.layerzero-api.com/v1/metadata, read 2026-11-23) maps this asset's contract to Ethena's USDe on Ethereum, but no toml lists this account, so no issuer of record can be confirmed from the account side",
+	},
+	{
 		code: "PYUSD",
 		issuer: "GDQE7IXJ4HUHV6RQHIUPRJSEZE4DRS5WY577O2FY6YQ5LVWZ7JZTU2V5",
 		domain: "paxos.com",
