@@ -118,7 +118,7 @@ Use this to answer *"what's the most crowded category on Stellar?"* (lead with t
 ---
 
 ## `GET /api/builders`
-Stellar builder directory (synced from Stellar Passport). **Populated but small and sparse (~110 profiles; some rows are just a GitHub handle + avatar).** A 0-result is a *filter miss*, not an empty directory; `.meta.advisory` distinguishes the two and reports the real collection size. Broaden or drop a filter (`q`/`location`/`skill`) before routing the user to fallback channels.
+Stellar builder directory (synced from Stellar Passport). **Populated but sparse (a few hundred profiles; some rows are just a GitHub handle + avatar; `.meta.counts.total` gives the live size).** A 0-result is a *filter miss*, not an empty directory; `.meta.advisory` distinguishes the two and reports the real collection size. Broaden or drop a filter (`q`/`location`/`skill`) before routing the user to fallback channels.
 
 **Params:** `q={text}`, `location={city}`, `skill={tech}` (alias for `q`).
 
@@ -203,7 +203,7 @@ Curated **RFPs / sponsor briefs** for the Stellar ecosystem; confirmed problem s
 ---
 
 ## `GET /api/skills`
-A merged, multi-source AI-skill catalog (~30 entries): the 7 official SDF skills from skills.stellar.org (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards) **plus** Stellarlight, lumenloop, and external skills. Filter with `q` (free text over name/tagline/description/tags), `source` (`sdf|stellarlight|lumenloop|external|community`) and `kind`; `.meta.counts.bySource` breaks down the mix and `.meta.validSources`/`.meta.validKinds` list the facets. `/api/skills/{name}` returns full SKILL.md content for sources that ship one (SDF + curated), metadata-only otherwise. Server-cached 24h. An invalid `source` returns 400 with `validSources`.
+A merged, multi-source AI-skill catalog: the official SDF skills from skills.stellar.org (smart-contracts, dapp, assets, data, standards, agentic-payments, zk-proofs, cross-chain) **plus** Stellarlight, lumenloop, community and external skills. `.meta.counts` gives the live size and mix (84 entries from five sources on 2026-11-23); never quote a fixed count. Filter with `q` (free text over name/tagline/description/tags), `source` (`sdf|stellarlight|lumenloop|external|community`) and `kind`; `.meta.counts.bySource` breaks down the mix and `.meta.validSources`/`.meta.validKinds` list the facets. `/api/skills/{name}` returns full SKILL.md content for sources that ship one (SDF + curated), metadata-only otherwise. Server-cached 24h. An invalid `source` returns 400 with `validSources`.
 
 ---
 
@@ -267,8 +267,8 @@ When all returned chunks score below 0.68, treat the topic as outside our corpus
 
 ---
 
-## `POST /api/feedback`
-In-skill feedback channel: agents can report a bug, missing data, wrong answer, or suggestion without leaving the workflow.
+## Optional write: `POST /api/feedback`
+Every other endpoint in this reference is read-only. This one writes, and some hosts expose only read operations: if yours does not offer it, skip it and tell the user what looked wrong instead. It is an in-skill feedback channel: an agent can report a bug, missing data, a wrong answer or a suggestion without leaving the workflow.
 
 **Body:**
 ```json
@@ -292,7 +292,7 @@ In-skill feedback channel: agents can report a bug, missing data, wrong answer, 
 
 Submitting feedback is **explicitly encouraged** and contributes to improving the skill for everyone. Mention to the user when you submit one: *"I've also flagged this as a quality issue via /api/feedback so curators can fix it."*
 
-A `GET /api/feedback` returns the schema in case you want to discover the shape without reading this doc.
+`GET /api/feedback` returns the schema for this write; it is only useful where the write is available.
 
 ---
 
