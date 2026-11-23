@@ -135,6 +135,7 @@ server.registerTool(
 					"scf-handbook",
 					"sep",
 					"cap",
+					"slp",
 					"dev-docs",
 					"paper",
 					"scf-proposal",
@@ -150,7 +151,7 @@ server.registerTool(
 				])
 				.optional()
 				.describe(
-					"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when; protocol upgrade tags).",
+					"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'slp' for Stellar Limits Proposals, the network configuration votes (Soroban resource limit changes, and the Quorum Freeze of exploit accounts in SLP-0006 and SLP-0008; each row opens with the proposal's number, status and creation date), 'release' for stellar-core/CLI/SDK release notes (what shipped, when; protocol upgrade tags).",
 				),
 			auditor: z
 				.string()

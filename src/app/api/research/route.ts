@@ -64,7 +64,7 @@ import {
 	findingIdentifierTargets,
 	hasFullLexicalCoverage,
 	identifierIsPresent,
-	identifierTargets,
+	identifiersMissingFrom,
 	isReleaseTitle,
 	matchesVersionTarget,
 	normalizeQueryText,
@@ -611,69 +611,77 @@ async function research(
 	// miss the named document must not mean the lookup fails — fetch its
 	// chunks directly by parentDocId and add them to the pool. The ranking
 	// stage pins them to the top (see identifierTargets in research-rank.ts).
-	const idTargets = identifierTargets(q);
-	if (idTargets.length) {
-		const targetRe = new RegExp(
-			`/(${idTargets.join("|")})\\.md(?:$|[#?])`,
-			"i",
-		);
-		if (!chunks.some((c) => targetRe.test(c.url))) {
-			try {
-				const direct = await payload.find({
-					collection: "research-docs",
-					where: {
-						parentDocId: { in: idTargets },
-						...(effectiveSource ? { source: { equals: effectiveSource } } : {}),
-					},
-					limit: 25,
-					depth: 0,
-					pagination: false,
-					select: { embedding: false },
+	// One read per missing id, so one id's chunks cannot fill another's;
+	// at most five, so a query listing forty ids is not forty reads.
+	const missingIds = identifiersMissingFrom(
+		q,
+		chunks.map((c) => c.url),
+	).slice(0, 5);
+	if (missingIds.length) {
+		try {
+			const reads = await Promise.allSettled(
+				missingIds.map((id) =>
+					payload.find({
+						collection: "research-docs",
+						where: {
+							parentDocId: { equals: id },
+							...(effectiveSource
+								? { source: { equals: effectiveSource } }
+								: {}),
+						},
+						limit: 25,
+						depth: 0,
+						pagination: false,
+						select: { embedding: false },
+					}),
+				),
+			);
+			const docs = reads.flatMap((r) =>
+				r.status === "fulfilled" ? r.value.docs : [],
+			);
+			for (const d of docs as unknown as Array<{
+				id: string;
+				source: string;
+				title: string;
+				section?: string;
+				url: string;
+				content: string;
+				chunkIndex: number;
+				publishedAt?: string;
+				observedAt?: string;
+				docKind?: string;
+				docVersionStatus?: string;
+				auditor?: string;
+				protocol?: string;
+				severity?: string;
+				capStatus?: string;
+				capProtocolVersion?: number;
+			}>) {
+				chunks.push({
+					id: String(d.id),
+					source: d.source,
+					title: d.title,
+					section: d.section ?? null,
+					url: d.url,
+					content: d.content,
+					chunkIndex: d.chunkIndex,
+					publishedAt: d.publishedAt ?? null,
+					observedAt: d.observedAt ?? null,
+					docKind: d.docKind ?? null,
+					docVersionStatus: d.docVersionStatus ?? null,
+					auditor: d.auditor ?? null,
+					protocol: d.protocol ?? null,
+					severity: d.severity ?? null,
+					// #785: the identifier-pin path is how "CAP-46" queries serve
+					// their row — it must carry the cap fields like every other path.
+					capStatus: d.capStatus ?? null,
+					capProtocolVersion: d.capProtocolVersion ?? null,
+					// No retrieval score: confidence floors relevance for
+					// exact-ID matches, and the pin sets the rank.
 				});
-				for (const d of direct.docs as unknown as Array<{
-					id: string;
-					source: string;
-					title: string;
-					section?: string;
-					url: string;
-					content: string;
-					chunkIndex: number;
-					publishedAt?: string;
-					observedAt?: string;
-					docKind?: string;
-					docVersionStatus?: string;
-					auditor?: string;
-					protocol?: string;
-					severity?: string;
-					capStatus?: string;
-					capProtocolVersion?: number;
-				}>) {
-					chunks.push({
-						id: String(d.id),
-						source: d.source,
-						title: d.title,
-						section: d.section ?? null,
-						url: d.url,
-						content: d.content,
-						chunkIndex: d.chunkIndex,
-						publishedAt: d.publishedAt ?? null,
-						observedAt: d.observedAt ?? null,
-						docKind: d.docKind ?? null,
-						docVersionStatus: d.docVersionStatus ?? null,
-						auditor: d.auditor ?? null,
-						protocol: d.protocol ?? null,
-						severity: d.severity ?? null,
-						// #785: the identifier-pin path is how "CAP-46" queries serve
-						// their row — it must carry the cap fields like every other path.
-						capStatus: d.capStatus ?? null,
-						capProtocolVersion: d.capProtocolVersion ?? null,
-						// No retrieval score: confidence floors relevance for
-						// exact-ID matches, and the pin sets the rank.
-					});
-				}
-			} catch {
-				// direct lookup is best-effort — the pool result still serves
 			}
+		} catch {
+			// direct lookup is best-effort — the pool result still serves
 		}
 	}
 

@@ -11,6 +11,7 @@
 
 import { createHash } from "node:crypto";
 import type { Payload } from "payload";
+import { preambleDate, toPublishedAt } from "./doc-dates";
 import { docKindOf, docVersionStatus } from "./doc-freshness";
 import { embedBatch } from "./embed";
 import { deriveCleanTitle } from "./title-quality";
@@ -22,6 +23,8 @@ export type ResearchSource =
 	| "scf-handbook"
 	| "sep"
 	| "cap"
+	// Stellar Limits Proposals: the network configuration votes (sls-118).
+	| "slp"
 	| "dev-docs"
 	| "paper"
 	| "scf-proposal"
@@ -265,6 +268,36 @@ export function chunkMarkdown(opts: {
 /** A paragraph longer than `max`: split at line boundaries, then a single
  *  overlong line at fixed width. Lossless — every character lands in some
  *  piece, in order. */
+/**
+ * A Stellar Limits Proposal (stellar/stellar-protocol limits/slp-NNNN.md) as
+ * corpus chunks (sls-118). Every chunk opens with the proposal's number,
+ * title, status and creation date from its preamble, so a row read alone
+ * says which network vote it is and whether it is Final. `publishedAt` is
+ * the preamble date, Updated over Created, as for SEPs and CAPs.
+ */
+export function slpChunks(md: string, fileName: string): ResearchChunk[] {
+	const parentDocId = fileName.replace(/\.md$/i, "").toLowerCase();
+	const head = md.slice(0, 2500);
+	const field = (k: string) =>
+		head.match(new RegExp(`^${k}:[ \\t]*(.+?)[ \\t]*$`, "m"))?.[1] ?? null;
+	const n = field("SLP");
+	const id = `SLP-${n && /^\d+$/.test(n) ? n.padStart(4, "0") : parentDocId.slice(4)}`;
+	const title = field("Title") ?? id;
+	const day = preambleDate(md);
+	const header = `${id}: ${title}. Status: ${field("Status") ?? "not stated"}. Created: ${field("Created") ?? "not stated"}.`;
+	return chunkMarkdown({
+		md,
+		parentDocId,
+		title,
+		url: `https://github.com/stellar/stellar-protocol/blob/master/limits/${fileName}`,
+		tags: ["slp", parentDocId],
+		publishedAt: day ? toPublishedAt(day) : undefined,
+	}).map((c) => {
+		const content = `${header}\n\n${c.content}`;
+		return { ...c, content, contentHash: sha256(content) };
+	});
+}
+
 export function splitOversized(text: string, max: number): string[] {
 	if (text.length <= max) return [text];
 	const out: string[] = [];

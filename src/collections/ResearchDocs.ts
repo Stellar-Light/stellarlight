@@ -73,6 +73,7 @@ export const ResearchDocs: CollectionConfig = {
 				{ label: "SCF Handbook", value: "scf-handbook" },
 				{ label: "SEP", value: "sep" },
 				{ label: "CAP", value: "cap" },
+				{ label: "SLP (limits proposal)", value: "slp" },
 				{ label: "Developers docs", value: "dev-docs" },
 				{ label: "Paper (whitepaper / SCP)", value: "paper" },
 				{ label: "SCF proposal", value: "scf-proposal" },

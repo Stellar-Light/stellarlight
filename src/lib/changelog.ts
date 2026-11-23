@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-22",
+		surfaces: ["api", "mcp", "skill"],
+		version: "spec@1.9.152",
+		type: "added",
+		summary:
+			"searchResearch gains the source `slp`: the Stellar Limits Proposals in limits/ of stellar/stellar-protocol, the repository the `cap` and `sep` sources already read. SLPs record the network configuration votes: Soroban resource limit changes, and the two uses of Quorum Freeze (CAP-0077) on Mainnet, SLP-0006 for the YieldBlox exploit accounts and SLP-0008 for the Mercado Bitcoin exploit account. The CAP describes the mechanism; only these say validators used it (stellar-raven sls-118). Every row opens with the proposal's number, title, status and creation date from its preamble, carries the preamble's date as `publishedAt` (Created, or Updated where a proposal states one, as for SEPs), and links the proposal file. A query naming a proposal (SLP-0006, slp 6) pins that proposal's rows above vector order, as CAP and SEP numbers already do; a query naming several ids now reads each one missing from the candidate pool on its own (up to five), so CAP-0077 SLP-0006 serves both. `slp` rows can join the recency supplement, since each is dated. The search_research MCP tool takes `slp` from its next release.",
+		detail:
+			"The source holds no documents until the corpus refresh runs on the new ingest (scripts/ingest-slps.ts, daily at 06:00 UTC); until then source=slp answers an empty page with meta.sourceEmpty true. A dry run on 2026-11-22 read eight proposals, SLP-0001 to SLP-0008, all Final, created 2024-12-04 to 2026-11-02, as 55 chunks. The refresh re-plans the source after each run like the others, so an ingest that dies mid-run reds its Idempotence step, or is named there as not re-planned when GitHub cannot be read. Ranking weighs `slp` like `cap`: canonical, and not decaying with age.",
+	},
+	{
+		date: "2026-11-22",
 		surfaces: ["api"],
 		version: "spec@1.9.151",
 		type: "changed",

@@ -213,7 +213,8 @@ export function hasFullLexicalCoverage(
 // Detection normalizes every form (CAP-38, cap 0038, sep#10, SEP-0024) to the
 // canonical zero-padded slug; ranking pins the identified document(s) above
 // vector order and floors their relevance (see exactIdMatch in confidence.ts).
-const IDENTIFIER_RE = /\b(cap|sep)[\s\-_#]*(\d{1,4})\b/gi;
+// SLP-0006 (a limits proposal, sls-118) is the same kind of key.
+const IDENTIFIER_RE = /\b(cap|sep|slp)[\s\-_#]*(\d{1,4})\b/gi;
 // "Sep 24, 2025" / "24 Sep 2026" are DATES, not SEP-0024. When the query
 // carries a date-shaped 'sep', skip its space/bare-separated matches; the
 // hyphen/hash forms (sep-24, sep#24) still count as identifiers.
@@ -478,6 +479,18 @@ export function exactMissNote(
 	return parts.join(" ");
 }
 
+/** The CAP/SEP/SLP ids the query names that no chunk in the pool belongs
+ * to, each to be read on its own: a query naming two (CAP-0077 SLP-0006)
+ * must not skip the second because the pool holds the first. */
+export function identifiersMissingFrom(
+	query: string | undefined,
+	urls: ReadonlyArray<string>,
+): string[] {
+	return identifierTargets(query).filter(
+		(id) => !urls.some((u) => matchesTarget(u, [id])),
+	);
+}
+
 /** Does this chunk belong to one of the identifier-named documents? */
 function matchesTarget(url: string, targets: string[]): boolean {
 	return targets.some((id) =>
@@ -584,6 +597,8 @@ export const RECENCY_SUPPLEMENT_SOURCES = [
 	"security-program",
 	"sdf-org",
 	"paper",
+	// Dated by each proposal's own preamble (sls-118).
+	"slp",
 ];
 
 // Query words that express the recency ASK rather than the topic — they must

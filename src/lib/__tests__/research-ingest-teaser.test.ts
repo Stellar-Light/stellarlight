@@ -5,7 +5,7 @@
  * every request; the ingester must cut it or the same chunk re-embeds daily.
  */
 import { describe, expect, it } from "vitest";
-import { stripTrailingTeaser } from "../research-ingest";
+import { slpChunks, stripTrailingTeaser } from "../research-ingest";
 
 const article =
 	"Perps on Stellar would let traders hedge exposure in leveraged trading. It uses…";
@@ -45,5 +45,63 @@ describe("stripTrailingTeaser", () => {
 			"Related articles\n- Introducing Stellar Ramps: Access On and Off Ramps with a Single Integrationstellar.org · Aug 4\n\nMentioned projects1 project";
 		expect(stripTrailingTeaser(news + tailA)).toBe(news);
 		expect(stripTrailingTeaser(news + tailB)).toBe(news);
+	});
+});
+
+// sls-118: the real head of limits/slp-0006.md (stellar/stellar-protocol
+// master, read 2026-11-22). A row read alone must say which vote it is,
+// that it is Final, and when it was created.
+const SLP_0006 = `## Preamble
+
+\`\`\`
+SLP: 0006
+Title: Freeze YieldBlox Exploit Stellar Accounts
+Authors: Alex Mootz <@mootz12>
+Consulted:
+Status: Final
+Created: 2026-05-07
+\`\`\`
+
+## Summary
+
+This proposal freezes three account entries using the frozen ledger key mechanism defined in [CAP-0077](../core/cap-0077.md). These accounts are currently blocked by validators at the overlay layer. This proposal moves the block to a network configuration.
+
+## Proposed Settings
+
+This proposal applies a \`CONFIG_SETTING_FROZEN_LEDGER_KEYS_DELTA\` configuration upgrade as defined by CAP-0077.
+`;
+
+describe("slpChunks", () => {
+	const chunks = slpChunks(SLP_0006, "slp-0006.md");
+	it("keys every chunk to the proposal and dates it from the preamble", () => {
+		expect(chunks.length).toBeGreaterThan(1);
+		for (const c of chunks) {
+			expect(c.parentDocId).toBe("slp-0006");
+			expect(c.url).toBe(
+				"https://github.com/stellar/stellar-protocol/blob/master/limits/slp-0006.md",
+			);
+			expect(c.title).toBe("Freeze YieldBlox Exploit Stellar Accounts");
+			expect(c.publishedAt).toBe("2026-05-07T00:00:00.000Z");
+			expect(c.content.split("\n")[0]).toBe(
+				"SLP-0006: Freeze YieldBlox Exploit Stellar Accounts. Status: Final. Created: 2026-05-07.",
+			);
+		}
+	});
+	it("hashes the content it stores", () => {
+		const again = slpChunks(SLP_0006, "slp-0006.md");
+		expect(again.map((c) => c.contentHash)).toEqual(
+			chunks.map((c) => c.contentHash),
+		);
+		expect(new Set(chunks.map((c) => c.contentHash)).size).toBe(chunks.length);
+	});
+	it("says a field is not stated rather than inventing one", () => {
+		const [c] = slpChunks(
+			"## Summary\n\nNo preamble here at all, just prose about limits.",
+			"slp-0009.md",
+		);
+		expect(c.content.split("\n")[0]).toBe(
+			"SLP-0009: SLP-0009. Status: not stated. Created: not stated.",
+		);
+		expect(c.publishedAt).toBeUndefined();
 	});
 });

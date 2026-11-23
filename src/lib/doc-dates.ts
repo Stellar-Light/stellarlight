@@ -26,7 +26,7 @@
  */
 export function preambleDate(md: string): string | null {
 	const head = md.slice(0, 2500);
-	if (!/^(?:SEP|CAP):\s*\d+/m.test(head)) return null;
+	if (!/^(?:SEP|CAP|SLP):\s*\d+/m.test(head)) return null;
 	const m =
 		head.match(/^Updated:\s*(\d{4}-\d{2}-\d{2})\b/m) ??
 		head.match(/^Created:\s*(\d{4}-\d{2}-\d{2})\b/m);
