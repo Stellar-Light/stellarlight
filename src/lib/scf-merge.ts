@@ -26,6 +26,8 @@ export interface ScfRoundAward {
 	awardName?: string | null;
 	amountUSD?: number | null;
 	awardType?: string | null;
+	/** The SCF page the award was read from (sls-116); moves with the award. */
+	sourceUrl?: string | null;
 	/** Payload array-row id — belongs to the shadow's document, never copied. */
 	id?: string | null;
 }
@@ -90,6 +92,7 @@ export function fillScfFromDupe(
 			awardName: r.awardName ?? null,
 			amountUSD: r.amountUSD ?? null,
 			awardType: r.awardType ?? null,
+			...(r.sourceUrl ? { sourceUrl: r.sourceUrl } : {}),
 		}));
 		filled.push("roundAwards");
 	}

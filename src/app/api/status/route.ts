@@ -262,6 +262,7 @@ export async function GET() {
 				"/api/repos/trust",
 				"/api/contracts",
 				"/api/sources/locate",
+				"/api/projects/scf-rounds",
 			],
 			docs: "https://stellarlight.xyz/scout",
 			skill: "https://stellarlight.xyz/skills/stellar-scout.md",

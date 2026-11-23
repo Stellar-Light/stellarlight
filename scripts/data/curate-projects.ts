@@ -2721,18 +2721,46 @@ async function main() {
 			continue;
 		}
 		const cur = d.scf ?? {};
-		const wantRA = fix.roundAwards ?? null;
-		const raInSync =
-			!wantRA ||
+		// sls-116: each award names the page it was verified on, the row's own
+		// (this block owns the row's awards; enrich holds a human-verified row)
+		const pageUrl = fix.unlink
+			? null
+			: fix.page
+				? SCF_PAGE + fix.page
+				: (cur.sourceUrl ?? null);
+		const wantRA = (
+			(fix.roundAwards ?? cur.roundAwards ?? []) as Array<{
+				round?: number | null;
+				awardName?: string | null;
+				amountUSD?: number | null;
+				awardType?: string | null;
+			}>
+		).map((r) => ({
+			round: r.round ?? null,
+			awardName: r.awardName ?? null,
+			amountUSD: r.amountUSD ?? null,
+			awardType: r.awardType ?? null,
+			sourceUrl: pageUrl,
+		}));
+		const raTuple = (
+			rows: Array<{
+				round?: number | null;
+				awardName?: string | null;
+				amountUSD?: number | null;
+				awardType?: string | null;
+				sourceUrl?: string | null;
+			}>,
+		) =>
 			JSON.stringify(
-				// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-				(cur.roundAwards ?? []).map((r: any) => [
-					r.round,
+				rows.map((r) => [
+					r.round ?? null,
+					r.awardName ?? null,
 					r.amountUSD ?? null,
 					r.awardType ?? null,
+					r.sourceUrl ?? null,
 				]),
-			) ===
-				JSON.stringify(wantRA.map((r) => [r.round, r.amountUSD, r.awardType]));
+			);
+		const raInSync = raTuple(cur.roundAwards ?? []) === raTuple(wantRA);
 		if (
 			cur.awarded === fix.awarded &&
 			cur.totalAwarded === fix.totalAwarded &&
@@ -2760,6 +2788,7 @@ async function main() {
 				scf: {
 					...cur,
 					...scfFix,
+					roundAwards: wantRA,
 					...(unlink
 						? { slug: null, sourceUrl: null, lastAwardedRound: null }
 						: {}),

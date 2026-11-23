@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
+		surfaces: ["api", "api-client"],
+		version: "spec@1.9.159",
+		type: "added",
+		summary:
+			"New operation getAwardRoundCoverage (`GET /api/projects/scf-rounds`, optional `round`): per numbered SCF round, the awards SCF's own round page lists against the awards served project rows carry, page by page, with the round page URL and when it was read. Each listed award no served row carries is named with why (`no-project-page`, `draft-row-only` or `no-row`), an award two served rows carry is named, and a row claiming a round with a page the round page does not list is named. searchProjects' `scfRoundAwards[]` gains `sourceUrl`: the SCF project page each award was read from, so a row that combines two SCF pages and cites one as `scfSourceUrl` can be checked award by award. Typed client: `getAwardRoundCoverage`.",
+		detail:
+			"SCF's side is the newest whole read the SCF sync stores on an execute (a partial read is never stored); the rows are read at request time, and every Draft row counts as not served. Until the first execute after this release the operation answers `rounds: null` with a reason, and `scfRoundAwards[].sourceUrl` is null, which means the page was not recorded per award (`scfSourceUrl` is then the citation). Measured read-only on 2026-11-23 from SCF's 46 round pages, its 531-row listing and the 216 project pages outside it, against the rows the public API served that day as the SCF sync's dry run (692 rows, the SCF group only) leaves them: SCF lists 934 awards in rounds 1 to 46 and served rows carry 907; in rounds 1 to 44, 893 listed and 866 carried, the same 27 gaps as the 2026-11-12 baseline (5 on Draft rows, 2 with no project page, 20 with no row). With the rows as served before that run, 10 rows that combine two SCF pages read as not carrying their second page's award (for example gatewayfm's SCF #44, which is on the OZ Accounts Policy Builder page); with each award citing its own page, none does. The Peer by HoneyCoin award (SCF #22 and #26) is carried on both peer and honey-coin. The 24 rows whose SCF record a person verified get each award's page from the curation lane, the rest from the SCF sync.",
+	},
+	{
+		date: "2026-11-23",
 		surfaces: ["api"],
 		type: "added",
 		summary:
