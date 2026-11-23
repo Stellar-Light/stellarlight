@@ -2888,6 +2888,12 @@ export const spec: OpenAPISpec = {
 													description:
 														"true = asserted with NO citable source. Do not report it as an established fact about a named company.",
 												},
+												statusCaveat: {
+													type: "string",
+													nullable: true,
+													description:
+														"The subject's statusCaveat as searchProjects serves it: on a Live record whose statusChecks have a hit, one sentence to relay with the status; treat Live as unconfirmed. Null = no check hit, or the record is not Live. Read searchProjects' statusChecks for what was checked.",
+												},
 											},
 										},
 										note: {
@@ -11842,7 +11848,7 @@ export const spec: OpenAPISpec = {
 					},
 					statusChecks: {
 						type: "array",
-						description: `Checks of the status label against stored upstream facts, present only on rows with a DefiLlama link (llamaSlugs); absent means the row has no DefiLlama link, so neither check applies. defillama-listing: hit when DefiLlama marks every linked slug dead (a deadFrom date, or deprecated with nothing locked and no live listing in its parentProtocol family), clear when it lists one as active, could-not-check when it was not read yet, a slug is missing upstream (a rename or removal), or a deprecated slug looks superseded (no deadFrom while value is still locked or a family listing is live): deprecated alone is never a hit. tvl-zero-onchain-quiet, only for ${ONCHAIN_USE_TYPES_TEXT} rows: hit when a DefiLlama TVL of 0 read within the last 14 days, over a listing that found every linked slug, meets 60 or more days in which no tracked contract emitted an event (each contract's lastEventAt, on an on-chain reading no older than 14 days), clear when a fresh TVL is above 0 or a tracked contract emitted an event within those 60 days, could-not-check otherwise (no TVL figure or one that is negative, a TVL reading older than 14 days, a listing with a linked slug missing upstream, no tracked contract, an on-chain reading older than 14 days or undated, or a tracked contract with no event on record). The hit speaks of events only: a contract can be called without emitting one. A could-not-check result is not a clean bill.`,
+						description: `Checks of the status label against stored facts, present only on rows with a DefiLlama link (llamaSlugs) or a served availabilityCheck; absent means neither, so no check applies. availability-check, on rows serving an availabilityCheck: hit when its result is none-found and it is newer than the label's reading of the product. Only statusBasis human-verified or onchain-activity dates such a reading, so the check hits when its checkedAt day is after that statusAsOf day, and on any date for every other basis (a page that answered, a probe of a page, the operator's word, a repo or package, a seed list, or none); clear when a human-verified or onchain-activity label was observed on the check's day or later; could-not-check when the check could not read a source or carries no YYYY-MM-DD date. defillama-listing, on DefiLlama-linked rows: hit when DefiLlama marks every linked slug dead (a deadFrom date, or deprecated with nothing locked and no live listing in its parentProtocol family), clear when it lists one as active, could-not-check when it was not read yet, a slug is missing upstream (a rename or removal), or a deprecated slug looks superseded (no deadFrom while value is still locked or a family listing is live): deprecated alone is never a hit. tvl-zero-onchain-quiet, only for ${ONCHAIN_USE_TYPES_TEXT} rows: hit when a DefiLlama TVL of 0 read within the last 14 days, over a listing that found every linked slug, meets 60 or more days in which no tracked contract emitted an event (each contract's lastEventAt, on an on-chain reading no older than 14 days), clear when a fresh TVL is above 0 or a tracked contract emitted an event within those 60 days, could-not-check otherwise (no TVL figure or one that is negative, a TVL reading older than 14 days, a listing with a linked slug missing upstream, no tracked contract, an on-chain reading older than 14 days or undated, or a tracked contract with no event on record). The hit speaks of events only: a contract can be called without emitting one. A could-not-check result is not a clean bill.`,
 						items: {
 							type: "object",
 							required: ["check", "result", "detail", "asOf", "sourceUrl"],
@@ -11864,7 +11870,7 @@ export const spec: OpenAPISpec = {
 									type: "string",
 									format: "uri",
 									description:
-										"Where to check the fact: the row's tvlMethodUrl when it has one (the protocol's own page, or for several rows the parent page that sums them), else the first linked protocol's DefiLlama page; the contract readings behind the TVL check are the row's onchain block.",
+										"Where to check the fact: the row's tvlMethodUrl when it has one (the protocol's own page, or for several rows the parent page that sums them), else the first linked protocol's DefiLlama page; the contract readings behind the TVL check are the row's onchain block. For availability-check, the first source the check read (availabilityCheck.sources).",
 								},
 							},
 						},
@@ -12575,7 +12581,7 @@ export const spec: OpenAPISpec = {
 							note: { type: "string" },
 						},
 						description:
-							"A dated check behind a null availability. result none-found = the sources (the operator's site, docs or repo and the store links they give) were read on checkedAt and offer no app, extension, device, web app or SMS service, or the operator's domain no longer resolves (the note says which); could-not-check = a source could not be read on checkedAt. Unknown either way, never 'unavailable'; note says what the sources showed. Null when availability has rows or no check is recorded.",
+							"A dated check behind a null availability. result none-found = the sources (the operator's site, docs or repo and the store links they give) were read on checkedAt and offer no app, extension, device, web app or SMS service, or the operator's domain no longer resolves (the note says which); could-not-check = a source could not be read on checkedAt. Unknown either way, never 'unavailable'; note says what the sources showed. Null when availability has rows or no check is recorded. A none-found check newer than the status label's observation is a statusChecks availability-check hit, which caveats a Live status (statusCaveat).",
 					},
 					types: {
 						type: "array",

@@ -45,6 +45,10 @@ export interface ResolutionEvidence {
 	statusSourceUrl: string | null;
 	/** True when we assert a status with no citable source behind it. */
 	unsourced: boolean;
+	/** sls-121: the subject's statusCaveat, as searchProjects serves it
+	 * (statusChecksFor). The route reads the checks' fields on the subject's
+	 * own row and fills it; null here. */
+	statusCaveat: string | null;
 }
 
 export interface Resolution {
@@ -186,6 +190,7 @@ export function resolveProject(
 		statusBasis: hit.statusBasis ?? null,
 		statusSourceUrl: hit.statusSourceUrl ?? null,
 		unsourced,
+		statusCaveat: null,
 	};
 
 	const parts: string[] = [];

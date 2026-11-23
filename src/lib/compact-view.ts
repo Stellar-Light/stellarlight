@@ -76,6 +76,8 @@ export const PROJECT_COMPACT: CompactPlan = {
 		shortDescription: true,
 		status: true,
 		statusAsOf: true,
+		// sls-121: a Live label travels with its caveat
+		statusCaveat: true,
 		deployment: ["network"],
 		tvlUSD: true,
 		tvlAsOf: true,

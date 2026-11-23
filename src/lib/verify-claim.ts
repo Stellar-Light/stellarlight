@@ -298,14 +298,17 @@ export interface SubjectFacts {
 	statusBasis: string | null;
 	statusAsOf: string | null;
 	statusSourceUrl: string | null;
-	/** The facts the status checks read (DQ1); absent on a row with no
-	 * DefiLlama link, which then answers exactly as before. */
+	/** The facts the status checks read (DQ1, sls-121); absent on a row with
+	 * no DefiLlama link and no availabilityCheck, which then answers exactly
+	 * as before. */
 	types?: string[] | null;
 	tvlUSD?: number | null;
 	tvlAsOf?: string | null;
 	llamaSlugs?: string[] | null;
 	llamaListing?: unknown;
 	onchain?: unknown;
+	availability?: unknown;
+	availabilityCheck?: unknown;
 }
 
 /** "is X live" — answered from the status record and its provenance tier.

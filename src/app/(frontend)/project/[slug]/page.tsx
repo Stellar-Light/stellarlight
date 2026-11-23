@@ -33,6 +33,7 @@ import { projectLogo } from "@/data/project-logos";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { loadProjectPageGithub } from "@/lib/project-repos";
 import { RESOLVABLE_PROJECT_STATUSES } from "@/lib/project-status";
+import { statusChecksFor } from "@/lib/status-checks";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 type Params = Promise<{
@@ -219,6 +220,7 @@ export default async function ProjectDetailPage({
 	) {
 		notFound();
 	}
+	const statusCaveat = statusChecksFor(project).statusCaveat ?? null;
 
 	// Fetch GitHub data directly (no HTTP call needed in server component)
 	let gh: {
@@ -436,6 +438,12 @@ export default async function ProjectDetailPage({
 												);
 											})()}
 									</div>
+									{/* sls-121: the caveat the API serves beside a Live label */}
+									{statusCaveat && (
+										<p className="text-sm text-muted-foreground max-w-2xl">
+											{statusCaveat}
+										</p>
+									)}
 
 									{/* Category Tags */}
 									<div className="flex flex-wrap items-center gap-3">
