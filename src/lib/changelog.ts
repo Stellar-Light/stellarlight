@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
 		surfaces: ["api"],
+		type: "added",
+		summary:
+			"getStablecoins carries Ethena's USDe (`USDE-GDJ5BNU5`, code USDE, issuer GDJ5BNU5...CH47, SAC CCNOV6XV...4JJN) from the next six-hourly refresh, with supply and trustlines read from Horizon like every other row. Its class is Crypto-Backed, from Ethena's own documentation. The issuer account sets no home_domain and Ethena publishes no Stellar address, so `issuerOfRecord` stays null with `issuerOfRecordCheck` not-named and a note on what identifies the asset: LayerZero's token metadata maps its contract to Ethena's USDe on Ethereum.",
+		detail:
+			"Read on 2026-11-23 from Horizon: USDE from this issuer held about 605,090 units, 37 trustlines; 14 other accounts issue a USDE and 26 others a USDe, so match on code and issuer, never the ticker. sUSDe (SUSDE, same issuer) is not added: it is the staked form of USDe, whose value in USDe rises as rewards accrue, a yield wrapper on an asset the list carries. ENA, Ethena's governance token, is not a stablecoin.",
+	},
+	{
+		date: "2026-11-23",
+		surfaces: ["api"],
 		version: "spec@1.9.158",
 		type: "fixed",
 		summary:

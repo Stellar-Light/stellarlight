@@ -1617,7 +1617,8 @@ describe("retiring ZUSD, GYEN, VEUR and GBPZ, as BRL and UAH were", () => {
 	it("the registry no longer lists them; VCHF, from VEUR's issuer account, stays", () => {
 		for (const id of RETIRED) expect(listed, id).not.toContain(id);
 		expect(listed).toContain("VCHF-GDXLSLCO");
-		expect(listed).toHaveLength(37);
+		// 37 after these retirements, plus Ethena's USDE (2026-11-23).
+		expect(listed).toHaveLength(38);
 	});
 
 	it("the next refresh retires exactly these four of the rows served on 2026-11-11, and never re-stamps a retired row", () => {
