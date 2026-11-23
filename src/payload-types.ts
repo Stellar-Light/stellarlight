@@ -2649,6 +2649,7 @@ export interface ResearchDoc {
 		| "scf-handbook"
 		| "sep"
 		| "cap"
+		| "slp"
 		| "dev-docs"
 		| "paper"
 		| "scf-proposal"

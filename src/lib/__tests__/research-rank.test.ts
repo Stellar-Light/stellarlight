@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
 	anchorDocUrls,
+	exactPin,
 	hasFullLexicalCoverage,
+	identifiersMissingFrom,
 	identifierTargets,
 	normalizeQueryText,
 	queryLexTokens,
@@ -63,6 +65,37 @@ describe("identifierTargets", () => {
 		expect(identifierTargets("sep-24 changes on Sep 1, 2026")).toContain(
 			"sep-0024",
 		);
+	});
+
+	it("reads a limits proposal number the same way (sls-118)", () => {
+		expect(
+			identifierTargets("SLP-0006 freeze YieldBlox exploit accounts"),
+		).toEqual(["slp-0006"]);
+		expect(identifierTargets("what did slp 8 freeze?")).toEqual(["slp-0008"]);
+		const pin = exactPin("SLP-0006");
+		expect(
+			pin({
+				url: "https://github.com/stellar/stellar-protocol/blob/master/limits/slp-0006.md",
+			}),
+		).toBe(true);
+		expect(
+			pin({
+				url: "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0077.md",
+			}),
+		).toBe(false);
+	});
+
+	it("reads each named id the pool lacks, even when it holds another", () => {
+		const cap77 =
+			"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0077.md";
+		expect(identifiersMissingFrom("CAP-0077 SLP-0006", [cap77])).toEqual([
+			"slp-0006",
+		]);
+		expect(identifiersMissingFrom("CAP-0077 SLP-0006", [])).toEqual([
+			"cap-0077",
+			"slp-0006",
+		]);
+		expect(identifiersMissingFrom("asset clawback", [cap77])).toEqual([]);
 	});
 
 	it("names nothing for ordinary queries", () => {

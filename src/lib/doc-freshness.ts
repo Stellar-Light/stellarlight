@@ -19,6 +19,7 @@ export type DocKind = "spec" | "guide" | "article" | "data";
 /** Sources whose docs are canonical: age ≠ staleness. */
 const SPEC_SOURCES = new Set([
 	"cap",
+	"slp",
 	"sep",
 	"paper",
 	"audit",

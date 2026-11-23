@@ -28,6 +28,9 @@ const AUTHORITY: Record<string, number> = {
 	sep: 1.0,
 	// Core protocol proposals — same canonical-spec tier as SEPs.
 	cap: 1.0,
+	// The network configuration votes: the record that a CAP mechanism was
+	// used (sls-118: Quorum Freeze in SLP-0006 and SLP-0008).
+	slp: 1.0,
 	"dev-docs": 0.95,
 	paper: 0.92,
 	audit: 0.9,
@@ -68,6 +71,7 @@ const DEFAULT_AUTHORITY = 0.6;
 const EVERGREEN = new Set([
 	"sep",
 	"cap",
+	"slp",
 	"dev-docs",
 	"paper",
 	"audit",

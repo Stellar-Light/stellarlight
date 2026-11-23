@@ -343,6 +343,7 @@ const RESEARCH_SOURCES = [
 	"scf-handbook",
 	"sep",
 	"cap",
+	"slp",
 	"dev-docs",
 	"paper",
 	"scf-proposal",
