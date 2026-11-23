@@ -32,6 +32,14 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
+		surfaces: ["api"],
+		version: "spec@1.9.158",
+		type: "fixed",
+		summary:
+			"`/api/projects/search` (and the search_projects MCP tool, which calls it) now holds `category` and `scfAwarded` (and its older alias) on rows found by meaning, as it already did for `status` and `type`. When no keyword matched, the semantic fallback served its nearest neighbours whatever those two filters said while `meta.filters` echoed them: read on 2026-11-23, q=ethena&scfAwarded=true served 7 unawarded rows of 10, and q=ethena&category=Anchor served 9 rows of 10 outside Anchor. Every filter is now matched in the vector read itself, which reads a wider pool when a filter is set so a page still fills when matching rows exist, and is held again on every served row, including a canonical that replaces a merged shadow. `meta.counts.semantic` now counts the semantic rows actually served.",
+	},
+	{
+		date: "2026-11-23",
 		surfaces: ["skill"],
 		type: "fixed",
 		summary:
