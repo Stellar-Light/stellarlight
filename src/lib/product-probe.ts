@@ -16,9 +16,15 @@ import { thirdPartyHost } from "./page-verdict";
  *  The bare word "stellar" is deliberately absent — it is the name of the
  *  network, so it appears on every page that merely mentions it. */
 const MARKERS: Array<{ re: RegExp; kind: string }> = [
-	{ re: /horizon(?:-testnet)?\.stellar\.org/i, kind: "horizon-endpoint" },
+	// Public network hosts only. horizon-testnet.stellar.org and an RPC host
+	// on the test network are no product on Stellar (audit 2026-11-23), and a
+	// bare "soroban-rpc" names no network. An RPC host counts when it names
+	// both soroban and mainnet: "rpc.mainnet" alone is an EVM chain's
+	// (nouns.build, team.finance). A public RPC named otherwise is missed, not
+	// misread. friendbot is testnet-only and is no marker.
+	{ re: /horizon\.stellar\.org/i, kind: "horizon-endpoint" },
 	{
-		re: /soroban[-.]rpc|rpc\.stellar\.org|mainnet\.sorobanrpc\.com/i,
+		re: /soroban[\w.-]*mainnet|mainnet[\w.-]*soroban|(?<![\w.-])rpc\.stellar\.org/i,
 		kind: "soroban-rpc",
 	},
 	{
@@ -36,6 +42,11 @@ const MARKERS: Array<{ re: RegExp; kind: string }> = [
 	{ re: /\bG[A-Z2-7]{55}\b/, kind: "stellar-address" },
 	{ re: /\bC[A-Z2-7]{55}\b/, kind: "contract-id" },
 ];
+// ponytail: the SDK, address and passphrase markers do not name a network (a
+// bundled SDK carries both passphrases as constants), so an app built only
+// for testnet still passes on them (zentra and lumen-later did on 2026-11-23:
+// their bundles name only test network endpoints). Telling the two apart
+// needs the network an address lives on (Horizon), not a regex.
 
 /** Unambiguous: these phrases only appear when there is no product at all. */
 const PLACEHOLDER_HARD =
@@ -80,9 +91,27 @@ export interface ProbeResult {
 	url: string | null;
 	/** true when we could not look at all; never treated as a negative. */
 	couldNotCheck: boolean;
+	/** The stellar.toml URL when it answered and is no public network
+	 *  evidence: it declares a test network, is an HTML document (an SPA's
+	 *  index.html), or is not served (404/410). A reading, unlike a marker
+	 *  not found, which a bundle past the read cut can hide. */
+	rejected?: string;
 }
 
 const TOML_PATH = "/.well-known/stellar.toml";
+const PUBLIC_PASSPHRASE = "Public Global Stellar Network ; September 2015";
+/** An HTML document, never a toml. An SPA that answers every path with its
+ *  index.html has the word "accounts" in its markup; 9 of 16 "tomls" with no
+ *  passphrase cited by Live rows on 2026-11-23 were that HTML. */
+const HTML_DOC = /^﻿?\s*<(?:!doctype|html)/i;
+/** A SEP-1 key at the start of a line that names the product's accounts or a
+ *  Stellar service it runs (federation, transfer, KYC, web auth). stellarterm
+ *  serves only FEDERATION_SERVER: a federation server is Stellar
+ *  infrastructure on its own domain, so it counts. A toml with only
+ *  [DOCUMENTATION] or VERSION names none: not evidence, and not rejected. */
+const SEP1_KEY =
+	/^\s*(?:\[\[CURRENCIES\]\]|[A-Z0-9_]*(?:ACCOUNTS|SIGNING_KEY|NETWORK_PASSPHRASE|_SERVER|_ENDPOINT)[A-Z0-9_]*\s*=)/m;
+const TOML_PASSPHRASE = /^\s*NETWORK_PASSPHRASE\s*=\s*["']([^"']*)["']/m;
 /** Bounded so one heavy site cannot hold the lane open. */
 const MAX_BUNDLES = 6;
 
@@ -145,18 +174,37 @@ export async function probeProduct(
 	// SEP-1 first: a stellar.toml is the strongest single signal a product can
 	// publish, and it is a Stellar-specific file nothing else serves by accident.
 	const toml = await get(origin + TOML_PATH, timeoutMs);
-	if (
-		toml?.ok &&
-		/\[\[CURRENCIES\]\]|ACCOUNTS|SIGNING_KEY|NETWORK_PASSPHRASE/i.test(
-			toml.body,
-		)
-	)
+	const tomlIsHtml = !!toml?.ok && HTML_DOC.test(toml.body);
+	if (toml?.ok && !tomlIsHtml && SEP1_KEY.test(toml.body)) {
+		// The product's own word on its network. A test network toml is no
+		// product on Stellar, and that is what the page would show too, so the
+		// probe stops here. SEP-1 lets a public network toml omit the key: of
+		// the 7 real tomls without it cited on 2026-11-23, 6 name an account
+		// that exists on the public network and none names one only on testnet,
+		// so absence is read as the public network, as SEP-1 intends.
+		const network = toml.body.match(TOML_PASSPHRASE)?.[1];
+		if (network !== undefined && network !== PUBLIC_PASSPHRASE)
+			return {
+				kind: null,
+				detail: `its stellar.toml declares ${/^Test SDF/.test(network) ? "the test network" : "a network other than the public one"} ("${network}")`,
+				url: origin + TOML_PATH,
+				couldNotCheck: false,
+				rejected: origin + TOML_PATH,
+			};
 		return {
 			kind: "sep1-toml",
 			detail: "publishes a SEP-1 stellar.toml",
 			url: origin + TOML_PATH,
 			couldNotCheck: false,
 		};
+	}
+	// It answered and is no toml: an HTML document, or not served. Any other
+	// 200 (a WAF interstitial, a toml naming no service) and a 403 or a
+	// timeout are no reading that the file is gone.
+	const tomlRejected =
+		tomlIsHtml || toml?.status === 404 || toml?.status === 410
+			? { rejected: origin + TOML_PATH }
+			: {};
 
 	const page = await get(rawUrl, timeoutMs);
 	if (!page)
@@ -180,6 +228,7 @@ export async function probeProduct(
 			detail: `${parked}: answered, but is not a product`,
 			url: rawUrl,
 			couldNotCheck: false,
+			...tomlRejected,
 		};
 
 	for (const m of MARKERS)
@@ -223,5 +272,6 @@ export async function probeProduct(
 		detail: `no Stellar marker in the served HTML or ${scripts.length} same-origin bundle(s)`,
 		url: rawUrl,
 		couldNotCheck: false,
+		...tomlRejected,
 	};
 }
