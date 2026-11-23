@@ -44,11 +44,13 @@ import "./load-env";
 import { getPayload } from "payload";
 import {
 	CANONICAL_PAGES,
+	dropLiveTables,
 	parseEffectiveDateLine,
 } from "../src/lib/canonical-pages";
 import {
 	chunkMarkdown,
 	dropH2Sections,
+	fetchFreshHtml,
 	loadExistingChunks,
 	missingH2Sections,
 	type ResearchChunk,
@@ -72,12 +74,10 @@ const BASE_TAGS = ["sdf-org", "sdf", "stellar-development-foundation"];
 /** Extraction floor: below this the page is a shell/redirect, not content. */
 const MIN_EXTRACTED_CHARS = 400;
 
+/** stellar.org serves an old and a new render of a changed page side by
+ * side (the Mandate's balances); see fetchFreshHtml. */
 async function fetchHtml(url: string): Promise<string> {
-	const res = await fetch(url, {
-		headers: { "User-Agent": "stellarlight-scout-ingest" },
-	});
-	if (!res.ok) throw new Error(`fetch ${url}: HTTP ${res.status}`);
-	return res.text();
+	return (await fetchFreshHtml(url)).html;
 }
 
 /**
@@ -126,9 +126,21 @@ async function run() {
 			continue;
 		}
 
+		// Live balances leave as tables. A page registered with them that has
+		// none was rebuilt: its figures may now sit in markup this cannot see,
+		// so keep the stored rows rather than ingest a snapshot.
+		if (row.liveBalanceTables && !/<table\b/i.test(main)) {
+			console.error(
+				"  ✗ registered live balance tables not found: layout change; SKIPPED, stored rows kept",
+			);
+			skips.push(`${row.id}: live balance tables not found`);
+			continue;
+		}
+		const scoped = row.liveBalanceTables ? dropLiveTables(main, row.url) : main;
+
 		// Drop the in-page nav scaffold stellar.org renders at the top of <main>
 		// ("Jump to...") so it never leads a chunk.
-		let md = stripHtml(main).replace(/^Jump to\.\.\.\s*/i, "");
+		let md = stripHtml(scoped).replace(/^Jump to\.\.\.\s*/i, "");
 		if (row.dropSections) {
 			// A section to drop that is not there was renamed or demoted: the
 			// block it hid would be ingested and re-embedded on every change.

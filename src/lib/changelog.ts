@@ -33,12 +33,22 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
 		surfaces: ["api", "api-client"],
-		version: "spec@1.9.159",
+		version: "spec@1.9.160",
 		type: "added",
 		summary:
 			"New operation getAwardRoundCoverage (`GET /api/projects/scf-rounds`, optional `round`): per numbered SCF round, the awards SCF's own round page lists against the awards served project rows carry, page by page, with the round page URL and when it was read. Each listed award no served row carries is named with why (`no-project-page`, `draft-row-only` or `no-row`), an award two served rows carry is named, and a row claiming a round with a page the round page does not list is named. searchProjects' `scfRoundAwards[]` gains `sourceUrl`: the SCF project page each award was read from, so a row that combines two SCF pages and cites one as `scfSourceUrl` can be checked award by award. Typed client: `getAwardRoundCoverage`.",
 		detail:
 			"SCF's side is the newest whole read the SCF sync stores on an execute (a partial read is never stored); the rows are read at request time, and every Draft row counts as not served. Until the first execute after this release the operation answers `rounds: null` with a reason, and `scfRoundAwards[].sourceUrl` is null, which means the page was not recorded per award (`scfSourceUrl` is then the citation). Measured read-only on 2026-11-23 from SCF's 46 round pages, its 531-row listing and the 216 project pages outside it, against the rows the public API served that day as the SCF sync's dry run (692 rows, the SCF group only) leaves them: SCF lists 934 awards in rounds 1 to 46 and served rows carry 907; in rounds 1 to 44, 893 listed and 866 carried, the same 27 gaps as the 2026-11-12 baseline (5 on Draft rows, 2 with no project page, 20 with no row). With the rows as served before that run, 10 rows that combine two SCF pages read as not carrying their second page's award (for example gatewayfm's SCF #44, which is on the OZ Accounts Policy Builder page); with each award citing its own page, none does. The Peer by HoneyCoin award (SCF #22 and #26) is carried on both peer and honey-coin. The 24 rows whose SCF record a person verified get each award's page from the curation lane, the rest from the SCF sync.",
+	},
+	{
+		date: "2026-11-23",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.159",
+		type: "changed",
+		summary:
+			'searchResearch: a CAP, SEP or SLP number written as an id (CAP-0077, cap-77, SEP 10, SLP-0006: a hyphen, or the prefix in capitals and a space) is now an exact key like a finding id, a CVE or GHSA id, or a release tag. Every chunk of that proposal\'s own document lists it in `exactKeys`, in canonical form; a chunk of another document that only cites it carries `[]`, a neighbour. A named proposal the scope does not hold is listed in `meta.exactMiss`. Lowercase prose such as "market cap 100" or "sep 41" is not an id and never makes a miss (it still pins a matching proposal, as before), and "Sep 2026" is a date. If the proposal lookup fails, or a query names more than 5 proposals the pool lacks, the page is `partial` with `failedReads` naming "research proposal lookup", and the miss is unchecked.',
+		detail:
+			'sls-118 had this as partial: the named proposal was already fetched and pinned first, but the row did not say it was the record. The research corpus also stops storing text that changes between two reads of an unchanged page, which turned the daily refresh\'s re-plan red: render-time ages on lumenloop news headers ("September 24, 20262mo ago" now reads "September 24, 2026"; 221 rows on 2026-11-23) and in the SCF Handbook footer ("Last updated 10 days ago" now reads "Last updated 2026-11-13", the page\'s own date; 40 rows), and the live account balance tables on SDF\'s Mandate pages (current and 2019), which sdf-org rows now replace with one sentence pointing at the page for the current figures (9 rows; the 2019 tables also listed each account\'s original allocation, which leaves with them). stellar.org pages are read past a stale render to the one the server calls fresh.',
 	},
 	{
 		date: "2026-11-23",

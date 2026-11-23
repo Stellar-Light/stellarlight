@@ -217,15 +217,24 @@ export function hasFullLexicalCoverage(
 const IDENTIFIER_RE = /\b(cap|sep|slp)[\s\-_#]*(\d{1,4})\b/gi;
 // "Sep 24, 2025" / "24 Sep 2026" are DATES, not SEP-0024. When the query
 // carries a date-shaped 'sep', skip its space/bare-separated matches; the
-// hyphen/hash forms (sep-24, sep#24) still count as identifiers.
+// hyphen/hash forms (sep-24, sep#24) still count as identifiers. "Sep 2026"
+// (month and year) is a date too: as a SEP number it would be an exact miss.
 const SEP_DATE_RE =
-	/\b(?:\d{1,2}(?:st|nd|rd|th)?\s+sep\b|sep\.?\s+\d{1,2}(?:st|nd|rd|th)?,?\s+(?:19|20)\d{2})/i;
+	/\b(?:\d{1,2}(?:st|nd|rd|th)?\s+sep\b|sep\.?\s+\d{1,2}(?:st|nd|rd|th)?,?\s+(?:19|20)\d{2}|sep\.?\s+(?:19|20)\d{2}\b)/i;
 
 /**
  * Canonical proposal slugs named by the query (e.g. "cap-0038", "sep-0010"),
  * deduped, in mention order. Empty when the query names none.
+ *
+ * `exact`: only the forms that are unmistakably an id, for exact keys and
+ * exact misses (sls-118): a hyphen in any case (cap-100, SLP-0006) or the
+ * prefix in capitals and a space (CAP 100). Lowercase prose ("market cap
+ * 100", "sep 41") still pins a matching document, but never claims a miss.
  */
-export function identifierTargets(query: string | undefined): string[] {
+export function identifierTargets(
+	query: string | undefined,
+	{ exact = false } = {},
+): string[] {
 	if (!query) return [];
 	const sepLooksLikeDate = SEP_DATE_RE.test(query);
 	const out: string[] = [];
@@ -233,6 +242,12 @@ export function identifierTargets(query: string | undefined): string[] {
 		const kind = m[1].toLowerCase();
 		// Space/bare-separated "sep 24" inside a date-shaped query is a month.
 		if (kind === "sep" && sepLooksLikeDate && !/[-#_]/.test(m[0])) continue;
+		if (
+			exact &&
+			!/^[a-z]{3}-\d/i.test(m[0]) &&
+			!/^(?:CAP|SEP|SLP)\s+\d/.test(m[0])
+		)
+			continue;
 		const id = `${kind}-${String(Number.parseInt(m[2], 10)).padStart(4, "0")}`;
 		if (!out.includes(id)) out.push(id);
 	}
@@ -423,7 +438,10 @@ export function exactKeyReport(args: {
 
 /** The exact keys a query names, each with its test for a row carrying it:
  * finding, CVE and GHSA ids verbatim (whole token) in title, content or url,
- * then repo-qualified release tags by release title. */
+ * repo-qualified release tags by release title, then CAP/SEP/SLP numbers by
+ * document (sls-118): a proposal number names a whole document, so every
+ * chunk of that proposal carries it and a chunk of another document that
+ * cites it does not, the url test exactPin pins with. */
 function namedKeys(
 	query: string | undefined,
 ): Array<{ key: string; carriedBy: (row: KeyedRow) => boolean }> {
@@ -439,6 +457,10 @@ function namedKeys(
 		...releaseTagTargets(query).map((t) => ({
 			key: `${t.repo} ${t.tag}`,
 			carriedBy: (r: KeyedRow) => isReleaseTitle(r.title, t),
+		})),
+		...identifierTargets(query, { exact: true }).map((id) => ({
+			key: id.toUpperCase(),
+			carriedBy: (r: KeyedRow) => matchesTarget(r.url ?? "", [id]),
 		})),
 	];
 }
@@ -466,8 +488,17 @@ export function exactMissNote(
 	if (unchecked)
 		return `No row on this page carries ${one ? "this identifier" : "these identifiers"} verbatim, and the exact lookup over the searched scope failed (see failedReads), so whether the corpus holds ${one ? "it" : "them"} is unknown. The rows below are the nearest semantic neighbours of the query, not that record. Retry before reporting ${one ? "it" : "them"} as found or absent.`;
 	const tags = identifiers.filter((i) => releaseTagTargets(i).length > 0);
-	const ids = identifiers.filter((i) => !tags.includes(i));
+	const proposals = identifiers.filter((i) =>
+		/^(?:CAP|SEP|SLP)-\d{4}$/.test(i),
+	);
+	const ids = identifiers.filter(
+		(i) => !tags.includes(i) && !proposals.includes(i),
+	);
 	const parts: string[] = [];
+	if (proposals.length)
+		parts.push(
+			`No proposal document ${proposals.join(", ")} is in the searched scope: proposals are looked up by number across the whole scope, not by similarity. Other rows can cite ${proposals.length === 1 ? "it" : "them"}, but they are not that proposal. The cap, sep and slp sources read the proposals on the master branch of stellar/stellar-protocol; one missing here may still exist there as an open pull request.`,
+		);
 	if (ids.length)
 		parts.push(
 			`No document in the searched scope carries ${ids.join(", ")} verbatim: the exact lookup checked every document in scope, not only this page. The rows below are the nearest semantic neighbours of the query, not that record, and their confidence scores rank similarity, not a match. Do not report ${ids.length === 1 ? "it" : "them"} as found or infer content from these rows. Absence from this corpus is not proof a record does not exist; its primary source decides that.`,
