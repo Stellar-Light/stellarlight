@@ -22,6 +22,9 @@
  * round page names and the listing lacks is read off its own page
  * (/project/<record id>) for its slug, and joined the way the enrich joins it.
  *
+ * Every awarded row, a reviewed shared claim included, must also cite its SCF
+ * page and a date (unsourcedAwards): an award with neither is a finding.
+ *
  * Exit 0 no finding, 1 a finding, 2 could-not-check (a side unread or
  * partial, or the baseline missing or unreadable). The basis of each count:
  * src/lib/scf-round-counts.ts.
@@ -35,6 +38,7 @@ import {
 	parseShortfallBaseline,
 	type ScfListingRow,
 	type ScfRound,
+	unsourcedAwards,
 } from "../../src/lib/scf-round-counts";
 import {
 	countedRows,
@@ -247,15 +251,22 @@ async function main() {
 				console.log(`    no row claiming it cites ${s}`);
 	}
 	for (const f of findings) console.log(`FAIL ${f.kind}: ${f.detail}`);
+	// every awarded row, shared claims included: each award cites its page
+	const unsourced = unsourcedAwards(ours.rows);
+	for (const s of unsourced)
+		console.log(
+			`FAIL unsourced: ${s} serves an SCF award with no SCF page or no date (scfSourceUrl, scfAsOf)`,
+		);
 	for (const n of notes) console.log(`NOTE: ${n}`);
 	const by = (v: string) => report.rounds.filter((r) => r.verdict === v);
 	const raw = `${by("agrees").length} rounds agree, ${by("short").length} short by ${by("short").reduce((n, r) => n + r.scf - r.ours, 0)}, ${by("over").length} over, ${by("unconfirmed").length} unconfirmed`;
+	const failed = findings.length + unsourced.length;
 	console.log(
-		findings.length
-			? `VERDICT: fail, ${findings.length} finding(s) against the baseline of ${baseline.asOf} (${raw})`
-			: `VERDICT: pass, every round agrees or holds its baseline entry of ${baseline.asOf} (${raw})`,
+		failed
+			? `VERDICT: fail, ${failed} finding(s) against the baseline of ${baseline.asOf} (${raw})`
+			: `VERDICT: pass, every round agrees or holds its baseline entry of ${baseline.asOf}, and every awarded row cites its SCF page and date (${raw})`,
 	);
-	process.exit(findings.length ? 1 : 0);
+	process.exit(failed ? 1 : 0);
 }
 
 main().catch((err) => {

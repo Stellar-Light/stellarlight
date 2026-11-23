@@ -621,8 +621,9 @@ export function strandedAwards<
 
 /**
  * Rows that keep an SCF award copied from a page another row joins, by a
- * reviewed decision (sls-116): the sync leaves both rows as they are, and the
- * round-count check counts the page's award once, on the row the page joins.
+ * reviewed decision (sls-116): the sync writes both rows from the page
+ * (sharedClaimMatches) and removes neither, and the round-count check counts
+ * the page's award once, on the row the page joins.
  */
 export const SCF_SHARED_CLAIMS: Record<
 	string,
@@ -631,13 +632,43 @@ export const SCF_SHARED_CLAIMS: Record<
 	// "Peer (by Honeycoin)" funds Peer, HoneyCoin's app, which is the peer
 	// row (usepeer.co); the page joins the company row, honey-coin
 	// (SCF_SLUG_OVERRIDES). Which row carries the award is the owner's call
-	// (improvements/TODO.md), so neither row changes until then.
+	// (improvements/TODO.md); until then both keep it, each written from the
+	// page with its source and date (sharedClaimMatches).
 	peer: {
 		page: "peer-by-honeycoin-inz",
 		joinedTo: "honey-coin",
 		why: "product row or company row is an owner decision",
 	},
 };
+
+/**
+ * The page each shared claim's row is written from: the match that joins the
+ * claim's page to its own row this run, put on the claiming row too, while
+ * that row stores the page and no page joins it. Without it the row was
+ * never written, so peer served SCF #22 and #26 with no source and no date
+ * (sls-116, 2026-11-17). Which row carries the award stays the owner's call.
+ * scfOnly: the match writes the row's scf group and nothing else; the page's
+ * logo, description and links are its own row's. A claim names no rounds, so
+ * the row takes every round the page awards (right while the page is the
+ * claimed award's own, as Peer by HoneyCoin's is).
+ */
+export function sharedClaimMatches<
+	M extends { scf: { slug?: unknown }; ours: { slug: string } },
+	R extends { slug: string; scf?: { slug?: string | null } | null },
+>(
+	matched: readonly M[],
+	bySlug: ReadonlyMap<string, R>,
+): Array<{ scf: M["scf"]; ours: R; scfOnly: true }> {
+	const out: Array<{ scf: M["scf"]; ours: R; scfOnly: true }> = [];
+	for (const [slug, claim] of Object.entries(SCF_SHARED_CLAIMS)) {
+		const row = bySlug.get(slug);
+		if (row?.scf?.slug !== claim.page) continue;
+		if (matched.some((m) => m.ours.slug === slug)) continue;
+		const own = matched.find((m) => String(m.scf.slug) === claim.page);
+		if (own) out.push({ scf: own.scf, ours: row, scfOnly: true });
+	}
+	return out;
+}
 
 /** The round-count check's rows: a shared claim (SCF_SHARED_CLAIMS) is the
  * same award as its page's own row, so it is not counted twice. */

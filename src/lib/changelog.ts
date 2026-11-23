@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
 		surfaces: ["api"],
+		version: "spec@1.9.156",
+		type: "fixed",
+		summary:
+			"Every SCF award a project row serves cites its SCF page and date. Peer served its copy of the Peer by HoneyCoin award (SCF #22 and #26, $145,000) with `scfSourceUrl` and `scfAsOf` null, the only one of 711 awarded rows read on 2026-11-23; after the next SCF sync it cites that page, as honey-coin does. The Round counts step of the SCF sync now fails on any awarded row with no SCF page or date; that step runs only when the sync is dispatched by hand to write (enrich-scf, execute), and no schedule or PR check runs it.",
+		detail:
+			"The SCF sync wrote only rows an SCF page joins, and that page joins honey-coin, so the reviewed shared claim on peer was never written. Which of the two rows carries the award is still an owner decision. Until then both rows serve it, so served sums of SCF funding (analyzeEcosystem totals and per-round shares, the clusters and analytics totals) include its $145,000 twice; only the round-count check counts it once. The sync writes peer's SCF record only, never the page's logo, description or links, which are honey-coin's. Rounds before SCF #45 are unchanged: on 2026-11-23, 20 of them are short of SCF's own round pages by 27 awards, the same 27 the check's reviewed baseline names (Draft rows, names no link confirms, projects with no row, and two awards with no project page). One of them is the Soroban Contract Source Verification Service page (SCF #44, $73,500), which no row carries.",
+	},
+	{
+		date: "2026-11-23",
+		surfaces: ["api"],
 		version: "spec@1.9.155",
 		type: "changed",
 		summary:
