@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
+		surfaces: ["api"],
+		version: "spec@1.9.155",
+		type: "changed",
+		summary:
+			"getStablecoins: `issuerOfRecordCheck` gains a new enum value, `could-not-read` (a client that checks the enum strictly must accept it), so `null` now means only that no read was ever tried. A row whose issuer-of-record read was tried and could not be made, with no named or not-named check stored, now carries `could-not-read` with the date of the latest try in `issuerOfRecordAsOf` and what failed in `issuerOfRecordNote`; it used to stay null in every field. A named or not-named check is still kept as it was when a later read fails. `issuerOfRecord` is documented as the organization the toml names, which is the legal issuer unless the issuer's own terms name another entity; `issuerOfRecordNote` then quotes those terms, and served wording names that entity as the issuer: verifyClaim contradicts a claim that the toml's organization issues the asset, and the asset page says the toml names it.",
+		detail:
+			"Counted on 2026-11-23 against the 37 live rows: the change reaches two rows, and only when the six-hourly stablecoin refresh next runs. BRLT (Settle Network, issuer GCHQ3F2B...): the account's home_domain, sep.stablex.cloud, did not resolve in DNS on 2026-11-23, so its five issuer-of-record fields were all null. It will carry `could-not-read`, dated, with a note that the stellar.toml at pubnet-sep.latamex.com names Relay Tech Services Ltd and lists the account as the BRLT issuer, while the account's home_domain does not point there, so the link is not confirmed from the account side; `issuerOfRecord` stays null (stellar-raven sls-120). EURC (Circle, issuer GDHU6WRG...): `issuerOfRecord` stays Circle Internet Financial, LLC, the ORG_NAME of Circle's toml, and `issuerOfRecordNote` will quote Circle's EURC terms, read 2026-11-23, which say EURC is issued by Circle Internet Financial Europe SAS and that Circle Internet Financial, LLC acts as a reseller (stellar-raven sls-119). verifyClaim then supports \"EURC is issued by Circle Internet Financial Europe SAS\" from that note and contradicts \"EURC is issued by Circle Internet Financial, LLC\" (it supported it before), and the EURC page says it is issued by Circle Internet Financial Europe SAS per its issuer's own terms, with the toml naming the LLC. USDC and MGUSD wording is unchanged. Circle's USDC terms, read the same day, name Circle Internet Financial, LLC as USDC's issuer, so the USDC row is unchanged. In the same count, 3 other reads failed from one machine (PYUSD answered HTTP 403, and two rows on api.anclap.com could not be fetched); each has a stored named check, which stays as it was.",
+	},
+	{
+		date: "2026-11-23",
 		surfaces: ["api", "skill"],
 		version: "spec@1.9.154",
 		type: "fixed",

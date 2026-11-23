@@ -80,14 +80,16 @@ export interface StablecoinRow {
 	 *  from `company`. */
 	issuerOfRecord: string | null;
 	/** What the stored check found: named, not-named (read, and no issuer of
-	 *  record named; issuerOfRecordNote says why), or null (never read). */
+	 *  record named; issuerOfRecordNote says why), could-not-read (tried, no
+	 *  read made, nothing completed stored), or null (never tried). */
 	issuerOfRecordCheck: IssuerOfRecordCheck | null;
 	/** The toml URL the stored check read (after same-host redirects). */
 	issuerOfRecordSourceUrl: string | null;
-	/** When the stored check was made (ISO). A failed read does not move it. */
+	/** When the stored check was made (ISO); on could-not-read, the latest
+	 *  try. A failed read does not move a named or not-named check's date. */
 	issuerOfRecordAsOf: string | null;
-	/** Named: the toml's desc for this currency, quoted, when it names another
-	 *  issuing party (MGUSD: Bridge). Not named: why. */
+	/** Named: the issuer's own terms or the toml's desc, quoted, when they
+	 *  name another issuing party (EURC, MGUSD). Otherwise: why. */
 	issuerOfRecordNote: string | null;
 	website: string | null;
 	/** Fiat the asset tracks (USD, JPY, ARS, …). supply is in THIS unit; only
@@ -162,8 +164,13 @@ export interface StablecoinRow {
 }
 
 /** What the stored issuer-of-record check found. A read that could not be
- *  made is not a check: it leaves the stored one as it was. */
-export const ISSUER_OF_RECORD_CHECKS = ["named", "not-named"] as const;
+ *  made leaves a stored named or not-named check as it was; with neither
+ *  stored, it is stored as could-not-read, dated, so null means never tried. */
+export const ISSUER_OF_RECORD_CHECKS = [
+	"named",
+	"not-named",
+	"could-not-read",
+] as const;
 export type IssuerOfRecordCheck = (typeof ISSUER_OF_RECORD_CHECKS)[number];
 
 /** The query parameters GET /api/stablecoins reads; anything else is a 400. */
@@ -358,6 +365,63 @@ const ASSET_TYPE_SET = new Set<string>(STABLECOIN_ASSET_TYPES);
 const REGISTRY_BY_ID = new Map(
 	STABLECOIN_REGISTRY.map((a) => [stablecoinId(a), a]),
 );
+
+type IssuerOfRecordView = {
+	ticker?: string | null;
+	issuer?: string | null;
+	issuerOfRecord?: string | null;
+	issuerOfRecordCheck?: string | null;
+	issuerOfRecordNote?: string | null;
+};
+
+/**
+ * The party the issuer's own terms say issues a row's asset, where the row's
+ * stored note quotes those terms and they name someone other than its issuer
+ * of record (sls-119, EURC: Circle Internet Financial Europe SAS, where
+ * Circle's toml names the LLC its terms call a reseller). Null otherwise; a
+ * toml desc naming another party (MGUSD: Bridge) is not such terms.
+ */
+export function disclosedIssuer(r: IssuerOfRecordView): string | null {
+	if (r.issuerOfRecordCheck !== "named" || !r.issuerOfRecord) return null;
+	if (!r.ticker || !r.issuer) return null;
+	const terms = REGISTRY_BY_ID.get(
+		stablecoinId({ code: r.ticker, issuer: r.issuer }),
+	)?.issuerDisclosure;
+	if (!terms || !r.issuerOfRecordNote?.includes(terms)) return null;
+	const party = namedIssuingParty(terms);
+	return party && !sameParty(party, r.issuerOfRecord) ? party : null;
+}
+
+/** Who served wording says issues a row's asset: the party its issuer's own
+ *  terms name where they differ from the toml (EURC), else the issuer of
+ *  record a named check holds, else null. */
+export function issuingParty(r: IssuerOfRecordView): string | null {
+	return (
+		disclosedIssuer(r) ??
+		(r.issuerOfRecordCheck === "named" && r.issuerOfRecord
+			? r.issuerOfRecord
+			: null)
+	);
+}
+
+/** The asset page's issuer line. Where the issuer's terms name another party,
+ *  the toml's organization is said to be named there, never to issue it. */
+export function issuerOfRecordLine(
+	r: IssuerOfRecordView,
+	checkedLabel: string | null,
+): string {
+	const when = checkedLabel ?? "on an unrecorded date";
+	const disclosed = disclosedIssuer(r);
+	if (disclosed)
+		return `Issued by ${disclosed}, per its issuer's own terms; its stellar.toml, as read ${when}, names ${r.issuerOfRecord}`;
+	if (r.issuerOfRecordCheck === "named" && r.issuerOfRecord)
+		return `Issued by ${r.issuerOfRecord}, per its stellar.toml as read ${when}`;
+	if (r.issuerOfRecordCheck === "not-named")
+		return `No issuer of record named by its stellar.toml (checked ${when})`;
+	if (r.issuerOfRecordCheck === "could-not-read")
+		return `Issuer of record not read: its stellar.toml could not be read (tried ${when})`;
+	return "Issuer of record not read from its stellar.toml yet";
+}
 
 /** A row the registry stopped tracking: the day and, where recorded, why. */
 export interface StablecoinRetirement {

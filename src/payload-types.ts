@@ -1351,19 +1351,19 @@ export interface Stablecoin {
 	 */
 	issuerOfRecord?: string | null;
 	/**
-	 * What the stored check found: named, or not-named (read, and no issuer of record named; the note says why). Empty = never read.
+	 * What the stored check found: named, not-named (read, and no issuer of record named; the note says why), or could-not-read (tried, and no read could be made, with nothing completed stored; the note says what failed). Empty = never tried.
 	 */
-	issuerOfRecordCheck?: ("named" | "not-named") | null;
+	issuerOfRecordCheck?: ("named" | "not-named" | "could-not-read") | null;
 	/**
 	 * The toml URL the stored check read, after same-host redirects
 	 */
 	issuerOfRecordSourceUrl?: string | null;
 	/**
-	 * When the stored check was made; a failed read does not move it
+	 * When the stored check was made, or on could-not-read the latest try; a failed read does not move a named or not-named check
 	 */
 	issuerOfRecordAsOf?: string | null;
 	/**
-	 * Named: the toml's desc for this currency, quoted, when it names another issuing party (MGUSD: Bridge). Not named: why.
+	 * Named: the issuer's own terms or the toml's desc for this currency, quoted, when they name another issuing party (EURC: Circle Internet Financial Europe SAS; MGUSD: Bridge). Otherwise: why.
 	 */
 	issuerOfRecordNote?: string | null;
 	domain?: string | null;

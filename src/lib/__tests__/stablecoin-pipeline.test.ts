@@ -24,10 +24,14 @@ import {
 	supplyBaselineWindow,
 } from "../stablecoin-pipeline";
 import {
+	disclosedIssuer,
+	issuerOfRecordLine,
+	issuingParty,
 	STABLECOIN_ASSET_TYPES,
 	type StoreRow,
 	storeRowToApi,
 } from "../stablecoins";
+import { issuedVerdict } from "../verify-claim";
 
 describe("orgLogoFromToml", () => {
 	// APS Money's real toml shape: 13 CURRENCIES blocks, none with an
@@ -365,29 +369,51 @@ describe("carryIssuerOfRecord: named, not named, or could not read", () => {
 	it("could not read: the stored check stays whole, its date unchanged", () => {
 		expect(
 			carryIssuerOfRecord(
-				{ outcome: "could-not-read", why: "HTTP 503" },
+				{ outcome: "could-not-read", at: AT, why: "HTTP 503" },
 				{ company: "MoneyGram", ...OLD },
 			),
 		).toEqual(OLD);
-	});
-
-	it("could not read with nothing stored stays null: never a guess from company", () => {
-		const NONE = {
+		const NOT_NAMED = {
+			...OLD,
 			issuerOfRecord: null,
-			issuerOfRecordCheck: null,
-			issuerOfRecordSourceUrl: null,
-			issuerOfRecordAsOf: null,
-			issuerOfRecordNote: null,
+			issuerOfRecordCheck: "not-named",
+			issuerOfRecordNote: "the toml does not list the issuer account",
 		};
 		expect(
 			carryIssuerOfRecord(
-				{ outcome: "could-not-read", why: "HTTP 503" },
+				{ outcome: "could-not-read", at: AT, why: "HTTP 503" },
+				NOT_NAMED,
+			),
+		).toEqual(NOT_NAMED);
+	});
+
+	it("could not read with no completed check stored is a dated could-not-read (sls-120): null means only never tried, and never a guess from company", () => {
+		const TRIED = {
+			issuerOfRecord: null,
+			issuerOfRecordCheck: "could-not-read",
+			issuerOfRecordSourceUrl: null,
+			issuerOfRecordAsOf: AT,
+			issuerOfRecordNote: "HTTP 503",
+		};
+		expect(
+			carryIssuerOfRecord(
+				{ outcome: "could-not-read", at: AT, why: "HTTP 503" },
 				{ company: "Novatti Group" },
 			),
-		).toEqual(NONE);
+		).toEqual(TRIED);
 		expect(
-			carryIssuerOfRecord({ outcome: "could-not-read", why: "x" }, undefined),
-		).toEqual(NONE);
+			carryIssuerOfRecord(
+				{ outcome: "could-not-read", at: AT, why: "HTTP 503" },
+				undefined,
+			),
+		).toEqual(TRIED);
+		// A stored could-not-read is the latest try: the next one moves it.
+		expect(
+			carryIssuerOfRecord(
+				{ outcome: "could-not-read", at: AT, why: "HTTP 503" },
+				{ ...TRIED, issuerOfRecordAsOf: "2026-11-01T00:00:00.000Z" },
+			),
+		).toEqual(TRIED);
 	});
 });
 
@@ -1189,13 +1215,19 @@ is_asset_anchored=true
 		});
 	});
 
-	it("BRLT: a toml host that cannot be reached writes back what is stored, never a blank", async () => {
+	it("BRLT: a toml host that cannot be reached writes back a stored check, and otherwise a dated could-not-read naming the one-sided toml (sls-120)", async () => {
 		const BRLT = reg("BRLT");
 		const brltRoutes = {
 			[horizon(BRLT.issuer)]: account("sep.stablex.cloud"),
-			// The runner's read: DNS for this host fails, so fetch throws.
+			// The runner's read: DNS has no such host, so fetch throws as
+			// Node's does (checked 2026-11-23: cause.code ENOTFOUND).
 			"https://sep.stablex.cloud/.well-known/stellar.toml": () => {
-				throw new TypeError("fetch failed");
+				throw Object.assign(new TypeError("fetch failed"), {
+					cause: Object.assign(
+						new Error("getaddrinfo ENOTFOUND sep.stablex.cloud"),
+						{ code: "ENOTFOUND" },
+					),
+				});
 			},
 		};
 		stubFetch404(brltRoutes);
@@ -1215,14 +1247,214 @@ is_asset_anchored=true
 		expect(
 			rowIdentity(m, { company: "Settle Network", ...STORED }, true),
 		).toMatchObject({ company: "Settle Network", ...STORED });
-		// Today nothing is stored for BRLT: it stays never read.
-		const never = rowIdentity(m, { company: "Settle Network" }, true);
-		expect(never).toMatchObject({
+		// Nothing completed is stored for BRLT: the try is stored, dated, with
+		// what failed and the toml that lists the account from the other side.
+		const tried = rowIdentity(m, { company: "Settle Network" }, true);
+		const at =
+			m.issuerOfRecordRead.outcome === "could-not-read" &&
+			m.issuerOfRecordRead.at;
+		expect(at).toMatch(/^\d{4}-\d\d-\d\dT/);
+		expect(tried).toMatchObject({
+			company: "Settle Network",
 			issuerOfRecord: null,
-			issuerOfRecordCheck: null,
-			issuerOfRecordAsOf: null,
+			issuerOfRecordCheck: "could-not-read",
+			issuerOfRecordSourceUrl: null,
+			issuerOfRecordAsOf: at,
 		});
-		expect(storeRowToApi(never as StoreRow).issuerOfRecordCheck).toBeNull();
+		const note = String(tried.issuerOfRecordNote);
+		expect(note).toMatch(
+			/^https:\/\/sep\.stablex\.cloud\/\.well-known\/stellar\.toml: the host name does not resolve \(ENOTFOUND\)\. The stellar\.toml at /,
+		);
+		expect(note).toContain(
+			"https://pubnet-sep.latamex.com/.well-known/stellar.toml (read 2026-11-23) names ORG_NAME Relay Tech Services Ltd and lists this account as the BRLT issuer",
+		);
+		expect(note).toContain("cannot be confirmed from the account side");
+		expect(storeRowToApi(tried as StoreRow)).toMatchObject({
+			issuerOfRecord: null,
+			issuerOfRecordCheck: "could-not-read",
+			issuerOfRecordAsOf: at,
+			issuerOfRecordNote: note,
+		});
+	});
+
+	it("BRLT's curated note rides only on the unresolvable home_domain: another failure is stored without it", async () => {
+		const BRLT = reg("BRLT");
+		const whyOf = async (routes: Record<string, () => Response>) => {
+			vi.unstubAllGlobals();
+			stubFetch404(routes);
+			const [m] = await settle(() =>
+				measureRegistry([BRLT], { concurrency: 1, staggerMs: 0 }),
+			);
+			const r = m.issuerOfRecordRead;
+			return r.outcome === "could-not-read"
+				? r.why
+				: `not a failed read: ${r.outcome}`;
+		};
+		// The name resolves again and the host answers 404.
+		expect(
+			await whyOf({ [horizon(BRLT.issuer)]: account("sep.stablex.cloud") }),
+		).toBe(
+			"https://sep.stablex.cloud/.well-known/stellar.toml answered not found; kept as a failed read, since a lapsed or parked domain answers the same",
+		);
+		// Horizon cannot be reached.
+		expect(
+			await whyOf({
+				[horizon(BRLT.issuer)]: () => {
+					throw new TypeError("fetch failed");
+				},
+			}),
+		).not.toContain("Relay Tech Services Ltd");
+		// Another name that does not resolve is not the one the note was
+		// written for.
+		expect(
+			await whyOf({
+				[horizon(BRLT.issuer)]: account("other.example"),
+				"https://other.example/.well-known/stellar.toml": () => {
+					throw Object.assign(new TypeError("fetch failed"), {
+						cause: { code: "ENOTFOUND" },
+					});
+				},
+			}),
+		).toBe(
+			"https://other.example/.well-known/stellar.toml: the host name does not resolve (ENOTFOUND)",
+		);
+	});
+
+	it("EURC: the toml's ORG_NAME stays the issuer of record, and the note quotes Circle's EURC terms naming the legal issuer (sls-119)", async () => {
+		const EURC = STABLECOIN_REGISTRY.find(
+			(a) =>
+				a.issuer === "GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2",
+		);
+		if (!EURC) throw new Error("Circle's EURC is not in the registry");
+		// Circle's toml as read 2026-11-23: one ORG_NAME, no issuing party in
+		// the EURC desc.
+		const circleToml = (orgName: string) => () =>
+			new Response(
+				`ACCOUNTS=["${EURC.issuer}"]\n[DOCUMENTATION]\nORG_NAME="${orgName}"\n\n[[CURRENCIES]]\ncode="EURC"\nissuer="${EURC.issuer}"\ndesc="EURC is a fully collateralized euro stablecoin."\n`,
+			);
+		const run = async (orgName: string) => {
+			stubFetch404({
+				[horizon(EURC.issuer)]: account("circle.com"),
+				"https://circle.com/.well-known/stellar.toml": circleToml(orgName),
+			});
+			const [m] = await measureRegistry([EURC], {
+				concurrency: 1,
+				staggerMs: 0,
+			});
+			return rowIdentity(m, undefined, true);
+		};
+		const row = await run("Circle Internet Financial, LLC");
+		expect(row).toMatchObject({
+			company: "Circle",
+			issuerOfRecord: "Circle Internet Financial, LLC",
+			issuerOfRecordCheck: "named",
+			issuerOfRecordSourceUrl: "https://circle.com/.well-known/stellar.toml",
+		});
+		const note = String(row.issuerOfRecordNote);
+		expect(note).toContain(
+			"https://www.circle.com/legal/eurc-terms, read 2026-11-23",
+		);
+		expect(note).toContain(
+			"EURC is a digital token issued by Circle Internet Financial Europe SAS",
+		);
+		expect(note).toContain("acts as a reseller of EURC");
+		// Every reader of the note finds the legal issuer: "is EURC issued by
+		// Circle Internet Financial Europe SAS" is supported from this row.
+		const v = issuedVerdict({
+			ticker: "EURC",
+			company: "Circle Internet Financial Europe SAS",
+			rows: [{ ticker: "EURC", ...row }],
+			corpusTotal: 1,
+		});
+		expect(v.verdict).toBe("supported");
+		expect(v.statement).toMatch(
+			/^Circle Internet Financial Europe SAS, the issuer its own terms name, issues EURC/,
+		);
+		// The LLC those terms call a reseller is contradicted by them, never
+		// supported as issuing EURC because the toml names it.
+		const llc = issuedVerdict({
+			ticker: "EURC",
+			company: "Circle Internet Financial, LLC",
+			rows: [{ ticker: "EURC", ...row }],
+			corpusTotal: 1,
+		});
+		expect(llc.verdict).toBe("contradicted");
+		expect(llc.statement).toMatch(
+			/^The issuer's own terms say Circle Internet Financial Europe SAS issues EURC \(issuer account GDHU6WRG/,
+		);
+		expect(llc.statement).not.toMatch(
+			/Circle Internet Financial, LLC[^.;]* issues/,
+		);
+		// The brand still matches.
+		expect(
+			issuedVerdict({
+				ticker: "EURC",
+				company: "Circle",
+				rows: [{ ticker: "EURC", ...row }],
+				corpusTotal: 1,
+			}).verdict,
+		).toBe("supported");
+		// The asset page says who issues it, and what the toml names.
+		const apiRow = storeRowToApi(row as StoreRow);
+		expect(issuingParty(apiRow)).toBe("Circle Internet Financial Europe SAS");
+		expect(issuerOfRecordLine(apiRow, "Nov 23, 2026")).toBe(
+			"Issued by Circle Internet Financial Europe SAS, per its issuer's own terms; its stellar.toml, as read Nov 23, 2026, names Circle Internet Financial, LLC",
+		);
+		// Until the refresh stores the note, the row says what it holds.
+		const unread = { ...apiRow, issuerOfRecordNote: null };
+		expect(disclosedIssuer(unread)).toBeNull();
+		expect(issuerOfRecordLine(unread, "Nov 23, 2026")).toBe(
+			"Issued by Circle Internet Financial, LLC, per its stellar.toml as read Nov 23, 2026",
+		);
+		// The note is served only while the toml names another party: were the
+		// ORG_NAME the legal issuer, it would add nothing.
+		vi.unstubAllGlobals();
+		expect(
+			(await run("Circle Internet Financial Europe SAS")).issuerOfRecordNote,
+		).toBeNull();
+	});
+
+	it("USDC and MGUSD keep their wording: no issuer terms override the toml there", () => {
+		const usdc = {
+			ticker: "USDC",
+			issuer: "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+			issuerOfRecord: "Circle Internet Financial, LLC",
+			issuerOfRecordCheck: "named",
+			issuerOfRecordNote: null,
+		};
+		expect(issuingParty(usdc)).toBe("Circle Internet Financial, LLC");
+		expect(issuerOfRecordLine(usdc, "Nov 23, 2026")).toBe(
+			"Issued by Circle Internet Financial, LLC, per its stellar.toml as read Nov 23, 2026",
+		);
+		const mgusd = {
+			ticker: "MGUSD",
+			issuer: MGUSD.issuer,
+			issuerOfRecord: "MoneyGram Payment Systems, Inc.",
+			issuerOfRecordCheck: "named",
+			issuerOfRecordNote:
+				'stellar.toml desc for MGUSD: "MGUSD is a USD-backed stablecoin issued by Bridge on behalf of MoneyGram."',
+		};
+		expect(disclosedIssuer(mgusd)).toBeNull();
+		expect(issuerOfRecordLine(mgusd, "Nov 23, 2026")).toBe(
+			"Issued by MoneyGram Payment Systems, Inc., per its stellar.toml as read Nov 23, 2026",
+		);
+		const bridge = issuedVerdict({
+			ticker: "MGUSD",
+			company: "Bridge",
+			rows: [mgusd],
+			corpusTotal: 1,
+		});
+		expect(bridge.statement).toMatch(
+			/^Bridge, the party its stellar\.toml's desc names as issuing it, issues MGUSD/,
+		);
+		expect(
+			issuedVerdict({
+				ticker: "MGUSD",
+				company: "MoneyGram Payment Systems, Inc.",
+				rows: [mgusd],
+				corpusTotal: 1,
+			}).verdict,
+		).toBe("supported");
 	});
 
 	it("with the write off, the run sends no issuer-of-record key and still sends the brand", async () => {

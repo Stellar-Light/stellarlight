@@ -508,7 +508,8 @@ async function main() {
 }
 
 /** One summary line: the brand, this run's read, and what the row would
- *  store from it (a failed read stores the previous check, unchanged). */
+ *  store from it (a failed read keeps a stored named or not-named check,
+ *  unchanged, and otherwise stores could-not-read with this run's date). */
 function issuerLine(m: MeasuredStablecoin, stored: IssuerOfRecordFields) {
 	const r = m.issuerOfRecordRead;
 	const read =
@@ -516,10 +517,10 @@ function issuerLine(m: MeasuredStablecoin, stored: IssuerOfRecordFields) {
 			? `named ${r.name} (${r.sourceUrl})${r.note ? `; note ${r.note}` : ""}`
 			: r.outcome === "not-named"
 				? `not named: ${r.why}${r.sourceUrl ? ` (${r.sourceUrl})` : ""}`
-				: `could not read: ${r.why}; keeps ${
-						stored.issuerOfRecordCheck
-							? `the ${stored.issuerOfRecordCheck} check of ${stored.issuerOfRecordAsOf}${stored.issuerOfRecord ? ` (${stored.issuerOfRecord})` : ""}`
-							: "nothing (never read)"
+				: `could not read: ${r.why}; ${
+						stored.issuerOfRecordCheck === "could-not-read"
+							? `stores could-not-read as of ${stored.issuerOfRecordAsOf}`
+							: `keeps the ${stored.issuerOfRecordCheck} check of ${stored.issuerOfRecordAsOf}${stored.issuerOfRecord ? ` (${stored.issuerOfRecord})` : ""}`
 					}`;
 	return `  · ${m.id}: brand ${m.company}; ${read}`;
 }
