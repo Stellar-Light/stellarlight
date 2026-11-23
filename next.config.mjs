@@ -152,6 +152,7 @@ const nextConfig = {
 			// getHackathonSubmission went unseen.
 			"/api/sources/locate",
 			"/api/hackathons/builds/:id",
+			"/api/projects/scf-rounds",
 		];
 		const corsHeaders = [
 			{ key: "Access-Control-Allow-Origin", value: "*" },

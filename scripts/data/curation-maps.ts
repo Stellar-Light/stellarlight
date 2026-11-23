@@ -90,6 +90,65 @@ export const STATUS_FIX: Record<
 	// directory already held it as fastbuka (site choppaddi.com, "FKA FastBuka",
 	// alias). A duplicate is hidden, never dead: Draft + canonicalSlug →
 	// fastbuka (CANONICAL_SET), so a lookup of either name folds to one row.
+	// ── sls-116 decisions (owner-approved 2026-11-23, sls116-decisions.md):
+	// Draft rows that carry an SCF award, published with the status the sheet
+	// proposed from what was read that day. ──
+	"the-hub": {
+		from: "Draft",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://github.com/thehubdao",
+		note: "SCF #29 ($46,500). The org's repos were pushed through 2025-11-02 (portal-contracts 2025-10-26), read 2026-11-23.",
+	},
+	octo: {
+		from: "Draft",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://github.com/octoplace",
+		note: "SCF #28 ($40,500). The org's last push was 2024-08-20 (octoplace-ui), read 2026-11-23.",
+	},
+	multiclique: {
+		from: "Draft",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://github.com/deep-ink-ventures/multiclique-protocol",
+		note: "SCF #19 ($97,500). The protocol repo was last pushed 2023-11-20, read 2026-11-23.",
+	},
+	"elio-dao": {
+		from: "Draft",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://communityfund.stellar.org/project/elio-dao-8ut",
+		note: "SCF #15 ($148,200). Its GitHub org, deep-ink-ventures, answers not found (read 2026-11-23).",
+	},
+	styx: {
+		from: "Draft",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://github.com/jj7302/styx-bridge",
+		note: "SCF #23 ($43,000). The bridge repo was last pushed 2024-02-19, read 2026-11-23.",
+	},
+	lumosdao: {
+		from: "Draft",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://github.com/naveed-siddiqi/lumos-dao",
+		note: "SCF #21 ($54,000) as LumosCore. The Stellar DAO repo was last pushed 2024-11-29 (read 2026-11-23); lumoscore.com now presents a multichain platform.",
+	},
+	instantdao: {
+		from: "Draft",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-23",
+		sourceUrl: "https://communityfund.stellar.org/project/instantdao-zce",
+		note: "SCF #8 ($50,000, 2021). No repository is linked; the SCF page links a demo video only.",
+	},
 	choppaddi: {
 		from: "Live",
 		to: "Draft",
@@ -1844,12 +1903,15 @@ export const STATUS_FIX: Record<
 	// thesora.app) published desktop releases v0.1.0 (2024-02-14) to v0.2.2
 	// (2024-09-19) for macOS and Linux, downloaded hundreds of times. The row's
 	// website and repo point elsewhere.
+	// sls-116 decisions 2026-11-23: the 2026-09-02 evidence was Posted's
+	// site, another project's; re-stamped on SORA's own repo (GITHUB_LINK_FIX).
 	sora: {
-		from: "Live",
+		from: "Inactive",
 		to: "Inactive",
-		note: "its recorded site posted.app is listed for sale at Porkbun; no linked code (checked 2026-09-02).",
-		asOf: "2026-09-02",
-		sourceUrl: "https://posted.app/",
+		note: "SCF #21 and #25 as Soroban CLI Cross Platform GUI. Its repo, tolgayayci/sora, last released v0.2.2 on 2024-09-19 and was last pushed 2024-11-24 (read 2026-11-23). The earlier note read Posted's site, another project's.",
+		replaceNote: true,
+		asOf: "2026-11-23",
+		sourceUrl: "https://github.com/tolgayayci/sora",
 		basis: "human-verified",
 	},
 	// Owner call 2026-08-29 ("remove this? why is this even added?"): a
@@ -3466,6 +3528,8 @@ export const TWITTER_LINK_FIX: Record<string, string> = {
 /** links.github corrections — equality-guarded overwrites for records whose
  * repo link points at the WRONG place (org renames, project splits). */
 export const GITHUB_LINK_FIX: Record<string, string> = {
+	// sls-116 decisions 2026-11-23: SORA's repo, the one its SCF page links
+	sora: "https://github.com/tolgayayci/sora",
 	// org renamed AquaToken→AquariusDeFi (old page is an empty shell)
 	aquarius: "https://github.com/AquariusDeFi",
 	// registry split out of scaffold-stellar into its own org 2026-05-19;
@@ -3943,6 +4007,9 @@ export const LOGO_SET: Record<
  *  to hide the duplicate from listings while search still folds to it). */
 export const CANONICAL_SET: Record<string, string> = {
 	choppaddi: "fastbuka", // 2026-09-23 duplicate seed; see STATUS_FIX
+	// sls-116 decisions 2026-11-23: the Draft row holding Sora's repo link is
+	// the served sora row's duplicate
+	"sora-cli": "sora",
 };
 
 export const ALIAS_ADD: Record<string, string[]> = {
@@ -4183,6 +4250,28 @@ export const SEEDS: Array<{
 	// NETWORKS_DERIVED (below) has curate clear the stored lists (sls-111,
 	// 2026-11-11).
 
+	// sls-116 decisions (owner-approved 2026-11-23): SCF #44 Build award
+	// ($73,500, RFP track) with no row. 57Blocks' other rows are other
+	// products. The repo exists (created 2026-08-19, pushed 2026-11-23).
+	{
+		slug: "soroban-contract-source-verification-service",
+		name: "Soroban Contract Source Verification Service",
+		category: "Tooling",
+		status: "Development",
+		types: ["Security"],
+		supportedNetworks: [],
+		shortDescription:
+			"A service by 57Blocks that verifies a deployed Soroban contract against its published source code, funded through SCF #44's RFP track.",
+		links: {
+			website: "https://57blocks.com/",
+			github: "https://github.com/57blocks/soroban-verification-service",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-23",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/soroban-contract-source-verification-service-bax",
+		statusBasis: "human-verified",
+	},
 	{
 		slug: "balance",
 		name: "Balance",

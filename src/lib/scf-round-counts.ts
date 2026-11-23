@@ -51,6 +51,10 @@ export interface OurAwardedRow {
 export interface ScfRound {
 	round: number;
 	phase: string;
+	/** The round's own page (communityfund.stellar.org/awards/<id>) and when
+	 *  it was read (sls-116: the round coverage serves both). */
+	pageUrl?: string;
+	readAt?: string;
 	submissions: Array<{
 		id: string;
 		project: string | null;
@@ -94,14 +98,22 @@ export type RoundCountReport =
 
 const PAGE = "https://communityfund.stellar.org/project/";
 
-export function compareRoundCounts(input: {
+/** SCF's side of the count, read whole or not at all: each numbered round's
+ * awards (keys: a project record id, or `submission <id>` for an award with
+ * no project page) and undecided projects, and every project record the
+ * listing and the off-listing pages name. */
+export type ScfSide =
+	| { status: "could-not-check"; reason: string }
+	| {
+			status: "read";
+			listed: Map<string, { slug: string; title: string; round: number }>;
+			byRound: Map<number, { awarded: Set<string>; undecided: number }>;
+			latestEnded: number;
+	  };
+
+export function readScfSide(input: {
 	rounds: ScfRound[] | null;
 	listing: ScfListingRow[] | null;
-	ours: OurAwardedRow[] | null;
-	/** The slug of the row the enrich joins a listed page to (an
-	 *  SCF_SLUG_OVERRIDES entry, an exact name, the title prefix), so a page a
-	 *  row folds without citing it still reads as carried. */
-	joinedRow?: (page: { slug: string; title: string }) => string | undefined;
 	/** The rounds the baseline lists: an index without one is a partial read. */
 	expectRounds?: number[];
 	/** Project records outside the listing, each read off its own page
@@ -109,12 +121,12 @@ export function compareRoundCounts(input: {
 	 * slug like a listed page's, and their summaries pin like the listing's.
 	 * A record id the round pages name and no page resolved stays named by id. */
 	offListing?: ScfListingRow[];
-}): RoundCountReport {
-	const cannot = (reason: string): RoundCountReport => ({
+}): ScfSide {
+	const cannot = (reason: string): ScfSide => ({
 		status: "could-not-check",
 		reason,
 	});
-	const { rounds, listing, ours } = input;
+	const { rounds, listing } = input;
 	if (!rounds?.length) return cannot("SCF round index unread or empty");
 	for (const r of rounds) {
 		if (!r.submissions) return cannot(`SCF #${r.round} page unread`);
@@ -145,7 +157,6 @@ export function compareRoundCounts(input: {
 	// ours over SCF's: exactly 500 rows is the cap SCF served until 2026-10.
 	if (listing.length === 500)
 		return cannot("SCF listing returned exactly 500 rows, its old page cap");
-	if (!ours?.length) return cannot("our awarded rows were not read in full");
 	// A page's summary pins its last award (lastAwardedRound). A negative code
 	// is an award SCF does not number and 0 names none: neither pins a round.
 	const pins = new Map<number, Set<string>>();
@@ -178,31 +189,13 @@ export function compareRoundCounts(input: {
 		});
 		if (round > 0) pins.set(round, new Set([...(pins.get(round) ?? []), id]));
 	}
-	const roundsOf = (r: OurAwardedRow) =>
-		Array.isArray(r.scfAwardedRounds) ? r.scfAwardedRounds.map(Number) : null;
-	const pageOf = (r: OurAwardedRow) =>
-		typeof r.scfSourceUrl === "string" && r.scfSourceUrl.startsWith(PAGE)
-			? r.scfSourceUrl.slice(PAGE.length)
-			: null;
 	// Undecided projects allow for a count above SCF's only in the latest
 	// ended round and after it; every earlier round is closed.
 	const latestEnded = Math.max(
 		-1,
 		...rounds.filter((r) => r.phase === "Ended").map((r) => r.round),
 	);
-	// The witness that the listing is whole where it matters most: every page
-	// our rows cite for the latest ended round is in it, or its pins (and so
-	// that round's count) could be cut.
-	const listedSlugs = new Set([...listed.values()].map((l) => l.slug));
-	const unlisted = ours
-		.filter((r) => roundsOf(r)?.includes(latestEnded))
-		.map(pageOf)
-		.filter((s): s is string => s !== null && !listedSlugs.has(s));
-	if (unlisted.length)
-		return cannot(
-			`SCF listing lacks ${unlisted.length} page(s) our rows cite for #${latestEnded}: ${unlisted.join(", ")}`,
-		);
-	const scfByRound = new Map<
+	const byRound = new Map<
 		number,
 		{ awarded: Set<string>; undecided: number }
 	>();
@@ -221,8 +214,52 @@ export function compareRoundCounts(input: {
 				.map(keyOf)
 				.filter((k) => !awarded.has(k)),
 		);
-		scfByRound.set(r.round, { awarded, undecided: pending.size });
+		byRound.set(r.round, { awarded, undecided: pending.size });
 	}
+	return { status: "read", listed, byRound, latestEnded };
+}
+
+export function compareRoundCounts(input: {
+	rounds: ScfRound[] | null;
+	listing: ScfListingRow[] | null;
+	ours: OurAwardedRow[] | null;
+	/** The slug of the row the enrich joins a listed page to (an
+	 *  SCF_SLUG_OVERRIDES entry, an exact name, the title prefix), so a page a
+	 *  row folds without citing it still reads as carried. */
+	joinedRow?: (page: { slug: string; title: string }) => string | undefined;
+	/** The rounds the baseline lists: an index without one is a partial read. */
+	expectRounds?: number[];
+	/** Project records outside the listing (readScfSide). */
+	offListing?: ScfListingRow[];
+}): RoundCountReport {
+	const cannot = (reason: string): RoundCountReport => ({
+		status: "could-not-check",
+		reason,
+	});
+	const side = readScfSide(input);
+	if (side.status === "could-not-check") return side;
+	const { ours } = input;
+	if (!ours?.length) return cannot("our awarded rows were not read in full");
+	const { listed, latestEnded } = side;
+	const roundsOf = (r: OurAwardedRow) =>
+		Array.isArray(r.scfAwardedRounds) ? r.scfAwardedRounds.map(Number) : null;
+	const pageOf = (r: OurAwardedRow) =>
+		typeof r.scfSourceUrl === "string" && r.scfSourceUrl.startsWith(PAGE)
+			? r.scfSourceUrl.slice(PAGE.length)
+			: null;
+	// The witness that the listing is whole where it matters most: every page
+	// our rows cite for the latest ended round is in it, or its pins (and so
+	// that round's count) could be cut.
+	const listedSlugs = new Set([...listed.values()].map((l) => l.slug));
+	const unlisted = ours
+		.filter((r) => roundsOf(r)?.includes(latestEnded))
+		.map(pageOf)
+		.filter((s): s is string => s !== null && !listedSlugs.has(s));
+	if (unlisted.length)
+		return cannot(
+			`SCF listing lacks ${unlisted.length} page(s) our rows cite for #${latestEnded}: ${unlisted.join(", ")}`,
+		);
+	const scfByRound = new Map(side.byRound);
 	// Rounds only we claim count too: SCF's index lists no such round, or its
 	// page lists no award in it.
 	for (const r of ours)
@@ -516,4 +553,220 @@ export function ourPageProblem(
 			return `the page was generated at ${String(b.meta.generatedAt)}, before the sync finished at ${notBefore.toISOString()}`;
 	}
 	return null;
+}
+
+/** One award SCF's round page lists, as the SCF sync stores it (sls-116):
+ * the project page it belongs to, or, for an award SCF linked to no project
+ * page, its submission. */
+export interface ListedAward {
+	/** Project page slug: communityfund.stellar.org/project/<page>. */
+	page: string | null;
+	/** SCF's submission id, set only when page is null. */
+	submission: string | null;
+}
+
+/** One round as the SCF sync stores it: what its page lists, and when. */
+export interface ListedRound {
+	round: number;
+	phase: string;
+	pageUrl: string | null;
+	readAt: string | null;
+	/** Projects whose submissions in the round are all pending. */
+	undecided: number;
+	awards: ListedAward[];
+}
+
+/** SCF's side as the sync stores it, every award named by page; the record
+ * ids no page resolved when the read was partial (nothing is stored then). */
+export function listedRounds(
+	rounds: readonly ScfRound[],
+	side: Extract<ScfSide, { status: "read" }>,
+): ListedRound[] | { unresolved: string[] } {
+	const unresolved: string[] = [];
+	const out = rounds.map((r): ListedRound => {
+		const { awarded, undecided } = side.byRound.get(r.round) ?? {
+			awarded: new Set<string>(),
+			undecided: 0,
+		};
+		const awards: ListedAward[] = [];
+		for (const key of awarded) {
+			if (key.startsWith("submission ")) {
+				awards.push({ page: null, submission: key.slice(11) });
+				continue;
+			}
+			const slug = side.listed.get(key)?.slug;
+			if (slug) awards.push({ page: slug, submission: null });
+			else unresolved.push(key);
+		}
+		awards.sort((a, b) =>
+			String(a.page ?? a.submission).localeCompare(
+				String(b.page ?? b.submission),
+			),
+		);
+		return {
+			round: r.round,
+			phase: r.phase,
+			pageUrl: r.pageUrl ?? null,
+			readAt: r.readAt ?? null,
+			undecided,
+			awards,
+		};
+	});
+	return unresolved.length ? { unresolved } : out;
+}
+
+/** A project row as the coverage reads it: the stored scf group. */
+export interface CoverageRow {
+	slug?: unknown;
+	status?: unknown;
+	scf?: {
+		awarded?: unknown;
+		awardedRounds?: unknown;
+		sourceUrl?: unknown;
+		roundAwards?: unknown;
+	} | null;
+}
+
+/** Why a listed award is not carried (GET /api/projects/scf-rounds). */
+export const NOT_CARRIED_REASONS = [
+	"no-project-page",
+	"draft-row-only",
+	"no-row",
+] as const;
+
+export interface RoundCoverage {
+	round: number;
+	phase: string | null;
+	roundPageUrl: string | null;
+	readAt: string | null;
+	/** Awards SCF's round page lists (its pins included). */
+	listed: number;
+	undecided: number;
+	/** Listed awards a served row carries: one whose award for the round
+	 *  cites that award's own SCF page. */
+	carried: number;
+	notCarried: Array<{
+		pageUrl: string | null;
+		submissionId: string | null;
+		reason: (typeof NOT_CARRIED_REASONS)[number];
+		draftSlugs: string[];
+	}>;
+	/** Listed awards more than one served row carries. */
+	carriedOnSeveralRows: Array<{ pageUrl: string; slugs: string[] }>;
+	/** Served rows whose scfAwardedRounds hold the round. */
+	rowsClaiming: number;
+	/** Served rows claiming the round whose page for it the round page does
+	 *  not list. */
+	notListed: Array<{ slug: string; pageUrls: string[] }>;
+}
+
+/** The pages a row cites for one round: each award's own page, else (an
+ * award not re-read since awards carried a page, or a round no award entry
+ * holds) the row's page. */
+function pagesFor(scf: NonNullable<CoverageRow["scf"]>, round: number) {
+	const awards = Array.isArray(scf.roundAwards)
+		? (scf.roundAwards as Array<{ round?: unknown; sourceUrl?: unknown }>)
+		: [];
+	const own = awards
+		.filter((a) => a?.round === round && typeof a.sourceUrl === "string")
+		.map((a) => String(a.sourceUrl));
+	if (own.length) return [...new Set(own)];
+	const claims =
+		(Array.isArray(scf.awardedRounds) &&
+			scf.awardedRounds.map(Number).includes(round)) ||
+		awards.some((a) => a?.round === round);
+	return claims && typeof scf.sourceUrl === "string" ? [scf.sourceUrl] : [];
+}
+
+/** Per round, the awards SCF's round page lists against the awards served
+ * rows carry, page by page (GET /api/projects/scf-rounds). A served row is
+ * any awarded row but a Draft; a Draft row is named only to say why an award
+ * is not served. Rounds newest first; a round rows claim and the read does
+ * not list is included with listed 0. */
+export function roundCoverage(
+	rounds: readonly ListedRound[],
+	rows: readonly CoverageRow[],
+): RoundCoverage[] {
+	const awarded = rows.filter((r) => r.scf?.awarded === true);
+	const served = awarded.filter((r) => r.status !== "Draft");
+	const drafts = awarded.filter((r) => r.status === "Draft");
+	const byRound = new Map(rounds.map((r) => [r.round, r]));
+	for (const r of served)
+		for (const n of Array.isArray(r.scf?.awardedRounds)
+			? r.scf.awardedRounds.map(Number)
+			: [])
+			if (Number.isInteger(n) && n > 0 && !byRound.has(n))
+				byRound.set(n, {
+					round: n,
+					phase: "",
+					pageUrl: null,
+					readAt: null,
+					undecided: 0,
+					awards: [],
+				});
+	const citing = (pool: readonly CoverageRow[], round: number, url: string) =>
+		pool
+			.filter((r) => r.scf && pagesFor(r.scf, round).includes(url))
+			.map((r) => String(r.slug))
+			.sort();
+	return [...byRound.values()]
+		.sort((a, b) => b.round - a.round)
+		.map((r): RoundCoverage => {
+			const listedUrls = new Set(
+				r.awards.flatMap((a) => (a.page ? [PAGE + a.page] : [])),
+			);
+			let carried = 0;
+			const notCarried: RoundCoverage["notCarried"] = [];
+			const carriedOnSeveralRows: RoundCoverage["carriedOnSeveralRows"] = [];
+			for (const a of r.awards) {
+				if (!a.page) {
+					notCarried.push({
+						pageUrl: null,
+						submissionId: a.submission,
+						reason: "no-project-page",
+						draftSlugs: [],
+					});
+					continue;
+				}
+				const url = PAGE + a.page;
+				const on = citing(served, r.round, url);
+				if (on.length > 1)
+					carriedOnSeveralRows.push({ pageUrl: url, slugs: on });
+				if (on.length) {
+					carried++;
+					continue;
+				}
+				const draftSlugs = citing(drafts, r.round, url);
+				notCarried.push({
+					pageUrl: url,
+					submissionId: null,
+					reason: draftSlugs.length ? "draft-row-only" : "no-row",
+					draftSlugs,
+				});
+			}
+			const claiming = served.filter(
+				(row) =>
+					Array.isArray(row.scf?.awardedRounds) &&
+					row.scf.awardedRounds.map(Number).includes(r.round),
+			);
+			const notListed = claiming.flatMap((row) => {
+				const pages = row.scf ? pagesFor(row.scf, r.round) : [];
+				return pages.some((p) => listedUrls.has(p))
+					? []
+					: [{ slug: String(row.slug), pageUrls: pages }];
+			});
+			return {
+				round: r.round,
+				phase: r.phase || null,
+				roundPageUrl: r.pageUrl,
+				readAt: r.readAt,
+				listed: r.awards.length,
+				undecided: r.undecided,
+				carried,
+				notCarried,
+				carriedOnSeveralRows,
+				rowsClaiming: claiming.length,
+				notListed: notListed.sort((a, b) => a.slug.localeCompare(b.slug)),
+			};
+		});
 }

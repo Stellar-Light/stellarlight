@@ -134,7 +134,14 @@ describe("readScfPage", () => {
 			notAwardedRounds: [38, 39, 40],
 		});
 		expect(read?.roundAwards).toEqual([
-			{ round: 42, awardName: undefined, amountUSD: 64900, awardType: "Build" },
+			{
+				round: 42,
+				awardName: undefined,
+				amountUSD: 64900,
+				awardType: "Build",
+				sourceUrl:
+					"https://communityfund.stellar.org/project/vaquita-gamified-finance-pqq",
+			},
 		]);
 	});
 });

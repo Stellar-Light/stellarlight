@@ -708,6 +708,9 @@ export type ScfPage = {
 		round: number | null;
 		amountUSD: number | null;
 		awardType: string | null;
+		/** The SCF project page the award was read from (sls-116): a row that
+		 * folds two pages cites one, so each award names its own. */
+		sourceUrl?: string;
 	}>;
 	verdictSubmissions?: number;
 	verdictAwardedAny?: number;
@@ -840,6 +843,7 @@ export function readScfPage(html: string, slug: string): ScfPage | null {
 			awardName: a.awardName,
 			amountUSD: a.budgetUSD,
 			awardType: a.awardType,
+			sourceUrl: `${SCF}/project/${slug}`,
 		}));
 	}
 	// Surfaced for the no-resurrect guard below (main loop): a page that
@@ -978,11 +982,14 @@ export async function readScfRounds(
 	if (!listed) return null;
 	const rounds: ScfRound[] = [];
 	for (const r of listed) {
-		const page = await get(`${SCF}/awards/${r.id}`);
+		const pageUrl = `${SCF}/awards/${r.id}`;
+		const page = await get(pageUrl);
 		const subs = page === null ? null : readRoundSubmissions(page, r.round);
 		rounds.push({
 			round: r.round,
 			phase: r.phase,
+			pageUrl,
+			readAt: new Date().toISOString(),
 			// an ended round with no submission is a page that changed shape or
 			// did not load whole, never a round nobody entered
 			submissions: subs?.length === 0 && r.phase === "Ended" ? null : subs,

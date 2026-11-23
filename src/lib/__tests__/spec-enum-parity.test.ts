@@ -43,6 +43,7 @@ import { RATE_LIMIT_SCOPE } from "../rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
 import { REPO_MATCH_MODES } from "../repo-search";
 import { RESEARCH_SOURCES } from "../research-sources";
+import { NOT_CARRIED_REASONS } from "../scf-round-counts";
 import { DEPRECATED_BY, VERSION_STATUSES } from "../soroban-versions";
 import {
 	AUTHORITY_ROLES,
@@ -414,6 +415,16 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 				.schema.properties.toolchain.properties.deprecatedRepos.items
 				.properties;
 		expect(tc.deprecatedBy.enum).toEqual([...DEPRECATED_BY]);
+	});
+
+	it("NOT_CARRIED_REASONS: one spread, getAwardRoundCoverage notCarried[].reason", () => {
+		expect(spread("NOT_CARRIED_REASONS")).toBe(1);
+		const reason =
+			S.paths["/api/projects/scf-rounds"].get.responses["200"].content[
+				"application/json"
+			].schema.properties.rounds.items.properties.notCarried.items.properties
+				.reason.enum;
+		expect(reason).toEqual([...NOT_CARRIED_REASONS]);
 	});
 
 	it("SOURCE_CHECK_STATES: one spread, two sites that equal it (explainRepo sourceCheck.state and knowledgeNotes[].sourceCheck.state)", () => {

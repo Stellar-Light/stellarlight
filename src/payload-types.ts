@@ -102,6 +102,7 @@ export interface Config {
 		"partner-accounts": PartnerAccount;
 		"partner-leads": PartnerLead;
 		"funding-snapshots": FundingSnapshot;
+		"scf-round-reads": ScfRoundRead;
 		"payload-kv": PayloadKv;
 		"payload-jobs": PayloadJob;
 		"payload-locked-documents": PayloadLockedDocument;
@@ -169,6 +170,7 @@ export interface Config {
 		"funding-snapshots":
 			| FundingSnapshotsSelect<false>
 			| FundingSnapshotsSelect<true>;
+		"scf-round-reads": ScfRoundReadsSelect<false> | ScfRoundReadsSelect<true>;
 		"payload-kv": PayloadKvSelect<false> | PayloadKvSelect<true>;
 		"payload-jobs": PayloadJobsSelect<false> | PayloadJobsSelect<true>;
 		"payload-locked-documents":
@@ -692,6 +694,10 @@ export interface Project {
 					 */
 					amountUSD?: number | null;
 					awardType?: string | null;
+					/**
+					 * The SCF project page this award was read from; empty = not recorded per award
+					 */
+					sourceUrl?: string | null;
 					id?: string | null;
 			  }[]
 			| null;
@@ -3254,6 +3260,30 @@ export interface FundingSnapshot {
 	createdAt: string;
 }
 /**
+ * System-written by the SCF sync (sls-116): each numbered SCF round's listed awards, by project page. Served by /api/projects/scf-rounds. Do not edit by hand.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scf-round-reads".
+ */
+export interface ScfRoundRead {
+	id: string;
+	/**
+	 * When the sync finished reading the rounds.
+	 */
+	readAt: string;
+	rounds:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	updatedAt: string;
+	createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -3504,6 +3534,10 @@ export interface PayloadLockedDocument {
 		| ({
 				relationTo: "funding-snapshots";
 				value: string | FundingSnapshot;
+		  } | null)
+		| ({
+				relationTo: "scf-round-reads";
+				value: string | ScfRoundRead;
 		  } | null);
 	globalSlug?: string | null;
 	user:
@@ -3755,6 +3789,7 @@ export interface ProjectsSelect<T extends boolean = true> {
 							awardName?: T;
 							amountUSD?: T;
 							awardType?: T;
+							sourceUrl?: T;
 							id?: T;
 					  };
 				basis?: T;
@@ -4750,6 +4785,16 @@ export interface FundingSnapshotsSelect<T extends boolean = true> {
 	methodologyVersion?: T;
 	awardedSlugs?: T;
 	computedAt?: T;
+	updatedAt?: T;
+	createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scf-round-reads_select".
+ */
+export interface ScfRoundReadsSelect<T extends boolean = true> {
+	readAt?: T;
+	rounds?: T;
 	updatedAt?: T;
 	createdAt?: T;
 }

@@ -359,6 +359,13 @@ export class ScoutClient {
 		return this.get("/api/projects/resolve", params);
 	}
 
+	/** Per SCF round: awards SCF's round page lists vs awards the rows carry. */
+	getAwardRoundCoverage(
+		params: { round?: number } = {},
+	): Promise<Record<string, unknown>> {
+		return this.get("/api/projects/scf-rounds", params);
+	}
+
 	/** SDF team / people index. */
 	getPeople(params: GetPeopleParams = {}): Promise<Record<string, unknown>> {
 		return this.get("/api/people", params);
