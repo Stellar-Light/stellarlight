@@ -94,6 +94,7 @@ import { REPO_MATCH_MODES } from "./repo-search";
 import { INDICATOR_KINDS } from "./repo-security";
 import { RESEARCH_SOURCES } from "./research-sources";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
+import { NOT_CARRIED_REASONS } from "./scf-round-counts";
 import { DEPRECATED_BY, VERSION_STATUSES } from "./soroban-versions";
 import {
 	AUTHORITY_ROLES,
@@ -2917,6 +2918,250 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/projects/scf-rounds": {
+			get: {
+				operationId: "getAwardRoundCoverage",
+				tags: ["Funding"],
+				summary:
+					"Per SCF round: awards SCF's round page lists vs awards Scout's rows carry",
+				description:
+					"Completeness check of THIS directory's SCF award records, one numbered round at a time: how many awards the round's official page lists, how many of them a served project row carries under that award's own project page, and each listed award no row carries, with why. Use it to tell a known gap from a complete round when counting or listing a round's awards from searchProjects. Not for one project's own awards (searchProjects) or funding totals (analyzeEcosystem).",
+				"x-routing": {
+					purpose:
+						"Is this directory's record of an SCF round complete: SCF's round-page award list against the awards Scout's project rows carry.",
+					keywords: [
+						"scf round coverage",
+						"awards missing from scout",
+						"round page award list",
+						"complete scf round",
+					],
+					useWhen: [
+						"counting or listing one SCF round's awards from Scout: does Scout carry every award SCF's round page lists",
+						"finding which SCF awards Scout's rows do not carry, and why",
+					],
+					notFor: [
+						"one project's SCF awards or funding -> searchProjects",
+						"SCF funding totals -> analyzeEcosystem",
+					],
+					exampleQuestions: [
+						"Does Scout carry every award SCF lists for round 44?",
+						"Which SCF awards are not on any Scout project row?",
+					],
+				},
+				parameters: [
+					{
+						name: "round",
+						in: "query",
+						required: false,
+						description:
+							"One SCF round number. Omitted: every round. A round neither SCF's index nor any row names returns rounds [].",
+						schema: { type: "integer", minimum: 1 },
+					},
+				],
+				responses: {
+					"200": {
+						description:
+							"Round coverage. rounds and totals are null, with unavailable saying why, until the SCF sync has stored a whole read of SCF's round pages.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: ["meta", "totals", "rounds"],
+									properties: {
+										meta: {
+											type: "object",
+											required: [
+												"source",
+												"generatedAt",
+												"scfSource",
+												"scfReadAt",
+												"basis",
+												"order",
+											],
+											properties: {
+												source: { type: "string", format: "uri" },
+												generatedAt: {
+													type: "string",
+													format: "date-time",
+													description: "When the project rows were read.",
+												},
+												scfSource: { type: "string", format: "uri" },
+												scfReadAt: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+													description:
+														"When the SCF sync finished its newest whole read of SCF's round pages. Null = no read stored yet.",
+												},
+												basis: {
+													type: "string",
+													description:
+														"What listed, carried, notCarried and notListed count. Safe to surface to a user.",
+												},
+												order: { type: "string" },
+											},
+										},
+										totals: {
+											type: "object",
+											nullable: true,
+											description:
+												"Sums over the rounds returned. Null when no read is stored.",
+											properties: {
+												rounds: { type: "integer" },
+												listed: { type: "integer" },
+												carried: { type: "integer" },
+												notCarried: { type: "integer" },
+												carriedOnSeveralRows: { type: "integer" },
+												notListed: { type: "integer" },
+											},
+										},
+										rounds: {
+											type: "array",
+											nullable: true,
+											description:
+												"One entry per round, newest first (not a rank). Null when no read is stored; [] = the round asked for is in neither SCF's index nor any row.",
+											items: {
+												type: "object",
+												properties: {
+													round: { type: "integer" },
+													phase: {
+														type: "string",
+														nullable: true,
+														description:
+															"SCF's phase for the round (e.g. Ended). Null for a round rows claim that SCF's index does not list.",
+													},
+													roundPageUrl: {
+														type: "string",
+														nullable: true,
+														description:
+															"SCF's own page for the round. Null for a round SCF's index does not list.",
+													},
+													readAt: {
+														type: "string",
+														format: "date-time",
+														nullable: true,
+														description: "When the sync read the round page.",
+													},
+													listed: {
+														type: "integer",
+														description:
+															"Awards SCF's round page lists (0 for a round its index does not list).",
+													},
+													undecided: {
+														type: "integer",
+														description:
+															"Projects whose submissions in the round are all pending: SCF has not said whether they were awarded.",
+													},
+													carried: {
+														type: "integer",
+														description:
+															"Listed awards a served row carries under that award's own SCF page.",
+													},
+													notCarried: {
+														type: "array",
+														description:
+															"Each listed award no served row carries. [] = every listed award is carried.",
+														items: {
+															type: "object",
+															properties: {
+																pageUrl: {
+																	type: "string",
+																	nullable: true,
+																	description:
+																		"The award's SCF project page; null when SCF linked it to none.",
+																},
+																submissionId: {
+																	type: "string",
+																	nullable: true,
+																	description:
+																		"SCF's submission id, set only when pageUrl is null.",
+																},
+																reason: {
+																	type: "string",
+																	enum: [...NOT_CARRIED_REASONS],
+																	description:
+																		"no-project-page: SCF links the award to no project page. draft-row-only: only an unpublished (Draft) row carries it. no-row: no row carries the page; it may still match a project under another name.",
+																},
+																draftSlugs: {
+																	type: "array",
+																	items: { type: "string" },
+																	description:
+																		"The Draft rows that carry it (draft-row-only); [] otherwise.",
+																},
+															},
+														},
+													},
+													carriedOnSeveralRows: {
+														type: "array",
+														description:
+															"Listed awards more than one served row carries: summing those rows counts the award more than once.",
+														items: {
+															type: "object",
+															properties: {
+																pageUrl: { type: "string" },
+																slugs: {
+																	type: "array",
+																	items: { type: "string" },
+																},
+															},
+														},
+													},
+													rowsClaiming: {
+														type: "integer",
+														description:
+															"Served rows whose scfAwardedRounds hold the round.",
+													},
+													notListed: {
+														type: "array",
+														description:
+															"Served rows claiming the round whose SCF page for it the round page does not list. [] = every claim matches a listed award.",
+														items: {
+															type: "object",
+															properties: {
+																slug: { type: "string" },
+																pageUrls: {
+																	type: "array",
+																	items: { type: "string" },
+																	description:
+																		"The pages the row cites for the round.",
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+										unavailable: {
+											type: "string",
+											description:
+												"Present only when no read is stored: why rounds is null.",
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": errorBody(
+						"Unknown query param, or round is not a positive integer",
+					),
+					"503": {
+						description:
+							"The stored SCF read or the project rows could not be read: an outage, NOT a count. Retry after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
+				},
+			},
+		},
 		"/api/changes": {
 			get: {
 				operationId: "getChanges",
@@ -3043,7 +3288,7 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													nullable: true,
 													description:
-														'Present ONLY when the query named an exact identifier that no served row carries verbatim: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889), a GHSA id (GHSA-96xm-fv9w-pf3f), or a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo\u0027s release title). Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. One the scope holds but this page leaves out (a limit, or an auditor/protocol/severity filter) is not listed here; meta.warnings names it. A release tag is matched on release titles, so its miss means no release document carries it. If the lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup", and the miss is unchecked rather than absent. Each result\u0027s `exactKeys` says which named keys that row carries. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist.',
+														'Present ONLY when the query named an exact identifier that no served row carries: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889) or a GHSA id (GHSA-96xm-fv9w-pf3f), each carried verbatim; a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo\u0027s release title); or a proposal number written as an id (CAP-0077, cap-77, SEP 10, SLP-0006: a hyphen, or the prefix in capitals and a space; lowercase prose such as "market cap 100" is not one), matched on the proposal\u0027s own document, so a row that only cites it does not carry it. Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. One the scope holds but this page leaves out (a limit, or an auditor/protocol/severity filter) is not listed here; meta.warnings names it. A release tag is matched on release titles, so its miss means no release document carries it. If the lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup" (for a proposal number, "research proposal lookup", which also reads at most 5 named proposals per request), and the miss is unchecked rather than absent. Each result\u0027s `exactKeys` says which named keys that row carries. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist.',
 													properties: {
 														identifiers: {
 															type: "array",
@@ -11344,7 +11589,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						items: { type: "string" },
 						description:
-							"Present only when the query named an exact key (an audit finding id, a CVE or GHSA id, or a repo-qualified release tag): the named keys this row carries verbatim (a release tag by its release title). [] = this row carries none of them: for those keys it is a semantic neighbour, not the record. Absent = the query named no such key, or `fields` left it out.",
+							"Present only when the query named an exact key (an audit finding id, a CVE or GHSA id, a repo-qualified release tag, or a CAP/SEP/SLP proposal number written as an id, e.g. CAP-0077, cap-77 or CAP 77): the named keys this row carries, an id verbatim, a release tag by its release title, a proposal number (canonical form, e.g. SLP-0006) on every chunk of that proposal\u0027s own document. [] = this row carries none of them: for those keys it is a semantic neighbour, not the record (a CAP that cites SLP-0006 is not SLP-0006). Absent = the query named no such key, or `fields` left it out.",
 					},
 					id: { type: "string" },
 					source: { type: "string" },
@@ -12180,6 +12425,12 @@ export const spec: OpenAPISpec = {
 								awardName: { type: "string", nullable: true },
 								amountUSD: { type: "number", nullable: true },
 								awardType: { type: "string", nullable: true },
+								sourceUrl: {
+									type: "string",
+									nullable: true,
+									description:
+										"The official SCF project page this award was read from. A row that combines two SCF pages cites one as scfSourceUrl, so check each award against its own page here. Null = the page was not recorded per award (an award not yet re-read since this field shipped); scfSourceUrl is then the citation.",
+								},
 							},
 						},
 					},

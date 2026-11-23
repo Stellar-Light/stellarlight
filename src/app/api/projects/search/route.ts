@@ -420,12 +420,7 @@ function pickProducts(rows: any): ProjectRow["products"] {
 function pickScfRoundAwards(
 	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 	scf: any,
-): Array<{
-	round: number | null;
-	awardName: string | null;
-	amountUSD: number | null;
-	awardType: string | null;
-}> {
+): ProjectRow["scfRoundAwards"] {
 	const rows = Array.isArray(scf?.roundAwards) ? scf.roundAwards : [];
 	return (
 		rows
@@ -441,6 +436,7 @@ function pickScfRoundAwards(
 				awardName: typeof r.awardName === "string" ? r.awardName : null,
 				amountUSD: typeof r.amountUSD === "number" ? r.amountUSD : null,
 				awardType: typeof r.awardType === "string" ? r.awardType : null,
+				sourceUrl: typeof r.sourceUrl === "string" ? r.sourceUrl : null,
 			}))
 	);
 }
@@ -555,6 +551,8 @@ interface ProjectRow {
 		awardName: string | null;
 		amountUSD: number | null;
 		awardType: string | null;
+		/** sls-116: the SCF page this award was read from. */
+		sourceUrl: string | null;
 	}>;
 	hackathon: { id: string; name: string; slug: string } | null;
 	hackathonPlacement: string | null;

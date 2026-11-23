@@ -17,6 +17,7 @@ import { getPayload } from "payload";
 import { decodeHtmlEntities } from "../src/lib/decode-entities";
 import {
 	chunkMarkdown,
+	fetchFreshHtml,
 	fetchSitemapUrls,
 	loadExistingChunks,
 	stripHtml,
@@ -51,15 +52,13 @@ async function fetchHtml(url: string): Promise<string> {
  * class resurrected itself here: stellar.org republished an article under a
  * new slug with a 301 from the old one, our crawl followed the redirect but
  * stored the post under the REQUESTED old slug, and every refresh re-created
- * the mirror row the repair had just deleted. The final URL is the identity. */
-async function fetchHtmlFinal(
+ * the mirror row the repair had just deleted. The final URL is the identity.
+ * stellar.org serves an old and a new render of a changed page side by
+ * side; fetchFreshHtml reads past the old one. */
+function fetchHtmlFinal(
 	url: string,
 ): Promise<{ html: string; finalUrl: string }> {
-	const res = await fetch(url, {
-		headers: { "User-Agent": "stellarlight-scout-ingest" },
-	});
-	if (!res.ok) throw new Error(`fetch ${url}: ${res.status}`);
-	return { html: await res.text(), finalUrl: res.url || url };
+	return fetchFreshHtml(url);
 }
 
 /**

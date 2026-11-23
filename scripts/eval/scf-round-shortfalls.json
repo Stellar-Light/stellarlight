@@ -1,61 +1,13 @@
 {
 	"$comment": "Known SCF round shortfalls: rounds where the directory carries fewer awards than SCF's own round page lists, each naming the SCF award pages (https://communityfund.stellar.org/project/<slug>) no served row carries in that round, the intake list in improvements/TODO.md. A ratchet read by scripts/eval/scf-round-counts.ts after every enrich-scf execute: a short round not listed here, a listed round whose shortfall grew, any round where ours is over SCF, and a listed SCF page no row carries that its round's entry does not name fail; a listed round whose shortfall shrank or closed, and a named page that is carried now, also fail until the entry is lowered or the page dropped. Entries are only ever lowered or removed, never raised or added, except in a reviewed change. An entry whose counts agree (scf equal to ours) records a swap and must name its pages. Since sls-116 the check reads every page outside SCF's 531-row listing that a round page names, so those pages are named and judged by slug too; an award with no project page is named by its submission record id and is not judged.",
-	"asOf": "2026-11-12",
-	"basis": "Predicted, not yet measured: SCF's 46 round pages, the 531-row listing and the 216 project pages outside it, read 2026-11-12, against the served directory as the curate-projects and enrich-scf plans of the sls-116 change leave it (the enrich plan run read-only with --rows-from https://www.stellarlight.xyz over the rows curate's execute leaves). The Round counts step after those executes confirms it or names each round that differs. Of the 27 awards still uncarried: 5 sit on Draft rows (the-hub, octo, ramm, multiclique, elio-dao), 6 have only a Draft candidate, 4 have a row of the page's name and no link to confirm it, 1 SCF #44 page and 7 earlier pages have no row, 2 awards have no project page, and boss-money and the interstellar platform need a person (improvements/TODO.md). Peer's copy of the Peer by HoneyCoin award is counted once, on honey-coin (SCF_SHARED_CLAIMS).",
+	"asOf": "2026-11-23",
+	"basis": "Owner decisions of 2026-11-23 (sls-116 decision sheet): SCF's round pages list 893 awards in rounds 1 to 44 (read 2026-11-23); after the curate-projects and enrich-scf executes that apply the sheet, every one is carried but these 6, which the owner declared out of scope: RAMM (#22, a Draft row the owner withdrew on 2026-09-06), Free Voting Platform (#5, a Draft row the owner removed on 2026-08-29), Mythforge (#10, #11, a 2022 game with no site or repository and no row), and 2 awards SCF links to no project page (WAVY by LINK, #18; Stellar USDC to GCash off-ramp, #15). The Round counts step after those executes confirms it.",
 	"rounds": [
-		{
-			"round": 44,
-			"scf": 46,
-			"ours": 45,
-			"missing": ["soroban-contract-source-verification-service-bax"]
-		},
-		{
-			"round": 29,
-			"scf": 40,
-			"ours": 38,
-			"missing": ["chrysalis-nkf", "the-hub-citizens-portal-yac"]
-		},
-		{
-			"round": 28,
-			"scf": 30,
-			"ours": 29,
-			"missing": ["octo-ultimate-sociofi-nft-hub-cf7"]
-		},
-		{
-			"round": 25,
-			"scf": 27,
-			"ours": 26,
-			"missing": ["soroban-cli-cross-platform-gui-57v"]
-		},
-		{
-			"round": 23,
-			"scf": 25,
-			"ours": 24,
-			"missing": ["styx-a-soroban-cosmos-bridge-qw2"]
-		},
 		{
 			"round": 22,
 			"scf": 33,
-			"ours": 31,
-			"missing": ["ramm-global-retail-commerce-zbg", "soracleorg-posted-bdt"]
-		},
-		{
-			"round": 21,
-			"scf": 26,
-			"ours": 24,
-			"missing": ["lumoscore-ckm", "soroban-cli-cross-platform-gui-57v"]
-		},
-		{
-			"round": 20,
-			"scf": 33,
 			"ours": 32,
-			"missing": ["amber-rwa-tokenization-on-stellar-sku"]
-		},
-		{
-			"round": 19,
-			"scf": 16,
-			"ours": 15,
-			"missing": ["multiclique-th6"]
+			"missing": ["ramm-global-retail-commerce-zbg"]
 		},
 		{
 			"round": 18,
@@ -66,8 +18,8 @@
 		{
 			"round": 15,
 			"scf": 12,
-			"ours": 10,
-			"missing": ["elio-dao-8ut", "submission rec52b54tNWXJ3tI3"]
+			"ours": 11,
+			"missing": ["submission rec52b54tNWXJ3tI3"]
 		},
 		{
 			"round": 11,
@@ -82,49 +34,10 @@
 			"missing": ["mythforge-3tz"]
 		},
 		{
-			"round": 9,
-			"scf": 14,
-			"ours": 13,
-			"missing": ["answerly-omb"]
-		},
-		{
-			"round": 8,
-			"scf": 7,
-			"ours": 5,
-			"missing": ["instantdao-zce", "wally-ygy"]
-		},
-		{
-			"round": 7,
-			"scf": 8,
-			"ours": 6,
-			"missing": [
-				"boss-money-former-leaf-global-hxt",
-				"optionblox-yieldblox-4mn"
-			]
-		},
-		{
-			"round": 6,
-			"scf": 8,
-			"ours": 7,
-			"missing": ["ayadee-trak-j7v"]
-		},
-		{
 			"round": 5,
 			"scf": 9,
-			"ours": 7,
-			"missing": ["free-voting-platform-0pp", "the-interstellar-platform-6rb"]
-		},
-		{
-			"round": 4,
-			"scf": 8,
-			"ours": 7,
-			"missing": ["apayio-lpa"]
-		},
-		{
-			"round": 1,
-			"scf": 8,
-			"ours": 7,
-			"missing": ["stellar-community-forum-3om"]
+			"ours": 8,
+			"missing": ["free-voting-platform-0pp"]
 		}
 	]
 }

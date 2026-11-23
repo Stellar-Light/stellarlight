@@ -48,7 +48,10 @@ jobs:
     # 45, not 30 (2026-09-13): the Idempotence re-plan re-runs every ingester
     # dry, so the job needs roughly double the single-pass 4–10 min. A guard
     # that cannot finish gives no verdict (curate-projects learned this at 8).
-    timeout-minutes: 45
+    # 60, not 45 (2026-11-23): sdf-blog and sdf-org read past stellar.org's
+    # STALE renders (fetchFreshHtml); one sdf-blog pass took 918 s locally
+    # with it, against 91 s in CI without it, and the job runs two passes.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -218,6 +221,9 @@ jobs:
               echo "  ✓ $s — $line"; clean=$((clean + 1))
             else
               echo "  ✗ $s — $line"
+              # The rows themselves (and any page the re-plan failed to read),
+              # so a red names what to diff instead of only a count.
+              grep -F '  ✗ ' "replan-$s.log" | head -n 12 | sed 's/^/    /'
             fi
             planned=$((planned + n))
           done

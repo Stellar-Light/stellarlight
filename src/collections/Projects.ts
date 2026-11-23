@@ -818,6 +818,16 @@ export const Projects: CollectionConfig = {
 							},
 						},
 						{ name: "awardType", type: "text" },
+						{
+							// sls-116: a row that folds two SCF pages cites one as
+							// scf.sourceUrl, so each award names its own page.
+							name: "sourceUrl",
+							type: "text",
+							admin: {
+								description:
+									"The SCF project page this award was read from; empty = not recorded per award",
+							},
+						},
 					],
 				},
 				// Citation-grade provenance trio (SYNTHESIS-2026-08-12): every award

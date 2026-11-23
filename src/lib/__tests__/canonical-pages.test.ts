@@ -5,12 +5,16 @@
  * ingester AND the weekly corpus-coverage class guard — a malformed row
  * would silently weaken both, so its invariants are pinned here.
  */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
 	CANONICAL_PAGES,
 	canonicalPage,
+	dropLiveTables,
 	parseEffectiveDateLine,
 } from "../canonical-pages";
+import { stripHtml } from "../research-ingest";
 
 describe("CANONICAL_PAGES registry", () => {
 	it("has unique ids and unique canonical URLs", () => {
@@ -129,5 +133,36 @@ describe("parseEffectiveDateLine", () => {
 	it("returns undefined when the wording changes (never invent a date)", () => {
 		expect(parseEffectiveDateLine("Last updated 2026")).toBeUndefined();
 		expect(parseEffectiveDateLine("EFFECTIVE DATE: SOON")).toBeUndefined();
+	});
+});
+
+// The Mandate's "SDF development" section as stellar.org served it twice
+// within one second on 2026-11-23: a STALE render (balances "Last updated:
+// November 21, 2026 at 7.08 AM UTC") and a HIT (November 23, other balances).
+// The refresh's execute stored the first, and its re-plan can read either.
+describe("dropLiveTables", () => {
+	const read = (f: string) =>
+		readFileSync(join(__dirname, "fixtures", f), "utf8");
+	const stale = read("sdf-mandate-section-stale-2026-11-23.html");
+	const hit = read("sdf-mandate-section-hit-2026-11-23.html");
+	const url = "https://stellar.org/foundation/mandate";
+
+	it("stores the mandate text with no balances, the same on both reads", () => {
+		expect(stale).not.toBe(hit);
+		const a = stripHtml(dropLiveTables(stale, url));
+		expect(stripHtml(dropLiveTables(hit, url))).toBe(a);
+		expect(a).not.toMatch(/\d{1,3}(?:,\d{3}){2,}/);
+		expect(a).not.toMatch(/Last updated|Current Balance/);
+		expect(a).toContain("At the inception of Stellar, XLM were given");
+		expect(a).toContain("On a regular basis SDF reimburses");
+		expect(a).toContain(
+			`This page carries SDF's current account balances, updated live: ${url}`,
+		);
+	});
+
+	it("the Mandate pages with live balances ask for it", () => {
+		expect(canonicalPage("mandate").liveBalanceTables).toBe(true);
+		expect(canonicalPage("mandate-2019").liveBalanceTables).toBe(true);
+		expect(canonicalPage("mandate-2017").liveBalanceTables).toBeUndefined();
 	});
 });

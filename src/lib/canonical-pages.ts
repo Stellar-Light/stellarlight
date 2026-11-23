@@ -112,6 +112,14 @@ export interface CanonicalPage {
 	 * titles as this page's content.
 	 */
 	dropSections?: string[];
+	/**
+	 * The page renders SDF's live account balances in <table> blocks, each
+	 * followed by its "Last updated" stamp (the Mandate pages). The balances
+	 * move during the day and stellar.org serves old and new renders side by
+	 * side, so the sdf-org ingester replaces each table with a pointer to the
+	 * page (dropLiveTables) instead of storing a snapshot.
+	 */
+	liveBalanceTables?: true;
 	/** Extra topic tags beyond ["sdf-org", "sdf", family]. */
 	tags?: string[];
 }
@@ -168,6 +176,7 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		signatures: ["self-funded, pays taxes, and has no shareholders"],
 		quotable: true,
 		dateStrategy: "undated",
+		liveBalanceTables: true,
 		tags: ["mandate", "structure", "self-funded", "taxes"],
 	},
 	{
@@ -184,6 +193,7 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		signatures: ["pay taxes as we do so", "venture-style fund"],
 		quotable: true,
 		dateStrategy: "undated",
+		liveBalanceTables: true,
 		tags: ["mandate", "historical", "2019"],
 	},
 	{
@@ -497,6 +507,20 @@ const MONTHS: Record<string, string> = {
 	nov: "11",
 	dec: "12",
 };
+
+/**
+ * Replace each live balance table of a page's HTML, and the "Last updated"
+ * stamp that follows it, with one sentence pointing at the page. On
+ * 2026-11-23 two reads of the Mandate within one second carried balances
+ * dated November 21 and November 23; the text around the tables did not
+ * change. See CanonicalPage.liveBalanceTables.
+ */
+export function dropLiveTables(html: string, url: string): string {
+	return html.replace(
+		/<table\b[\s\S]*?<\/table>(?:\s*<p\b[^>]*>\s*Last updated:[\s\S]*?<\/p>)?/gi,
+		`<p>This page carries SDF's current account balances, updated live: ${url}</p>`,
+	);
+}
 
 /**
  * The "effective-date-line" dateStrategy: parse a page-stated

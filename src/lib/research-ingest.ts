@@ -682,6 +682,42 @@ export async function fetchSitemapUrls(
 	return Array.from(new Set(urls));
 }
 
+/**
+ * Fetch a page, reading again while its server marks the render stale.
+ *
+ * stellar.org is a Next.js site: each response says `x-nextjs-cache: HIT`, a
+ * render the server still counts as fresh, or `STALE`, one past that by any
+ * amount. After a page changes, both are served side by side, so the corpus
+ * refresh's execute and its re-plan minutes later can read two versions of
+ * one page. On 2026-11-23 six reads of the Mandate page within one second
+ * gave three STALE renders with balances "Last updated: November 21" and
+ * three HITs with "November 23"; the execute had stored a STALE one. The same
+ * mix put the Terms page's old effective date back on 21 rows (2026-10-23).
+ * A STALE render usually turns into a HIT within three more reads half a
+ * second apart (43 of 43 sampled blog pages, 2026-11-23). After `attempts`
+ * stale answers the last one is used: a site whose rebuilds keep failing has
+ * nothing newer to serve. A HIT is not promised to be the newest render.
+ */
+export async function fetchFreshHtml(
+	url: string,
+	{ attempts = 5, delayMs = 500 } = {},
+): Promise<{ html: string; finalUrl: string }> {
+	for (let i = 1; ; i++) {
+		const res = await fetch(url, {
+			headers: { "User-Agent": "stellarlight-scout-ingest" },
+		});
+		if (!res.ok) throw new Error(`fetch ${url}: HTTP ${res.status}`);
+		const stale = res.headers.get("x-nextjs-cache") === "STALE";
+		if (!stale || i >= attempts) {
+			if (stale)
+				console.warn(`  ⚠ still STALE after ${attempts} reads: ${url}`);
+			return { html: await res.text(), finalUrl: res.url || url };
+		}
+		await res.body?.cancel();
+		await new Promise((r) => setTimeout(r, delayMs));
+	}
+}
+
 /** Strip HTML to a markdown-ish text blob (no proper parser, just regex). */
 /**
  * Cut a site's "more from …" teaser off the end of an article body.
@@ -740,6 +776,23 @@ export function dropH2Sections(md: string, headings: string[]): string {
 		.join("\n");
 }
 
+// Render-time ages. A page that prints how long ago something happened works
+// it out when the page is rendered, and the sites serve renders hours or a
+// day old, so two reads of an unchanged page minutes apart say "1mo ago" and
+// "2mo ago". The chunk re-hashes, the corpus refresh re-embeds it, and its
+// re-plan right after the execute plans the write again (Idempotence red on
+// lumenloop news, 2026-11-13 to 11-23). Two rendered forms, never prose such
+// as "built 50 years ago":
+// - the whole text of a <time datetime> element, as the SCF Handbook's
+//   GitBook footer prints it ("Last updated <time>10 days ago</time>"): the
+//   element's own date replaces it;
+// - an age glued to a "Month D, YYYY" date, as lumenloop news headers print
+//   it beside their <time> ("September 24, 20262mo ago"): the date stays.
+const AGE_IN_TIME_RE =
+	/<time\b[^>]*\bdate[Tt]ime=["'](\d{4}-\d{2}-\d{2})[^"']*["'][^>]*>\s*\d+ (?:second|minute|hour|day|week|month|year)s? ago\s*<\/time>/g;
+const AGE_AFTER_DATE_RE =
+	/([A-Z][a-z]+ \d{1,2}, \d{4})(?:\d+(?:mo|[smhdwy]) ago|today|yesterday)/g;
+
 export function stripHtml(html: string): string {
 	return (
 		html
@@ -747,6 +800,7 @@ export function stripHtml(html: string): string {
 			.replace(/<(script|style)\b[^<]*(?:(?!<\/\1>)<[^<]*)*<\/\1>/gi, "")
 			// Drop HTML comments
 			.replace(/<!--[\s\S]*?-->/g, "")
+			.replace(AGE_IN_TIME_RE, "$1")
 			// Headings → markdown
 			.replace(/<h1[^>]*>/gi, "\n\n# ")
 			.replace(/<\/h1>/gi, "\n")
@@ -772,6 +826,7 @@ export function stripHtml(html: string): string {
 			.replace(/&#39;/g, "'")
 			.replace(/[ \t]+/g, " ")
 			.replace(/\n{3,}/g, "\n\n")
+			.replace(AGE_AFTER_DATE_RE, "$1")
 			.trim()
 	);
 }

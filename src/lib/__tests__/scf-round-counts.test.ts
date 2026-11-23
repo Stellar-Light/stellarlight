@@ -798,14 +798,15 @@ describe("parseShortfallBaseline: a broken baseline is could-not-check, never em
 	it("the committed baseline is valid, dated, and lists no SCF #45 gap", () => {
 		const b = parseShortfallBaseline(baselineFile);
 		if ("error" in b) throw new Error(b.error);
-		expect(b.asOf).toBe("2026-11-12");
+		expect(b.asOf).toBe("2026-11-23");
 		expect(b.rounds.map((e) => e.round)).not.toContain(45);
 		// sls-116: 34 short rounds short by 119 and 5 swaps (2026-11-11)
-		// become 20 short rounds short by 27 and no swap once the sync reads
-		// the pages outside the listing
-		expect(b.rounds.filter((e) => e.scf > e.ours)).toHaveLength(20);
+		// became 20 short by 27 once the sync read the pages outside the
+		// listing, and 6 short by 6 after the owner's decisions of 2026-11-23
+		// (each of the 6 declared out of scope)
+		expect(b.rounds.filter((e) => e.scf > e.ours)).toHaveLength(6);
 		expect(b.rounds.filter((e) => e.scf === e.ours)).toEqual([]);
-		expect(b.rounds.reduce((n, e) => n + e.scf - e.ours, 0)).toBe(27);
+		expect(b.rounds.reduce((n, e) => n + e.scf - e.ours, 0)).toBe(6);
 		for (const e of b.rounds)
 			expect(e.missing.length, `#${e.round}`).toBeGreaterThan(0);
 	});

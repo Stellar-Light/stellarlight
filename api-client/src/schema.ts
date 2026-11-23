@@ -90,6 +90,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/projects/scf-rounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Per SCF round: awards SCF's round page lists vs awards Scout's rows carry
+         * @description Completeness check of THIS directory's SCF award records, one numbered round at a time: how many awards the round's official page lists, how many of them a served project row carries under that award's own project page, and each listed award no row carries, with why. Use it to tell a known gap from a complete round when counting or listing a round's awards from searchProjects. Not for one project's own awards (searchProjects) or funding totals (analyzeEcosystem).
+         */
+        get: operations["getAwardRoundCoverage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/changes": {
         parameters: {
             query?: never;
@@ -991,7 +1011,7 @@ export interface components {
         };
         /** @description One ranked research chunk from /api/research (best chunk per document). */
         ResearchResult: {
-            /** @description Present only when the query named an exact key (an audit finding id, a CVE or GHSA id, or a repo-qualified release tag): the named keys this row carries verbatim (a release tag by its release title). [] = this row carries none of them: for those keys it is a semantic neighbour, not the record. Absent = the query named no such key, or `fields` left it out. */
+            /** @description Present only when the query named an exact key (an audit finding id, a CVE or GHSA id, a repo-qualified release tag, or a CAP/SEP/SLP proposal number written as an id, e.g. CAP-0077, cap-77 or CAP 77): the named keys this row carries, an id verbatim, a release tag by its release title, a proposal number (canonical form, e.g. SLP-0006) on every chunk of that proposal's own document. [] = this row carries none of them: for those keys it is a semantic neighbour, not the record (a CAP that cites SLP-0006 is not SLP-0006). Absent = the query named no such key, or `fields` left it out. */
             exactKeys?: string[];
             id?: string;
             source?: string;
@@ -1409,6 +1429,8 @@ export interface components {
                 awardName?: string | null;
                 amountUSD?: number | null;
                 awardType?: string | null;
+                /** @description The official SCF project page this award was read from. A row that combines two SCF pages cites one as scfSourceUrl, so check each award against its own page here. Null = the page was not recorded per award (an award not yet re-read since this field shipped); scfSourceUrl is then the citation. */
+                sourceUrl?: string | null;
             }[];
             /** @description Structured corridor/coverage for Anchor-typed projects: answers 'which anchors serve currency/corridor X?' with filterable, dated fields instead of prose. Synced from the matching partner record; null for non-anchors or when no partner record matches. */
             coverage?: {
@@ -3452,6 +3474,126 @@ export interface operations {
             };
         };
     };
+    getAwardRoundCoverage: {
+        parameters: {
+            query?: {
+                /** @description One SCF round number. Omitted: every round. A round neither SCF's index nor any row names returns rounds []. */
+                round?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Round coverage. rounds and totals are null, with unavailable saying why, until the SCF sync has stored a whole read of SCF's round pages. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta: {
+                            /** Format: uri */
+                            source: string;
+                            /**
+                             * Format: date-time
+                             * @description When the project rows were read.
+                             */
+                            generatedAt: string;
+                            /** Format: uri */
+                            scfSource: string;
+                            /**
+                             * Format: date-time
+                             * @description When the SCF sync finished its newest whole read of SCF's round pages. Null = no read stored yet.
+                             */
+                            scfReadAt: string | null;
+                            /** @description What listed, carried, notCarried and notListed count. Safe to surface to a user. */
+                            basis: string;
+                            order: string;
+                        };
+                        /** @description Sums over the rounds returned. Null when no read is stored. */
+                        totals: {
+                            rounds?: number;
+                            listed?: number;
+                            carried?: number;
+                            notCarried?: number;
+                            carriedOnSeveralRows?: number;
+                            notListed?: number;
+                        } | null;
+                        /** @description One entry per round, newest first (not a rank). Null when no read is stored; [] = the round asked for is in neither SCF's index nor any row. */
+                        rounds: {
+                            round?: number;
+                            /** @description SCF's phase for the round (e.g. Ended). Null for a round rows claim that SCF's index does not list. */
+                            phase?: string | null;
+                            /** @description SCF's own page for the round. Null for a round SCF's index does not list. */
+                            roundPageUrl?: string | null;
+                            /**
+                             * Format: date-time
+                             * @description When the sync read the round page.
+                             */
+                            readAt?: string | null;
+                            /** @description Awards SCF's round page lists (0 for a round its index does not list). */
+                            listed?: number;
+                            /** @description Projects whose submissions in the round are all pending: SCF has not said whether they were awarded. */
+                            undecided?: number;
+                            /** @description Listed awards a served row carries under that award's own SCF page. */
+                            carried?: number;
+                            /** @description Each listed award no served row carries. [] = every listed award is carried. */
+                            notCarried?: {
+                                /** @description The award's SCF project page; null when SCF linked it to none. */
+                                pageUrl?: string | null;
+                                /** @description SCF's submission id, set only when pageUrl is null. */
+                                submissionId?: string | null;
+                                /**
+                                 * @description no-project-page: SCF links the award to no project page. draft-row-only: only an unpublished (Draft) row carries it. no-row: no row carries the page; it may still match a project under another name.
+                                 * @enum {string}
+                                 */
+                                reason?: "no-project-page" | "draft-row-only" | "no-row";
+                                /** @description The Draft rows that carry it (draft-row-only); [] otherwise. */
+                                draftSlugs?: string[];
+                            }[];
+                            /** @description Listed awards more than one served row carries: summing those rows counts the award more than once. */
+                            carriedOnSeveralRows?: {
+                                pageUrl?: string;
+                                slugs?: string[];
+                            }[];
+                            /** @description Served rows whose scfAwardedRounds hold the round. */
+                            rowsClaiming?: number;
+                            /** @description Served rows claiming the round whose SCF page for it the round page does not list. [] = every claim matches a listed award. */
+                            notListed?: {
+                                slug?: string;
+                                /** @description The pages the row cites for the round. */
+                                pageUrls?: string[];
+                            }[];
+                        }[] | null;
+                        /** @description Present only when no read is stored: why rounds is null. */
+                        unavailable?: string;
+                    };
+                };
+            };
+            /** @description Unknown query param, or round is not a positive integer */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The stored SCF read or the project rows could not be read: an outage, NOT a count. Retry after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2). */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
+        };
+    };
     getChanges: {
         parameters: {
             query: {
@@ -3501,7 +3643,7 @@ export interface operations {
                                 corpusWideTopScore?: number;
                                 corpusWideTopSource?: string | null;
                             } | null;
-                            /** @description Present ONLY when the query named an exact identifier that no served row carries verbatim: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889), a GHSA id (GHSA-96xm-fv9w-pf3f), or a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo's release title). Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. One the scope holds but this page leaves out (a limit, or an auditor/protocol/severity filter) is not listed here; meta.warnings names it. A release tag is matched on release titles, so its miss means no release document carries it. If the lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup", and the miss is unchecked rather than absent. Each result's `exactKeys` says which named keys that row carries. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist. */
+                            /** @description Present ONLY when the query named an exact identifier that no served row carries: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889) or a GHSA id (GHSA-96xm-fv9w-pf3f), each carried verbatim; a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo's release title); or a proposal number written as an id (CAP-0077, cap-77, SEP 10, SLP-0006: a hyphen, or the prefix in capitals and a space; lowercase prose such as "market cap 100" is not one), matched on the proposal's own document, so a row that only cites it does not carry it. Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. One the scope holds but this page leaves out (a limit, or an auditor/protocol/severity filter) is not listed here; meta.warnings names it. A release tag is matched on release titles, so its miss means no release document carries it. If the lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup" (for a proposal number, "research proposal lookup", which also reads at most 5 named proposals per request), and the miss is unchecked rather than absent. Each result's `exactKeys` says which named keys that row carries. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist. */
                             exactMiss?: {
                                 /** @description The identifiers the query named that the corpus does not contain. */
                                 identifiers?: string[];

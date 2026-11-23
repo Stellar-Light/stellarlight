@@ -640,6 +640,29 @@ const SCF_FIX: Record<
 	// recap $93,700 = page total $149,820 EXACTLY; absent from the #40
 	// recap's full 24-project list.
 	abroad: { awarded: true, totalAwarded: 149820, awardedRounds: [32, 35] },
+	// sls-116 decisions (owner-approved 2026-11-23): each row stored a fossil
+	// page from the pre-2026-08-12 substring matcher ("apay" inside
+	// "coala-pay", "trak" inside "devtrak") with awarded false, which the SCF
+	// sync holds as a correction; its own page and award are written here.
+	// The page's awarded submission is the one the row's source record cites.
+	apay: {
+		awarded: true,
+		totalAwarded: null, // the page discloses no amount (total 0)
+		awardedRounds: [4],
+		roundAwards: [
+			{ round: 4, amountUSD: null, awardType: "Legacy v1.0 Award" },
+		],
+		page: "apayio-lpa",
+	},
+	trak: {
+		awarded: true,
+		totalAwarded: 16737.09,
+		awardedRounds: [6],
+		roundAwards: [
+			{ round: 6, amountUSD: 16737.09, awardType: "Legacy v2.0 Award" },
+		],
+		page: "ayadee-trak-j7v",
+	},
 };
 
 // sls-050: rename continuity — served as the `identity` block and matched as
@@ -2721,18 +2744,46 @@ async function main() {
 			continue;
 		}
 		const cur = d.scf ?? {};
-		const wantRA = fix.roundAwards ?? null;
-		const raInSync =
-			!wantRA ||
+		// sls-116: each award names the page it was verified on, the row's own
+		// (this block owns the row's awards; enrich holds a human-verified row)
+		const pageUrl = fix.unlink
+			? null
+			: fix.page
+				? SCF_PAGE + fix.page
+				: (cur.sourceUrl ?? null);
+		const wantRA = (
+			(fix.roundAwards ?? cur.roundAwards ?? []) as Array<{
+				round?: number | null;
+				awardName?: string | null;
+				amountUSD?: number | null;
+				awardType?: string | null;
+			}>
+		).map((r) => ({
+			round: r.round ?? null,
+			awardName: r.awardName ?? null,
+			amountUSD: r.amountUSD ?? null,
+			awardType: r.awardType ?? null,
+			sourceUrl: pageUrl,
+		}));
+		const raTuple = (
+			rows: Array<{
+				round?: number | null;
+				awardName?: string | null;
+				amountUSD?: number | null;
+				awardType?: string | null;
+				sourceUrl?: string | null;
+			}>,
+		) =>
 			JSON.stringify(
-				// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-				(cur.roundAwards ?? []).map((r: any) => [
-					r.round,
+				rows.map((r) => [
+					r.round ?? null,
+					r.awardName ?? null,
 					r.amountUSD ?? null,
 					r.awardType ?? null,
+					r.sourceUrl ?? null,
 				]),
-			) ===
-				JSON.stringify(wantRA.map((r) => [r.round, r.amountUSD, r.awardType]));
+			);
+		const raInSync = raTuple(cur.roundAwards ?? []) === raTuple(wantRA);
 		if (
 			cur.awarded === fix.awarded &&
 			cur.totalAwarded === fix.totalAwarded &&
@@ -2760,6 +2811,7 @@ async function main() {
 				scf: {
 					...cur,
 					...scfFix,
+					roundAwards: wantRA,
 					...(unlink
 						? { slug: null, sourceUrl: null, lastAwardedRound: null }
 						: {}),

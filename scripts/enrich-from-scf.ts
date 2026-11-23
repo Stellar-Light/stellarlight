@@ -22,6 +22,7 @@
 import "./load-env";
 import { writeFileSync } from "node:fs";
 import { getPayload } from "payload";
+import { listedRounds, readScfSide } from "../src/lib/scf-round-counts";
 import configPromise from "../src/payload.config";
 import { curatedFieldsFor } from "./data/curation-maps";
 import {
@@ -460,6 +461,53 @@ async function main() {
 	for (const s of offList.unjoined) console.log(`  not joined: ${s}`);
 	console.log("");
 
+	// 4d. What SCF's round pages list (sls-116), stored on an execute for GET
+	// /api/projects/scf-rounds, which serves it against the rows. Only a whole
+	// read is stored; a partial one is could-not-check (exit 2 below), and the
+	// endpoint keeps serving the last whole read with its date.
+	const side = readScfSide({
+		rounds,
+		listing: scfProjects,
+		offListing: off.pages.map((p) => ({
+			id: p.id,
+			slug: p.slug,
+			title: p.title,
+			lastAwardedRound: p.lastAwardedRound ?? 0,
+		})),
+	});
+	const listed =
+		side.status === "read" && off.unread.length === 0
+			? listedRounds(rounds ?? [], side)
+			: null;
+	const roundsUnstored = !listed
+		? side.status === "could-not-check"
+			? side.reason
+			: `${off.unread.length} record page(s) outside the listing unread`
+		: "unresolved" in listed
+			? `record(s) no page resolved: ${listed.unresolved.join(", ")}`
+			: null;
+	if (roundsUnstored || !Array.isArray(listed)) {
+		console.log(`Round coverage: NOT STORED (${roundsUnstored})\n`);
+	} else {
+		const n = listed.reduce((t, r) => t + r.awards.length, 0);
+		console.log(
+			`Round coverage: ${listed.length} rounds, ${n} awards listed${dryRun ? " (dry run: not stored)" : ""}\n`,
+		);
+		if (!dryRun && payload) {
+			try {
+				await payload.create({
+					collection: "scf-round-reads",
+					data: { readAt: new Date().toISOString(), rounds: listed },
+				});
+			} catch (err) {
+				console.log(
+					`    ROUND COVERAGE WRITE ERROR: ${err instanceof Error ? err.message : String(err)}`,
+				);
+				stats.errors++;
+			}
+		}
+	}
+
 	// One row, several pages (2026-09-06). A project with a submission-named
 	// second page (ctx, untangled, lobster, coala-pay) was written once PER
 	// PAGE and the last page won: the exact-replace dropped the other page's
@@ -619,7 +667,8 @@ async function main() {
 			// rows carry Payload array-row ids the scrape doesn't have.
 			// awardName is part of the tuple: a non-numbered award has round
 			// null, so without the name two different Liquidity Awards compare
-			// equal and a real change would read as no drift.
+			// equal and a real change would read as no drift. sourceUrl too: a
+			// row that folds two pages serves each award's own page (sls-116).
 			(detail?.roundAwards &&
 				JSON.stringify(
 					(currentScf.roundAwards ?? []).map(
@@ -628,11 +677,13 @@ async function main() {
 							awardName?: string | null;
 							amountUSD?: number | null;
 							awardType?: string | null;
+							sourceUrl?: string | null;
 						}) => [
 							r.round ?? null,
 							r.awardName ?? null,
 							r.amountUSD ?? null,
 							r.awardType ?? null,
+							r.sourceUrl ?? null,
 						],
 					),
 				) !==
@@ -642,6 +693,7 @@ async function main() {
 							r.awardName ?? null,
 							r.amountUSD,
 							r.awardType,
+							r.sourceUrl ?? null,
 						]),
 					));
 
@@ -993,6 +1045,12 @@ async function main() {
 	if (unchecked.length > 0 || strandedRefused) {
 		console.error(
 			`\n✗ ${unchecked.length} SCF page(s) could not be read, so their awards were not checked${strandedRefused ? `, and the stranded pass was skipped (${strandedRefused})` : ""}; exiting 2.`,
+		);
+		process.exit(2);
+	}
+	if (roundsUnstored) {
+		console.error(
+			`\n✗ SCF's round pages were not read whole (${roundsUnstored}), so the round coverage was not stored; exiting 2.`,
 		);
 		process.exit(2);
 	}

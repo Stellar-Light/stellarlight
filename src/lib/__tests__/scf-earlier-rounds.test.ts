@@ -200,7 +200,8 @@ describe("a page outside the listing joins one row, by a reviewed entry or a nam
 		).toBe("the-blue-marble");
 		// the same name with no link is a hypothesis: a person decides
 		expect(
-			joinOffListing({ slug: "wally-ygy", title: "Wally" }, index),
+			// (wally-ygy itself joins by a reviewed entry since 2026-11-23)
+			joinOffListing({ slug: "wally-abc", title: "Wally" }, index),
 		).toEqual({
 			why: "name only, no link the page and the row share",
 			candidate: rows[3],
