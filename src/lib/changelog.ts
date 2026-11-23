@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
 		surfaces: ["api"],
+		version: "spec@1.9.157",
+		type: "fixed",
+		summary:
+			"statusBasis `product-integration` no longer counts the test network. A stellar.toml whose NETWORK_PASSPHRASE is a test network's, a page naming horizon-testnet.stellar.org, or an RPC host that does not name Soroban mainnet was read as a product on Stellar; so was an SPA's index.html served at the stellar.toml path, because its markup says \"accounts\". The weekly product lane now re-reads its own stamps and moves a row whose cited stellar.toml it rejects on two reads to `unverified` with no source. That lane writes no status; a withdrawn row is then open to the weak-basis rules like any other row.",
+		detail:
+			"Read on 2026-11-23: of 820 Live rows, 72 served product-integration and 46 of those cited a stellar.toml. Six tomls declare the test network (slimepay, remi, microvault, sytemap, juntta, hedgepay), and none of the accounts they name exists on the public network. Of 16 citing a toml with no passphrase, 9 were HTML pages; the 7 real tomls stay evidence, because SEP-1 lets a public network toml omit the passphrase and 6 of them name an account that exists on the public network. A toml naming a Stellar service the product runs (a federation, transfer, KYC or web auth server) counts as well; a toml naming none is no evidence, and is not rejected. A read-only dry run of the lane on 2026-11-23 over 65 of its own stamps plans 15 withdrawals (the 6 test network tomls, 7 HTML pages and 2 tomls no longer served), 5 re-citations to the evidence found now, and 39 unchanged; 4 could not be read. A withdrawal needs two reads 30 seconds apart that agree, and a marker merely not found again never withdraws. Once withdrawn, the daily site-liveness lane may stamp `site-liveness` where the website answered, the Lumenloop sync may write its label (Live for every listed project) and stamp `source-inherited`, and the weak-basis liveness check may queue the row for a person. The SDK, address and passphrase markers do not name a network, so an app built only for the test network can still earn this basis.",
+	},
+	{
+		date: "2026-11-23",
+		surfaces: ["api"],
 		version: "spec@1.9.156",
 		type: "fixed",
 		summary:
