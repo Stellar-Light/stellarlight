@@ -23,13 +23,14 @@ import {
 	type Snapshot,
 	type SnapshotRow,
 } from "../../src/lib/lifecycle-metrics";
+import { onchainReadingOf } from "../../src/lib/onchain-use";
 
 const API = "https://stellarlight.xyz/api/projects/search";
 const DIR = "data/snapshots/projects";
 const EXECUTE = process.argv.includes("--execute");
 const WITH_LISTED = process.argv.includes("--with-listed-dates");
 const FIELDS =
-	"slug,status,statusBasis,statusAsOf,lifecycle,lastActivityAt,scfAwarded,scfAwardedRounds,deployment,category,repos";
+	"slug,status,statusBasis,statusAsOf,lifecycle,lastActivityAt,scfAwarded,scfAwardedRounds,deployment,category,repos,onchain";
 
 // biome-ignore lint/suspicious/noExplicitAny: the API's JSON
 async function getJson(url: string): Promise<any> {
@@ -109,6 +110,7 @@ export async function servedProjects(): Promise<{
 				category: p.category ?? null,
 				repos: Array.isArray(p.repos) ? p.repos.length : 0,
 				listed: null,
+				onchain: onchainReadingOf(p.onchain),
 			});
 		}
 	}
@@ -205,6 +207,15 @@ async function main() {
 	console.log(
 		`  history: ${report.snapshots} snapshot(s) since ${report.historyStart}; ${report.survival.windowDays}-day survival available from ${report.survival.availableFrom}`,
 	);
+	const use = report.onchainUse;
+	if (use)
+		console.log(
+			`  on-chain: ${rows.filter((r) => r.onchain).length} projects with a reading · ${use.readings.length} weekly reading(s) so far · ${Object.entries(
+				use.counts,
+			)
+				.map(([k, v]) => `${k} ${v}`)
+				.join(" · ")}`,
+		);
 	if (!EXECUTE) {
 		console.log("\nDRY RUN: nothing written. Re-run with --execute.");
 		return;

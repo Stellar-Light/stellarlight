@@ -10,6 +10,11 @@
  * here asserts a number the snapshots do not hold: a definition that has no
  * data yet says when it will.
  */
+import {
+	type OnchainReading,
+	type OnchainUseReport,
+	onchainUse,
+} from "./onchain-use";
 import { isStrongStatusBasis } from "./project-status";
 
 /** One project as the directory served it on the snapshot day. */
@@ -34,6 +39,10 @@ export interface SnapshotRow {
 	repos: number;
 	/** First listed in the directory (YYYY-MM-DD); null = not read. */
 	listed: string | null;
+	/** The weekly on-chain reading the project served that day; null = it
+	 * serves none. Absent on snapshots written before 2026-11-23, which did
+	 * not record it: not a reading of "none". */
+	onchain?: OnchainReading | null;
 }
 
 export interface Snapshot {
@@ -142,6 +151,8 @@ export interface LifecycleReport {
 		availableFrom: string;
 		readings: SurvivalReading[];
 	};
+	/** Absent on reports written before 2026-11-23. */
+	onchainUse?: OnchainUseReport;
 }
 
 /**
@@ -258,5 +269,6 @@ export function lifecycleMetrics(
 				.slice(0, 10),
 			readings,
 		},
+		onchainUse: onchainUse(snaps),
 	};
 }
