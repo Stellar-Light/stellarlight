@@ -61,8 +61,32 @@ export const SCF_SLUG_OVERRIDES: Record<string, string> = {
 	"bondhiveonchain-fixed-deposit-pbl": "bondhive",
 	"coinsph-stellar-remittances-qwo": "coins-ph",
 	"identity-operating-system-idos-nqg": "idos",
-	"peer-by-honeycoin-inz": "honey-coin",
+	// Owner decision (sls116-decisions.md, 2026-11-23): every submission on
+	// the page is a Peer product ("Peer: The everything app.", "Peer:
+	// Flights on Stellar"), and the peer row's source record cites both;
+	// honey-coin's copy goes (the stranded pass removes it).
+	"peer-by-honeycoin-inz": "peer",
 	"pelago-airswift-nkm": "airswift",
+	// sls-116 decisions (owner-approved 2026-11-23, sls116-decisions.md):
+	// each page's awarded submission is the one the row's own source
+	// record (the Lumenloop ecosystem entry it was seeded from) cites.
+	"chrysalis-nkf": "raum-network", // #29 $49,040 · raum.network
+	"soracleorg-posted-bdt": "soracle", // #22 $24,000
+	"amber-rwa-tokenization-on-stellar-sku": "amber", // #20 $50,000
+	"answerly-omb": "answerly", // #9, amount not published
+	"wally-ygy": "wally", // #8, amount not published
+	"boss-money-former-leaf-global-hxt": "boss-revolution", // #7 $249,112 · bossmoney.com
+	"optionblox-yieldblox-4mn": "yieldblox", // #7 $320,972 · script3.io
+	"ayadee-trak-j7v": "trak", // #6 $16,737.09 (SCF_FIX)
+	"the-interstellar-platform-6rb": "interstellar", // #5 $44,868.20
+	"apayio-lpa": "apay", // #4, amount not published (SCF_FIX)
+	"stellar-community-forum-3om": "galactictalk", // #1 $21,509.98
+	"soroban-cli-cross-platform-gui-57v": "sora", // #21 $20,000 + #25 $77,500 · github.com/tolgayayci/sora
+	"lumoscore-ckm": "lumosdao", // #21 $54,000 · lumoscore.com
+	"styx-a-soroban-cosmos-bridge-qw2": "styx", // #23 $43,000 · github.com/jj7302/styx-bridge
+	"instantdao-zce": "instantdao", // #8 $50,000
+	"soroban-contract-source-verification-service-bax":
+		"soroban-contract-source-verification-service", // #44 $73,500 (SEEDS)
 	// Soroban → Stellar rename class (product renamed, SCF page didn't).
 	"soroban-security-portal-7ea": "stellar-security-portal",
 	// sls-063 (2026-08-11, stellar-raven): 10 more product/submission-named
@@ -604,6 +628,7 @@ export function strandedAwards<
 	joinedPage: ReadonlyMap<string, unknown>,
 	joined: ReadonlySet<unknown>,
 	identityOf: (row: R) => unknown,
+	claims: typeof SCF_SHARED_CLAIMS = SCF_SHARED_CLAIMS,
 ): Array<{ row: R; page: string; owner: unknown }> {
 	const out: Array<{ row: R; page: string; owner: unknown }> = [];
 	for (const row of rows) {
@@ -613,7 +638,7 @@ export function strandedAwards<
 		const id = identityOf(row);
 		const owner = joinedPage.get(page);
 		if (owner === undefined || owner === id || joined.has(id)) continue;
-		if (SCF_SHARED_CLAIMS[row.slug]?.page === page) continue;
+		if (claims[row.slug]?.page === page) continue;
 		out.push({ row, page, owner });
 	}
 	return out;
@@ -629,16 +654,8 @@ export const SCF_SHARED_CLAIMS: Record<
 	string,
 	{ page: string; joinedTo: string; why: string }
 > = {
-	// "Peer (by Honeycoin)" funds Peer, HoneyCoin's app, which is the peer
-	// row (usepeer.co); the page joins the company row, honey-coin
-	// (SCF_SLUG_OVERRIDES). Which row carries the award is the owner's call
-	// (improvements/TODO.md); until then both keep it, each written from the
-	// page with its source and date (sharedClaimMatches).
-	peer: {
-		page: "peer-by-honeycoin-inz",
-		joinedTo: "honey-coin",
-		why: "product row or company row is an owner decision",
-	},
+	// none: the one claim (peer on Peer by HoneyCoin) ended 2026-11-23, when
+	// the owner put the page on peer (SCF_SLUG_OVERRIDES)
 };
 
 /**
@@ -658,9 +675,10 @@ export function sharedClaimMatches<
 >(
 	matched: readonly M[],
 	bySlug: ReadonlyMap<string, R>,
+	claims: typeof SCF_SHARED_CLAIMS = SCF_SHARED_CLAIMS,
 ): Array<{ scf: M["scf"]; ours: R; scfOnly: true }> {
 	const out: Array<{ scf: M["scf"]; ours: R; scfOnly: true }> = [];
-	for (const [slug, claim] of Object.entries(SCF_SHARED_CLAIMS)) {
+	for (const [slug, claim] of Object.entries(claims)) {
 		const row = bySlug.get(slug);
 		if (row?.scf?.slug !== claim.page) continue;
 		if (matched.some((m) => m.ours.slug === slug)) continue;
@@ -678,7 +696,10 @@ export function countedRows<
 		scf?: { slug?: string | null } | null;
 		scfSourceUrl?: unknown;
 	},
->(rows: readonly R[]): R[] {
+>(
+	rows: readonly R[],
+	claims: typeof SCF_SHARED_CLAIMS = SCF_SHARED_CLAIMS,
+): R[] {
 	const PAGE = "https://communityfund.stellar.org/project/";
 	const pageOf = (r: R) =>
 		r.scf?.slug ??
@@ -687,9 +708,7 @@ export function countedRows<
 			: null);
 	// the claim holds only while the row stores the claim's page, as in
 	// strandedAwards: a page of its own makes it a row like any other
-	return rows.filter(
-		(r) => SCF_SHARED_CLAIMS[String(r.slug)]?.page !== pageOf(r),
-	);
+	return rows.filter((r) => claims[String(r.slug)]?.page !== pageOf(r));
 }
 
 /** Most stranded awards one run may remove without --allow-stranded. */

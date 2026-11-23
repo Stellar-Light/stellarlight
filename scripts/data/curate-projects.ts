@@ -640,6 +640,29 @@ const SCF_FIX: Record<
 	// recap $93,700 = page total $149,820 EXACTLY; absent from the #40
 	// recap's full 24-project list.
 	abroad: { awarded: true, totalAwarded: 149820, awardedRounds: [32, 35] },
+	// sls-116 decisions (owner-approved 2026-11-23): each row stored a fossil
+	// page from the pre-2026-08-12 substring matcher ("apay" inside
+	// "coala-pay", "trak" inside "devtrak") with awarded false, which the SCF
+	// sync holds as a correction; its own page and award are written here.
+	// The page's awarded submission is the one the row's source record cites.
+	apay: {
+		awarded: true,
+		totalAwarded: null, // the page discloses no amount (total 0)
+		awardedRounds: [4],
+		roundAwards: [
+			{ round: 4, amountUSD: null, awardType: "Legacy v1.0 Award" },
+		],
+		page: "apayio-lpa",
+	},
+	trak: {
+		awarded: true,
+		totalAwarded: 16737.09,
+		awardedRounds: [6],
+		roundAwards: [
+			{ round: 6, amountUSD: 16737.09, awardType: "Legacy v2.0 Award" },
+		],
+		page: "ayadee-trak-j7v",
+	},
 };
 
 // sls-050: rename continuity — served as the `identity` block and matched as
