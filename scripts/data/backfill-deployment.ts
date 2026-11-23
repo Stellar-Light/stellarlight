@@ -402,6 +402,13 @@ export async function planDeployments(
 		const owner = seedOwner.get(address);
 		return !!owner && owner !== slug;
 	};
+	// A row's contract is no deployment evidence when a seed gives it to
+	// another row, or when only a third party's label ties it to the row (the
+	// on-chain map's labelled tier).
+	const notEvidence = (
+		c: { address: string; tier?: string | null },
+		slug: string,
+	) => c.tier === "labelled" || ownedElsewhere(c.address, slug);
 
 	// Evidence source: repos with a mainnet contract id, by projectSlug. An id
 	// the scan judged cited is a contract the repo's README names and its
@@ -434,7 +441,7 @@ export async function planDeployments(
 	const contractIds: Record<Net, string[]> = { mainnet: [], testnet: [] };
 	for (const p of projects) {
 		for (const c of p.onchain?.contracts ?? [])
-			if (c?.address && !ownedElsewhere(c.address, p.slug))
+			if (c?.address && !notEvidence(c, p.slug))
 				contractIds.mainnet.push(c.address);
 		const j = joins.get(p.slug);
 		if (j) contractIds.mainnet.push(j.contractId);
@@ -526,7 +533,7 @@ export async function planDeployments(
 		} else {
 			const cands: DeploymentCandidate[] = [];
 			for (const c of p.onchain?.contracts ?? [])
-				if (c?.address && !ownedElsewhere(c.address, p.slug))
+				if (c?.address && !notEvidence(c, p.slug))
 					cands.push({
 						network: "mainnet",
 						basis: "onchain-activity",

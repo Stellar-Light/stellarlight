@@ -28,6 +28,36 @@ describe("basis-from-onchain evidence: the newest dated activity, or nothing", (
 		});
 	});
 
+	it("never cites a contract only a third party's label ties to the row (the on-chain map's labelled tier)", () => {
+		expect(
+			evidenceOf({
+				contracts: [
+					{
+						address: C1,
+						lastEventAt: "2026-10-01T00:00:00.000Z",
+						tier: "strong",
+					},
+					{
+						address: C2,
+						lastEventAt: "2026-11-20T08:00:00.000Z",
+						tier: "labelled",
+					},
+				],
+			})?.detail,
+		).toBe("event from CAJJZSGMMM… on 2026-10-01");
+		expect(
+			evidenceOf({
+				contracts: [
+					{
+						address: C2,
+						lastEventAt: "2026-11-20T08:00:00.000Z",
+						tier: "labelled",
+					},
+				],
+			}),
+		).toBeNull();
+	});
+
 	it("cites the asset when its movement is the newest activity", () => {
 		const ev = evidenceOf({
 			...asset,

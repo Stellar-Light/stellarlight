@@ -12,16 +12,24 @@
  * 2026-11-06; every row froze. The fields nothing free can supply (payment
  * and trade counts of an asset, event totals, sub-calls and storage size of
  * a contract) are gone, not zeroed. A contract's creation date does not
- * change, so the date a row holds is kept; a contract that joins later has
- * none until a ledger-proved source is wired in (improvements/TODO.md).
+ * change: the on-chain map's, proved in the ledger, is written; otherwise the
+ * date a row holds is kept.
  *
  * Join keys come from verified-only sources:
  *   1. src/data/onchain-contracts.ts: hand-verified seeds, each with its
  *      primary-source URL.
- *   2. repos.codeVerified.mainnetContractId: the contract the code scan
+ *   2. src/data/onchain-map.json: contracts and accounts linked to a row by
+ *      evidence of their own, with tier, evidence kind and source (rules in
+ *      src/lib/onchain-map.ts). Accounts are written to onchain.accounts.
+ *   3. repos.codeVerified.mainnetContractId: the contract the code scan
  *      proved to be a repo's own, for repos linked to a directory project.
- *   3. partner records, the stablecoin registry and a project's own
+ *   4. partner records, the stablecoin registry and a project's own
  *      stellar.toml, for the issued asset.
+ *
+ * Each week every contract's instance is looked up on mainnet (read-only RPC
+ * getLedgerEntries) and every map account on Horizon: an address read absent
+ * is marked endedAt with the day it was first read so; one that could not be
+ * checked keeps what it had, and the run exits red.
  *
  * A row is refreshed whole or left as it was: a read that fails skips the
  * project, nothing is zeroed, and the run exits red.
@@ -37,6 +45,7 @@ import {
 	ONCHAIN_NOT_THIS_ROW,
 	ONCHAIN_SEEDS,
 } from "../../src/data/onchain-contracts";
+import onchainMap from "../../src/data/onchain-map.json";
 import { STABLECOIN_REGISTRY } from "../../src/data/stablecoin-registry";
 import { attestedSourceRepos } from "../../src/lib/contract-ownership";
 import {
@@ -46,6 +55,14 @@ import {
 	verifiedRepoOf,
 } from "../../src/lib/onchain-join";
 import {
+	endedAtOf,
+	type OnchainMapLink,
+	type Presence,
+	selectLinks,
+} from "../../src/lib/onchain-map";
+import {
+	accountPresence,
+	contractPresence,
 	type FetchJson,
 	indexHeadAt,
 	MAX_INDEX_LAG_MINUTES,
@@ -117,6 +134,25 @@ const fetchJson: FetchJson = async (url) => {
 const day = (v: unknown) =>
 	typeof v === "string" && v ? v.slice(0, 10) : "none";
 
+/** The on-chain map's fields of one contract or account (null where the map
+ * holds none: a seed or repo join), and its existence: endedAt is the day
+ * the address was first read absent, kept while that cannot be checked. */
+const mapFields = (
+	m: OnchainMapLink | undefined,
+	// biome-ignore lint/suspicious/noExplicitAny: stored array row
+	old: any,
+	presence: Presence,
+	now: string,
+) => ({
+	tier: m?.tier ?? null,
+	evidence: m?.evidence ?? null,
+	sourceUrl: m?.sourceUrl ?? null,
+	createdLedger: m?.createdLedger ?? null,
+	dateBasis: m?.dateBasis ?? null,
+	sharedWithinFamily: m?.sharedWithinFamily ?? null,
+	endedAt: endedAtOf(old?.endedAt, presence, now),
+});
+
 async function run() {
 	const now = new Date();
 	const asOf = now.toISOString();
@@ -148,15 +184,19 @@ async function run() {
 		{
 			contracts: Array<{
 				address: string;
-				label: string;
+				label: string | null;
 				/** The repo this contract rolls up to: its seed names it, or the
 				 * scan proved the repo's source defines it. */
 				sourceRepo?: string;
 				/** Set from a seed only: the repo served as verifiedRepo where
 				 * the WASM carries no build metadata to attest. */
 				curatedRepo?: string;
+				/** The on-chain map's link (src/data/onchain-map.json). */
+				map?: OnchainMapLink;
 			}>;
 			asset?: { code: string; issuer: string };
+			/** The on-chain map's accounts for this row. */
+			accounts?: OnchainMapLink[];
 		}
 	>();
 	for (const seed of ONCHAIN_SEEDS) {
@@ -231,6 +271,7 @@ async function run() {
 			lastEventAt: string | null;
 		}
 	>();
+	const rolledUp = new Set<string>();
 	// Repo-derived contracts: the id the code scan proved to be a repo's own,
 	// joined by src/lib/onchain-join.ts under the rule the deployment pass
 	// uses. Until 2026-11 this read codeVerified.mainnetContractId, a path the
@@ -255,6 +296,41 @@ async function run() {
 			),
 		]);
 	};
+	// The on-chain map: contracts and accounts linked to a row by evidence of
+	// their own (src/data/onchain-map.json, rules in src/lib/onchain-map.ts).
+	// A contract it gives to one row is settled like a seed's, so a repo link
+	// never files it under another row; what a curator held back stays back.
+	let mapContracts = 0;
+	let mapAccounts = 0;
+	for (const l of selectLinks(onchainMap.links as OnchainMapLink[]).kept) {
+		if (heldBack(l.slug).has(l.address)) {
+			console.log(
+				`  held back: map ${l.kind} ${l.address.slice(0, 8)}… is not joined to ${l.slug} (a curator named it as another product's)`,
+			);
+			continue;
+		}
+		const entry = bySlug.get(l.slug) ?? { contracts: [] };
+		bySlug.set(l.slug, entry);
+		if (l.kind === "account") {
+			entry.accounts = [...(entry.accounts ?? []), l];
+			mapAccounts += 1;
+			continue;
+		}
+		const owner = seedOwner.get(l.address);
+		if (owner && owner !== l.slug) {
+			console.log(
+				`  map contract ${l.address.slice(0, 8)}… names ${l.slug}, a seed gives it to ${owner}: not joined`,
+			);
+			continue;
+		}
+		const held = entry.contracts.find((c) => c.address === l.address);
+		if (held) held.map = l;
+		else {
+			entry.contracts.push({ address: l.address, label: l.label, map: l });
+			mapContracts += 1;
+		}
+		if (!l.sharedWithinFamily) seedOwner.set(l.address, l.slug);
+	}
 	const repoJoin = repoContractJoins(repoRows, { seedOwner, heldBack });
 	for (const j of repoJoin.retracted)
 		console.log(
@@ -466,7 +542,40 @@ async function run() {
 	}
 
 	console.log(
-		`Join keys: ${ONCHAIN_SEEDS.length} seeded + ${repoDerived} repo-derived (${repoJoin.retracted.length} more held back, ${repoJoin.shared.length} shared by two rows) + ${partnerDerived} partner-asset + ${registryDerived} registry + ${tomlDerived} toml → ${bySlug.size} projects\n`,
+		`Join keys: ${ONCHAIN_SEEDS.length} seeded + ${mapContracts} map contracts and ${mapAccounts} map accounts + ${repoDerived} repo-derived (${repoJoin.retracted.length} more held back, ${repoJoin.shared.length} shared by two rows) + ${partnerDerived} partner-asset + ${registryDerived} registry + ${tomlDerived} toml → ${bySlug.size} projects\n`,
+	);
+
+	// The weekly existence check: each contract's instance on mainnet (one
+	// read-only RPC pass) and each map account on Horizon. An address read
+	// absent is ended with the day it was first read so; one that could not
+	// be checked keeps what the row holds and turns the run red.
+	const contractState = await contractPresence([
+		...new Set(
+			[...bySlug.values()].flatMap((k) => k.contracts.map((c) => c.address)),
+		),
+	]);
+	const accountState = new Map<string, Presence>();
+	for (const a of new Set(
+		[...bySlug.values()].flatMap((k) =>
+			(k.accounts ?? []).map((x) => x.address),
+		),
+	)) {
+		let p = await accountPresence(a);
+		if (p === null) {
+			await sleep(5_000);
+			p = await accountPresence(a);
+		}
+		accountState.set(a, p);
+		await sleep(150);
+	}
+	const unchecked = [
+		...(contractState ? [] : ["every contract (the RPC could not be read)"]),
+		...[...accountState].filter(([, p]) => p === null).map(([a]) => a),
+	];
+	const tally = (m: Map<string, Presence>) =>
+		`${[...m.values()].filter((p) => p === "present").length} present, ${[...m.values()].filter((p) => p === "absent").length} absent, ${[...m.values()].filter((p) => p === null).length} could not check`;
+	console.log(
+		`existence: contracts ${contractState ? tally(contractState) : "could not check"}; accounts ${tally(accountState)}\n`,
 	);
 
 	// The repo each contract's deployed WASM is attested to, read once for
@@ -554,16 +663,30 @@ async function run() {
 		const contracts: Array<Record<string, unknown>> = [];
 		let failed = false;
 		for (const c of keys.contracts) {
-			const reading = await readContract(c.address, fetchJson, now);
+			const old = priorContracts.find((p) => p?.address === c.address);
+			const presence = contractState?.get(c.address) ?? null;
+			// An address that holds no contract has no activity to read: the
+			// row keeps the last reading it had.
+			const reading =
+				presence === "absent"
+					? {
+							lastEventAt: old?.lastEventAt ?? null,
+							activeLedgers: old?.activeLedgers ?? null,
+							ttlState: old?.ttlState ?? null,
+						}
+					: await readContract(c.address, fetchJson, now);
 			if (!reading) {
 				failed = true;
 				break;
 			}
-			const old = priorContracts.find((p) => p?.address === c.address);
 			// A contract whose code the RPC did not list keeps the repo the row
 			// holds. For one archived on chain that is expected (its entries
 			// leave the live ledger state); for a live one it is a failed read.
-			if (!attested.has(c.address) && reading.ttlState !== "archived")
+			if (
+				presence !== "absent" &&
+				!attested.has(c.address) &&
+				reading.ttlState !== "archived"
+			)
 				unreadLive.push(`${slug} ${c.label}`);
 			contracts.push({
 				address: c.address,
@@ -571,10 +694,25 @@ async function run() {
 				lastEventAt: reading.lastEventAt,
 				activeLedgers: reading.activeLedgers,
 				ttlState: reading.ttlState,
-				createdAt: old?.createdAt ?? null,
+				// The map's creation is proved in the ledger; otherwise the date
+				// the first reading recorded is kept.
+				createdAt: c.map?.createdAt ?? old?.createdAt ?? null,
 				verifiedRepo: verifiedRepoOf(evidenceOf(c, old?.verifiedRepo)),
+				...mapFields(c.map, old, presence, asOf),
 			});
 		}
+		const accounts = (keys.accounts ?? []).map((a) => {
+			const old = (Array.isArray(prior?.accounts) ? prior.accounts : []).find(
+				// biome-ignore lint/suspicious/noExplicitAny: stored array rows
+				(p: any) => p?.address === a.address,
+			);
+			return {
+				address: a.address,
+				label: a.label,
+				createdAt: a.createdAt,
+				...mapFields(a, old, accountState.get(a.address) ?? null, asOf),
+			};
+		});
 
 		const asset =
 			!failed && keys.asset
@@ -618,7 +756,10 @@ async function run() {
 					priorContracts.find((p) => p?.address === c.address)?.verifiedRepo,
 				),
 			);
-			if (!k) continue;
+			// A contract an issuer and its tokens share sits on each of their
+			// rows: count it once.
+			if (!k || rolledUp.has(`${k} ${c.address}`)) continue;
+			rolledUp.add(`${k} ${c.address}`);
 			const cur = byRepo.get(k) ?? {
 				contracts: 0,
 				activeLedgers: null,
@@ -648,7 +789,7 @@ async function run() {
 		for (const c of contracts) {
 			const old = priorContracts.find((p) => p?.address === c.address);
 			console.log(
-				`    ${String(c.label)}: last event ${day(c.lastEventAt)} | ${c.activeLedgers ?? "no"} active ledgers | ${c.ttlState ?? "ttl unread"}${old ? "" : " | NEW"}${c.createdAt ? "" : " | no creation date"}${(old?.verifiedRepo ?? null) !== c.verifiedRepo ? ` | source repo ${old?.verifiedRepo ?? "none"} → ${c.verifiedRepo ?? "none"}` : ""}`,
+				`    ${String(c.label ?? c.address)}: last event ${day(c.lastEventAt)} | ${c.activeLedgers ?? "no"} active ledgers | ${c.ttlState ?? "ttl unread"}${old ? "" : " | NEW"}${c.createdAt ? "" : " | no creation date"}${old?.createdAt && c.createdAt && Date.parse(old.createdAt) !== Date.parse(String(c.createdAt)) ? ` | created ${old.createdAt} → ${c.createdAt}` : ""}${(old?.verifiedRepo ?? null) !== c.verifiedRepo ? ` | source repo ${old?.verifiedRepo ?? "none"} → ${c.verifiedRepo ?? "none"}` : ""}${c.tier ? ` | map ${c.tier} (${(c.evidence as string[]).join(", ")})` : ""}${c.endedAt ? ` | ENDED ${day(c.endedAt)}` : ""}`,
 			);
 		}
 		for (const gone of priorContracts.filter(
@@ -657,6 +798,18 @@ async function run() {
 			console.log(
 				`    DROPPED ${String(gone?.label)} ${String(gone?.address)}`,
 			);
+		// biome-ignore lint/suspicious/noExplicitAny: stored array rows
+		const priorAccounts: any[] = Array.isArray(prior?.accounts)
+			? prior.accounts
+			: [];
+		for (const a of accounts)
+			console.log(
+				`    account ${a.address}${a.label ? ` (${a.label})` : ""}: map ${a.tier} (${(a.evidence ?? []).join(", ")}) | opened ${day(a.createdAt)}${priorAccounts.some((p) => p?.address === a.address) ? "" : " | NEW"}${a.endedAt ? ` | ENDED ${day(a.endedAt)}` : ""}${accountState.get(a.address) === null ? " | could not check" : ""}`,
+			);
+		for (const gone of priorAccounts.filter(
+			(p) => !accounts.some((a) => a.address === p?.address),
+		))
+			console.log(`    DROPPED account ${String(gone?.address)}`);
 
 		if (execute) {
 			const onchain = {
@@ -668,6 +821,7 @@ async function run() {
 				assetTrustlines,
 				assetLastMovedAt,
 				contracts,
+				accounts,
 				source: SOURCE,
 				asOf,
 				prevAsOf: priorAsOf ? new Date(priorAsOf).toISOString() : null,
@@ -710,9 +864,23 @@ async function run() {
 						"activeLedgers",
 						"ttlState",
 						"verifiedRepo",
+						"tier",
+						"evidence",
+						"endedAt",
 					]),
 				);
 			}
+			// biome-ignore lint/suspicious/noExplicitAny: stored array rows
+			const backAccounts: any[] = (back as any).onchain?.accounts ?? [];
+			for (const a of accounts)
+				mm.push(
+					...diffWritten(
+						`${slug} account ${a.address.slice(0, 8)}`,
+						a,
+						backAccounts.find((b) => b?.address === a.address),
+						["address", "tier", "evidence", "createdAt", "endedAt"],
+					),
+				);
 			if (mm.length) {
 				console.error(formatMismatches(mm));
 				projectReadBackFailed += 1;
@@ -866,6 +1034,13 @@ async function run() {
 		// is corrected, so the run says so with its exit code.
 		console.error(
 			`RED: ${noRow.length} join key(s) name a slug no project row has: ${noRow.join(", ")}. Correct the seed or the repo link.`,
+		);
+		process.exitCode = 1;
+	}
+	if (unchecked.length) {
+		// Could-not-check ends nothing, and the run says so with its exit code.
+		console.error(
+			`RED: existence could not be checked for ${unchecked.length} address(es) (${unchecked.slice(0, 5).join("; ")}${unchecked.length > 5 ? "; ..." : ""}); each keeps the endedAt it had.`,
 		);
 		process.exitCode = 1;
 	}

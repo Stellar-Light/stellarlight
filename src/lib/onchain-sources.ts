@@ -43,10 +43,17 @@
  */
 import { Asset, Networks } from "@stellar/stellar-sdk";
 import {
+	instanceKey,
+	MAINNET_RPC,
+	readLedgerEntries,
+} from "./contract-ownership";
+import {
+	HORIZON,
 	horizonAssetUrl,
 	supplyOfAssetRecord,
 	trustlinesOfAssetRecord,
 } from "./horizon-supply";
+import type { Presence } from "./onchain-map";
 
 /** GET a URL as parsed JSON; null when it could not be read. */
 export type FetchJson = (url: string) => Promise<unknown | null>;
@@ -217,4 +224,56 @@ export async function indexHeadAt(
 	);
 	const events = Array.isArray(data?.events) ? data.events.map(obj) : [];
 	return isoOf(events[0]?.close_time);
+}
+
+/**
+ * Whether each contract's instance is on mainnet, from one read-only
+ * getLedgerEntries pass. The RPC lists an archived instance too (one evicted
+ * from live state reads back with liveUntilLedgerSeq 0, checked 2026-11-23),
+ * and an instance entry cannot be deleted, so an absent answer means the
+ * address holds no contract. Null when the RPC could not be read, or when it
+ * listed none of several contracts, which is the instrument (a wrong network
+ * or a failing node), not the chain.
+ */
+export async function contractPresence(
+	ids: string[],
+	rpcUrl = MAINNET_RPC,
+	fetchImpl: typeof fetch = fetch,
+): Promise<Map<string, "present" | "absent"> | null> {
+	const keyOf = new Map<string, string>();
+	for (const id of new Set(ids)) {
+		try {
+			keyOf.set(id, instanceKey(id));
+		} catch {
+			// not a contract address: never asked
+		}
+	}
+	if (!keyOf.size) return new Map();
+	const found = await readLedgerEntries([...keyOf.values()], rpcUrl, fetchImpl);
+	if (!found) return null;
+	const out = new Map<string, "present" | "absent">();
+	for (const [id, key] of keyOf)
+		out.set(id, found.has(key) ? "present" : "absent");
+	if (keyOf.size > 1 && ![...out.values()].includes("present")) return null;
+	return out;
+}
+
+/** Whether an account exists on mainnet now: Horizon answers 404 for an
+ * account that was merged or never funded. Null on any other failure. */
+export async function accountPresence(
+	address: string,
+	fetchImpl: typeof fetch = fetch,
+): Promise<Presence> {
+	try {
+		const res = await fetchImpl(`${HORIZON}/accounts/${address}`, {
+			headers: { "user-agent": "stellarlight-onchain-enrich" },
+			signal: AbortSignal.timeout(20_000),
+		});
+		if (res.status === 404) return "absent";
+		if (!res.ok) return null;
+		const body = (await res.json()) as { account_id?: unknown };
+		return body.account_id === address ? "present" : null;
+	} catch {
+		return null;
+	}
 }

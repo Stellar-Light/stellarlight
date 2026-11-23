@@ -68,7 +68,7 @@ describe("buildContractsRegistry", () => {
 			),
 		);
 		expect(total).toBe(2);
-		expect(contracts[0].repo.fullName).toBe("proto/contracts");
+		expect(contracts[0].repo?.fullName).toBe("proto/contracts");
 		expect(contracts[0].audits).toEqual({
 			count: 2,
 			latestAuditor: "Veridise",
@@ -117,7 +117,7 @@ describe("an id a repo only cites is not listed as its contract", () => {
 		);
 		expect(total).toBe(5);
 		expect(
-			contracts.map((c) => [c.repo.fullName, c.contractBasis]).sort(),
+			contracts.map((c) => [c.repo?.fullName, c.contractBasis]).sort(),
 		).toEqual(
 			[
 				["reflector-network/reflector-contract", "self-validated"],

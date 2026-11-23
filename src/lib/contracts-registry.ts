@@ -16,10 +16,39 @@
  * Blend pool. An id not judged yet (published) is listed as before.
  * No self-declared registries, no directory prose. The set grows exactly as
  * fast as scans + weekly on-chain passes reach repos; meta carries that note.
+ *
+ * The curated on-chain map (src/data/onchain-map.json) reaches this registry
+ * through the project rows the on-chain lane writes: a contract a row holds
+ * with a map tier carries `attribution` (project, tier, evidence, source,
+ * ledger-proved creation, endedAt), and one no repo row names gets a row of
+ * its own (contractBasis onchain-map). A contract two rows hold outside one
+ * issuer-and-token family is attributed to neither.
  */
 
 import type { Payload } from "payload";
 import { isOwnContract } from "./contract-basis";
+import { repoInUrl } from "./onchain-join";
+import { MAP_TIERS } from "./onchain-map";
+import { findWholeSet } from "./whole-set";
+
+/** The on-chain map's link of a contract to its project, as the on-chain
+ * lane last wrote it on the project row. */
+export interface ContractAttribution {
+	project: { slug: string; name: string | null };
+	tier: "strong" | "labelled";
+	evidence: string[];
+	sourceUrl: string | null;
+	createdAt: string | null;
+	createdLedger: number | null;
+	dateBasis: string | null;
+	/** Every member of the issuer-and-token family holding it, issuer first;
+	 * null when one project holds it. */
+	sharedWithinFamily: string[] | null;
+	/** The day the weekly check first read the contract absent from mainnet. */
+	endedAt: string | null;
+	/** The reading that last checked it (the project's onchain.asOf). */
+	asOf: string | null;
+}
 
 export interface ContractRow {
 	/** The repo's mainnet contract id (C…, any basis but cited), else the
@@ -37,7 +66,9 @@ export interface ContractRow {
 		asOf: string | null;
 	}>;
 	contractBasis: string | null;
-	repo: { fullName: string; url: string | null };
+	/** Null on a row the on-chain map alone lists, when no source repo is
+	 * attested for the contract. */
+	repo: { fullName: string; url: string | null } | null;
 	project: { slug: string; name: string | null } | null;
 	stellarProof: string | null;
 	codeDepth: number | null;
@@ -58,6 +89,9 @@ export interface ContractRow {
 	} | null;
 	successorRepo: string | null;
 	scannedAt: string | null;
+	/** The on-chain map's link of contractId to a project, or null when the
+	 * map holds none for it. */
+	attribution: ContractAttribution | null;
 }
 
 export interface ContractsQuery {
@@ -105,7 +139,7 @@ export async function buildContractsRegistry(
 		const needle = q.toLowerCase();
 		rows = rows.filter(
 			(r) =>
-				r.repo.fullName.toLowerCase().includes(needle) ||
+				(r.repo?.fullName ?? "").toLowerCase().includes(needle) ||
 				(r.project?.slug ?? "").includes(needle) ||
 				(r.project?.name ?? "").toLowerCase().includes(needle) ||
 				(r.contractId ?? "").toLowerCase().includes(needle),
@@ -139,10 +173,24 @@ async function buildRegistryRows(payload: Payload): Promise<ContractRow[]> {
 	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 	const docs = res.docs as any[];
 
+	// The on-chain map's contracts, as the project rows hold them.
+	// Every such row (limit 0): a cut set would drop attributions in silence.
+	const mapped = await findWholeSet(payload, {
+		collection: "projects",
+		where: { "onchain.contracts.tier": { in: [...MAP_TIERS] } },
+		limit: 0,
+		depth: 0,
+		select: { slug: true, name: true, onchain: true },
+	});
+	const attribution = attributionsOf(mapped.docs);
+
 	// One audits query for every owning project (EXACT projectSlug join —
 	// the repo-knowledge discipline, never fuzzy).
 	const slugs = [
-		...new Set(docs.map((d) => d.projectSlug).filter(Boolean)),
+		...new Set([
+			...docs.map((d) => d.projectSlug).filter(Boolean),
+			...[...attribution.values()].map((a) => a.attribution.project.slug),
+		]),
 	] as string[];
 	// Project rows carry on-chain enrichment's per-contract attribution
 	// (onchain.contracts[].verifiedRepo). A repo row admitted on usage alone
@@ -273,10 +321,115 @@ async function buildRegistryRows(payload: Payload): Promise<ContractRow[]> {
 				: null,
 			successorRepo: d.successorRepo ? String(d.successorRepo) : null,
 			scannedAt: d.codeScannedAt ? String(d.codeScannedAt) : null,
+			attribution: null,
 		};
 	});
 
 	// Membership is the repo's own contract or live usage; a row the query
 	// found only for an id it cites has neither.
-	return rows.filter((r) => r.contractId || r.codeInUse);
+	const listed = rows.filter((r) => r.contractId || r.codeInUse);
+	for (const r of listed)
+		r.attribution =
+			(r.contractId && attribution.get(r.contractId)?.attribution) || null;
+	// A mapped contract no repo row names is a row of its own.
+	const named = new Set(listed.map((r) => r.contractId));
+	for (const [address, { attribution: a, verifiedRepo }] of attribution) {
+		if (named.has(address)) continue;
+		const repo = repoInUrl(verifiedRepo);
+		listed.push({
+			contractId: address,
+			contractBasis: "onchain-map",
+			verifiedContracts: [],
+			repo: repo ? { fullName: repo, url: `https://github.com/${repo}` } : null,
+			project: a.project,
+			stellarProof: null,
+			codeDepth: null,
+			codeDomains: [],
+			interfaceSize: 0,
+			interfacePreview: [],
+			codeInUse: null,
+			audits: auditsByProject.get(a.project.slug) ?? null,
+			successorRepo: null,
+			scannedAt: null,
+			attribution: a,
+		});
+	}
+	return listed;
+}
+
+/**
+ * Each mapped contract's attribution, by address, from the project rows
+ * that hold it. Held by one row: that row's. Held by several: only when
+ * they are all members of the one issuer-and-token family each entry names,
+ * and then under the family's first member present (the issuer). Anything
+ * else is a contract linked to two projects, which proves neither.
+ */
+export function attributionsOf(
+	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+	projects: any[],
+): Map<string, { attribution: ContractAttribution; verifiedRepo: unknown }> {
+	const holders = new Map<
+		string,
+		// biome-ignore lint/suspicious/noExplicitAny: stored array row
+		Array<{ slug: string; name: string | null; c: any; asOf: string | null }>
+	>();
+	for (const p of projects) {
+		if (typeof p?.slug !== "string" || !p.slug) continue;
+		for (const c of Array.isArray(p?.onchain?.contracts)
+			? p.onchain.contracts
+			: []) {
+			if (typeof c?.address !== "string" || !c.address) continue;
+			if (c.tier !== "strong" && c.tier !== "labelled") continue;
+			holders.set(c.address, [
+				...(holders.get(c.address) ?? []),
+				{
+					slug: p.slug,
+					name: typeof p.name === "string" ? p.name : null,
+					c,
+					asOf: p.onchain?.asOf ? String(p.onchain.asOf) : null,
+				},
+			]);
+		}
+	}
+	const strings = (v: unknown): string[] =>
+		Array.isArray(v) ? v.filter((s): s is string => typeof s === "string") : [];
+	const out = new Map<
+		string,
+		{ attribution: ContractAttribution; verifiedRepo: unknown }
+	>();
+	for (const [address, hs] of holders) {
+		let h = hs[0];
+		if (hs.length > 1) {
+			const family = strings(h.c.sharedWithinFamily);
+			const slugs = new Set(hs.map((x) => x.slug));
+			const sameFamily =
+				slugs.size === hs.length &&
+				hs.every(
+					(x) =>
+						family.includes(x.slug) &&
+						strings(x.c.sharedWithinFamily).join() === family.join(),
+				);
+			if (!sameFamily) continue;
+			const first = family.find((s) => slugs.has(s));
+			h = hs.find((x) => x.slug === first) ?? h;
+		}
+		const family = strings(h.c.sharedWithinFamily);
+		out.set(address, {
+			verifiedRepo: h.c.verifiedRepo,
+			attribution: {
+				project: { slug: h.slug, name: h.name },
+				tier: h.c.tier,
+				evidence: strings(h.c.evidence),
+				sourceUrl: typeof h.c.sourceUrl === "string" ? h.c.sourceUrl : null,
+				createdAt: h.c.createdAt ? String(h.c.createdAt) : null,
+				createdLedger:
+					typeof h.c.createdLedger === "number" ? h.c.createdLedger : null,
+				dateBasis: typeof h.c.dateBasis === "string" ? h.c.dateBasis : null,
+				sharedWithinFamily: family.length ? family : null,
+				endedAt: h.c.endedAt ? String(h.c.endedAt) : null,
+				asOf: h.asOf,
+			},
+		});
+	}
+	return out;
 }

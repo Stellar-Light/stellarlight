@@ -1,4 +1,5 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionConfig, Field } from "payload";
+import { MAP_TIERS } from "@/lib/onchain-map";
 import {
 	AVAILABILITY_CHECK_RESULTS,
 	AVAILABILITY_PLATFORMS,
@@ -11,6 +12,33 @@ import {
 import { LLAMA_LISTING_STATES } from "@/lib/status-checks";
 import { generateSlug, normalizeUrlField } from "../lib/utils/normalize";
 import { adminOnly, isAdmin } from "./access";
+
+/** The on-chain map's fields on a contract or account (src/lib/onchain-map.ts);
+ * null where the map holds none of it. */
+const ONCHAIN_MAP_FIELDS: Field[] = [
+	{
+		name: "tier",
+		type: "select",
+		options: [...MAP_TIERS],
+		admin: {
+			description:
+				"strong: the directory, a code proof, a protocol registry anchor or the project's own account. labelled: a public-directory label under the project's own domain, or an address an issuer and its tokens share. Null: not from the on-chain map",
+		},
+	},
+	{ name: "evidence", type: "text", hasMany: true },
+	{ name: "sourceUrl", type: "text" },
+	{ name: "createdLedger", type: "number" },
+	{ name: "dateBasis", type: "text" },
+	{ name: "sharedWithinFamily", type: "text", hasMany: true },
+	{
+		name: "endedAt",
+		type: "date",
+		admin: {
+			description:
+				"The day the weekly check first read the address absent from mainnet (no contract instance on the RPC, or Horizon answers 404 for the account). Null: present, or never read absent",
+		},
+	},
+];
 
 export const Projects: CollectionConfig = {
 	slug: "projects",
@@ -371,7 +399,7 @@ export const Projects: CollectionConfig = {
 							type: "date",
 							admin: {
 								description:
-									"When the contract was created. Kept from the reading that first recorded it; null for a contract joined after 2026-11-03",
+									"When the contract was created: proved in that ledger's metadata where dateBasis says so (the on-chain map), otherwise kept from the reading that first recorded it. Null when neither holds a date",
 							},
 						},
 						{
@@ -382,6 +410,27 @@ export const Projects: CollectionConfig = {
 									"GitHub repo the contract's code comes from: the deployed WASM is attested to it (its build metadata names the repo, SEP-55, and GitHub lists a build attestation for that WASM there), or, for a WASM built without such metadata, a hand-verified seed names it (src/data/onchain-contracts.ts)",
 							},
 						},
+						...ONCHAIN_MAP_FIELDS,
+					],
+				},
+				{
+					// The on-chain map's accounts (src/data/onchain-map.json):
+					// written by the on-chain lane, which checks each on Horizon
+					// every week.
+					name: "accounts",
+					type: "array",
+					fields: [
+						{ name: "address", type: "text" },
+						{ name: "label", type: "text" },
+						{
+							name: "createdAt",
+							type: "date",
+							admin: {
+								description:
+									"When the current account was opened, proved in that ledger's metadata. Not a launch date",
+							},
+						},
+						...ONCHAIN_MAP_FIELDS,
 					],
 				},
 				{

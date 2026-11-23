@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
+		surfaces: ["api", "api-client", "skill"],
+		version: "spec@1.9.161",
+		type: "added",
+		summary:
+			"The curated on-chain map: which mainnet contracts and accounts belong to which directory project, each link with a `tier` (strong or labelled), its `evidence` kinds, the public page it was read from (`sourceUrl`) and, where proved, the ledger it was created in. listContracts (`GET /api/contracts`) rows gain `attribution` (null when the map holds no link for the contract), and a mapped contract no repo row names gets a row of its own with `contractBasis: onchain-map` (`repo` null when no source repo is attested); `meta.attribution` credits Stellar Index and stellar-expert/public-directory. Project rows: `onchain.contracts[]` gains tier, evidence, sourceUrl, createdLedger, dateBasis, sharedWithinFamily and endedAt, and `onchain.accounts[]` is new.",
+		detail:
+			"Built on 2026-11-23 from a map checked read-only against public sources: 732 links, 345 to 336 contracts across 72 projects (275 strong, 70 labelled) and 387 to 356 accounts across 111 projects (100 strong, 287 labelled). Strong is the directory, a code proof (the deployed code's functions are defined in the project's repo, or its build metadata names the repo), a protocol registry anchor or the project's own account; labelled is a public-directory label under the project's own domain, a third party's label, not a verification. The code test was checked on contracts whose owner was known: it judged 1 of 112 other projects' contracts as own and missed about a quarter of own contracts, so no attribution is not proof a contract is not a project's. Every contract creation and account opening in the map was found in that ledger's own metadata (8 accounts not on Horizon are undated). Left out: 167 weaker links (named on the project's own pages only, or the same deployer only), 4 links of 2 addresses held by two unrelated projects, the 29 foundation accounts the public directory labels, attributed to stellar-development-foundation only, and 2 contracts a curator had named as another product's. An address an issuer and its tokens share (10 families, such as fxdao, usdx, eurx and gbpx) is kept for each member one tier down and served once on /api/contracts, under the issuer. The weekly on-chain lane writes the links and checks each address: a contract with no instance on mainnet, or an account Horizon answers 404 for, gets `endedAt`; an address that could not be checked keeps what it had. The links appear after that lane's next execute; until then `attribution` is null, as before. A labelled contract is not counted as status or deployment evidence.",
+	},
+	{
+		date: "2026-11-23",
 		surfaces: ["api", "api-client"],
 		version: "spec@1.9.160",
 		type: "added",
