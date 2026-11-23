@@ -1,52 +1,36 @@
 /**
- * The stablecoin measurement pipeline — ported 2026-08-18 from the
+ * The stablecoin measurement pipeline: ported 2026-08-18 from the
  * Replit-hosted service so the data survives that host being shut down.
  *
- * Per asset in the registry: confirm it exists on Horizon, read supply +
- * holders + 24h trade volume + lifetime payment-op count from Stellar
- * Expert, price it, and pull its logo from the issuer's own stellar.toml.
- * Every number is dated.
+ * Per asset in the registry: read its supply and trustline count from
+ * Horizon's asset record, price it, and pull its logo from the issuer's own
+ * stellar.toml. Every number is dated.
  *
  * FAIL-OPEN is the rule, inherited from the original and kept deliberately:
  * one asset's fetch failing must never empty the list, and a missing metric
- * is `null` — "not measured", never 0. The whole reason /api/stablecoins
+ * is `null`: "not measured", never 0. The whole reason /api/stablecoins
  * carries meta.coverage is that a dropped row reads as "this asset does not
  * exist" to anyone who does not know better (sls-066).
  *
  * Sources, all public, no keys:
- *   Horizon        — asset existence on mainnet
- *   Stellar Expert — supply, trustline holders, 24h/7d TRADE volume, lifetime
- *                    payment-op count
- *   CoinGecko      — live FX for every peg, via the XLM cross
- *   <domain>/.well-known/stellar.toml — the issuer's own logo
+ *   Horizon: the asset record (existence, supply as the balances held
+ *     outside the issuer, and open trustlines in every authorization state)
+ *   CoinGecko: live FX for every peg, via the XLM cross
+ *   <domain>/.well-known/stellar.toml: the issuer's own logo
  *   <issuer account's home_domain>/.well-known/stellar.toml: the issuer of
- *                    record (ORG_NAME), read off the account Horizon reports
+ *     record (ORG_NAME), read off the account Horizon reports
  *
- * NOT a source here: real dollar-denominated PAYMENT (transfer) volume, as
- * opposed to the SDEX trade volume this file already reports. Researched
- * 2026-09-02 against the $612M raw / $171.59M adjusted 24h figures Allium's
- * Stellar dashboard reports:
- *   - Horizon's own root document (GET https://horizon.stellar.org/) shows
- *     neither `payments` nor `operations` accepts an asset filter in its
- *     link template — only `trades`/`trade_aggregations` do, and those are
- *     SDEX trades, not payments. Paging either collection unfiltered to find
- *     one asset's payments is a full-ledger scan, not a cron job.
- *   - Stellar Expert's `payments` and `trades` fields are LIFETIME COUNTS —
- *     its own UI labels them "Total payments count" / "Total trades count" —
- *     not amounts, and not scoped to any period. Twelve candidate
- *     history/stats/volume paths were probed against its public API; all
- *     404, except `/holders` (unrelated).
- *   - The canonical source for this exact metric is SDF's own Hubble
- *     warehouse (BigQuery, `crypto-stellar.crypto_stellar.*`), which needs a
- *     GCP project with a billing account on file, the BigQuery API enabled,
- *     and either a service-account key or OAuth login — none of which this
- *     repo has. Dune has decoded Stellar tables too, but every Dune API call
- *     (even free-tier) needs an API key we don't have either.
- * `paymentsCountLifetime` below is the honest fallback: a real, free,
- * zero-marginal-cost COUNT of payment operations (not SDEX trades, and not
- * adjusted for mint/CEX/DeFi the way Allium's figure is) — pulled off the
- * same Expert call this file already makes for supply/holders. See the PR
- * that added it for the full source-by-source table.
+ * Until 2026-11-06 supply, trustlines, 24h SDEX volume and a lifetime
+ * payment count came from Stellar Expert. Its API answers 402 since then.
+ * Horizon now gives supply and trustlines; no free source gives the volume
+ * or the payment count, so both are null (never an estimate). Supply is
+ * continuous with the explorer's on most assets; onchain-sources.ts records
+ * where the two differ (checked 2026-11-22).
+ *
+ * NOT a source here: dollar-denominated payment volume. Horizon's payments
+ * and operations collections take no asset filter, so one asset's payments
+ * are a full-ledger scan; SDF's Hubble warehouse and Dune hold it, and both
+ * need accounts and keys this repo does not have (researched 2026-09-02).
  */
 
 import {
@@ -54,6 +38,11 @@ import {
 	type StablecoinAsset,
 	stablecoinId,
 } from "@/data/stablecoin-registry";
+import {
+	horizonAssetUrl,
+	supplyOfAssetRecord,
+	trustlinesOfAssetRecord,
+} from "./horizon-supply";
 import {
 	type IssuerOfRecordCheck,
 	namedIssuingParty,
@@ -64,11 +53,7 @@ import {
 import { looksLikeStellarToml, parseStellarToml } from "./stellar-toml";
 
 const HORIZON = "https://horizon.stellar.org";
-const EXPERT = "https://api.stellar.expert/explorer/public";
 const COINGECKO = "https://api.coingecko.com/api/v3";
-
-/** Stellar Expert reports supply/volume in stroops (1e-7). */
-const STROOP = 10_000_000;
 
 /** What the writer stores about the issuer of record: one check. */
 export interface IssuerOfRecordFields {
@@ -130,7 +115,8 @@ export interface MeasuredStablecoin {
 	priceBasis: PriceBasis | null;
 	holders: number | null;
 	volume24hUSD: number | null;
-	/** Lifetime count of payment operations Stellar Expert has indexed for
+	/** Null since 2026-11-06: no free source reports it. Was the lifetime
+	 *  count of payment operations Stellar Expert had indexed for
 	 *  this asset ("Total payments count" in its own UI) — a COUNT, not an
 	 *  amount, and not scoped to any period on its own. Not comparable
 	 *  across assets of different ages; `refresh-stablecoins.ts` diffs it
@@ -157,10 +143,9 @@ export interface MeasuredStablecoin {
 export const RATE_LIMIT_MARK = "rate-limited (429)";
 class RateLimitedError extends Error {
 	constructor(url: string, retries: number) {
-		// fetchJson is shared by Horizon, Stellar Expert and CoinGecko calls, so
-		// name the actual host rather than assuming which one — the only path
-		// that currently turns this into a stored row note is the Stellar
-		// Expert one (supplyAndHolders), but this stays correct if that changes.
+		// fetchJson is shared by the Horizon and CoinGecko calls, so name the
+		// actual host rather than assuming which one: the path that turns this
+		// into a stored row note is the Horizon asset read (horizonFigures).
 		let host = "upstream";
 		try {
 			host = new URL(url).hostname;
@@ -177,7 +162,7 @@ class RateLimitedError extends Error {
 async function fetchJson(
 	url: string,
 	{ retries = 3, timeoutMs = 10_000 } = {},
-	// biome-ignore lint/suspicious/noExplicitAny: shared by three external APIs (Horizon, Stellar Expert, CoinGecko), each a different raw JSON shape
+	// biome-ignore lint/suspicious/noExplicitAny: shared by external APIs (Horizon, CoinGecko), each a different raw JSON shape
 ): Promise<any | null> {
 	for (let i = 0; i < retries; i++) {
 		try {
@@ -190,7 +175,7 @@ async function fetchJson(
 			});
 			if (res.status === 404) return null;
 			if (res.status === 429) {
-				// Stellar Expert rate-limits hard; back off further than usual.
+				// Rate-limited: back off further than usual.
 				await sleep(Math.min(2000 * 2.5 ** i, 30_000));
 				continue;
 			}
@@ -209,77 +194,30 @@ async function fetchJson(
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Confirm the asset is really issued on mainnet before reporting on it. */
-async function existsOnHorizon(code: string, issuer: string): Promise<boolean> {
-	try {
-		const data = await fetchJson(
-			`${HORIZON}/assets?asset_code=${encodeURIComponent(code)}&asset_issuer=${issuer}&limit=1`,
-			{ retries: 2, timeoutMs: 6000 },
-		);
-		return (data?._embedded?.records ?? []).length > 0;
-	} catch {
-		// A Horizon wobble is NOT evidence the asset is gone. Caller keeps the
-		// row and marks it unmeasured rather than dropping it.
-		return false;
-	}
-}
-
 /**
- * One Stellar Expert call, three fields off it: supply, trustline-holder
- * count, and — new 2026-09-02 — the lifetime payment-operation counter
- * (`paymentsCountLifetime`) that `refresh-stablecoins.ts` diffs against
- * yesterday's snapshot to derive `paymentsCount24h`. Free: it's the same
- * response body this function already fetched.
+ * Supply and trustline count from Horizon's own asset record: supply is the
+ * sum of the balances the ledger holds outside the issuer (horizon-supply.ts),
+ * and `holders` stays what this field has always counted, open trustlines
+ * (`accounts.*`). Stellar Expert, read until 2026-11-06, answers 402 since
+ * its API went paid; Horizon is free and is the ledger's own record.
+ * `found` false = Horizon lists no such asset. A failed read throws, so the
+ * caller marks the row unmeasured with the reason, never as a delisting.
  */
-async function supplyAndHolders(
+async function horizonFigures(
 	code: string,
 	issuer: string,
-	suffix = "",
-): Promise<{
-	supply: number | null;
-	holders: number | null;
-	paymentsCountLifetime: number | null;
-}> {
-	const data = await fetchJson(`${EXPERT}/asset/${code}-${issuer}${suffix}`);
-	if (!data)
-		return { supply: null, holders: null, paymentsCountLifetime: null };
-	const supply = data.supply != null ? Number(data.supply) / STROOP : null;
-	const holders =
-		typeof data.trustlines === "object"
-			? (data.trustlines?.total ?? null)
-			: (data.trustlines ?? null);
-	const payments = Number(data.payments);
+): Promise<{ found: boolean; supply: number | null; holders: number | null }> {
+	const data = await fetchJson(`${horizonAssetUrl(code, issuer)}&limit=1`, {
+		retries: 2,
+		timeoutMs: 6000,
+	});
+	const record = data?._embedded?.records?.[0];
+	if (!record) return { found: false, supply: null, holders: null };
 	return {
-		supply: Number.isFinite(supply) ? supply : null,
-		holders: Number.isFinite(Number(holders)) ? Number(holders) : null,
-		paymentsCountLifetime: Number.isFinite(payments) ? payments : null,
+		found: true,
+		supply: supplyOfAssetRecord(record),
+		holders: trustlinesOfAssetRecord(record),
 	};
-}
-
-async function volume24hUSD(
-	code: string,
-	issuer: string,
-	priceUSD: number | null,
-	suffix = "",
-): Promise<number | null> {
-	if (priceUSD == null) return null;
-	try {
-		const data = await fetchJson(`${EXPERT}/asset/${code}-${issuer}${suffix}`, {
-			retries: 2,
-			timeoutMs: 6000,
-		});
-		if (!data) return null;
-		let native: number | null = null;
-		if (data.volume24h != null) native = Number(data.volume24h) / STROOP;
-		// 7-day rolling / 7 is an ESTIMATE, used only when the 24h figure is
-		// absent. Callers should not present it as an exact daily number.
-		else if (data.volume7d != null) native = Number(data.volume7d) / STROOP / 7;
-		return native == null || !Number.isFinite(native)
-			? null
-			: native * priceUSD;
-	} catch {
-		return null;
-	}
 }
 
 /**
@@ -924,6 +862,79 @@ export function paymentsCount24hFrom(
 	return delta >= 0 ? delta : null;
 }
 
+/** The date a stored row's figures carry. A live or curated reading carries
+ *  its own. An unmeasured run keeps the previous figures, so it keeps their
+ *  date: the previous row's own date when that row was live (its figures are
+ *  that reading's), else the newest live snapshot on record (the previous
+ *  row was itself kept forward), else the date the row already holds. Only
+ *  a row with nothing to keep takes the run's time, with every metric null,
+ *  which the collection reads as "not measured at measuredAt". */
+export function storedMeasuredAt(
+	basis: MeasuredStablecoin["basis"],
+	readingAt: string,
+	previous: { basis: unknown; measuredAt: unknown } | null,
+	lastLiveAt: string | null,
+): string {
+	if (basis !== "unmeasured") return readingAt;
+	const previousAt =
+		typeof previous?.measuredAt === "string" && previous.measuredAt
+			? previous.measuredAt
+			: null;
+	if (previous?.basis === "live" && previousAt) return previousAt;
+	return lastLiveAt ?? previousAt ?? readingAt;
+}
+
+/** The figures a run stores, and whether any was carried forward. A metric
+ *  the run could not read keeps the previous value (a failed fetch never
+ *  blanks a good number in current state); priceBasis moves with priceUSD.
+ *  Volume and the payment count are stored as measured, never carried: no
+ *  free source reports them since 2026-11-06, so a carried value would be
+ *  the last paid reading served under a later date. */
+export function figuresToStore(
+	m: Pick<
+		MeasuredStablecoin,
+		| "supply"
+		| "priceUSD"
+		| "priceBasis"
+		| "marketCapUSD"
+		| "holders"
+		| "volume24hUSD"
+		| "paymentsCountLifetime"
+	>,
+	prev: Record<string, unknown> | null | undefined,
+) {
+	let kept = false;
+	const keep = <T>(fresh: T | null, old: unknown): T | null => {
+		if (fresh != null) return fresh;
+		if (old != null) {
+			kept = true;
+			return old as T;
+		}
+		return null;
+	};
+	const figures = {
+		supply: keep(m.supply, prev?.supply),
+		priceUSD: keep(m.priceUSD, prev?.priceUSD),
+		priceBasis: keep(m.priceBasis, prev?.priceBasis),
+		marketCapUSD: keep(m.marketCapUSD, prev?.marketCapUSD),
+		holders: keep(m.holders, prev?.holders),
+		volume24hUSD: m.volume24hUSD,
+		paymentsCountLifetime: m.paymentsCountLifetime,
+	};
+	return { figures, kept };
+}
+
+/** Does this run's snapshot replace the one already stored for the day? A
+ *  day's series point is its best reading: a failed run never overwrites a
+ *  live reading taken earlier the same UTC day, or the day would read as
+ *  unmeasured and its real measurement would be lost. */
+export function replacesDaySnapshot(
+	stored: { basis?: unknown } | null | undefined,
+	basis: MeasuredStablecoin["basis"],
+): boolean {
+	return !(stored?.basis === "live" && basis !== "live");
+}
+
 /** The measuredAt range the 7-day supply baseline is read from: 6 to 8 days
  *  back. The writer queries exactly this, then picks with supplyBaseline. */
 export function supplyBaselineWindow(atMs: number): {
@@ -1053,6 +1064,10 @@ export async function measureStablecoin(
 		const { price, basis: priceBasis } = await unitPriceUSD(asset);
 		return {
 			...base,
+			// The figures' own date: the day a person checked them, not this run.
+			measuredAt: Number.isNaN(Date.parse(asset.hardcodedData.checkedAt))
+				? now
+				: new Date(asset.hardcodedData.checkedAt).toISOString(),
 			supply: asset.hardcodedData.supply,
 			priceUSD: price,
 			priceBasis: price == null ? null : priceBasis,
@@ -1070,44 +1085,33 @@ export async function measureStablecoin(
 	}
 
 	try {
-		if (!asset.skipHorizonValidation) {
-			const live = await existsOnHorizon(asset.code, asset.issuer);
-			if (!live) {
-				return {
-					...base,
-					supply: null,
-					marketCapUSD: null,
-					priceUSD: null,
-					priceBasis: null,
-					holders: null,
-					volume24hUSD: null,
-					paymentsCountLifetime: null,
-					logoUrl,
-					logoSource,
-					basis: "unmeasured",
-					note: withCaveat(
-						"Not confirmed on Horizon at measurement time. This is a lookup failure, not a claim the asset was retired; the row stays so its absence is never read as delisting.",
-					),
-				};
-			}
-		}
-
-		const { supply, holders, paymentsCountLifetime } = await supplyAndHolders(
+		const { found, supply, holders } = await horizonFigures(
 			asset.code,
 			asset.issuer,
-			asset.stellarExpertSuffix ?? "",
 		);
+		if (!found && !asset.skipHorizonValidation) {
+			return {
+				...base,
+				supply: null,
+				marketCapUSD: null,
+				priceUSD: null,
+				priceBasis: null,
+				holders: null,
+				volume24hUSD: null,
+				paymentsCountLifetime: null,
+				logoUrl,
+				logoSource,
+				basis: "unmeasured",
+				note: withCaveat(
+					"Horizon answered and lists no asset with this code and issuer. Not a claim the asset was retired: the row stays so its absence is never read as a delisting.",
+				),
+			};
+		}
 		const {
 			price,
 			basis: priceBasis,
 			note: priceNote,
 		} = await unitPriceUSD(asset);
-		const vol = await volume24hUSD(
-			asset.code,
-			asset.issuer,
-			price,
-			asset.stellarExpertSuffix ?? "",
-		);
 
 		return {
 			...base,
@@ -1116,8 +1120,10 @@ export async function measureStablecoin(
 			priceBasis: price == null ? null : priceBasis,
 			marketCapUSD: supply != null && price != null ? supply * price : null,
 			holders,
-			volume24hUSD: vol,
-			paymentsCountLifetime,
+			// No free source reports either since Stellar Expert went paid
+			// (2026-11-06): null, never an estimate.
+			volume24hUSD: null,
+			paymentsCountLifetime: null,
 			logoUrl,
 			logoSource,
 			basis: supply == null ? "unmeasured" : "live",
@@ -1126,7 +1132,7 @@ export async function measureStablecoin(
 			...(supply == null
 				? {
 						note: withCaveat(
-							"Supply unavailable from Stellar Expert at measurement time.",
+							"Supply unavailable from Horizon at measurement time.",
 						),
 					}
 				: priceNote

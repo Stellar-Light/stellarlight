@@ -10,9 +10,9 @@ name: Refresh stablecoins
 # The script reads back every row it wrote — current rows, retirements and
 # snapshots — against the exact payload sent (QUALITY.md §3, second condition).
 
-# Measures the stablecoin registry from public APIs (Horizon, Stellar Expert,
-# CoinGecko, issuer stellar.toml) and writes current state + one dated
-# snapshot per asset per UTC day.
+# Measures the stablecoin registry from public APIs (Horizon, CoinGecko,
+# issuer stellar.toml; Stellar Expert until its API went paid on 2026-11-06)
+# and writes current state + one dated snapshot per asset per UTC day.
 #
 # This is the job that replaces the Replit-hosted service /api/stablecoins
 # proxied. Every 6 hours: often enough that a figure is never a day stale,

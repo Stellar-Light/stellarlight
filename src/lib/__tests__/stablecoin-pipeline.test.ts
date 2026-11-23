@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { STABLECOIN_REGISTRY, stablecoinId } from "@/data/stablecoin-registry";
 import {
 	carryIssuerOfRecord,
+	figuresToStore,
 	issuerOfRecordFromToml,
 	issuerOfRecordPatch,
 	issuerOfRecordWriteOn,
@@ -12,10 +13,13 @@ import {
 	nextPaymentsHistory,
 	orgLogoFromToml,
 	paymentsCount24hFrom,
+	RATE_LIMIT_MARK,
 	readIssuerOfRecord,
 	readIssuerToml,
+	replacesDaySnapshot,
 	rowIdentity,
 	rowsToRetire,
+	storedMeasuredAt,
 	supplyBaseline,
 	supplyBaselineWindow,
 } from "../stablecoin-pipeline";
@@ -1035,24 +1039,106 @@ is_asset_anchored=true
 		);
 	});
 
-	it("the read does not wait on Stellar Expert: its 402 leaves the row unmeasured and still named", async () => {
+	it("a failed Horizon read leaves the row unmeasured and still named", async () => {
 		stubFetch404({
 			...routes,
 			[`https://horizon.stellar.org/assets?asset_code=MGUSD&asset_issuer=${MGUSD.issuer}&limit=1`]:
-				() => new Response(JSON.stringify({ _embedded: { records: [{}] } })),
-			[`https://api.stellar.expert/explorer/public/asset/MGUSD-${MGUSD.issuer}`]:
-				() => new Response('{"error":"Payment Required"}', { status: 402 }),
+				() => new Response("unavailable", { status: 503 }),
 		});
 		const [m] = await settle(() =>
 			measureRegistry([MGUSD], { concurrency: 1, staggerMs: 0 }),
 		);
 		expect(m.basis).toBe("unmeasured");
-		expect(m.note).toBe("Measurement failed: HTTP 402");
+		expect(m.note).toBe("Measurement failed: HTTP 503");
 		expect(rowIdentity(m, undefined, true)).toMatchObject({
 			company: "MoneyGram",
 			issuerOfRecord: "MoneyGram Payment Systems, Inc.",
 			issuerOfRecordCheck: "named",
 		});
+	});
+
+	it("supply and trustlines come from Horizon's asset record; the paid explorer is never asked", async () => {
+		const explorer = vi.fn(
+			() => new Response('{"error":"Payment Required"}', { status: 402 }),
+		);
+		stubFetch404({
+			...routes,
+			[`https://horizon.stellar.org/assets?asset_code=MGUSD&asset_issuer=${MGUSD.issuer}&limit=1`]:
+				() =>
+					new Response(
+						JSON.stringify({
+							_embedded: {
+								records: [
+									{
+										balances: {
+											authorized: "1000.5000000",
+											authorized_to_maintain_liabilities: "0.0000000",
+											unauthorized: "0.0000000",
+										},
+										claimable_balances_amount: "10.0000000",
+										liquidity_pools_amount: "0.0000000",
+										contracts_amount: "0.0000000",
+										accounts: {
+											authorized: 120,
+											authorized_to_maintain_liabilities: 1,
+											unauthorized: 2,
+										},
+									},
+								],
+							},
+						}),
+					),
+			[`https://api.stellar.expert/explorer/public/asset/MGUSD-${MGUSD.issuer}`]:
+				explorer,
+		});
+		const [m] = await settle(() =>
+			measureRegistry([MGUSD], { concurrency: 1, staggerMs: 0 }),
+		);
+		expect(m.holders).toBe(123);
+		expect(m.supply).toBe(1010.5);
+		expect(m.volume24hUSD).toBeNull();
+		expect(m.paymentsCountLifetime).toBeNull();
+		expect(explorer).not.toHaveBeenCalled();
+	});
+
+	const horizonUrl = `https://horizon.stellar.org/assets?asset_code=MGUSD&asset_issuer=${MGUSD.issuer}&limit=1`;
+
+	it("Horizon answering with no record reads as not listed, not as a lookup failure", async () => {
+		stubFetch404({
+			...routes,
+			[horizonUrl]: () =>
+				new Response(JSON.stringify({ _embedded: { records: [] } })),
+		});
+		const [m] = await settle(() =>
+			measureRegistry([MGUSD], { concurrency: 1, staggerMs: 0 }),
+		);
+		expect(m.basis).toBe("unmeasured");
+		expect(m.note).toMatch(/^Horizon answered and lists no asset/);
+	});
+
+	it("a record with no balances is unmeasured, said in Horizon's name", async () => {
+		stubFetch404({
+			...routes,
+			[horizonUrl]: () =>
+				new Response(JSON.stringify({ _embedded: { records: [{}] } })),
+		});
+		const [m] = await settle(() =>
+			measureRegistry([MGUSD], { concurrency: 1, staggerMs: 0 }),
+		);
+		expect(m.basis).toBe("unmeasured");
+		expect(m.note).toBe("Supply unavailable from Horizon at measurement time.");
+	});
+
+	it("a Horizon rate limit is could-not-check, with the mark the retry pass keys on", async () => {
+		stubFetch404({
+			...routes,
+			[horizonUrl]: () => new Response("slow down", { status: 429 }),
+		});
+		const [m] = await settle(() =>
+			measureRegistry([MGUSD], { concurrency: 1, staggerMs: 0 }),
+		);
+		expect(m.basis).toBe("unmeasured");
+		expect(m.note).toContain(RATE_LIMIT_MARK);
 	});
 
 	it("USDT0: not named, with the reason, what it leaves unconfirmed and the date, and no name taken from the brand", async () => {
@@ -1216,9 +1302,7 @@ describe("a class on every row, from the issuer's own statement (sls-107)", () =
 		const BRLT = reg("BRLT");
 		stubFetch404({
 			[`https://horizon.stellar.org/assets?asset_code=BRLT&asset_issuer=${BRLT.issuer}&limit=1`]:
-				() => new Response(JSON.stringify({ _embedded: { records: [{}] } })),
-			[`https://api.stellar.expert/explorer/public/asset/BRLT-${BRLT.issuer}`]:
-				() => new Response('{"error":"Payment Required"}', { status: 402 }),
+				() => new Response("unavailable", { status: 503 }),
 		});
 		vi.useFakeTimers();
 		let done = false;
@@ -1230,7 +1314,7 @@ describe("a class on every row, from the issuer's own statement (sls-107)", () =
 		while (!done) await vi.advanceTimersByTimeAsync(500);
 		const [m] = await p;
 		expect(m.note).toBe(
-			"Measurement failed: HTTP 402. The issuer account's home_domain, sep.stablex.cloud, did not resolve when checked on 2026-11-11, so its stellar.toml cannot be read: neither the issuer of record nor the toml's listing of the account can be checked.",
+			"Measurement failed: HTTP 503. The issuer account's home_domain, sep.stablex.cloud, did not resolve when checked on 2026-11-11, so its stellar.toml cannot be read: neither the issuer of record nor the toml's listing of the account can be checked.",
 		);
 		expect(m.assetType).toBe("Unclassified");
 	});
@@ -1326,5 +1410,94 @@ describe("retiring ZUSD, GYEN, VEUR and GBPZ, as BRL and UAH were", () => {
 					STABLECOIN_REGISTRY.some((a) => a.assetType === t),
 					t,
 				).toBe(true);
+	});
+});
+
+describe("the date a row's figures carry", () => {
+	it("an unmeasured run keeps the date of the figures it keeps, never its own time", () => {
+		const run = "2026-11-22T18:25:00.000Z";
+		const live = "2026-11-22T12:25:00.000Z";
+		// the previous row was live: its figures are that reading's
+		expect(
+			storedMeasuredAt(
+				"unmeasured",
+				run,
+				{ basis: "live", measuredAt: live },
+				"2026-11-21T18:25:00.000Z",
+			),
+		).toBe(live);
+		// the previous row was itself kept forward: the newest live snapshot
+		expect(
+			storedMeasuredAt(
+				"unmeasured",
+				run,
+				{ basis: "unmeasured", measuredAt: live },
+				"2026-11-20T12:00:00.000Z",
+			),
+		).toBe("2026-11-20T12:00:00.000Z");
+		// no live snapshot on record: the row's own date stays
+		expect(
+			storedMeasuredAt(
+				"unmeasured",
+				run,
+				{ basis: "unmeasured", measuredAt: "2026-10-01T00:00:00.000Z" },
+				null,
+			),
+		).toBe("2026-10-01T00:00:00.000Z");
+		// a new row with nothing to keep: every metric is null at the run
+		expect(storedMeasuredAt("unmeasured", run, null, null)).toBe(run);
+		expect(
+			storedMeasuredAt("live", run, { basis: "live", measuredAt: live }, null),
+		).toBe(run);
+	});
+
+	it("a failed run never replaces a live snapshot taken the same day", () => {
+		expect(replacesDaySnapshot({ basis: "live" }, "unmeasured")).toBe(false);
+		expect(replacesDaySnapshot({ basis: "live" }, "live")).toBe(true);
+		expect(replacesDaySnapshot({ basis: "unmeasured" }, "unmeasured")).toBe(
+			true,
+		);
+		expect(replacesDaySnapshot(undefined, "unmeasured")).toBe(true);
+	});
+
+	it("keeps unread figures forward, never volume or the payment count", () => {
+		const prev = {
+			supply: 100,
+			priceUSD: 1,
+			priceBasis: "assumed-peg",
+			marketCapUSD: 100,
+			holders: 7,
+			volume24hUSD: 5000,
+			paymentsCountLifetime: 123456,
+		};
+		const failed = figuresToStore(
+			{
+				supply: null,
+				priceUSD: null,
+				priceBasis: null,
+				marketCapUSD: null,
+				holders: null,
+				volume24hUSD: null,
+				paymentsCountLifetime: null,
+			},
+			prev,
+		);
+		expect(failed.kept).toBe(true);
+		expect(failed.figures).toMatchObject({ supply: 100, holders: 7 });
+		expect(failed.figures.volume24hUSD).toBeNull();
+		expect(failed.figures.paymentsCountLifetime).toBeNull();
+	});
+
+	it("hand-checked figures carry the day they were checked", async () => {
+		const AUDD = STABLECOIN_REGISTRY.find((a) => a.code === "AUDD");
+		if (!AUDD?.hardcodedData) throw new Error("AUDD carries curated figures");
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => new Response("not found", { status: 404 })),
+		);
+		const m = await measureStablecoin(AUDD);
+		vi.unstubAllGlobals();
+		expect(m.basis).toBe("curated-static");
+		expect(m.measuredAt.slice(0, 10)).toBe(AUDD.hardcodedData.checkedAt);
 	});
 });

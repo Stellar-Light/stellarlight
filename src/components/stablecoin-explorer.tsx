@@ -754,13 +754,13 @@ export function StablecoinExplorer({
 							<div className="text-3xl font-semibold tabular-nums">
 								{totalVolume24h > 0 ? displayUSD(totalVolume24h) : "N/A"}
 							</div>
-							{/* Stellar Expert reports traded volume, not payments: this is
-							    a 7-day trade average, and it is ~99% USDC. Transfer volume
-							    (what a payments dashboard means by "volume") is an order of
-							    magnitude larger and we do not measure it — so the label
-							    says which one this is rather than inviting the comparison. */}
+							{/* Volume came from Stellar Expert, whose API became paid on
+							    2026-11-06; no free source reports it, so the card says so
+							    instead of showing a stale figure. */}
 							<div className="text-[11px] text-muted-foreground mt-1">
-								Traded on-chain, 7-day average
+								{totalVolume24h > 0
+									? "Traded on-chain, 7-day average"
+									: "Not measured since Nov 6, 2026"}
 							</div>
 						</CardContent>
 					</Card>

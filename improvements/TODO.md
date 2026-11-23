@@ -301,6 +301,18 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 
 ## Next
 
+- **Stablecoin volume and payment count have no source.** `volume24hUSD`
+  and `paymentsCount24h` on getStablecoins were read from Stellar Expert,
+  whose API answers 402 since 2026-11-06; supply and trustlines now come from
+  Horizon, and these two are written null every run. Probe:
+  `/api/stablecoins?limit=5` serves both null on every row while the spec
+  still describes Stellar Expert's counter. Drop them from the row and the
+  spec in the next spec release, as the on-chain lane did (spec 1.9.151).
+  The same release corrects the spec's "Measured every 6h from Horizon,
+  Stellar Expert and live peg FX" (getStablecoins and getLeaderboard
+  sort=supply) and the paymentsCount24h description, and decides
+  sort=volume (it has nothing to rank by; the served methodology says so).
+
 Found by the repo-unlink lane on 2026-11-12 (branch lane/r1112-repo-unlink):
 
 - Promote repo unlink to scheduled runs after 3 clean dispatches. enrich-repos
