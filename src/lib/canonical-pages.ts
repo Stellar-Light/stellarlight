@@ -25,7 +25,8 @@
  *     downstream consumer filing.
  *
  * `signatures` are verbatim phrases verified on the LIVE page at
- * registry-write time (2026-07-13 for every row below). Keep them:
+ * registry-write time (2026-07-13 for the sls-055 rows; later rows say
+ * their date). Keep them:
  *   - short and load-bearing (the exact claim consumers must be able to quote),
  *   - free of HTML entities/smart quotes (they're matched against the
  *     stripHtml'd chunk text, which does not decode every entity),
@@ -50,7 +51,10 @@ export type CanonicalFamily =
 	| "quarterly-reports"
 	| "security-program"
 	| "research-grants"
-	| "asset-launches";
+	| "asset-launches"
+	| "strategy"
+	| "service-providers"
+	| "community";
 
 export interface CanonicalPage {
 	/** Stable registry key. sdf-org rows chunk under parentDocId `sdf-org-<id>`. */
@@ -101,6 +105,13 @@ export interface CanonicalPage {
 	 *    default <main>-scrape path only.
 	 */
 	extractStrategy?: "next-data-person-cards";
+	/**
+	 * H2 headings whose whole section the sdf-org ingester drops before
+	 * chunking: a "latest posts" list rendered inside <main> changes whenever
+	 * a blog post publishes, so it would re-embed between runs and store blog
+	 * titles as this page's content.
+	 */
+	dropSections?: string[];
 	/** Extra topic tags beyond ["sdf-org", "sdf", family]. */
 	tags?: string[];
 }
@@ -253,6 +264,125 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		quotable: true,
 		dateStrategy: "undated",
 		tags: ["quarterly-reports", "transparency"],
+	},
+
+	// ── sls-117 / #1969: the rest of SDF's own org pages. The rows above came
+	// from the sls-055 questions, not from the site's /foundation/* section,
+	// so strategy, roadmap and north stars were never registered; the
+	// service-provider directory and the community FAQ sat outside it. Every
+	// /foundation/* page in the stellar.org sitemap (2026-11-22) is now a row
+	// except careers (job listings) and previous-mandate (the /mandate/2017
+	// document). Signatures verified on the live pages 2026-11-22. The
+	// strategy and roadmap titles carry the year the page shows (the roadmap
+	// still shows 2025), and a signature pins that year, so a new year's page
+	// reds the guard instead of serving under a stale title.
+	{
+		id: "strategy",
+		url: "https://stellar.org/foundation/strategy",
+		family: "strategy",
+		title:
+			"SDF 2026 Strategy: objectives and targets (stellar.org/foundation/strategy)",
+		source: "sdf-org",
+		ingestedBy: "ingest-sdf-org.ts",
+		signatures: [
+			"$1 billion in growth for network asset value",
+			"15 new transformational enterprises and deploy at least 5 in 2026",
+		],
+		quotable: true,
+		dateStrategy: "undated",
+		tags: ["strategy", "2026", "objectives"],
+	},
+	{
+		id: "roadmap",
+		url: "https://stellar.org/foundation/roadmap",
+		family: "strategy",
+		title:
+			"SDF Product Roadmap 2025 (as the page shows) (stellar.org/foundation/roadmap)",
+		source: "sdf-org",
+		ingestedBy: "ingest-sdf-org.ts",
+		signatures: ["2025 Product Roadmap", "ledger close times of 2.5 seconds"],
+		quotable: true,
+		dateStrategy: "undated",
+		tags: ["roadmap", "2025", "product-roadmap"],
+	},
+	{
+		id: "north-stars",
+		url: "https://stellar.org/foundation/north-stars",
+		family: "strategy",
+		title:
+			"SDF North Stars: the long-term goals each yearly strategy maps to (stellar.org/foundation/north-stars)",
+		source: "sdf-org",
+		ingestedBy: "ingest-sdf-org.ts",
+		signatures: ["SDF will map our work to the following North Stars"],
+		quotable: true,
+		dateStrategy: "undated",
+		tags: ["north-stars", "strategy"],
+	},
+	{
+		id: "code-of-conduct",
+		url: "https://stellar.org/foundation/code-of-conduct",
+		family: "foundation",
+		title:
+			"SDF Code of Conduct for the Stellar community (stellar.org/foundation/code-of-conduct)",
+		source: "sdf-org",
+		ingestedBy: "ingest-sdf-org.ts",
+		signatures: [
+			"applies to all spaces managed by the SDF",
+			"contributed by you under the Apache 2.0 license",
+		],
+		quotable: true,
+		dateStrategy: "undated",
+		tags: ["code-of-conduct", "community"],
+	},
+	{
+		id: "next-gen",
+		url: "https://stellar.org/foundation/next-gen",
+		family: "foundation",
+		title:
+			"Stellar next-gen: SDF university and education partnerships (stellar.org/foundation/next-gen)",
+		source: "sdf-org",
+		ingestedBy: "ingest-sdf-org.ts",
+		signatures: [
+			"SDF collaborates with universities and other educational institutions",
+		],
+		quotable: true,
+		dateStrategy: "undated",
+		tags: ["education", "universities"],
+	},
+	{
+		id: "service-providers",
+		url: "https://stellar.org/ecosystem/service-providers",
+		family: "service-providers",
+		title:
+			"Stellar Service Providers: SDF directory of integration partners by type (stellar.org/ecosystem/service-providers)",
+		source: "sdf-org",
+		ingestedBy: "ingest-sdf-org.ts",
+		signatures: [
+			"trusted service providers below have the experience needed",
+			"Developer services",
+			"Infrastructure & whitelabel services",
+		],
+		quotable: true,
+		dateStrategy: "undated",
+		tags: ["service-providers", "directory", "integration"],
+	},
+	{
+		id: "community",
+		url: "https://stellar.org/community",
+		family: "community",
+		title:
+			"Stellar Community: channels, programs and SDF answers to common questions (stellar.org/community)",
+		source: "sdf-org",
+		ingestedBy: "ingest-sdf-org.ts",
+		signatures: [
+			"SDF cannot recover funds",
+			"Delaware-incorporated nonprofit, though not tax-exempt",
+		],
+		// The page lists SDF's newest blog posts under this heading.
+		dropSections: ["Onchain updates"],
+		quotable: true,
+		dateStrategy: "undated",
+		tags: ["community", "faq"],
 	},
 
 	// ── quarterly-reports: the latest report itself (sdf-blog owns it) ──
