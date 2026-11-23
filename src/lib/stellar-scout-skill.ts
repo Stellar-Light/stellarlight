@@ -100,8 +100,8 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 
    **Crowdedness score** (1-10): the easiest path is to call \`/api/clusters?dimension=types\` and read the \`.crowdedness\` for the type that matches the user's idea. The endpoint uses a log-scaled formula (\`round(log₂(size+1) + log₂(scfFunded+1) + 0.5×log₂(winners+1))\`) so the score actually differentiates: SDK / Payments / Security max out at 10, Lending / DEX ~9, Bridge / Social Impact ~8, Gaming / Anchor / NFT ~7, AI ~6, Indexer ~5, Explorer ~4. Surface with one-line justification: *"Crowdedness 6/10 (AI cluster): 10 projects, 6 SCF-funded. Real momentum, niche still has room."*
 4. **Competitor list.** Top 3-5 from step 2, with: name, what they shipped, hackathon they came from (if any), SCF funding (if any), GitHub link. Distinguish *direct* vs *adjacent*.
-5. **SDK / skill recommendation.** Map the idea to the right \`skills.stellar.org\` track (Soroban / dapp / assets / data / agentic-payments / zk-proofs / standards). Tell the user to grab that skill next.
-6. **Teammate candidates.** Hit \`/api/builders?q={skill_keyword}\` for builders who've shipped in this category. **The Builders directory is small and growing** (opt-in profiles synced from Stellar Passport; currently in the dozens, not hundreds). Surface every match with name, GitHub, location. If you get fewer than 3 hits, tell the user explicitly and suggest fallback channels: *"the public Builders directory is still growing; for more candidates check Stellar Discord #builders, the Stellar GitHub org, or recent SCF Round announcements."*
+5. **SDK / skill recommendation.** Map the idea to the right \`skills.stellar.org\` skill (smart-contracts, dapp, assets, data, standards, agentic-payments, zk-proofs, cross-chain; \`GET /api/skills?source=sdf\` lists the current set). Tell the user to grab that skill next.
+6. **Teammate candidates.** Hit \`/api/builders?q={skill_keyword}\` for builders who've shipped in this category. **The Builders directory is small and growing** (opt-in profiles synced from Stellar Passport; a few hundred profiles, many of them sparse; \`.meta.counts.total\` gives the live size). Surface every match with name, GitHub, location. If you get fewer than 3 hits, tell the user explicitly and suggest fallback channels: *"the public Builders directory is still growing; for more candidates check Stellar Discord #builders, the Stellar GitHub org, or recent SCF Round announcements."*
 7. **Funding signal.** What's been funded in this area? Filter \`/api/projects/search?q={keywords}&scfAwarded=1\` and surface total SCF dollars + recipients. Cross-reference active SCF rounds if visible.
 8. **Suggested next steps.** Concrete:
    - (a) Which upcoming hackathon to enter (\`/api/hackathons?status=upcoming\`).
@@ -263,9 +263,10 @@ Full docs in \`references/api-reference.md\`. Quick lookup table:
 | \`/api/stablecoins\` | GET | Tracked stablecoins ranked by USD market cap; \`?peg=\` and \`?assetType=\` filters. \`company\` is the brand; \`issuerOfRecord\` is the ORG_NAME in the issuer's own stellar.toml. Never compare raw \`supply\` across pegs |
 | \`/api/changes\` | GET | Reconciliation feed: rows that changed since \`?since=\` (projects/repos/partners) with \`facets\`. For refreshing remembered claims, not discovery |
 | - | - | Project rows carry \`onchain\` readings (per contract the newest event, ledgers with an event and TTL state; per asset holders, supply, trustlines and the newest movement) for verified join keys; null = not tracked, never 'inactive', and no recent event is not proof of disuse |
-| \`/api/feedback\` | POST | In-skill feedback channel (bug/missing-data/wrong-answer/suggestion) |
 
 All endpoints rate-limited per IP. All return \`.meta.counts\` + \`.meta.source\` for traceability.
+
+**Optional write: feedback.** Everything above is read-only. One endpoint writes: \`POST /api/feedback\` sends a curator a bug, missing data, a wrong answer or a suggestion. Some hosts expose only read operations; if yours does not offer it, skip it and tell the user what looked wrong instead. Details are in the API reference, under "Optional write".
 
 ## References (load these on demand)
 
@@ -322,7 +323,7 @@ When in doubt, query \`/api/skills?kind=sdk\` and filter on the user's intent (p
 ## Companion skills
 
 - **\`stellar-developer-activity\`**: for ecosystem-wide stats (active dev count, commit volume, country breakdown, peer L1 comparisons). Available at \`https://stellarlight.xyz/skills/stellar-developer-activity.md\`.
-- **\`skills.stellar.org\` skills**: for *how to build*. The 7 official SDF skills (soroban, dapp, assets, data, agentic-payments, zk-proofs, standards). Install them as needed when the user moves from "what should I build" to "how do I build it".
+- **\`skills.stellar.org\` skills**: for *how to build*. The official SDF skills (smart-contracts, dapp, assets, data, standards, agentic-payments, zk-proofs, cross-chain); \`GET /api/skills?source=sdf\` lists the current set. Install them as needed when the user moves from "what should I build" to "how do I build it".
 
 ## Attribution
 

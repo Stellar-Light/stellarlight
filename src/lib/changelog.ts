@@ -32,6 +32,13 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
+		surfaces: ["skill"],
+		type: "fixed",
+		summary:
+			'The Scout skill names the current SDF skills (smart-contracts, dapp, assets, data, standards, agentic-payments, zk-proofs, cross-chain) instead of seven with a `soroban` slug that answers 404, and says the skills catalog mixes five sources whose live size `.meta.counts` gives. It no longer gives the Builders directory a fixed size ("in the dozens", "about 110"); it has a few hundred profiles and `.meta.counts.total` is the live count. The feedback write is set apart from the read-only guidance, since some hosts expose only reads: the endpoint table lists reads only, and `POST /api/feedback` is described once, as an optional write to skip where a host does not offer it.',
+	},
+	{
+		date: "2026-11-23",
 		surfaces: ["api"],
 		version: "spec@1.9.157",
 		type: "fixed",
