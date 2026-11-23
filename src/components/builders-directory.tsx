@@ -21,6 +21,7 @@ import {
 	ChevronDown,
 	Globe,
 	Search,
+	Trophy,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -58,6 +59,9 @@ export type BuilderRowData = {
 	contributesTo: Array<{ slug: string; name: string }>;
 	languages: string[];
 	ambassador: { tier: string; region?: string } | null;
+	/** hackathon builds whose repo is one of theirs (the profile page's rule);
+	 * null: the hackathon index or the code read did not run, so not known */
+	hackathons: { builds: number; wins: number; events: string[] } | null;
 	/** ISO-3166 alpha-2 from the free-text location, when we can tell */
 	country: { code: string; name: string } | null;
 };
@@ -86,13 +90,16 @@ const heat = (r: BuilderRowData) => r.commits30d * 3 + (r.commits90d ?? 0);
  * profile: 5,713 commits in 90 days across two repos, 2026-11-22), so each
  * count is log-damped: ten times the commits is a few points, not ten times
  * the weight. Building a listed project counts for more than committing to
- * one, and a written bio breaks near ties. No clock in it, so the server and
- * the browser sort alike. */
+ * one, a winning hackathon build for more than an entry, and a written bio
+ * breaks near ties. No clock in it, so the server and the browser sort
+ * alike. */
 const top = (r: BuilderRowData) =>
 	Math.log2(1 + heat(r)) +
 	Math.log2(1 + (r.stars ?? 0)) +
 	(r.projects.length > 0 ? 4 : r.contributesTo.length > 0 ? 2 : 0) +
+	(r.hackathons?.wins ? 2 : r.hackathons?.builds ? 1 : 0) +
 	(r.bio ? 1 : 0);
+const enteredHackathon = (r: BuilderRowData) => (r.hackathons?.builds ?? 0) > 0;
 // an unknown count sorts below every known one, zero included
 const known = (n: number | null) => n ?? -1;
 const within = (iso: string | null, days: number) =>
@@ -113,6 +120,7 @@ const hasSubstance = (r: BuilderRowData) =>
 	r.commits30d > 0 ||
 	onListedProject(r) ||
 	r.passportProjects > 0 ||
+	enteredHackathon(r) ||
 	!!r.ambassador;
 
 // The site-wide filter-button shell (leaderboard/directory pattern).
@@ -139,6 +147,8 @@ export function BuildersDirectory({
 		"",
 	);
 	const onlyAmbassadors = ambassadorsOnly === "1";
+	const [hackathonsOnly, setHackathonsOnly] = useQueryState("hackathons", "");
+	const onlyHackathons = hackathonsOnly === "1";
 	const [countryParam, setCountry] = useQueryState("country", "");
 	const country = countryParam || null;
 	const [shownAll, setShownAll] = useQueryState("all", "");
@@ -155,7 +165,12 @@ export function BuildersDirectory({
 		let activeN = 0;
 		let listedN = 0;
 		let ambassadorN = 0;
+		let hackathonN = 0;
+		// unknown on every row = the hackathon read did not run: no count to show
+		let hackathonsKnown = false;
 		for (const r of rows) {
+			if (r.hackathons) hackathonsKnown = true;
+			if (enteredHackathon(r)) hackathonN += 1;
 			if (isRecent(r)) activeN += 1;
 			if (onListedProject(r)) listedN += 1;
 			if (r.ambassador) ambassadorN += 1;
@@ -169,6 +184,8 @@ export function BuildersDirectory({
 			activeN,
 			listedN,
 			ambassadorN,
+			hackathonN,
+			hackathonsKnown,
 			countries: [...countries.values()].sort(
 				(a, b) => b.n - a.n || a.name.localeCompare(b.name),
 			),
@@ -181,15 +198,16 @@ export function BuildersDirectory({
 			if (onlyActive && !isRecent(r)) return false;
 			if (onlyProjects && !onListedProject(r)) return false;
 			if (onlyAmbassadors && !r.ambassador) return false;
+			if (onlyHackathons && !enteredHackathon(r)) return false;
 			if (country && r.country?.code !== country) return false;
 			if (needle) {
 				const hay =
-					`${r.name} ${r.handle} ${r.role ?? ""} ${r.location ?? ""} ${r.bio ?? ""} ${r.projects.map((p) => p.name).join(" ")} ${r.contributesTo.map((p) => p.name).join(" ")} ${r.languages.join(" ")}`.toLowerCase();
+					`${r.name} ${r.handle} ${r.role ?? ""} ${r.location ?? ""} ${r.bio ?? ""} ${r.projects.map((p) => p.name).join(" ")} ${r.contributesTo.map((p) => p.name).join(" ")} ${r.languages.join(" ")} ${r.hackathons?.events.join(" ") ?? ""}`.toLowerCase();
 				if (!hay.includes(needle)) return false;
 			}
 			return true;
 		};
-	}, [q, onlyActive, onlyProjects, onlyAmbassadors, country]);
+	}, [q, onlyActive, onlyProjects, onlyAmbassadors, onlyHackathons, country]);
 
 	// A search by name should find the person even when their profile is
 	// empty, so the gate only applies while nobody is typing.
@@ -233,12 +251,14 @@ export function BuildersDirectory({
 		onlyActive ||
 		onlyProjects ||
 		onlyAmbassadors ||
+		onlyHackathons ||
 		country !== null;
 	const clear = () => {
 		setQ("");
 		setActive("");
 		setProjectsOnly("");
 		setAmbassadorsOnly("");
+		setHackathonsOnly("");
 		setCountry("");
 		setPages(1);
 	};
@@ -248,8 +268,15 @@ export function BuildersDirectory({
 
 	return (
 		<div>
-			{/* Pulse: the directory in four numbers; three of them filter it */}
-			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+			{/* Pulse: the directory in a few numbers; all but the last filter it */}
+			<div
+				className={cn(
+					"grid grid-cols-2 gap-3 mb-6",
+					pulse.ambassadorN > 0 && pulse.hackathonsKnown
+						? "lg:grid-cols-5"
+						: "lg:grid-cols-4",
+				)}
+			>
 				<PulseTile
 					value={total}
 					label="Builders"
@@ -278,6 +305,18 @@ export function BuildersDirectory({
 						setPages(1);
 					}}
 				/>
+				{pulse.hackathonsKnown && (
+					<PulseTile
+						value={pulse.hackathonN}
+						label="Hackathon builders"
+						hint="entered one with their code"
+						pressed={onlyHackathons}
+						onClick={() => {
+							setHackathonsOnly(onlyHackathons ? "" : "1");
+							setPages(1);
+						}}
+					/>
+				)}
 				{pulse.ambassadorN > 0 ? (
 					<PulseTile
 						value={pulse.ambassadorN}
@@ -290,11 +329,13 @@ export function BuildersDirectory({
 						}}
 					/>
 				) : (
-					<PulseTile
-						value={pulse.countries.length}
-						label="Countries"
-						hint="read from profile locations"
-					/>
+					!pulse.hackathonsKnown && (
+						<PulseTile
+							value={pulse.countries.length}
+							label="Countries"
+							hint="read from profile locations"
+						/>
+					)
 				)}
 			</div>
 
@@ -400,8 +441,8 @@ export function BuildersDirectory({
 					</h2>
 					{sort === "top" && shown.length > 1 && (
 						<p className="text-xs text-muted-foreground/70">
-							ordered by recent commits, stars on their own repos and listed
-							projects
+							ordered by recent commits, stars on their own repos, listed
+							projects and hackathon builds
 						</p>
 					)}
 				</div>
@@ -672,6 +713,33 @@ function BuilderCard({ r }: { r: BuilderRowData }) {
 							</span>
 						)}
 					</div>
+				)}
+				{r.hackathons && r.hackathons.builds > 0 && (
+					<p
+						className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground"
+						title={r.hackathons.events.join(", ")}
+					>
+						<Trophy
+							className={cn(
+								"w-3.5 h-3.5 flex-shrink-0",
+								r.hackathons.wins > 0 && "text-foreground/90",
+							)}
+							aria-hidden
+						/>
+						<span className="truncate">
+							{r.hackathons.builds === 1
+								? `Built at ${r.hackathons.events[0]}`
+								: `${r.hackathons.builds} hackathon builds`}
+							{r.hackathons.wins > 0 && (
+								<span className="text-foreground/90">
+									{" · "}
+									{r.hackathons.wins === 1
+										? "1 winning build"
+										: `${r.hackathons.wins} winning builds`}
+								</span>
+							)}
+						</span>
+					</p>
 				)}
 				{r.ambassador && (
 					<p className="mt-3 text-xs text-muted-foreground">

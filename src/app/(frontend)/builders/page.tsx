@@ -9,6 +9,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AMBASSADORS } from "@/data/stellar-ambassadors";
 import { builderCodeActivity, type CodeActivity } from "@/lib/builder-code";
 import {
+	buildsForRepos,
+	getHackathonBuildsIndex,
+	type IndexedBuild,
+} from "@/lib/hackathon-builds";
+import {
 	fetchAllBuilders,
 	isPublicBuilder,
 	type PassportBuilder,
@@ -88,6 +93,17 @@ export default async function BuildersPage() {
 			console.error("builders repo activity failed:", error);
 		}
 	}
+	// Hackathon builds, matched by the profile page's own rule (a build whose
+	// GitHub link is one of their repos, or their account), so the card and
+	// the profile count alike. Known only once the code read ran: the match
+	// rests on the repos it found. null = not read, never "none".
+	let hackathonBuilds: IndexedBuild[] | null = null;
+	if (activityRead)
+		try {
+			hackathonBuilds = await getHackathonBuildsIndex();
+		} catch (error) {
+			console.error("builders hackathon index failed:", error);
+		}
 	const act = (b: PassportBuilder) =>
 		activity.get(String(b.github_username).toLowerCase());
 	// free-text locations ("São Paulo, Brazil", "Lagos, Nigeria") -> a country we can flag
@@ -149,6 +165,14 @@ export default async function BuildersPage() {
 	const rows: BuilderRowData[] = builders.map((b) => {
 		const a = act(b);
 		const handle = String(b.github_username);
+		// ponytail: one pass over the index per builder (419 x 1,460 link
+		// parses a render, every 5 minutes); key the builds by repo if either
+		// number grows tenfold
+		const entered = hackathonBuilds
+			? buildsForRepos(hackathonBuilds, a?.repos.map((r) => r.fullName) ?? [], [
+					handle,
+				])
+			: null;
 		return {
 			handle,
 			name: b.display_name || handle,
@@ -173,6 +197,13 @@ export default async function BuildersPage() {
 				? [...a.contributesTo.entries()].map(([slug, name]) => ({ slug, name }))
 				: [],
 			languages: a?.languages ?? [],
+			hackathons: entered
+				? {
+						builds: entered.length,
+						wins: entered.filter((x) => x.isWinner).length,
+						events: [...new Set(entered.map((x) => x.hackathon.title))],
+					}
+				: null,
 			country: countryOf(b.location),
 			ambassador: AMBASSADORS[handle.toLowerCase()]
 				? {

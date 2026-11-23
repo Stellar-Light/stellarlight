@@ -27,6 +27,7 @@ const row = (
 	contributesTo: [],
 	languages: [],
 	ambassador: null,
+	hackathons: null,
 	country: null,
 	...over,
 });
@@ -51,6 +52,25 @@ describe("builders directory", () => {
 		expect(html([row("pusher", { commits30d: 3 })])).toContain(
 			"/builders/pusher",
 		);
+	});
+
+	it("counts hackathon builders, and a hackathon build alone is substance", () => {
+		const out = html([
+			row("hacker", {
+				hackathons: { builds: 2, wins: 1, events: ["Stellar Hacks: Agents"] },
+			}),
+			row("other", { bio: "no hackathon", hackathons: null }),
+		]);
+		expect(out).toContain("/builders/hacker");
+		expect(out).toMatch(/Hackathon builders<\/span><span[^>]*>1</);
+		expect(out).toContain("2 hackathon builds");
+		expect(out).toContain("1 winning build");
+	});
+
+	it("shows no hackathon count when the hackathon read did not run", () => {
+		const out = html([row("unread", { bio: "x", hackathons: null })]);
+		expect(out).not.toContain("Hackathon builders");
+		expect(out).toContain("Countries");
 	});
 
 	it("does not let a raw commit count outrank a builder with a project", () => {
