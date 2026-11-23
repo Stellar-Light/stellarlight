@@ -37,6 +37,7 @@ import { getPayload } from "payload";
 import { STABLECOIN_REGISTRY } from "../src/data/stablecoin-registry";
 import {
 	carryIssuerOfRecord,
+	figuresToStore,
 	type IssuerOfRecordFields,
 	type IssuerOfRecordRead,
 	issuerOfRecordWriteOn,
@@ -45,8 +46,10 @@ import {
 	nextPaymentsHistory,
 	paymentsCount24hFrom,
 	RATE_LIMIT_MARK,
+	replacesDaySnapshot,
 	rowIdentity,
 	rowsToRetire,
+	storedMeasuredAt,
 	supplyBaseline,
 	supplyBaselineWindow,
 } from "../src/lib/stablecoin-pipeline";
@@ -106,6 +109,33 @@ async function main() {
 		}
 	}
 
+	/** When this asset was last measured for real: its newest snapshot whose
+	 *  basis was live. An unmeasured run keeps the previous figures (keep()
+	 *  below), so the row must keep their date too; the run's own time would
+	 *  serve them as measured today. Null when no live reading is on record. */
+	async function lastLiveMeasuredAt(assetId: string): Promise<string | null> {
+		try {
+			const r = await payload.find({
+				collection: "stablecoin-snapshots",
+				where: {
+					and: [
+						{ assetId: { equals: assetId } },
+						{ basis: { equals: "live" } },
+					],
+				},
+				sort: "-measuredAt",
+				limit: 1,
+				depth: 0,
+			});
+			const at = (r.docs[0] as { measuredAt?: unknown } | undefined)
+				?.measuredAt;
+			return typeof at === "string" && at ? at : null;
+		} catch {
+			// Could not look: storedMeasuredAt falls back to the row's own date.
+			return null;
+		}
+	}
+
 	const measured = await measureRegistry(STABLECOIN_REGISTRY);
 	const day = utcDay(new Date());
 	let created = 0;
@@ -139,7 +169,11 @@ async function main() {
 			await snapshotsBetween(m.id, week.from, week.to),
 			at,
 		);
-		const change7d = pctChange(m.supply, weekAgoSnap?.supply ?? null);
+		// A hand-entered figure has no measured change.
+		const change7d =
+			m.basis === "curated-static"
+				? null
+				: pctChange(m.supply, weekAgoSnap?.supply ?? null);
 
 		const existing = await payload.find({
 			collection: "stablecoins",
@@ -163,36 +197,22 @@ async function main() {
 			m.paymentsCountLifetime,
 		);
 
-		// Never let a failed fetch blank a good number in CURRENT state.
-		const keep = <T>(fresh: T | null, old: unknown): T | null => {
-			if (fresh != null) return fresh;
-			if (old != null) {
-				kept = true;
-				return old as T;
-			}
-			return null;
-		};
-		let kept = false;
+		const { figures, kept } = figuresToStore(m, prev);
+		const measuredAt = storedMeasuredAt(
+			m.basis,
+			m.measuredAt,
+			prev ? { basis: prev.basis, measuredAt: prev.measuredAt } : null,
+			m.basis === "unmeasured" && prev?.basis !== "live"
+				? await lastLiveMeasuredAt(m.id)
+				: null,
+		);
 
 		const row = {
 			// Brand, identity and class; the issuer of record has none of its
 			// keys while the write switch is off, so the stored fields stay
 			// exactly as they are.
 			...rowIdentity(m, prev, WRITE_ISSUER_OF_RECORD),
-			supply: keep(m.supply, prev?.supply),
-			priceUSD: keep(m.priceUSD, prev?.priceUSD),
-			// Moves with priceUSD, never on its own: the pipeline sets priceBasis
-			// null exactly when priceUSD is null, so keep() carries the pair
-			// forward together — a kept-forward price keeps the basis that
-			// produced it, or the pair would describe two runs.
-			priceBasis: keep(m.priceBasis, prev?.priceBasis),
-			marketCapUSD: keep(m.marketCapUSD, prev?.marketCapUSD),
-			holders: keep(m.holders, prev?.holders),
-			volume24hUSD: keep(m.volume24hUSD, prev?.volume24hUSD),
-			paymentsCountLifetime: keep(
-				m.paymentsCountLifetime,
-				prev?.paymentsCountLifetime,
-			),
+			...figures,
 			// Derived fresh each run, like supplyChange7d: never kept forward
 			// from a previous run when it cannot be computed now.
 			paymentsCount24h,
@@ -202,9 +222,13 @@ async function main() {
 			logoUrl: m.logoUrl,
 			logoSource: m.logoSource,
 			basis: m.basis,
-			measuredAt: m.measuredAt,
+			measuredAt,
 			note: m.note ?? null,
 		};
+		const was = (k: string) => (prev?.[k] == null ? "none" : String(prev[k]));
+		console.log(
+			`  ${m.id}: ${m.basis} · supply ${was("supply")} -> ${row.supply ?? "none"} · holders ${was("holders")} -> ${row.holders ?? "none"} · measuredAt ${row.measuredAt ?? "none"}`,
+		);
 		if (kept) {
 			keptRows++;
 			kept7(m, problems);
@@ -257,10 +281,19 @@ async function main() {
 					limit: 1,
 					depth: 0,
 				});
-				if (had.docs[0]) {
+				const stored = had.docs[0] as
+					| { id: string; basis?: unknown }
+					| undefined;
+				if (!replacesDaySnapshot(stored, m.basis)) {
+					console.log(
+						`  ${key}: kept today's live snapshot; this run was ${m.basis}`,
+					);
+					return;
+				}
+				if (stored) {
 					await payload.update({
 						collection: "stablecoin-snapshots",
-						id: (had.docs[0] as { id: string }).id,
+						id: stored.id,
 						data: snap,
 					});
 				} else {
