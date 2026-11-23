@@ -10,7 +10,7 @@ and delete it here. `docs/QUALITY-FINDINGS-QUEUE.md` is the historical queue
 this replaces.
 
 A probe is a request plus an assertion that is true now and flips when the
-item is fixed. API base URL: https://www.stellarlight.xyz.
+item is fixed. API base URL: https://stellarlight.xyz.
 
 ## Now
 
@@ -277,7 +277,7 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     dead or retired it with nothing locked and no live successor.
 
 12. **The toolchain deprecated count reads as a soroban-sdk count.**
-    Probe: `curl -s 'https://www.stellarlight.xyz/api/analyze?dimension=toolchain' | jq '.toolchain | {deprecatedTotal, soroban: .bySorobanSdkStatus.deprecated, js: .byJsSdkStatus.deprecated, rowsWithReason: ([.deprecatedRepos[] | select(.deprecatedBy)] | length)}'`
+    Probe: `curl -s 'https://stellarlight.xyz/api/analyze?dimension=toolchain' | jq '.toolchain | {deprecatedTotal, soroban: .bySorobanSdkStatus.deprecated, js: .byJsSdkStatus.deprecated, rowsWithReason: ([.deprecatedRepos[] | select(.deprecatedBy)] | length)}'`
     serves `soroban` and `js` as null and `rowsWithReason` 0 on 2026-11-12 (spec
     1.9.136): `deprecatedTotal` 1,284 of 5,865 is Rust OR JS, but only 404
     repos pin a deprecated soroban-sdk; 881 pin one that is not deprecated
@@ -313,6 +313,13 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
   sort=supply) and the paymentsCount24h description, and decides
   sort=volume (it has nothing to rank by; the served methodology says so).
 
+- **Shared pages without their own Open Graph preview as the home page.**
+  Pages that set no `openGraph` inherit the layout's title, description
+  and image, so a shared /directory or /hackathons/{slug} link previews
+  with "StellarLight - Stellar Ecosystem Directory". Probe: the
+  `og:title` of /hackathons/hackmeridian-2026. The layout's `url` was
+  removed on 2026-11-23; titles and descriptions per page remain.
+
 Found by the repo-unlink lane on 2026-11-12 (branch lane/r1112-repo-unlink):
 
 - Promote repo unlink to scheduled runs after 3 clean dispatches. enrich-repos
@@ -324,7 +331,7 @@ Found by the repo-unlink lane on 2026-11-12 (branch lane/r1112-repo-unlink):
   although the read hook strips them from the output, so a filter can still
   tell which repos carry a tag. projectUnlink got field read access for the
   same reason; triageTags has other consumers and was left as it is. Probe:
-  `curl 'https://www.stellarlight.xyz/api/repos?limit=1&where[triageTags][exists]=true'`
+  `curl 'https://stellarlight.xyz/api/repos?limit=1&where[triageTags][exists]=true'`
   answers 200 with a totalDocs.
 - normal's github.repos lists normalfinance/normal-v1, which GitHub answers
   404 for (2026-11-12).
@@ -1061,11 +1068,11 @@ improvements/audits/2026-11-13-regrade-drift/):
   project claims, so 425 of 918 (all but one created since the last full
   regrade on 2026-09-15) store repoScore 0 with no label and sit at the
   bottom of search's candidate window and the scanner's queue. Probe:
-  `curl -g 'https://www.stellarlight.xyz/api/repos?limit=1&where[source][equals]=builder-owned&where[repoScoreLabel][exists]=false'`
+  `curl -g 'https://stellarlight.xyz/api/repos?limit=1&where[source][equals]=builder-owned&where[repoScoreLabel][exists]=false'`
   answers totalDocs 425.
 - `/api/repos?sort=id` answers 500 from page offset 11,600 (`limit=100&page=117`
   and `limit=1000&page=12`), while the default sort pages to the end. Probe:
-  `curl -s -o /dev/null -w '%{http_code}' 'https://www.stellarlight.xyz/api/repos?limit=100&page=117&depth=0&sort=id'`
+  `curl -s -o /dev/null -w '%{http_code}' 'https://stellarlight.xyz/api/repos?limit=100&page=117&depth=0&sort=id'`
   prints 500.
 - 21 free-text or number dispatch inputs in 13 workflows are still written
   into run scripts as `${{ inputs.x }}`, so each is shell text (among them

@@ -28,7 +28,7 @@ pnpm raven:gate --raven <scratch>/stellar-raven --spec <file.json>
 ```
 
 The first scores the branch's spec. The second scores a saved spec, for
-example the live one from `GET https://www.stellarlight.xyz/api/openapi.json`.
+example the live one from `GET https://stellarlight.xyz/api/openapi.json`.
 
 - Exit 0, `VERDICT: Raven would ACCEPT`: ship.
 - Exit 1, hold: read the per-question flips in the output. A question of

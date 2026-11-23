@@ -8,6 +8,7 @@ import {
 } from "@/components/usage-chart";
 import { getUsageStats, getUsageUaSplit } from "@/lib/api-usage";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { RESOLVABLE_PROJECT_STATUSES } from "@/lib/project-status";
 import { findWholeSet } from "@/lib/whole-set";
 
 // Recomputed at most every 5 minutes — 30 daily-window counts per render is
@@ -153,7 +154,12 @@ async function getEcosystemTopline() {
 	if (!payload) return null;
 	try {
 		const [projects, repos, research, partners, funded] = await Promise.all([
-			payload.count({ collection: "projects" }),
+			// Listed projects only: the collection also holds Draft rows (hidden
+			// twins and unpublished entries) that no page serves.
+			payload.count({
+				collection: "projects",
+				where: { status: { in: [...RESOLVABLE_PROJECT_STATUSES] } },
+			}),
 			payload.count({ collection: "repos" }),
 			payload.count({ collection: "research-docs" }),
 			payload.count({ collection: "partner-accounts" }),
@@ -161,7 +167,12 @@ async function getEcosystemTopline() {
 			// read, so a cut read leaves it unknown rather than a partial total.
 			findWholeSet<{ scf?: { totalAwarded?: number | null } }>(payload, {
 				collection: "projects",
-				where: { "scf.awarded": { equals: true } },
+				where: {
+					and: [
+						{ "scf.awarded": { equals: true } },
+						{ status: { in: [...RESOLVABLE_PROJECT_STATUSES] } },
+					],
+				},
 				limit: 1000,
 				depth: 0,
 				select: { scf: true },
@@ -352,7 +363,10 @@ export default async function AnalyticsPage() {
 					className="mb-12"
 				>
 					<div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-8 pt-1">
-						<Stat label="Project records" value={fmt(eco?.projects)} />
+						<Stat
+							label="Listed projects (active and inactive)"
+							value={fmt(eco?.projects)}
+						/>
 						<Stat label="Indexed repositories" value={fmt(eco?.repos)} />
 						<Stat
 							label="Research documents"
