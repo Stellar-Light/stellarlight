@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.9.160",
+		"version": "1.9.161",
 		"summary": "Agent-native data layer for the Stellar ecosystem: projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]); counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose (category/product enumerations, synonym chains, example question phrasings) lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nRate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice); compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility; those flat fields are DEPRECATED, read `meta.counts`. `searchRepos` ranks a capped candidate window (the top 200 rows by repoScore for a browse with no q, the top 600 for a search): when `meta.counts.truncated` is true, `total` counts that window and paging ends there, and `meta.counts.eligible` gives the number of rows the filters admit (null where only ranking every row could count them).\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all; the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it; matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0-1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -12102,7 +12102,7 @@
 					"Code"
 				],
 				"summary": "Evidence-gated registry of verified mainnet Soroban contracts",
-				"description": "Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence; the scanner echo-checked a README-claimed contract id live on-chain, or weekly on-chain enrichment attributed real activity to the repo. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.",
+				"description": "Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence; the scanner echo-checked a README-claimed contract id live on-chain, weekly on-chain enrichment attributed real activity to the repo, or the curated on-chain map links it to a project. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.",
 				"x-routing": {
 					"purpose": "Enumerate/filter VERIFIED mainnet contracts as entities: which contracts exist with code+usage+audit evidence, per domain or project.",
 					"keywords": [
@@ -12239,6 +12239,24 @@
 												},
 												"note": {
 													"type": "string"
+												},
+												"attribution": {
+													"type": "array",
+													"description": "Credit for the sources behind `attribution`, as their terms ask: Stellar Index (a link when its data is shown publicly) and stellar-expert/public-directory (MIT License).",
+													"items": {
+														"type": "object",
+														"properties": {
+															"name": {
+																"type": "string"
+															},
+															"url": {
+																"type": "string"
+															},
+															"use": {
+																"type": "string"
+															}
+														}
+													}
 												}
 											}
 										},
@@ -12260,9 +12278,10 @@
 															"source-matched",
 															"sibling-matched",
 															"published",
-															"onchain-attributed"
+															"onchain-attributed",
+															"onchain-map"
 														],
-														"description": "Ownership evidence for contractId. self-validated = the contract's WASM names THIS repo as its source (SEP-55 source_repo) and this repo holds a GitHub build attestation for that WASM. source-matched = this repo's own #[contractimpl] source defines at least half of the functions the deployed WASM exports, or all of them when it exports fewer than four (a function-name match, not a byte-level build; a GitHub fork never qualifies). sibling-matched = a repo under the same GitHub owner that this repo points to (SEP-55 source_repo, a git submodule, or a README link) defines them. published = not judged yet under that rule (stored before spec 1.9.135, or a scan could not read the repo the source is in); a rescan moves such a row to a judged value where it can decide, and a row judged cited leaves this registry. onchain-attributed = the repo has no such id; the address comes from on-chain enrichment, which recorded stellar.expert naming this repo as the contract's source on the project row. null when contractId is null (a row listed for live usage alone), or for an id recorded before its basis was (not judged yet)."
+														"description": "Ownership evidence for contractId. self-validated = the contract's WASM names THIS repo as its source (SEP-55 source_repo) and this repo holds a GitHub build attestation for that WASM. source-matched = this repo's own #[contractimpl] source defines at least half of the functions the deployed WASM exports, or all of them when it exports fewer than four (a function-name match, not a byte-level build; a GitHub fork never qualifies). sibling-matched = a repo under the same GitHub owner that this repo points to (SEP-55 source_repo, a git submodule, or a README link) defines them. published = not judged yet under that rule (stored before spec 1.9.135, or a scan could not read the repo the source is in); a rescan moves such a row to a judged value where it can decide, and a row judged cited leaves this registry. onchain-attributed = the repo has no such id; the address comes from on-chain enrichment, which recorded stellar.expert naming this repo as the contract's source on the project row. onchain-map = no repo row names the contract; the curated on-chain map links it to the project, and `attribution` says why. null when contractId is null (a row listed for live usage alone), or for an id recorded before its basis was (not judged yet)."
 													},
 													"verifiedContracts": {
 														"type": "array",
@@ -12293,6 +12312,8 @@
 													},
 													"repo": {
 														"type": "object",
+														"nullable": true,
+														"description": "The repo the row comes from. On an onchain-map row, the repo the contract's deployed code is attested to; null when none is attested (not a claim the code has no repo).",
 														"properties": {
 															"fullName": {
 																"type": "string"
@@ -12315,6 +12336,99 @@
 																"nullable": true
 															}
 														}
+													},
+													"attribution": {
+														"type": "object",
+														"nullable": true,
+														"description": "The curated on-chain map's link of contractId to a project, as the weekly on-chain lane last wrote it on the project row. tier strong = the directory, a code proof (the deployed code's functions are defined in the project's repo, or its build metadata names the repo), a protocol registry anchor (Stellar Index) or the project's own account; labelled = a stellar-expert/public-directory label under the project's own domain (a third party's label, not a verification), or a contract an issuer and its tokens share (sharedWithinFamily, issuer first; served once, under the issuer). The code test was checked on contracts whose owner was known: 1 of 112 other projects' contracts judged own, and it misses about a quarter, so a contract with no attribution is not proof it is not a project's. A contract two projects hold outside one family is attributed to neither. createdAt and createdLedger are the creation found in that ledger's metadata (dateBasis). endedAt = the day the weekly check first read no contract instance at the address; null = present, or never read absent. null = the map holds no link for this contract.",
+														"properties": {
+															"project": {
+																"type": "object",
+																"properties": {
+																	"slug": {
+																		"type": "string"
+																	},
+																	"name": {
+																		"type": "string",
+																		"nullable": true
+																	}
+																}
+															},
+															"tier": {
+																"type": "string",
+																"enum": [
+																	"strong",
+																	"labelled"
+																]
+															},
+															"evidence": {
+																"type": "array",
+																"items": {
+																	"type": "string",
+																	"enum": [
+																		"directory",
+																		"own-repo-interface",
+																		"own-wasm-meta",
+																		"own-pages-confirmed",
+																		"own-deployer-confirmed",
+																		"own-account",
+																		"protocol-registry",
+																		"public-directory-label",
+																		"named-on-own-pages",
+																		"same-deployer"
+																	]
+																},
+																"description": "Why the address is the project's, strongest first: directory, own-repo-interface, own-wasm-meta, own-pages-confirmed, own-deployer-confirmed, protocol-registry, public-directory-label (meanings in the on-chain map file, src/data/onchain-map.json)."
+															},
+															"sourceUrl": {
+																"type": "string",
+																"nullable": true,
+																"description": "The public page or file the link was read from."
+															},
+															"createdAt": {
+																"type": "string",
+																"format": "date-time",
+																"nullable": true
+															},
+															"createdLedger": {
+																"type": "integer",
+																"nullable": true
+															},
+															"dateBasis": {
+																"type": "string",
+																"nullable": true
+															},
+															"sharedWithinFamily": {
+																"type": "array",
+																"nullable": true,
+																"items": {
+																	"type": "string"
+																}
+															},
+															"endedAt": {
+																"type": "string",
+																"format": "date-time",
+																"nullable": true
+															},
+															"asOf": {
+																"type": "string",
+																"format": "date-time",
+																"nullable": true,
+																"description": "The on-chain reading that last checked the contract (the project's onchain.asOf)."
+															}
+														},
+														"required": [
+															"project",
+															"tier",
+															"evidence",
+															"sourceUrl",
+															"createdAt",
+															"createdLedger",
+															"dateBasis",
+															"sharedWithinFamily",
+															"endedAt",
+															"asOf"
+														]
 													},
 													"stellarProof": {
 														"type": "string",
@@ -18445,7 +18559,7 @@
 							"object",
 							"null"
 						],
-						"description": "On-chain readings for hand-verified contract/asset join keys, from Stellar Index, Horizon and the Soroban RPC. null = not tracked in our registry. NEVER 'no on-chain activity'. contracts[]: {address, label, lastEventAt, activeLedgers, ttlState, createdAt, verifiedRepo}. lastEventAt = the newest event the contract emitted: proof of use on that date. A contract can be called without emitting an event, so a null or old lastEventAt is NOT proof it is unused. activeLedgers = lifetime count of ledgers in which it emitted an event. ttlState = 'live', or 'archived' when the contract's entry has outlived its TTL and must be restored before it can run. createdAt = when the contract was created, kept from the reading that first recorded it; null for a contract joined after 2026-11-03. verifiedRepo = the GitHub repo the contract's code comes from: the deployed WASM is attested to it (its build metadata names the repo and GitHub lists a build attestation for that WASM there), or, for a WASM built without such metadata, a hand-verified seed names it; where the contract's code could not be read this time (a contract archived on chain may leave the live ledger state, or a read failed), the value the row already holds is kept, which for a row first read before 2026-11-06 can be the old explorer's validation; null = none of these, never a claim about the code. Asset-issuer readings: assetHolders = accounts holding a balance now (contracts that hold the asset, such as smart wallets and pools, are not counted); assetTrustlines = open trustlines in every authorization state (reach, always >= assetHolders; do NOT read it as the holder count); assetSupply = units outside the issuer in whole asset units; assetLastMovedAt = the newest transfer, mint, burn or clawback of the asset, classic payments included (null = none among its newest 100 events, or no event on record). assetHoldersDelta = holder change since the previous reading of the same source, with prevAsOf + deltaDays defining the window; null = no comparable prior reading, NOT zero change. source + asOf date every payload. Gone since 1.9.151, because their source went paid and no free source holds them: assetPayments, assetPaymentsAmount, assetPaymentsDelta, assetTrades, and per contract events, eventsDelta, subinvocations, subinvocationsDelta and storageEntries."
+						"description": "On-chain readings for hand-verified contract/asset join keys, from Stellar Index, Horizon and the Soroban RPC. null = not tracked in our registry. NEVER 'no on-chain activity'. contracts[]: {address, label, lastEventAt, activeLedgers, ttlState, createdAt, verifiedRepo, tier, evidence, sourceUrl, createdLedger, dateBasis, sharedWithinFamily, endedAt}. lastEventAt = the newest event the contract emitted: proof of use on that date. A contract can be called without emitting an event, so a null or old lastEventAt is NOT proof it is unused. activeLedgers = lifetime count of ledgers in which it emitted an event. ttlState = 'live', or 'archived' when the contract's entry has outlived its TTL and must be restored before it can run. createdAt = when the contract was created: found in that ledger's metadata (createdLedger) where dateBasis says so, otherwise kept from the reading that first recorded it; null = neither holds a date. verifiedRepo = the GitHub repo the contract's code comes from: the deployed WASM is attested to it (its build metadata names the repo and GitHub lists a build attestation for that WASM there), or, for a WASM built without such metadata, a hand-verified seed names it; where the contract's code could not be read this time (a contract archived on chain may leave the live ledger state, or a read failed), the value the row already holds is kept, which for a row first read before 2026-11-06 can be the old explorer's validation; null = none of these, never a claim about the code. tier, evidence, sourceUrl, createdLedger, dateBasis and sharedWithinFamily come from the curated on-chain map and are null on a contract it does not hold: tier strong = the directory, a code proof, a protocol registry anchor (Stellar Index, stellarindex.io) or the project's own account; labelled = a stellar-expert/public-directory label (MIT) under the project's own domain, a third party's label and not a verification, or an address an issuer and its tokens share (sharedWithinFamily names them, issuer first). evidence = why, strongest first; sourceUrl = the public page it was read from. endedAt = the day the weekly check first read no contract instance at the address; null = present, or never read absent. accounts[]: the map's accounts for the row, {address, label, createdAt (the current account's opening, proved in that ledger's metadata, not a launch date), tier, evidence, sourceUrl, createdLedger, dateBasis, sharedWithinFamily, endedAt (the day Horizon first answered that the account does not exist: merged or never funded)}; [] = the map links none, never a claim the project has no account. Asset-issuer readings: assetHolders = accounts holding a balance now (contracts that hold the asset, such as smart wallets and pools, are not counted); assetTrustlines = open trustlines in every authorization state (reach, always >= assetHolders; do NOT read it as the holder count); assetSupply = units outside the issuer in whole asset units; assetLastMovedAt = the newest transfer, mint, burn or clawback of the asset, classic payments included (null = none among its newest 100 events, or no event on record). assetHoldersDelta = holder change since the previous reading of the same source, with prevAsOf + deltaDays defining the window; null = no comparable prior reading, NOT zero change. source + asOf date every payload. Gone since 1.9.151, because their source went paid and no free source holds them: assetPayments, assetPaymentsAmount, assetPaymentsDelta, assetTrades, and per contract events, eventsDelta, subinvocations, subinvocationsDelta and storageEntries."
 					},
 					"publicGoods": {
 						"type": [

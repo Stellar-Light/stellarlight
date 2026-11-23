@@ -1019,7 +1019,19 @@ Found 2026-10-23 by the dead-protocol guard round
   6 of 64 contracts, so it cannot stand in. The proof is the CREATED entry of
   the contract instance in the creation ledger's own metadata (an archive
   RPC `getLedgers` read); wire it in as a lane, or as a data file of proved
-  dates.
+  dates. Partly done in spec 1.9.161: the on-chain map
+  (src/data/onchain-map.json) carries the proved creation of the 336
+  contracts it holds, and the lane writes it. A contract that joins through
+  a seed or the repo scan alone still has none.
+- The token integrations lane (scripts/refresh-token-integrations.ts, not on
+  main yet) attributes holder contracts from /api/contracts at its weakest
+  rank (3), below a public-directory label (2), and reads only `contractId`
+  and `project`. Since spec 1.9.161 a row's `attribution` says how strong the
+  link is: rank a strong-tier attribution with the protocol registry (1), a
+  labelled one with the label (2), name the tier and evidence in its basis,
+  and skip a contract with `attribution.endedAt`. Account holders need
+  `onchain.accounts[]` from the project rows. Found while moving the map in
+  (2026-11-23).
 - enrich-onchain names rows that hold an on-chain block and have no join key
   any more (ORPHAN lines) and leaves them as they were, because a join can
   also drop out on a failed toml or Horizon read. Each needs a decision by

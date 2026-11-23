@@ -461,13 +461,50 @@ export interface Project {
 					 */
 					ttlState?: string | null;
 					/**
-					 * When the contract was created. Kept from the reading that first recorded it; null for a contract joined after 2026-11-03
+					 * When the contract was created: proved in that ledger's metadata where dateBasis says so (the on-chain map), otherwise kept from the reading that first recorded it. Null when neither holds a date
 					 */
 					createdAt?: string | null;
 					/**
 					 * GitHub repo the contract's code comes from: the deployed WASM is attested to it (its build metadata names the repo, SEP-55, and GitHub lists a build attestation for that WASM there), or, for a WASM built without such metadata, a hand-verified seed names it (src/data/onchain-contracts.ts)
 					 */
 					verifiedRepo?: string | null;
+					/**
+					 * strong: the directory, a code proof, a protocol registry anchor or the project's own account. labelled: a public-directory label under the project's own domain, or an address an issuer and its tokens share. Null: not from the on-chain map
+					 */
+					tier?: ("strong" | "labelled") | null;
+					evidence?: string[] | null;
+					sourceUrl?: string | null;
+					createdLedger?: number | null;
+					dateBasis?: string | null;
+					sharedWithinFamily?: string[] | null;
+					/**
+					 * The day the weekly check first read the address absent from mainnet (no contract instance on the RPC, or Horizon answers 404 for the account). Null: present, or never read absent
+					 */
+					endedAt?: string | null;
+					id?: string | null;
+			  }[]
+			| null;
+		accounts?:
+			| {
+					address?: string | null;
+					label?: string | null;
+					/**
+					 * When the current account was opened, proved in that ledger's metadata. Not a launch date
+					 */
+					createdAt?: string | null;
+					/**
+					 * strong: the directory, a code proof, a protocol registry anchor or the project's own account. labelled: a public-directory label under the project's own domain, or an address an issuer and its tokens share. Null: not from the on-chain map
+					 */
+					tier?: ("strong" | "labelled") | null;
+					evidence?: string[] | null;
+					sourceUrl?: string | null;
+					createdLedger?: number | null;
+					dateBasis?: string | null;
+					sharedWithinFamily?: string[] | null;
+					/**
+					 * The day the weekly check first read the address absent from mainnet (no contract instance on the RPC, or Horizon answers 404 for the account). Null: present, or never read absent
+					 */
+					endedAt?: string | null;
 					id?: string | null;
 			  }[]
 			| null;
@@ -3702,6 +3739,28 @@ export interface ProjectsSelect<T extends boolean = true> {
 							ttlState?: T;
 							createdAt?: T;
 							verifiedRepo?: T;
+							tier?: T;
+							evidence?: T;
+							sourceUrl?: T;
+							createdLedger?: T;
+							dateBasis?: T;
+							sharedWithinFamily?: T;
+							endedAt?: T;
+							id?: T;
+					  };
+				accounts?:
+					| T
+					| {
+							address?: T;
+							label?: T;
+							createdAt?: T;
+							tier?: T;
+							evidence?: T;
+							sourceUrl?: T;
+							createdLedger?: T;
+							dateBasis?: T;
+							sharedWithinFamily?: T;
+							endedAt?: T;
 							id?: T;
 					  };
 				assetHoldersDelta?: T;

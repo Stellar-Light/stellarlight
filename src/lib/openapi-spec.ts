@@ -61,6 +61,7 @@ import {
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
 import { RESEARCH_MODES } from "./match-mode";
 import { SOURCE_CHECK_STATES } from "./note-pins";
+import { MAP_TIERS, ONCHAIN_MAP_EVIDENCE } from "./onchain-map";
 import {
 	ORACLE_CONTRACT_STATES,
 	ORACLE_FEED_LIST_BASES,
@@ -7799,7 +7800,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Evidence-gated registry of verified mainnet Soroban contracts",
 				description:
-					"Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence; the scanner echo-checked a README-claimed contract id live on-chain, or weekly on-chain enrichment attributed real activity to the repo. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.",
+					"Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence; the scanner echo-checked a README-claimed contract id live on-chain, weekly on-chain enrichment attributed real activity to the repo, or the curated on-chain map links it to a project. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.",
 				"x-routing": {
 					purpose:
 						"Enumerate/filter VERIFIED mainnet contracts as entities: which contracts exist with code+usage+audit evidence, per domain or project.",
@@ -7911,6 +7912,19 @@ export const spec: OpenAPISpec = {
 													},
 												},
 												note: { type: "string" },
+												attribution: {
+													type: "array",
+													description:
+														"Credit for the sources behind `attribution`, as their terms ask: Stellar Index (a link when its data is shown publicly) and stellar-expert/public-directory (MIT License).",
+													items: {
+														type: "object",
+														properties: {
+															name: { type: "string" },
+															url: { type: "string" },
+															use: { type: "string" },
+														},
+													},
+												},
 											},
 										},
 										contracts: {
@@ -7933,9 +7947,10 @@ export const spec: OpenAPISpec = {
 															"sibling-matched",
 															"published",
 															"onchain-attributed",
+															"onchain-map",
 														],
 														description:
-															"Ownership evidence for contractId. self-validated = the contract's WASM names THIS repo as its source (SEP-55 source_repo) and this repo holds a GitHub build attestation for that WASM. source-matched = this repo's own #[contractimpl] source defines at least half of the functions the deployed WASM exports, or all of them when it exports fewer than four (a function-name match, not a byte-level build; a GitHub fork never qualifies). sibling-matched = a repo under the same GitHub owner that this repo points to (SEP-55 source_repo, a git submodule, or a README link) defines them. published = not judged yet under that rule (stored before spec 1.9.135, or a scan could not read the repo the source is in); a rescan moves such a row to a judged value where it can decide, and a row judged cited leaves this registry. onchain-attributed = the repo has no such id; the address comes from on-chain enrichment, which recorded stellar.expert naming this repo as the contract's source on the project row. null when contractId is null (a row listed for live usage alone), or for an id recorded before its basis was (not judged yet).",
+															"Ownership evidence for contractId. self-validated = the contract's WASM names THIS repo as its source (SEP-55 source_repo) and this repo holds a GitHub build attestation for that WASM. source-matched = this repo's own #[contractimpl] source defines at least half of the functions the deployed WASM exports, or all of them when it exports fewer than four (a function-name match, not a byte-level build; a GitHub fork never qualifies). sibling-matched = a repo under the same GitHub owner that this repo points to (SEP-55 source_repo, a git submodule, or a README link) defines them. published = not judged yet under that rule (stored before spec 1.9.135, or a scan could not read the repo the source is in); a rescan moves such a row to a judged value where it can decide, and a row judged cited leaves this registry. onchain-attributed = the repo has no such id; the address comes from on-chain enrichment, which recorded stellar.expert naming this repo as the contract's source on the project row. onchain-map = no repo row names the contract; the curated on-chain map links it to the project, and `attribution` says why. null when contractId is null (a row listed for live usage alone), or for an id recorded before its basis was (not judged yet).",
 													},
 													verifiedContracts: {
 														type: "array",
@@ -7959,6 +7974,9 @@ export const spec: OpenAPISpec = {
 													},
 													repo: {
 														type: "object",
+														nullable: true,
+														description:
+															"The repo the row comes from. On an onchain-map row, the repo the contract's deployed code is attested to; null when none is attested (not a claim the code has no repo).",
 														properties: {
 															fullName: { type: "string" },
 															url: { type: "string", nullable: true },
@@ -7971,6 +7989,79 @@ export const spec: OpenAPISpec = {
 															slug: { type: "string" },
 															name: { type: "string", nullable: true },
 														},
+													},
+													attribution: {
+														type: "object",
+														nullable: true,
+														description:
+															"The curated on-chain map's link of contractId to a project, as the weekly on-chain lane last wrote it on the project row. tier strong = the directory, a code proof (the deployed code's functions are defined in the project's repo, or its build metadata names the repo), a protocol registry anchor (Stellar Index) or the project's own account; labelled = a stellar-expert/public-directory label under the project's own domain (a third party's label, not a verification), or a contract an issuer and its tokens share (sharedWithinFamily, issuer first; served once, under the issuer). The code test was checked on contracts whose owner was known: 1 of 112 other projects' contracts judged own, and it misses about a quarter, so a contract with no attribution is not proof it is not a project's. A contract two projects hold outside one family is attributed to neither. createdAt and createdLedger are the creation found in that ledger's metadata (dateBasis). endedAt = the day the weekly check first read no contract instance at the address; null = present, or never read absent. null = the map holds no link for this contract.",
+														properties: {
+															project: {
+																type: "object",
+																properties: {
+																	slug: { type: "string" },
+																	name: { type: "string", nullable: true },
+																},
+															},
+															tier: {
+																type: "string",
+																enum: [...MAP_TIERS],
+															},
+															evidence: {
+																type: "array",
+																items: {
+																	type: "string",
+																	enum: [...ONCHAIN_MAP_EVIDENCE],
+																},
+																description:
+																	"Why the address is the project's, strongest first: directory, own-repo-interface, own-wasm-meta, own-pages-confirmed, own-deployer-confirmed, protocol-registry, public-directory-label (meanings in the on-chain map file, src/data/onchain-map.json).",
+															},
+															sourceUrl: {
+																type: "string",
+																nullable: true,
+																description:
+																	"The public page or file the link was read from.",
+															},
+															createdAt: {
+																type: "string",
+																format: "date-time",
+																nullable: true,
+															},
+															createdLedger: {
+																type: "integer",
+																nullable: true,
+															},
+															dateBasis: { type: "string", nullable: true },
+															sharedWithinFamily: {
+																type: "array",
+																nullable: true,
+																items: { type: "string" },
+															},
+															endedAt: {
+																type: "string",
+																format: "date-time",
+																nullable: true,
+															},
+															asOf: {
+																type: "string",
+																format: "date-time",
+																nullable: true,
+																description:
+																	"The on-chain reading that last checked the contract (the project's onchain.asOf).",
+															},
+														},
+														required: [
+															"project",
+															"tier",
+															"evidence",
+															"sourceUrl",
+															"createdAt",
+															"createdLedger",
+															"dateBasis",
+															"sharedWithinFamily",
+															"endedAt",
+															"asOf",
+														],
 													},
 													stellarProof: { type: "string", nullable: true },
 													codeDepth: { type: "number", nullable: true },
@@ -12589,7 +12680,7 @@ export const spec: OpenAPISpec = {
 					onchain: {
 						type: ["object", "null"],
 						description:
-							"On-chain readings for hand-verified contract/asset join keys, from Stellar Index, Horizon and the Soroban RPC. null = not tracked in our registry. NEVER 'no on-chain activity'. contracts[]: {address, label, lastEventAt, activeLedgers, ttlState, createdAt, verifiedRepo}. lastEventAt = the newest event the contract emitted: proof of use on that date. A contract can be called without emitting an event, so a null or old lastEventAt is NOT proof it is unused. activeLedgers = lifetime count of ledgers in which it emitted an event. ttlState = 'live', or 'archived' when the contract's entry has outlived its TTL and must be restored before it can run. createdAt = when the contract was created, kept from the reading that first recorded it; null for a contract joined after 2026-11-03. verifiedRepo = the GitHub repo the contract's code comes from: the deployed WASM is attested to it (its build metadata names the repo and GitHub lists a build attestation for that WASM there), or, for a WASM built without such metadata, a hand-verified seed names it; where the contract's code could not be read this time (a contract archived on chain may leave the live ledger state, or a read failed), the value the row already holds is kept, which for a row first read before 2026-11-06 can be the old explorer's validation; null = none of these, never a claim about the code. Asset-issuer readings: assetHolders = accounts holding a balance now (contracts that hold the asset, such as smart wallets and pools, are not counted); assetTrustlines = open trustlines in every authorization state (reach, always >= assetHolders; do NOT read it as the holder count); assetSupply = units outside the issuer in whole asset units; assetLastMovedAt = the newest transfer, mint, burn or clawback of the asset, classic payments included (null = none among its newest 100 events, or no event on record). assetHoldersDelta = holder change since the previous reading of the same source, with prevAsOf + deltaDays defining the window; null = no comparable prior reading, NOT zero change. source + asOf date every payload. Gone since 1.9.151, because their source went paid and no free source holds them: assetPayments, assetPaymentsAmount, assetPaymentsDelta, assetTrades, and per contract events, eventsDelta, subinvocations, subinvocationsDelta and storageEntries.",
+							"On-chain readings for hand-verified contract/asset join keys, from Stellar Index, Horizon and the Soroban RPC. null = not tracked in our registry. NEVER 'no on-chain activity'. contracts[]: {address, label, lastEventAt, activeLedgers, ttlState, createdAt, verifiedRepo, tier, evidence, sourceUrl, createdLedger, dateBasis, sharedWithinFamily, endedAt}. lastEventAt = the newest event the contract emitted: proof of use on that date. A contract can be called without emitting an event, so a null or old lastEventAt is NOT proof it is unused. activeLedgers = lifetime count of ledgers in which it emitted an event. ttlState = 'live', or 'archived' when the contract's entry has outlived its TTL and must be restored before it can run. createdAt = when the contract was created: found in that ledger's metadata (createdLedger) where dateBasis says so, otherwise kept from the reading that first recorded it; null = neither holds a date. verifiedRepo = the GitHub repo the contract's code comes from: the deployed WASM is attested to it (its build metadata names the repo and GitHub lists a build attestation for that WASM there), or, for a WASM built without such metadata, a hand-verified seed names it; where the contract's code could not be read this time (a contract archived on chain may leave the live ledger state, or a read failed), the value the row already holds is kept, which for a row first read before 2026-11-06 can be the old explorer's validation; null = none of these, never a claim about the code. tier, evidence, sourceUrl, createdLedger, dateBasis and sharedWithinFamily come from the curated on-chain map and are null on a contract it does not hold: tier strong = the directory, a code proof, a protocol registry anchor (Stellar Index, stellarindex.io) or the project's own account; labelled = a stellar-expert/public-directory label (MIT) under the project's own domain, a third party's label and not a verification, or an address an issuer and its tokens share (sharedWithinFamily names them, issuer first). evidence = why, strongest first; sourceUrl = the public page it was read from. endedAt = the day the weekly check first read no contract instance at the address; null = present, or never read absent. accounts[]: the map's accounts for the row, {address, label, createdAt (the current account's opening, proved in that ledger's metadata, not a launch date), tier, evidence, sourceUrl, createdLedger, dateBasis, sharedWithinFamily, endedAt (the day Horizon first answered that the account does not exist: merged or never funded)}; [] = the map links none, never a claim the project has no account. Asset-issuer readings: assetHolders = accounts holding a balance now (contracts that hold the asset, such as smart wallets and pools, are not counted); assetTrustlines = open trustlines in every authorization state (reach, always >= assetHolders; do NOT read it as the holder count); assetSupply = units outside the issuer in whole asset units; assetLastMovedAt = the newest transfer, mint, burn or clawback of the asset, classic payments included (null = none among its newest 100 events, or no event on record). assetHoldersDelta = holder change since the previous reading of the same source, with prevAsOf + deltaDays defining the window; null = no comparable prior reading, NOT zero change. source + asOf date every payload. Gone since 1.9.151, because their source went paid and no free source holds them: assetPayments, assetPaymentsAmount, assetPaymentsDelta, assetTrades, and per contract events, eventsDelta, subinvocations, subinvocationsDelta and storageEntries.",
 					},
 					publicGoods: {
 						type: ["object", "null"],

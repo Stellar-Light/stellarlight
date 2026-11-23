@@ -88,6 +88,9 @@ export function evidenceOf(onchain: any): Ev | null {
 	for (const c of (onchain?.contracts ?? []) as any[]) {
 		const at = when(c?.lastEventAt);
 		if (!at || typeof c?.address !== "string" || !c.address) continue;
+		// A third party's label (the on-chain map's labelled tier) ties the
+		// address to the project; it is not proof the project runs it.
+		if (c.tier === "labelled") continue;
 		dated.push({
 			kind: "contract-event",
 			detail: `event from ${c.address.slice(0, 10)}… on ${at.slice(0, 10)}`,

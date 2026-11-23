@@ -16,6 +16,7 @@ import { CONTRACT_BASES } from "../contract-basis";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "../http-params";
 import { RESEARCH_MODES } from "../match-mode";
 import { SOURCE_CHECK_STATES } from "../note-pins";
+import { MAP_TIERS, ONCHAIN_MAP_EVIDENCE } from "../onchain-map";
 import { spec } from "../openapi-spec";
 import {
 	ORACLE_CONTRACT_STATES,
@@ -77,6 +78,23 @@ import { TRUST_SIGNALS } from "../trust-report";
 const S: any = spec;
 const sorted = (xs: readonly string[]) => [...xs].sort();
 type Param = { name: string; description: string; schema: { enum: string[] } };
+
+describe("the on-chain map's tier and evidence are the code's lists", () => {
+	it("listContracts attribution.tier and attribution.evidence spread MAP_TIERS and ONCHAIN_MAP_EVIDENCE, and the collection stores the same tiers", () => {
+		const a =
+			S.paths["/api/contracts"].get.responses["200"].content["application/json"]
+				.schema.properties.contracts.items.properties.attribution.properties;
+		expect(sorted(a.tier.enum)).toEqual(sorted(MAP_TIERS));
+		expect(sorted(a.evidence.items.enum)).toEqual(sorted(ONCHAIN_MAP_EVIDENCE));
+		const src = readFileSync(
+			resolve(__dirname, "../../collections/Projects.ts"),
+			"utf8",
+		);
+		expect(src).toMatch(
+			/name: "tier",\s*type: "select",\s*options: \[\.\.\.MAP_TIERS\]/,
+		);
+	});
+});
 
 describe("statusBasis is ONE list (sls-084)", () => {
 	it("Project.statusBasis enum equals STATUS_BASES", () => {
@@ -762,11 +780,13 @@ describe("contract basis is ONE list", () => {
 		const e =
 			S.paths["/api/contracts"].get.responses["200"].content["application/json"]
 				.schema.properties.contracts.items.properties.contractBasis.enum;
-		// Every stored basis but cited, plus on-chain attribution.
+		// Every stored basis but cited, plus on-chain attribution and the
+		// on-chain map's own rows.
 		expect(sorted(e)).toEqual(
 			sorted([
 				...CONTRACT_BASES.filter((b) => b !== "cited"),
 				"onchain-attributed",
+				"onchain-map",
 			]),
 		);
 	});

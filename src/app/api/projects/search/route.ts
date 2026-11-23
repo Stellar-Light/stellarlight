@@ -804,6 +804,25 @@ function pickPublicGoods(g: any) {
 	};
 }
 
+/** The on-chain map's fields of one contract or account
+ * (src/lib/onchain-map.ts); null where the link is not the map's. */
+// biome-ignore lint/suspicious/noExplicitAny: Payload array row
+function pickMapLink(x: any) {
+	const list = (v: unknown) =>
+		Array.isArray(v) && v.length
+			? v.filter((s): s is string => typeof s === "string")
+			: null;
+	return {
+		tier: x.tier ?? null,
+		evidence: list(x.evidence),
+		sourceUrl: x.sourceUrl ?? null,
+		createdLedger: typeof x.createdLedger === "number" ? x.createdLedger : null,
+		dateBasis: x.dateBasis ?? null,
+		sharedWithinFamily: list(x.sharedWithinFamily),
+		endedAt: x.endedAt ?? null,
+	};
+}
+
 // biome-ignore lint/suspicious/noExplicitAny: Payload group shape
 function pickOnchain(o: any) {
 	if (!o || !o.asOf) return null;
@@ -834,6 +853,18 @@ function pickOnchain(o: any) {
 						ttlState: typeof c.ttlState === "string" ? c.ttlState : null,
 						createdAt: c.createdAt ?? null,
 						verifiedRepo: c.verifiedRepo ?? null,
+						...pickMapLink(c),
+					}),
+				)
+			: [],
+		accounts: Array.isArray(o.accounts)
+			? o.accounts.map(
+					// biome-ignore lint/suspicious/noExplicitAny: Payload array row
+					(a: any) => ({
+						address: a.address ?? null,
+						label: a.label ?? null,
+						createdAt: a.createdAt ?? null,
+						...pickMapLink(a),
 					}),
 				)
 			: [],

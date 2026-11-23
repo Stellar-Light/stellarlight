@@ -2,9 +2,11 @@
 # the newest event, ledgers with an event, TTL state and attested source repo;
 # per asset holders, supply, trustlines and newest movement) from Stellar
 # Index, Horizon and the Soroban RPC, join keys hand-verified in
-# src/data/onchain-contracts.ts. The explorer it read until 2026-11-03 went
-# paid and the lane failed for three weeks. Weekly + dispatchable; dry-run by
-# default on dispatch.
+# src/data/onchain-contracts.ts and the curated on-chain map
+# (src/data/onchain-map.json: contracts and accounts, each checked weekly for
+# existence on mainnet and marked endedAt when read absent). The explorer it
+# read until 2026-11-03 went paid and the lane failed for three weeks.
+# Weekly + dispatchable; dry-run by default on dispatch.
 name: Enrich on-chain metrics
 on:
   schedule:
@@ -20,7 +22,9 @@ permissions:
 jobs:
   enrich:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # About 5 minutes for 68 contracts (2026-11-22); the map adds about 300
+    # contracts and 356 Horizon account reads.
+    timeout-minutes: 40
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}

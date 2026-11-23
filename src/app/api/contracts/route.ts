@@ -6,9 +6,10 @@
  *   GET /api/contracts?domain=oracle       → filter by code-evidenced domain
  *
  * MEMBERSHIP IS EVIDENCE-GATED: a row exists only when the scanner verified
- * a README contract id live on mainnet and did not judge it cited OR weekly
- * on-chain enrichment attributed real activity to the repo. An id the README
- * only cites is not listed. Each
+ * a README contract id live on mainnet and did not judge it cited, weekly
+ * on-chain enrichment attributed real activity to the repo, or the curated
+ * on-chain map links the contract to a project (src/data/onchain-map.json,
+ * through the project rows). An id the README only cites is not listed. Each
  * row joins code truth (proof, depth, interface, domains), live usage,
  * per-project audit records, and succession. Absence here is NOT a claim a
  * contract doesn't exist — the registry grows exactly as fast as scans and
@@ -26,6 +27,7 @@ import { DEFAULT_READ_TIMEOUT_MS, degradedRead } from "@/lib/degraded-read";
 import { clampLimit } from "@/lib/http-params";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { ONCHAIN_MAP_ATTRIBUTION } from "@/lib/onchain-map";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { serverTiming } from "@/lib/server-timing";
@@ -155,7 +157,8 @@ export async function GET(req: NextRequest) {
 					offset,
 				},
 				counts: { returned: contracts.length, total },
-				note: "Evidence-gated: rows exist only for contracts the scanner verified live on mainnet and did not judge cited, contracts on-chain enrichment attributed to the repo, or repos with live usage. A contract a repo's README only cites, usually one it calls, is not listed here as that repo's; /api/repos/trust serves it with mainnetContractBasis cited. contractBasis published or null means not judged yet: a rescan moves such a row to a judged basis where it can decide. Absence is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Lead with rows that carry codeInUse (live usage is the strongest signal).",
+				note: "Evidence-gated: rows exist only for contracts the scanner verified live on mainnet and did not judge cited, contracts on-chain enrichment attributed to the repo, or repos with live usage. A contract a repo's README only cites, usually one it calls, is not listed here as that repo's; /api/repos/trust serves it with mainnetContractBasis cited. contractBasis published or null means not judged yet: a rescan moves such a row to a judged basis where it can decide. Absence is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Lead with rows that carry codeInUse (live usage is the strongest signal). A row's attribution is the curated on-chain map's link of the contract to a project (tier, evidence, source, ledger-proved creation, endedAt); a contract the map holds that no repo row names is listed with contractBasis onchain-map.",
+				attribution: ONCHAIN_MAP_ATTRIBUTION,
 			},
 			contracts,
 		},
