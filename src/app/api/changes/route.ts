@@ -41,6 +41,7 @@ import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { hasTomlRead } from "@/lib/partner-public";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { PUBLISHED_PROJECT_WHERE } from "@/lib/project-status";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -190,7 +191,8 @@ export async function GET(req: NextRequest) {
 	if (surfaces.includes("projects")) {
 		const r = await payload.find({
 			collection: "projects",
-			where,
+			// A Draft has no public page: its edits are not changes anyone can see.
+			where: { and: [where, PUBLISHED_PROJECT_WHERE] },
 			sort: "-updatedAt",
 			limit: perSurface,
 			depth: 0,
@@ -219,9 +221,21 @@ export async function GET(req: NextRequest) {
 		counts.projects = r.totalDocs;
 		truncated.projects = r.totalDocs > perSurface;
 		byFacet.projects = {
-			status: await facetTotal("projects", "statusAsOf"),
-			"scf-awards": await facetTotal("projects", "scf.asOf"),
-			deployment: await facetTotal("projects", "deployment.asOf"),
+			status: await facetTotal(
+				"projects",
+				"statusAsOf",
+				PUBLISHED_PROJECT_WHERE,
+			),
+			"scf-awards": await facetTotal(
+				"projects",
+				"scf.asOf",
+				PUBLISHED_PROJECT_WHERE,
+			),
+			deployment: await facetTotal(
+				"projects",
+				"deployment.asOf",
+				PUBLISHED_PROJECT_WHERE,
+			),
 		};
 	}
 

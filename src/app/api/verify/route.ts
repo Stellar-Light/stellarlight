@@ -10,6 +10,7 @@ import { getPayload } from "payload";
 import { logApiHit } from "@/lib/api-usage";
 import { unknownParamWarning } from "@/lib/http-params";
 import { noteScanOf, noteSourceCheck } from "@/lib/note-pins";
+import { RESOLUTION_POOL_WHERE } from "@/lib/project-status";
 import { type ResolvableProject, resolveProject } from "@/lib/resolve-project";
 import { retirementOf } from "@/lib/stablecoins";
 import { getAppUrl } from "@/lib/utils/app-url";
@@ -142,6 +143,7 @@ export async function GET(req: NextRequest) {
 	// renames, aliases and canonical slugs are handled there, once.
 	const projects = await payload.find({
 		collection: "projects",
+		where: RESOLUTION_POOL_WHERE,
 		limit: 5000,
 		depth: 0,
 		select: {

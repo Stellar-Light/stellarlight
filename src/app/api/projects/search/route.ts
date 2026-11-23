@@ -1981,16 +1981,52 @@ async function handle(req: NextRequest) {
 			// page, so every fold is visible).
 			//
 			// The drop condition is decidable here, over the FULL set, with no
-			// extra query: a shadow is dropped exactly when its canonical is
-			// already among the matches. (A shadow whose canonical is absent gets
-			// SWAPPED for it — still one row, so it does not change the count.)
-			const matchedSlugs = new Set(projects.map((p) => p.slug));
-			foldedFromTotal = projects.filter(
-				(p) =>
-					p.canonicalSlug &&
-					p.canonicalSlug !== p.slug &&
-					matchedSlugs.has(p.canonicalSlug),
-			).length;
+			// extra query: a shadow stands for its canonical, so a record matched
+			// twice (canonical and shadow, or two shadows of one canonical) is
+			// one row. A shadow whose canonical is absent gets SWAPPED for it on
+			// the page: still one row.
+			//
+			// It must also be applied here, not only on the page: the page fold
+			// dedupes within one page, so a shadow ranked on a later page was
+			// swapped for a canonical already served on an earlier one, and the
+			// same record came back twice (sls-122: q=wallet served coca at 46
+			// and again at 102 through its Draft shadow coca-wallet, total 195
+			// over 196 rows walked). One row per record in rank order, the
+			// first occurrence keeping its place; `total` is that count. A Draft
+			// shadow whose canonical is missing or not published is counted here
+			// and dropped on the page by the belt below, so total can still
+			// exceed the rows served in that case (pre-existing, rare).
+			// When the canonical is itself a match, its own row (already in
+			// hand) takes the shadow's place here, so the record does not depend
+			// on the page fold's read of canonicals succeeding.
+			const matched = new Map(projects.map((p) => [p.slug, p]));
+			const isShadowRow = (p: {
+				slug: string;
+				canonicalSlug?: string | null;
+			}) => !!p.canonicalSlug && p.canonicalSlug !== p.slug;
+			// The record a row stands for: follow pointers through matched
+			// shadows (a shadow of a shadow) to the first row that is not one,
+			// or to the first target outside the matches.
+			const recordOf = (p: (typeof projects)[number]) => {
+				let at = p;
+				for (let hop = 0; hop < 8 && isShadowRow(at); hop++) {
+					const next = matched.get(at.canonicalSlug as string);
+					if (!next) return at.canonicalSlug as string;
+					at = next;
+				}
+				return at.slug;
+			};
+			const firstOf = new Set<string>();
+			const onePerRecord: typeof projects = [];
+			for (const p of projects) {
+				const record = recordOf(p);
+				if (firstOf.has(record)) continue;
+				firstOf.add(record);
+				const own = matched.get(record);
+				onePerRecord.push(own && !isShadowRow(own) ? own : p);
+			}
+			projects = onePerRecord;
+			foldedFromTotal = totalMatching - projects.length;
 			projects = projects.slice(offset, offset + limit);
 
 			// Re-populate logo + hackathon for ONLY the returned page. The

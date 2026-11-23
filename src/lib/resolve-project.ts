@@ -22,6 +22,8 @@
  */
 
 /** How the input matched. Exactness is part of the answer. */
+import { RESOLVABLE_PROJECT_STATUSES } from "./project-status";
+
 export type MatchKind = "slug" | "canonical-slug" | "alias" | "name" | "repo";
 
 export interface ResolvableProject {
@@ -166,6 +168,17 @@ export function resolveProject(
 		current = next;
 	}
 	const superseded = current.slug !== hit.slug;
+
+	// A Draft row is admin-only: it is in the pool only as a lineage shadow,
+	// so its old name keeps resolving to the record it was merged into (its
+	// subject reads Draft: hidden, not dead). One whose pointer reaches no
+	// published record names nothing a reader can open: not found.
+	const published = (p: ResolvableProject) =>
+		(RESOLVABLE_PROJECT_STATUSES as readonly string[]).includes(p.status ?? "");
+	if (!published(current))
+		return miss(
+			`No project in this directory is named "${query}". That means it is NOT TRACKED HERE; never that it never existed, and never that it is defunct.`,
+		);
 
 	const unsourced = !hit.statusSourceUrl;
 	const evidence: ResolutionEvidence = {
