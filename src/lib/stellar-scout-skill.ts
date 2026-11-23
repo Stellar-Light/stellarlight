@@ -24,7 +24,7 @@ description: Scouts the Stellar ecosystem before you build. Validates ideas agai
 
 A research skill for **the strategic layer** of building on Stellar: what's already been shipped, what got funded, what RFPs are open right now, and whether a new idea has a real gap. Works for hackathon entrants, SCF grant applicants, and independent builders or teams alike.
 
-For *how to build* (Rust on Soroban, SEP standards, agentic payments, ZK, etc.), defer to the Stellar Foundation's official skills at **https://skills.stellar.org/**. Scout chains into them via \`/api/skills\` (\`?source=sdf\` lists the current set) when the user moves from "what should I build" to "how do I build it".
+For *how to build* (Rust on Soroban, SEP standards, agentic payments, ZK, etc.), defer to the Stellar Foundation's official skills at **https://skills.stellar.org/** (\`GET /api/skills?source=sdf\` lists the current set). Scout chains into them via \`/api/skills\` when the user moves from "what should I build" to "how do I build it".
 
 ## When to use this skill
 
