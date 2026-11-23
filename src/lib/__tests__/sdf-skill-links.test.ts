@@ -5,6 +5,7 @@ import {
 	parseLlmsRegistry,
 	parseLlmsSkillLinks,
 	registrySkillView,
+	urlForSkill,
 } from "../integrations/sdf-skills";
 
 // The registry's llms.txt is the source of truth for WHERE a skill is served
@@ -192,5 +193,22 @@ describe("fetchSdfSkillCatalog freshness", () => {
 		vi.restoreAllMocks();
 		serve(null);
 		expect((await fetchSdfSkillCatalog()).updatedAt).toBeNull();
+	});
+});
+
+describe("urlForSkill", () => {
+	it("gives a skills.stellar.org skill its SKILL.md as homepage, not the directory that answers 404", () => {
+		expect(urlForSkill("smart-contracts")).toEqual({
+			rawUrl: "https://skills.stellar.org/skills/smart-contracts/SKILL.md",
+			url: "https://skills.stellar.org/skills/smart-contracts/SKILL.md",
+		});
+	});
+	it("gives a GitHub-hosted skill its tree page", () => {
+		expect(
+			urlForSkill(
+				"x",
+				"https://raw.githubusercontent.com/o/r/main/skills/x/SKILL.md",
+			).url,
+		).toBe("https://github.com/o/r/tree/main/skills/x");
 	});
 });

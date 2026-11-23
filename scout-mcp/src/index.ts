@@ -919,13 +919,13 @@ server.registerTool(
 	{
 		title: "Get the full content of one Stellar AI skill",
 		description:
-			"Full detail for ONE skill by slug or display name: metadata plus, for SDF official skills, the complete raw SKILL.md text (`.skill.content`, fetched live from skills.stellar.org). 404s with a hint to list skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use list_skills.",
+			"Full detail for ONE skill by slug or display name: metadata plus, for entries whose source ships a SKILL.md, the complete raw text (`.skill.content`); metadata only otherwise. 404s with a hint to list skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use list_skills.",
 		inputSchema: {
 			name: z
 				.string()
 				.min(1)
 				.describe(
-					"Skill name (e.g. 'soroban', 'anchors', 'agentic-payments').",
+					"Skill name (e.g. 'smart-contracts', 'agentic-payments', 'stellar-scout').",
 				),
 		},
 	},

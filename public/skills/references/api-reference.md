@@ -118,7 +118,7 @@ Use this to answer *"what's the most crowded category on Stellar?"* (lead with t
 ---
 
 ## `GET /api/builders`
-Stellar builder directory (synced from Stellar Passport). **Populated but sparse (a few hundred profiles; some rows are just a GitHub handle + avatar; `.meta.counts.total` gives the live size).** A 0-result is a *filter miss*, not an empty directory; `.meta.advisory` distinguishes the two and reports the real collection size. Broaden or drop a filter (`q`/`location`/`skill`) before routing the user to fallback channels.
+Stellar builder directory (synced from Stellar Passport). **Populated but sparse (only opt-in Stellar Passport profiles; some rows are just a GitHub handle + avatar; the `builders` entry in `GET /api/status` `sources[]` gives the current size).** A 0-result is a *filter miss*, not an empty directory; `.meta.advisory` distinguishes the two and reports the real collection size. Broaden or drop a filter (`q`/`location`/`skill`) before routing the user to fallback channels.
 
 **Params:** `q={text}`, `location={city}`, `skill={tech}` (alias for `q`).
 
@@ -203,14 +203,14 @@ Curated **RFPs / sponsor briefs** for the Stellar ecosystem; confirmed problem s
 ---
 
 ## `GET /api/skills`
-A merged, multi-source AI-skill catalog: the official SDF skills from skills.stellar.org (smart-contracts, dapp, assets, data, standards, agentic-payments, zk-proofs, cross-chain) **plus** Stellarlight, lumenloop, community and external skills. `.meta.counts` gives the live size and mix (84 entries from five sources on 2026-11-23); never quote a fixed count. Filter with `q` (free text over name/tagline/description/tags), `source` (`sdf|stellarlight|lumenloop|external|community`) and `kind`; `.meta.counts.bySource` breaks down the mix and `.meta.validSources`/`.meta.validKinds` list the facets. `/api/skills/{name}` returns full SKILL.md content for sources that ship one (SDF + curated), metadata-only otherwise. Server-cached 24h. An invalid `source` returns 400 with `validSources`.
+A merged, multi-source AI-skill catalog: the official SDF skills from skills.stellar.org **plus** Stellarlight, lumenloop, community and external skills. `.meta.counts.bySource` gives the whole catalog's current mix (`.meta.counts.total` is the match count, so the catalog size when unfiltered); never quote a fixed count or a fixed list of skills. Filter with `q` (free text over name/tagline/description/tags), `source` (`sdf|stellarlight|lumenloop|external|community`) and `kind`; `.meta.validSources`/`.meta.validKinds` list the facets. Each entry carries its own install location: `install` (the command, null where the source gives none), `installAlt` (alternate commands), `homepage` and `repository`. `/api/skills/{name}` returns full SKILL.md content for sources that ship one, metadata only otherwise. Server-cached 24h. An invalid `source` returns 400 with `validSources`.
 
 ---
 
 ## `GET /api/skills/{name}`
-Full content of one SDF skill: returns JSON with `.skill.content` containing the entire SKILL.md (frontmatter included).
+One catalog entry by slug or display name. For an entry whose source ships a SKILL.md, `.skill.content` holds the whole file (frontmatter included); for any other entry `.skill.content` is null or absent and the row is metadata only. An unknown slug returns 404.
 
-Use this in Deep Dive step 5 (SDK recommendation) so you can quote or summarize the relevant SDF skill inline. After recommending it, tell the user to install the skill themselves at `https://skills.stellar.org/skills/{name}/SKILL.md` for ongoing use.
+Use this in Deep Dive step 5 (SDK recommendation) so you can quote or summarize the relevant skill inline. After recommending it, tell the user how to install it for ongoing use from the entry's own fields: `.skill.install` (alternates in `.skill.installAlt`), else its `homepage` or `repository` where it has no install command. Never build an install URL from the slug.
 
 ---
 
@@ -264,35 +264,6 @@ When all returned chunks score below 0.68, treat the topic as outside our corpus
 - On a filtered zero, check `.meta.didYouMean`; a near-miss name form (`project=blend-capital`, `auditor=Otter Sec`) gets a suggested correction instead of a silent empty.
 
 **Rate limit:** 60 requests / minute / IP.
-
----
-
-## Optional write: `POST /api/feedback`
-Every other endpoint in this reference is read-only. This one writes, and some hosts expose only read operations: if yours does not offer it, skip it and tell the user what looked wrong instead. It is an in-skill feedback channel: an agent can report a bug, missing data, a wrong answer or a suggestion without leaving the workflow.
-
-**Body:**
-```json
-{
-  "kind": "bug" | "missing-data" | "wrong-answer" | "suggestion" | "other",
-  "message": "10-4000 chars describing the issue concretely",
-  "context": {
-    "query": "optional: the user query that triggered the issue",
-    "endpoint": "optional: the /api/* endpoint that misbehaved",
-    "skillVersion": "optional: SKILL.md frontmatter version",
-    "agentName": "optional: claude-code | codex | openclaw | etc."
-  }
-}
-```
-
-**Returns:** `{ok: true, id, message}` on 201; `{error, validKinds?, hint?, example?}` on 400; `{error, hint}` on 429.
-
-**Rate limit:** 6 requests / minute / IP (lower than read endpoints; feedback shouldn't fire-hose).
-
-**When to call this:** whenever you (the agent) detect a quality issue worth a curator's eye; bad citation, missing protocol, wrong tag, unexpected 0-result for a real question. Don't fire on every empty response; reserve for things a human reviewer should investigate.
-
-Submitting feedback is **explicitly encouraged** and contributes to improving the skill for everyone. Mention to the user when you submit one: *"I've also flagged this as a quality issue via /api/feedback so curators can fix it."*
-
-`GET /api/feedback` returns the schema for this write; it is only useful where the write is available.
 
 ---
 
@@ -378,6 +349,3 @@ The **tokenized real-world assets issued on Stellar**, each re-verified from the
 
 ## `GET /api/changes`
 **Reconciliation feed** for anything holding cached or remembered claims about our data (agent memory, an institutional cache): every project / repo / partner row whose data changed after `since`, newest-first per surface, with `facets` naming which dated fact families moved (`status`, `scf-awards`, `code-facts`, `toml`; `["row"]` = undated change, re-read the row). **Params:** `since` (required, `YYYY-MM-DD` or ISO datetime; 400 if unparseable), `surfaces` (CSV subset of `projects,repos,partners`), `limit` (per surface, 1-500, default 100; `meta.truncated.<surface>` signals more). **Use when** you answered from our data earlier and want to refresh only what moved. Not a discovery endpoint.
-
-## `GET /api/feedback`
-Returns the **schema** for `POST /api/feedback` (valid `kind` values, required fields, size limits) so an agent can self-discover the shape without reading this doc. No side effects.

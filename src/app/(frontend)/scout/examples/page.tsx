@@ -96,7 +96,7 @@ const SESSIONS = [
 			"Restate + reframe: \"You're proposing a shielded stablecoin with hidden balances. Before searching: the regulatory layer (Tornado Cash sanctioning) makes pure privacy a dead-end on Stellar. The real wedge is *selective disclosure*: privacy by default, compliance-readable by warrant. I'll vet that angle.\"",
 			"GET /api/projects/search?q=privacy+stablecoin+confidential → 1 adjacent match (XLM shielded prototype, abandoned).",
 			"Crowdedness 2/10. Partial gap: 1 abandoned adjacent project, 0 SCF-funded, 0 hackathon winners in this exact lane.",
-			"GET /api/skills/zk-proofs → quote the SDF skill's ZK primitives section inline. Recommend installing https://skills.stellar.org/skills/zk-proofs/SKILL.md + soroban.",
+			"GET /api/skills/zk-proofs → quote the SDF skill's ZK primitives section inline. Recommend installing it with the entry's own install command, plus smart-contracts.",
 			"GET /api/builders?q=zk → surface candidates with the small-and-growing caveat.",
 			"GET /api/projects/search?q=privacy+zk&scfAwarded=1 → report 0 SCF-funded privacy/ZK projects on Stellar today; funding signal is open.",
 			"GET /api/rfps?q=privacy → no open RFP matches; suggest the user submits one at stellarlight.xyz/ideas.",
@@ -122,8 +122,8 @@ const SESSIONS = [
 				},
 				{
 					label: "SDK recommendation",
-					value: "zk-proofs + soroban",
-					meta: "Install both from skills.stellar.org",
+					value: "zk-proofs + smart-contracts",
+					meta: "Install each with its catalog install command",
 				},
 				{
 					label: "Funding signal",
@@ -149,12 +149,12 @@ const SESSIONS = [
 		steps: [
 			"GET /api/skills/smart-contracts → load the full SDF smart-contracts skill.",
 			"Quote relevant sections inline (setup, storage types, authorization, security pitfalls).",
-			"Recommend installing https://skills.stellar.org/skills/smart-contracts/SKILL.md for ongoing work.",
+			"Recommend installing it for ongoing work with the entry's own install command.",
 			"Cross-reference: assets (for SAC bridge), data (for RPC queries), standards (for SEP work).",
 		],
 		response: {
 			summary:
-				'Loading the official "soroban" skill (8,008 words, SDF-maintained). Five concerns to know upfront:',
+				"Loading the official smart-contracts skill (SDF-maintained). Five concerns to know upfront:",
 			rows: [
 				{
 					label: "1. Project setup",
@@ -183,7 +183,7 @@ const SESSIONS = [
 				},
 			],
 			footer:
-				"Install the full skill at .claude/skills/stellar-smart-contracts/SKILL.md from https://skills.stellar.org/skills/smart-contracts/SKILL.md. For SAC bridge specifically, also grab the assets skill.",
+				"Install the full skill with the install command its catalog entry carries (/api/skills/smart-contracts). For SAC bridge specifically, also grab the assets skill.",
 		},
 	},
 	{

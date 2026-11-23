@@ -17,7 +17,7 @@ Load when the user query matches one of these shapes; the patterns here show the
 2. `GET /api/projects/search?q=privacy+stablecoin+confidential` → 1 adjacent match (XLM shielded prototype, abandoned).
 3. **Partial gap**: adjacent project exists but abandoned; user's angle is fresh.
 4. List the abandoned project + 2 ZK-adjacent projects.
-5. SDK rec: `GET /api/skills/zk-proofs` → quote relevant section inline. Tell user to install `https://skills.stellar.org/skills/zk-proofs/SKILL.md` for ongoing use. Also recommend `soroban`.
+5. SDK rec: `GET /api/skills/zk-proofs` → quote relevant section inline. Tell user to install it for ongoing use with the entry's own `.skill.install` command. Also recommend `smart-contracts` for the contract itself.
 6. Builders search: `GET /api/builders?q=zk` → surface candidates. **If < 3 hits, note the directory is small + growing and recommend Stellar Discord #builders.**
 7. Funding: `GET /api/projects/search?q=privacy+zk&scfAwarded=1` → report total SCF-funded $.
 8. Next steps: `GET /api/hackathons?status=upcoming` for events to target; `GET /api/rfps?q=zk+privacy` for open sponsor briefs that match (SCF-funded).
@@ -29,7 +29,7 @@ Load when the user query matches one of these shapes; the patterns here show the
 **Agent action:**
 1. `GET /api/skills/smart-contracts` → load the full SDF Soroban skill content.
 2. Use it to answer the user's question with cited references to the actual skill sections.
-3. Tell the user: *"For ongoing work, install this skill at `.claude/skills/stellar-smart-contracts/SKILL.md` from `https://skills.stellar.org/skills/smart-contracts/SKILL.md`."*
+3. Tell the user how to install it for ongoing work, quoting the entry's own `.skill.install` command (alternates in `.skill.installAlt`).
 
 ---
 

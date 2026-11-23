@@ -760,10 +760,12 @@ unless noted.
   default mode differs.
 - Evidence gates count Spanish stopwords ("de", "para").
 - `organizer=<name>` on getHackathons returns 0 with no warning.
-- Skill text: the read-only skill tells agents to post feedback (sk-019);
-  "7 SDF skills" (sk-027); Builders "in the dozens" (sk-028), in
-  `public/skills/stellar-scout.md` and `public/skills/references/api-reference.md`;
-  the skill omits build search params.
+- Skill text: sk-019, sk-027 and sk-028 are fixed in the skill files (both
+  feedback operations moved to the opt-in `public/skills/references/feedback.md`;
+  no fixed SDF skill list, `soroban` slug or Builders size); open until the
+  live recheck after deploy and the Raven upstream-ready handoffs, and the
+  Stellar-Light/stellar-scout README patch is applied. The skill omits build
+  search params.
 - The golden eval gate counts questions (its floor was set at 37; the set has
   53); eval runs record the API version; the battery's held-out rows become a
   frozen routing holdout.

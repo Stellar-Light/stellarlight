@@ -194,7 +194,8 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 				>
 					skills.stellar.org
 				</a>{" "}
-				(soroban, dapp, assets, etc.); those are the technical execution layer.
+				(/api/skills?source=sdf lists the current set); those are the technical
+				execution layer.
 			</>
 		),
 	},
@@ -269,11 +270,10 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 				They compose. <strong>Scout</strong> answers{" "}
 				<em>"what should I build, with whom, for what funding?"</em>: strategy.{" "}
 				<strong>skills.stellar.org</strong> (the Stellar Development
-				Foundation's 7 official skills: soroban, dapp, assets, data,
-				agentic-payments, zk-proofs, standards) answers{" "}
-				<em>"how do I actually build it?"</em>: execution. Scout cross-links to
-				those skills in its responses; install both when you move from research
-				into building.
+				Foundation's official skills; /api/skills?source=sdf lists the current
+				set) answers <em>"how do I actually build it?"</em>: execution. Scout
+				cross-links to those skills in its responses; install both when you move
+				from research into building.
 			</>
 		),
 	},
@@ -644,31 +644,14 @@ export default async function ScoutPage() {
 									Companion skills (from SDF)
 								</div>
 							</div>
-							<div className="flex flex-wrap gap-1.5 mb-3">
-								{[
-									"soroban",
-									"dapp",
-									"assets",
-									"data",
-									"agentic-payments",
-									"zk-proofs",
-									"standards",
-								].map((n) => (
-									<span
-										key={n}
-										className="inline-block px-2 py-0.5 text-xs rounded-md bg-white/5 text-muted-foreground border border-border/50 font-mono"
-									>
-										{n}
-									</span>
-								))}
-							</div>
 							<p className="text-xs text-muted-foreground leading-relaxed">
-								The Stellar Foundation's 7 official skills: the "how to build"
-								layer. Scout chains into them via{" "}
+								The Stellar Foundation's official skills: the "how to build"
+								layer. Scout reads the current set from{" "}
 								<code className="text-[11px] px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
-									/api/skills
+									/api/skills?source=sdf
 								</code>{" "}
-								when the user moves from research to execution.
+								and chains into them when the user moves from research to
+								execution.
 							</p>
 						</div>
 					</div>
@@ -873,10 +856,10 @@ export default async function ScoutPage() {
 							["GET", "/api/hackathons", "curated + DoraHacks live"],
 							["GET", "/api/projects/search", "prior-art + competitor lookup"],
 							["GET", "/api/rfps", "SCF-funded sponsor briefs"],
-							["GET", "/api/skills", "SDF skill catalog"],
+							["GET", "/api/skills", "multi-source skill catalog"],
 							["GET", "/api/clusters", "topic clusters + crowdedness"],
 							["GET", "/api/analyze", "cross-event analytics"],
-							["POST", "/api/feedback", "in-skill feedback loop"],
+							["GET", "/api/status", "freshness + counts per source"],
 						].map(([method, path, blurb]) => (
 							<div key={path} className="flex items-baseline gap-3">
 								<span className="text-emerald-400 w-12 inline-block">

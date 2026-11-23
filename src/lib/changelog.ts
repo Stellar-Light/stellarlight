@@ -35,6 +35,13 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["skill"],
 		type: "fixed",
 		summary:
+			"Correction to the entry below: naming the current SDF skills was itself a fixed list, and goes stale the same way. The Scout skill, its API reference and its examples now name no SDF skill list and no catalog count: `GET /api/skills?source=sdf` gives the current set and `.meta.counts.bySource` the totals; `smart-contracts` is the slug where an example needs one; an agent installs a skill with the entry's own `install` command, never a skills.stellar.org path built from the slug; and `/api/skills/{name}` is described as full SKILL.md content where the source ships one, metadata only otherwise. The Builders directory has no stated size: the `builders` entry in `GET /api/status` gives the current count (`.meta.counts.total` on `/api/builders` counts matches, not the directory). The skill is now read-only: both feedback operations moved to an opt-in companion, `references/feedback.md`, which says up front that it writes to stellarlight.xyz, and the skill, the API reference and the examples name neither. On `/api/skills`, SDF rows gave `homepage` (and `/api/skills/{name}` gave `url`) as `https://skills.stellar.org/skills/{name}/`, which answers 404; both are now the skill's SKILL.md, the page skills.stellar.org itself links.",
+	},
+	{
+		date: "2026-11-23",
+		surfaces: ["skill"],
+		type: "fixed",
+		summary:
 			'The Scout skill names the current SDF skills (smart-contracts, dapp, assets, data, standards, agentic-payments, zk-proofs, cross-chain) instead of seven with a `soroban` slug that answers 404, and says the skills catalog mixes five sources whose live size `.meta.counts` gives. It no longer gives the Builders directory a fixed size ("in the dozens", "about 110"); it has a few hundred profiles and `.meta.counts.total` is the live count. The feedback write is set apart from the read-only guidance, since some hosts expose only reads: the endpoint table lists reads only, and `POST /api/feedback` is described once, as an optional write to skip where a host does not offer it.',
 	},
 	{
