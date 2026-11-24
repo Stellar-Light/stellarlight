@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-24",
 		surfaces: ["api"],
+		version: "spec@1.9.167",
+		type: "added",
+		summary:
+			"New, partner-only: three cohort endpoints that serve a dated snapshot of project launch and retention data to partners whose key is on the cohort allowlist. listCohortRows (`GET /api/cohort/projects`) gives one row per directory project: stage dates, launch date and its basis, the day-180 reading, operating-now evidence, SCF tranche payments and the gaps that are not known, filtered by scfAwarded, firstAwardYear, awardType, category and status. getCohortJourney (`GET /api/cohort/journey?slug=`) gives one project's dated events, each with its evidence link, source, strength and basis. getCohortFigures (`GET /api/cohort/retention`) gives the figures with their denominators: launch known by basis, day-180 readings, operating now, retention after a launch SCF confirmed, SCF-funded against the rest and by first award year, type and size, and SCF delivery by round, with the facts register's own rows for them.",
+		detail:
+			"Without a key, or with a partner key whose name is not on the allowlist, every cohort endpoint answers 401 with a one-line error and serves nothing else. Responses are never cached by a shared cache and are marked noindex; every 200 carries `meta.asOf` and `meta.cannotSee`. The spec marks the three operations with a security requirement (a bearer key or `x-api-key`) and `x-partner-only: true`. Partner keys are now compared in constant time on every endpoint. A dashboard for the same partners reads these endpoints with the partner's key; it is not linked from the site and is not indexed.",
+	},
+	{
+		date: "2026-11-24",
+		surfaces: ["api"],
 		version: "spec@1.9.166",
 		type: "fixed",
 		summary:
