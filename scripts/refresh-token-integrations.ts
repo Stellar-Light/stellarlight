@@ -79,6 +79,7 @@ import {
 	planWrites,
 	poolDepth,
 	poolEdgeTier,
+	priorHolderContracts,
 	ROW_FIELDS,
 	registryTokenId,
 	type StoredRow,
@@ -1602,6 +1603,7 @@ async function main() {
 		checked,
 		sweeps,
 		notes,
+		priorHolderContracts(stored),
 	);
 	edges.push(...holderEdges);
 	edges.push(...(await accountSweep(priority, ident, price, checked, notes)));
@@ -1773,6 +1775,7 @@ async function holderSweep(
 	checked: Set<string>,
 	sweeps: Map<string, Record<string, unknown>>,
 	notes: string[],
+	prior: Map<string, Set<string>>,
 ): Promise<Edge[]> {
 	if (!priority.length) return [];
 	// Horizon's contract counts: which tokens a contract can hold at all, and
@@ -1901,6 +1904,9 @@ async function holderSweep(
 			...glob,
 			...(inter.get(t) ?? []),
 			...(swept.get(t)?.found ?? []),
+			// every contract a live holder row was read at: an absence ends a row
+			// only after its own balance was read again
+			...(prior.get(t) ?? []),
 		]);
 		for (const c of [...cands].sort())
 			if (CRE.test(c) && c !== t) pairs.push([t, c]);

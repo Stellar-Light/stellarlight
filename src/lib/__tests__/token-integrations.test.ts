@@ -21,6 +21,7 @@ import {
 	planWrites,
 	poolDepth,
 	poolEdgeTier,
+	priorHolderContracts,
 	type StoredRow,
 	summarize,
 	type TokenIdentity,
@@ -549,5 +550,25 @@ describe("the Ethena case (readings of 2026-11-23)", () => {
 			balance: "4175.1648927",
 			code: "SUSDE",
 		});
+	});
+});
+
+describe("priorHolderContracts", () => {
+	const C1 = `C${"A".repeat(55)}`;
+	const C2 = `C${"B".repeat(55)}`;
+	const G1 = `G${"A".repeat(55)}`;
+	const row = (o: Partial<StoredRow>): StoredRow =>
+		({ id: "x", key: "k", tokenId: "T", status: "active", ...o }) as StoredRow;
+	it("re-reads the contract every live holder row was last read at", () => {
+		// Blend's USDC holder row ended in a dry run because its contract fell
+		// out of the capped candidate lists while it still held 5,942 USDC.
+		const m = priorHolderContracts([
+			row({ kind: "holder", bestPool: C1 }),
+			row({ kind: "holder_unattributed", bestPool: C2 }),
+			row({ kind: "holder", bestPool: G1 }), // an account holder: Horizon reads it
+			row({ kind: "holder", bestPool: C2, status: "ended" }),
+			row({ kind: "dex_pool", bestPool: C2, tokenId: "U" }),
+		]);
+		expect([...m]).toEqual([["T", new Set([C1, C2])]]);
 	});
 });
