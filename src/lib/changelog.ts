@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-24",
+		surfaces: ["api"],
+		version: "spec@1.9.164",
+		type: "fixed",
+		summary:
+			"A hackathon submission's `project.basis` gains `curated`: a link a person verified against named evidence (the same repo, the team's own accounts, or the project's own page naming the build), never a name alone, served when no rule finds that project. Two submissions no rule linked gain their project on the sync lane's next run: Comet x Hoops Finance (Stellar Hacks: Blend, 2nd place) to Hoops Finance and Juntta (Stellar Ideaton) to Juntta. getHackathon no longer serves a bare 0 winners for an ended event off DoraHacks: the Waterloo Blockchain Innovation Challenge served `stats.winners` 0 with `winnersNote` null, and now says no page we read names its winners (checked 2026-11-24).",
+		detail:
+			"Five submission-to-project links are recorded with their evidence, read on 2026-11-24. Three are already linked by a rule and keep that rule's basis (YieldBack.Cash scf-page-and-name, PayZoll submission-links-and-name, clevercon moved-repo); the record keeps each one if its page changes. Comet x Hoops Finance: its repo sits under the Hoops Finance GitHub organisation and is one of the repos the directory indexes for it, its DoraHacks page lists the project's X account, and its demo is on a subdomain of the project's website. Juntta: its DoraHacks page lists the Instagram and LinkedIn accounts the project's own website links. A record overrules a rule that finds another project, and stands aside when its project is not listed. The sync lane's dry run on this code (read-only, 2026-11-24) changed the link on 2 rows, both these, and dropped none; 43 submissions link to a project after it, 2 of them by a curated record. Any ended event off DoraHacks with no winner served and no dated note now says its 0 is not a count, rather than nothing.",
+	},
+	{
 		date: "2026-11-23",
 		surfaces: ["api", "api-client"],
 		version: "spec@1.9.163",
