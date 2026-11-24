@@ -42,9 +42,11 @@ jobs:
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-      CACHE_DIR: ${{ runner.temp }}/token-integrations-cache
       WRITE: ${{ ((github.event_name == 'schedule' && vars.TOKEN_INTEGRATIONS_WRITE == 'on') || inputs.execute) && 'yes' || 'no' }}
     steps:
+      # The runner context is not available in job-level env (the dispatch
+      # API rejects the file), so the cache path is set by the first step.
+      - run: echo "CACHE_DIR=$RUNNER_TEMP/token-integrations-cache" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with: { version: 10 }
