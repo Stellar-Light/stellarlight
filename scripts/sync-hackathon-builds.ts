@@ -39,9 +39,14 @@
  *      directory projects (src/lib/hackathon-build-categories.ts), written
  *      only when the method's leave-one-out precision on the directory's own
  *      hand-set types clears the floor
+ *   8. contributors: the human accounts with commits on each repo's default
+ *      branch (GitHub's contributors API; a fork, the authors of the commits
+ *      its parent does not hold), once a month per repo, at most
+ *      CONTRIBUTORS_MAX_REPOS repos a run; /api/builders joins a builder's
+ *      login to them
  *
  * Stored curated rows with a repo (scripts/import-curated-builds.ts writes
- * their own fields) run steps 3 to 7 too, with no DoraHacks page or page
+ * their own fields) run steps 3 to 8 too, with no DoraHacks page or page
  * rule and with the link rules reading the repo's own name, and get only
  * the fields those steps derive (src/lib/curated-import.ts
  * SYNC_DERIVED_FIELDS): one field, one writer.
@@ -120,6 +125,7 @@ import { rebuildFlight } from "./eval/scf-official";
 import {
 	createGh,
 	fetchRepoActivity,
+	fetchRepoContributors,
 	fetchRepoStack,
 	RateLimitError,
 	type RepoActivity,
@@ -132,6 +138,12 @@ const STACK_MAX_AGE_MS = 30 * 86_400_000;
  * spreads over a few days and never drains the Actions token. A dry run reads
  * a sample to check the pipeline. */
 const STACK_MAX_REPOS = EXECUTE ? 400 : 25;
+const CONTRIBUTORS_MAX_AGE_MS = 30 * 86_400_000;
+/** One REST call per repo (a few for a long list or a fork). The Actions
+ * token answers 1,000 REST calls an hour for the whole repository, and the
+ * stack step may spend 400 of them, so the first backfill (about 1,300 repos)
+ * spreads over five runs. A dry run reads a sample. */
+const CONTRIBUTORS_MAX_REPOS = EXECUTE ? 300 : 25;
 const req = createRequire(import.meta.url);
 // biome-ignore lint/suspicious/noExplicitAny: dynamic require, no types
 const { MongoClient } = req("mongodb") as any;
@@ -279,6 +291,7 @@ const FIELDS = [
 	"stack",
 	"categories",
 	"repoArchived",
+	"contributors",
 ] as const;
 
 async function pool<T>(items: T[], n: number, fn: (t: T) => Promise<void>) {
@@ -926,6 +939,74 @@ async function main() {
 		);
 	}
 
+	// ── 8. contributors ──────────────────────────────────────────────────
+	// Read only for repos whose activity read answered this run, so a fork is
+	// known as one (its contributors list carries its parent's authors). A
+	// repo that answers not found, or cannot be read, keeps what is stored and
+	// is never written []: a missing repo is not "no contributors".
+	const contribDue = new Map<string, Row[]>();
+	for (const r of byPriority) {
+		const a = r.repoFullName ? activity.get(r.repoFullName) : undefined;
+		const at = stored.get(r.entryKey)?.contributorsReadAt;
+		if (
+			!r.repoFullName ||
+			a?.state !== "read" ||
+			(at && Date.now() - Date.parse(at) < CONTRIBUTORS_MAX_AGE_MS)
+		)
+			continue;
+		contribDue.set(r.repoFullName, [
+			...(contribDue.get(r.repoFullName) ?? []),
+			r,
+		]);
+	}
+	const contribRun = {
+		read: 0,
+		missing: 0,
+		failed: 0,
+		forks: 0,
+		rateLimited: false,
+	};
+	const contribBatch = [...contribDue.keys()].slice(0, CONTRIBUTORS_MAX_REPOS);
+	const contribLogins = new Set<string>();
+	if (!contribDue.size) {
+		console.log("\nrepo contributors: none due");
+	} else if (!ghToken) {
+		console.log(
+			`\nrepo contributors: ${contribDue.size} repos due, not read (GITHUB_TOKEN is not set)`,
+		);
+	} else {
+		const gh = createGh(ghToken);
+		await pool(contribBatch, 4, async (repo) => {
+			if (contribRun.rateLimited) return;
+			const a = activity.get(repo);
+			const fork = a?.state === "read" ? a.fork : undefined;
+			try {
+				const c = await fetchRepoContributors(gh, repo, fork);
+				if (c.state === "read") {
+					for (const r of contribDue.get(repo) ?? []) {
+						r.contributors = c.logins;
+						r.contributorsReadAt = now;
+					}
+					for (const l of c.logins) contribLogins.add(l);
+					if (fork) contribRun.forks++;
+				}
+				if (c.state === "error") {
+					contribRun.failed++;
+					console.error(`  ✗ ${repo}: ${c.note}`);
+				} else contribRun[c.state]++;
+			} catch (e) {
+				if (e instanceof RateLimitError) contribRun.rateLimited = true;
+				else {
+					contribRun.failed++;
+					console.error(`  ✗ ${repo}: ${(e as Error).message}`);
+				}
+			}
+		});
+		console.log(
+			`\nrepo contributors: ${contribDue.size} repos due, ${contribBatch.length} this run: ${contribRun.read} read (${contribRun.forks} forks, read as the commits their parent does not hold), ${contribRun.missing} not found, ${contribRun.failed} could not be read (stored lists kept); ${contribLogins.size} distinct human accounts${contribRun.rateLimited ? "; GitHub rate limit reached, the rest wait for the next run" : ""}`,
+		);
+	}
+
 	// ── 7. categories ────────────────────────────────────────────────────
 	// Measured before it is trusted: every typed directory project is sorted
 	// from its neighbours without itself, over the k/cut grid, and categories
@@ -1255,6 +1336,16 @@ async function main() {
 	) {
 		console.error(
 			`✗ ${stackRun.failed} of ${stackBatch.length} repos could not be read. Rows were written; the stacks need a re-run.`,
+		);
+		process.exitCode = 2;
+	}
+	if (
+		contribBatch.length >= 20 &&
+		contribRun.failed > contribBatch.length / 2 &&
+		!process.exitCode
+	) {
+		console.error(
+			`✗ ${contribRun.failed} of ${contribBatch.length} repos' contributors could not be read. Rows were written; the contributors need a re-run.`,
 		);
 		process.exitCode = 2;
 	}

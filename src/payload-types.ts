@@ -1957,6 +1957,14 @@ export interface HackathonBuild {
 	 */
 	activityCheckedAt?: string | null;
 	/**
+	 * Human GitHub accounts with commits on the repo's default branch, lowercased, most commits first (GitHub's contributors API; a fork, the authors of the commits its parent does not hold). Bots and AI agent accounts left out. Meaningful only when contributorsReadAt is set: empty after a read = only bots or no commits. A repo that cannot be read keeps what is stored.
+	 */
+	contributors?: string[] | null;
+	/**
+	 * When the lane last read the repo's contributors, ISO. Empty = never read: no repo link, not found, not public, or not read yet.
+	 */
+	contributorsReadAt?: string | null;
+	/**
 	 * The repo this build links carried malware when last checked: its link is withheld from every read. Set and cleared by the repo-security lane.
 	 */
 	securityHeld?: boolean | null;
@@ -4413,6 +4421,8 @@ export interface HackathonBuildsSelect<T extends boolean = true> {
 	repoLastCommitAt?: T;
 	repoArchived?: T;
 	activityCheckedAt?: T;
+	contributors?: T;
+	contributorsReadAt?: T;
 	securityHeld?: T;
 	securityHold?: T;
 	firstSeenAt?: T;

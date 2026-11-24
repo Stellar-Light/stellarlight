@@ -33,6 +33,7 @@ import {
 	specFunctions,
 	submoduleTargets,
 } from "../../src/lib/contract-ownership";
+import { humanLogins } from "../../src/lib/hackathon-build-contributors";
 import {
 	type NotePin,
 	type PinRead,
@@ -288,8 +289,18 @@ export type RepoActivity =
 			lastCommitAt: string | null;
 			archived: boolean;
 			fullName?: string;
+			/** Present only on a fork. */
+			fork?: RepoFork;
 	  }
 	| { state: "missing" };
+
+/** A fork's parent (owner/name, lowercased) and both default branches;
+ * null where GitHub did not answer (a parent deleted or made private). */
+export type RepoFork = {
+	parent: string | null;
+	parentBranch: string | null;
+	branch: string | null;
+};
 
 const ACTIVITY_BATCH = 50;
 
@@ -309,7 +320,7 @@ export async function fetchRepoActivity(
 		const batch = repos.slice(i, i + ACTIVITY_BATCH);
 		const fields = batch.map((full, j) => {
 			const [owner, name] = full.split("/");
-			return `r${j}: repository(owner: ${JSON.stringify(owner ?? "")}, name: ${JSON.stringify(name ?? "")}) { nameWithOwner isArchived defaultBranchRef { target { ... on Commit { committedDate } } } }`;
+			return `r${j}: repository(owner: ${JSON.stringify(owner ?? "")}, name: ${JSON.stringify(name ?? "")}) { nameWithOwner isArchived isFork parent { nameWithOwner defaultBranchRef { name } } defaultBranchRef { name target { ... on Commit { committedDate } } } }`;
 		});
 		let body: {
 			data?: Record<
@@ -317,7 +328,13 @@ export async function fetchRepoActivity(
 				{
 					nameWithOwner?: string;
 					isArchived: boolean;
+					isFork?: boolean;
+					parent?: {
+						nameWithOwner?: string;
+						defaultBranchRef: { name?: string } | null;
+					} | null;
 					defaultBranchRef: {
+						name?: string;
 						target: { committedDate?: string } | null;
 					} | null;
 				} | null
@@ -354,6 +371,15 @@ export async function fetchRepoActivity(
 					archived: !!r.isArchived,
 					...(r.nameWithOwner
 						? { fullName: r.nameWithOwner.toLowerCase() }
+						: {}),
+					...(r.isFork
+						? {
+								fork: {
+									parent: r.parent?.nameWithOwner?.toLowerCase() ?? null,
+									parentBranch: r.parent?.defaultBranchRef?.name ?? null,
+									branch: r.defaultBranchRef?.name ?? null,
+								},
+							}
 						: {}),
 				});
 			else if (notFound.has(`r${j}`)) out.set(full, { state: "missing" });
@@ -412,6 +438,77 @@ export async function fetchRepoStack(gh: Gh, full: string): Promise<RepoStack> {
 	if (body.truncated && !stack.length)
 		return { state: "error", note: "tree truncated" };
 	return { state: "read", stack };
+}
+
+/** A repo's human contributors (humanLogins: lowercased, most commits
+ * first).
+ *  read     the list was read; `logins` may be [] (an empty repo, or only
+ *           bots and agents).
+ *  missing  the repo answered 404: deleted, renamed away, or private.
+ *  error    anything else, a fork whose parent cannot be compared included;
+ *           nothing may be concluded, retry later. */
+export type RepoContributors =
+	| { state: "read"; logins: string[] }
+	| { state: "missing" }
+	| { state: "error"; note: string };
+
+/** Pages of 100. The contributors API links at most 500 authors to
+ * accounts, so five pages hold every one; a fork with more own commits than
+ * this is not read. */
+const CONTRIBUTOR_PAGES = 5;
+
+/**
+ * The human contributors on a repo's default branch, from GitHub's
+ * contributors API. A fork's history carries its parent's authors (a fork of
+ * stellar/stellar-cli lists the CLI's maintainers), so a fork is read as the
+ * authors of the commits it holds that its parent does not (the compare
+ * API). One REST call for most repos. A RateLimitError from `gh` propagates
+ * so the caller can stop its run cleanly.
+ */
+export async function fetchRepoContributors(
+	gh: Gh,
+	full: string,
+	fork?: RepoFork,
+): Promise<RepoContributors> {
+	const [owner, name] = full.split("/");
+	if (!owner || !name) return { state: "error", note: "not owner/name" };
+	if (fork) {
+		const parentOwner = fork.parent?.split("/")[0];
+		if (!parentOwner || !fork.parentBranch || !fork.branch)
+			return { state: "error", note: "fork: parent not readable" };
+		const basehead = `${parentOwner}:${encodeURIComponent(fork.parentBranch)}...${encodeURIComponent(fork.branch)}`;
+		const authors: Array<{ login?: string; type?: string } | null> = [];
+		for (let page = 1; page <= CONTRIBUTOR_PAGES; page++) {
+			const res = await gh(
+				`/repos/${owner}/${name}/compare/${basehead}?per_page=100&page=${page}`,
+			);
+			// A 404 here can be the parent's branch, not this repo: unknown.
+			if (!res.ok) return { state: "error", note: `compare ${res.status}` };
+			const body = (await res.json()) as {
+				total_commits?: number;
+				commits?: Array<{ author: { login?: string; type?: string } | null }>;
+			};
+			const commits = body.commits ?? [];
+			authors.push(...commits.map((c) => c.author));
+			if (!commits.length || authors.length >= (body.total_commits ?? 0))
+				return { state: "read", logins: humanLogins(authors) };
+		}
+		return { state: "error", note: "fork: more own commits than read" };
+	}
+	const list: Array<{ login?: string; type?: string }> = [];
+	for (let page = 1; page <= CONTRIBUTOR_PAGES; page++) {
+		const res = await gh(
+			`/repos/${owner}/${name}/contributors?per_page=100&page=${page}`,
+		);
+		if (res.status === 404) return { state: "missing" };
+		// 204 = an empty repository: read, and no one has committed.
+		if (res.status === 204) break;
+		if (!res.ok) return { state: "error", note: `contributors ${res.status}` };
+		const body = (await res.json()) as Array<{ login?: string; type?: string }>;
+		list.push(...body);
+		if (body.length < 100) break;
+	}
+	return { state: "read", logins: humanLogins(list) };
 }
 
 /** THE shared, guarded path selection. Identical for probe/scanner/eval. */

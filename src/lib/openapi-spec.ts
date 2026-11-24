@@ -42,6 +42,7 @@ import {
 	GROUP_FACETS,
 	SHIFT_FACETS,
 } from "./hackathon-analytics";
+import { BUILDER_BUILD_BASES } from "./hackathon-build-contributors";
 import {
 	BUILD_MATCH_MODES,
 	BUILD_SEARCH_MODES,
@@ -15560,6 +15561,54 @@ export const spec: OpenAPISpec = {
 												"This person's own commits into this repo, last 12 months; null for owned repos (their own repo; the whole history is theirs).",
 										},
 									},
+								},
+							},
+						},
+					},
+					hackathonBuilds: {
+						type: "array",
+						nullable: true,
+						description:
+							"Stored hackathon builds (the /api/hackathons/builds rows, one per event entered) whose GitHub repo lists this login as a contributor: a human account with commits on the repo's default branch when it was read (GitHub's contributors API; for a fork, the commits its parent does not hold; bots and AI agent accounts left out). QUERY-INDEPENDENT, on every row, newest event first; the order is not a rank. A contributor is not necessarily a team member who entered: commits made after the event count, and a teammate who never committed is missed. It cannot see a build with no repo link, a repo that was never readable (deleted or private), or this person's work under another GitHub account; a build whose repo is held for malware credits no one. [] = none of the read lists names this login; null = the read failed (meta.warnings names it), never 'none'.",
+						items: {
+							type: "object",
+							properties: {
+								id: {
+									type: "string",
+									description:
+										"The build's id, as /api/hackathons/builds serves it and /api/hackathons/builds/{id} opens it.",
+								},
+								name: { type: "string" },
+								hackathon: { type: "string", description: "The event's name." },
+								hackathonSlug: { type: "string" },
+								endedAt: { type: "string", nullable: true },
+								placement: {
+									type: "string",
+									nullable: true,
+									description:
+										"The build's placement in this event as /api/hackathons/builds serves it; null when it placed nowhere or no placement was published.",
+								},
+								isWinner: { type: "boolean" },
+								url: {
+									type: "string",
+									description:
+										"The build's own page: its DoraHacks submission, or the list a curated row comes from.",
+								},
+								basis: {
+									type: "string",
+									enum: [...BUILDER_BUILD_BASES],
+									description:
+										"Why the build is on this row: the login is in the repo's contributor list.",
+								},
+								contributorCount: {
+									type: "integer",
+									description:
+										"Human contributors the repo listed when read: context for how central this person was (1 of 2 is not 1 of 200).",
+								},
+								contributorsReadAt: {
+									type: "string",
+									format: "date-time",
+									description: "When the repo's contributors were read.",
 								},
 							},
 						},

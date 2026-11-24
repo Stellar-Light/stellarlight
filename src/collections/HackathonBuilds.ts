@@ -343,6 +343,26 @@ export const HackathonBuilds: CollectionConfig = {
 			},
 		},
 		{
+			// One writer: the sync lane's contributors step. Read by the
+			// /api/builders join (src/lib/hackathon-build-contributors.ts).
+			name: "contributors",
+			type: "text",
+			hasMany: true,
+			index: true,
+			admin: {
+				description:
+					"Human GitHub accounts with commits on the repo's default branch, lowercased, most commits first (GitHub's contributors API; a fork, the authors of the commits its parent does not hold). Bots and AI agent accounts left out. Meaningful only when contributorsReadAt is set: empty after a read = only bots or no commits. A repo that cannot be read keeps what is stored.",
+			},
+		},
+		{
+			name: "contributorsReadAt",
+			type: "text",
+			admin: {
+				description:
+					"When the lane last read the repo's contributors, ISO. Empty = never read: no repo link, not found, not public, or not read yet.",
+			},
+		},
+		{
 			name: "securityHeld",
 			type: "checkbox",
 			defaultValue: false,
