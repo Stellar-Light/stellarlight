@@ -26,6 +26,10 @@ import { adminOnly } from "./access";
  *                      index) — the CANONICAL_PAGES registry family
  *                      (sls-055), ingested by scripts/ingest-sdf-org.ts and
  *                      class-guarded by scripts/eval/corpus-coverage-check.ts
+ *   - stellar-discussions : the Stellar org's GitHub Discussions (hosted on
+ *                      stellar/stellar-protocol), one document per
+ *                      discussion with its comments and replies; its
+ *                      category in `discussionCategory`
  *   - ec-developer-report : Annual + geographic developer reports published
  *                      by Electric Capital (github.com/electric-capital/
  *                      developer-reports) — macro ecosystem stats, peer-L1
@@ -114,6 +118,10 @@ export const ResearchDocs: CollectionConfig = {
 					label: "Protocol/tooling releases (stellar-core, CLI, SDKs)",
 					value: "release",
 				},
+				{
+					label: "Stellar GitHub Discussions (stellar/stellar-protocol)",
+					value: "stellar-discussions",
+				},
 			],
 		},
 		{
@@ -158,6 +166,14 @@ export const ResearchDocs: CollectionConfig = {
 			type: "text",
 		},
 		{ name: "capProtocolVersion", type: "number" },
+		{
+			name: "discussionCategory",
+			type: "text",
+			admin: {
+				description:
+					"GitHub Discussions category slug (tokenomics, core-advancement-proposals, ...). Only set when source='stellar-discussions'; the research `category` filter.",
+			},
+		},
 		{
 			name: "title",
 			type: "text",

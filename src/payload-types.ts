@@ -2832,7 +2832,8 @@ export interface ResearchDoc {
 		| "security-program"
 		| "sdf-org"
 		| "ec-developer-report"
-		| "release";
+		| "release"
+		| "stellar-discussions";
 	/**
 	 * Audit firm name (Certora, OtterSec, Halborn, …). Only set when source='audit'.
 	 */
@@ -2849,6 +2850,10 @@ export interface ResearchDoc {
 		| null;
 	capStatus?: string | null;
 	capProtocolVersion?: number | null;
+	/**
+	 * GitHub Discussions category slug (tokenomics, core-advancement-proposals, ...). Only set when source='stellar-discussions'.
+	 */
+	discussionCategory?: string | null;
 	/**
 	 * Parent doc title (e.g. SEP name, blog post title, paper title)
 	 */
@@ -4814,6 +4819,7 @@ export interface ResearchDocsSelect<T extends boolean = true> {
 	severity?: T;
 	capStatus?: T;
 	capProtocolVersion?: T;
+	discussionCategory?: T;
 	title?: T;
 	section?: T;
 	url?: T;

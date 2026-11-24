@@ -58,6 +58,9 @@ const AUTHORITY: Record<string, number> = {
 	"ec-developer-report": 0.8,
 	"scf-proposal": 0.72,
 	"sdf-blog": 0.7,
+	// The Stellar org's GitHub Discussions: proposals argued in public, by
+	// their authors and by anyone. Below the CAP/SEP/SLP each one discusses.
+	"stellar-discussions": 0.65,
 	"lumenloop-research": 0.62,
 	lumenloop: 0.6,
 	// Dated protocol/dev meeting recaps (developers.stellar.org/meetings/…).

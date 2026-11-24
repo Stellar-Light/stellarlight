@@ -21,6 +21,21 @@ export const RESEARCH_SOURCES = [
 	"sdf-org",
 	"ec-developer-report",
 	"release",
+	"stellar-discussions",
+] as const;
+
+/**
+ * The GitHub Discussions categories of the Stellar org (hosted on
+ * stellar/stellar-protocol) that source `stellar-discussions` reads, by
+ * slug: the stored `discussionCategory` and the research `category` filter.
+ */
+export const DISCUSSION_CATEGORIES = [
+	"announcements",
+	"core-advancement-proposals",
+	"general-discussion",
+	"stellar-ecosystem-proposals",
+	"stellar-limits-proposals",
+	"tokenomics",
 ] as const;
 
 /**

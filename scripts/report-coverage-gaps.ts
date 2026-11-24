@@ -354,6 +354,7 @@ const RESEARCH_SOURCES = [
 	"security-program",
 	"sdf-org",
 	"ec-developer-report",
+	"stellar-discussions",
 ] as const;
 
 /** Collections whose zero/blank state is a documented serving choice, not a

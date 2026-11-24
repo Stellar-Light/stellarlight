@@ -113,6 +113,28 @@ describe("small sources", () => {
 		expect(p[0].$vectorSearch.filter).toEqual({ source: { $eq: "paper" } });
 	});
 
+	it("a discussion category: reads the whole source, then keeps the category", async () => {
+		const {
+			buildResearchVectorPipeline,
+			researchOverfetch,
+			VECTOR_DEEP_LIMIT,
+		} = await import("../research-pipeline");
+		const p = buildResearchVectorPipeline({
+			queryEmbedding: [0, 1],
+			limit: 5,
+			sourceFilter: "stellar-discussions",
+			indexFilter: true,
+			category: "tokenomics",
+		}) as Array<Record<string, { limit?: number } & Record<string, unknown>>>;
+		expect(p[0].$vectorSearch.limit).toBe(VECTOR_DEEP_LIMIT);
+		expect(p[1].$match).toEqual({
+			source: "stellar-discussions",
+			discussionCategory: "tokenomics",
+		});
+		expect(p[2].$limit).toBe(researchOverfetch(5));
+		expect(p[3].$project.discussionCategory).toBe(1);
+	});
+
 	it("reads the served index's filter paths once and caches them", async () => {
 		const { vectorIndexFilterPaths } = await import("../research-pipeline");
 		let calls = 0;

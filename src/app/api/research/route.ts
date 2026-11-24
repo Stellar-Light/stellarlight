@@ -82,7 +82,11 @@ import {
 	titleNamesProtocol,
 	versionTargets,
 } from "@/lib/research-rank";
-import { RESEARCH_SOURCES, requestedSources } from "@/lib/research-sources";
+import {
+	DISCUSSION_CATEGORIES,
+	RESEARCH_SOURCES,
+	requestedSources,
+} from "@/lib/research-sources";
 import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
@@ -118,6 +122,8 @@ interface ResearchRow {
 	// CAP crosswalk (source === "cap"; #785 — every serving path must carry these)
 	capStatus?: string | null;
 	capProtocolVersion?: number | null;
+	// GitHub Discussions category slug (source === "stellar-discussions")
+	discussionCategory?: string | null;
 }
 
 // A scoped query that returns nothing must say whether the SOURCE is empty
@@ -198,6 +204,8 @@ async function research(
 	const auditorFilter = sp.get("auditor");
 	const protocolFilter = sp.get("protocol");
 	const severityFilter = sp.get("severity")?.toLowerCase() ?? null;
+	// A GitHub Discussions category; implies source=stellar-discussions.
+	const categoryFilter = sp.get("category")?.toLowerCase() ?? null;
 	const limitParam = clampLimit(sp.get("limit") ?? sp.get("perSource"), 8, 25);
 	const limitRaw = Math.floor(Number(sp.get("limit")));
 	const limitNote =
@@ -274,7 +282,38 @@ async function research(
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
 	}
-	const effectiveSource = auditScoped ? "audit" : sourceFilter;
+	if (
+		categoryFilter &&
+		!DISCUSSION_CATEGORIES.includes(categoryFilter as never)
+	) {
+		return NextResponse.json(
+			{
+				error: `unknown category: '${categoryFilter}'`,
+				hint: "category is a GitHub Discussions category of source=stellar-discussions",
+				validCategories: DISCUSSION_CATEGORIES,
+			},
+			{ status: 400, headers: rateLimitHeaders(limit) },
+		);
+	}
+	// The category filter scopes retrieval to its source, as the audit
+	// filters do; a contradictory source or audit filter is rejected.
+	if (
+		categoryFilter &&
+		(auditScoped || (sourceFilter && sourceFilter !== "stellar-discussions"))
+	) {
+		return NextResponse.json(
+			{
+				error: `category applies only to source=stellar-discussions, which contradicts ${auditScoped ? "the audit filters" : `source='${sourceFilter}'`}`,
+				hint: "drop the source param (the stellar-discussions scope is implied) or use source=stellar-discussions",
+			},
+			{ status: 400, headers: rateLimitHeaders(limit) },
+		);
+	}
+	const effectiveSource = auditScoped
+		? "audit"
+		: categoryFilter
+			? "stellar-discussions"
+			: sourceFilter;
 
 	const payload = await getPayloadSafe();
 	mark("init");
@@ -332,6 +371,7 @@ async function research(
 		severity?: string;
 		capStatus?: string;
 		capProtocolVersion?: number;
+		discussionCategory?: string;
 		score?: number;
 	}) => ({
 		id: String(d._id),
@@ -350,6 +390,7 @@ async function research(
 		severity: d.severity ?? null,
 		capStatus: d.capStatus ?? null,
 		capProtocolVersion: d.capProtocolVersion ?? null,
+		discussionCategory: d.discussionCategory ?? null,
 		score: d.score,
 	});
 
@@ -387,6 +428,7 @@ async function research(
 				limit: limitParam,
 				sourceFilter: effectiveSource,
 				indexFilter,
+				category: categoryFilter,
 			});
 
 			let docs = await collection.aggregate(pipeline).toArray();
@@ -400,6 +442,7 @@ async function research(
 							limit: limitParam,
 							sourceFilter: effectiveSource,
 							deep: true,
+							category: categoryFilter,
 						}),
 					)
 					.toArray();
@@ -471,6 +514,8 @@ async function research(
 				// biome-ignore lint/suspicious/noExplicitAny: Payload Where is awkward
 				const where: any = {};
 				if (effectiveSource) where.source = { equals: effectiveSource };
+				if (categoryFilter)
+					where.discussionCategory = { equals: categoryFilter };
 				if (tokens.length) {
 					where.or = tokens.map((t) => ({
 						or: [{ title: { contains: t } }, { content: { contains: t } }],
@@ -506,6 +551,7 @@ async function research(
 					severity?: string;
 					capStatus?: string;
 					capProtocolVersion?: number;
+					discussionCategory?: string;
 				}>;
 
 				// Compute mean content length for length-normalization
@@ -578,6 +624,7 @@ async function research(
 						severity: d.severity ?? null,
 						capStatus: d.capStatus ?? null,
 						capProtocolVersion: d.capProtocolVersion ?? null,
+						discussionCategory: d.discussionCategory ?? null,
 						score: score(d),
 					}))
 					.filter((d) => (d.score ?? 0) > 0)
@@ -675,6 +722,7 @@ async function research(
 				severity?: string;
 				capStatus?: string;
 				capProtocolVersion?: number;
+				discussionCategory?: string;
 			}>) {
 				chunks.push({
 					id: String(d.id),
@@ -695,6 +743,7 @@ async function research(
 					// their row — it must carry the cap fields like every other path.
 					capStatus: d.capStatus ?? null,
 					capProtocolVersion: d.capProtocolVersion ?? null,
+					discussionCategory: d.discussionCategory ?? null,
 					// No retrieval score: confidence floors relevance for
 					// exact-ID matches, and the pin sets the rank.
 				});
@@ -770,6 +819,7 @@ async function research(
 					severity: (d.severity as string) ?? null,
 					capStatus: (d.capStatus as string) ?? null,
 					capProtocolVersion: (d.capProtocolVersion as number) ?? null,
+					discussionCategory: (d.discussionCategory as string) ?? null,
 					// No score: the chunk literally contains the figure asked
 					// about, which beats any cosine estimate of whether it might.
 				});
@@ -797,6 +847,7 @@ async function research(
 		severity?: string;
 		capStatus?: string;
 		capProtocolVersion?: number;
+		discussionCategory?: string;
 		embedding?: number[];
 	}
 	const toRow = (d: RawResearchDoc, score?: number): ResearchRow => ({
@@ -820,6 +871,7 @@ async function research(
 		// by both #764 (main mappers) and #784 (vector $project).
 		capStatus: d.capStatus ?? null,
 		capProtocolVersion: d.capProtocolVersion ?? null,
+		discussionCategory: d.discussionCategory ?? null,
 		...(score != null ? { score } : {}),
 	});
 
@@ -1099,6 +1151,11 @@ async function research(
 		});
 	}
 
+	// The category post-filter, for the rows the supplements above added
+	// from the whole source scope.
+	if (categoryFilter)
+		chunks = chunks.filter((c) => c.discussionCategory === categoryFilter);
+
 	// Shared ranking stage (src/lib/research-rank.ts): drop low-value chunks,
 	// collapse to the best chunk per document, and order by the attached
 	// confidence signal (relevance + freshness + authority) with raw-score
@@ -1214,6 +1271,7 @@ async function research(
 			auditor: auditorFilter,
 			protocol: protocolFilter,
 			severity: severityFilter,
+			category: categoryFilter,
 			limit: limitParam,
 			mode,
 		},
@@ -1262,6 +1320,7 @@ async function research(
 					auditor: auditorFilter,
 					protocol: protocolFilter,
 					severity: severityFilter,
+					category: categoryFilter,
 					limit: limitParam,
 				},
 				counts: {
@@ -1325,6 +1384,7 @@ function researchParamWarning(sp: URLSearchParams): string | null {
 			"auditor",
 			"protocol",
 			"severity",
+			"category",
 			"limit",
 			"perSource",
 			"fields",
@@ -1337,6 +1397,7 @@ function researchParamWarning(sp: URLSearchParams): string | null {
 				"auditor",
 				"protocol",
 				"severity",
+				"category",
 				"limit",
 				"perSource",
 				"fields",
@@ -1423,7 +1484,7 @@ async function researchMany(
 	// `fields` is applied to the merged page, not per source: the merge sorts
 	// on confidence, which a field list can leave out (sources=a,b&fields=title
 	// answered 500).
-	for (const k of ["auditor", "protocol", "severity"]) {
+	for (const k of ["auditor", "protocol", "severity", "category"]) {
 		const v = sp.get(k);
 		if (v !== null) base.searchParams.set(k, v);
 	}
@@ -1525,6 +1586,7 @@ async function researchMany(
 			auditor: sp.get("auditor"),
 			protocol: sp.get("protocol"),
 			severity: sp.get("severity"),
+			category: sp.get("category"),
 			mode,
 		},
 		resultCount: results.length,
@@ -1567,6 +1629,7 @@ async function researchMany(
 					auditor: sp.get("auditor"),
 					protocol: sp.get("protocol"),
 					severity: sp.get("severity")?.toLowerCase() ?? null,
+					category: sp.get("category")?.toLowerCase() ?? null,
 					limit: perSource,
 				},
 				counts: {

@@ -678,6 +678,8 @@ export const RECENCY_SUPPLEMENT_SOURCES = [
 	"paper",
 	// Dated by each proposal's own preamble (sls-118).
 	"slp",
+	// Dated by each discussion's own createdAt.
+	"stellar-discussions",
 ];
 
 // Query words that express the recency ASK rather than the topic — they must
