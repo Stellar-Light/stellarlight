@@ -1534,6 +1534,43 @@
 			"pr": null,
 			"costUsd": 0,
 			"note": "agent run failed: "
+		},
+		{
+			"task": "notes",
+			"unit": "notes-2026-11-24",
+			"items": [
+				"AquariusDeFi/aquarius-sdk",
+				"stellar-experimental/walleterm",
+				"Neko-Protocol/neko-mainnet",
+				"EduNodeOrg/website",
+				"Etesia-Research/etesia-portfolio-builder",
+				"NilaDAO/nila-soroban",
+				"lendwise-fi/lendwise",
+				"Neko-Protocol/neko-web",
+				"tolgayayci/rail402",
+				"57blocks/agentsmith-oss",
+				"Neko-Protocol/neko-backend",
+				"troqpay/private-yield",
+				"TrustLine-id/stellar-vault-app",
+				"agamafinance/agama-soroban",
+				"NoetherDEX/noether-contracts",
+				"WebSoroban/payloop",
+				"diadata-org/diadata",
+				"Etesia-Research/stellar_vault",
+				"mrkanchwala/safu-soroban",
+				"withObsrvr/stellar-ingest",
+				"EduNodeOrg/server",
+				"NectarLabsio/nectar",
+				"theahaco/soroban-sim",
+				"BWB-Labs/bwb-stellar",
+				"RozoAI/soroswap-v2-frontend"
+			],
+			"date": "2026-11-24",
+			"run": "45478485034",
+			"outcome": "error",
+			"pr": null,
+			"costUsd": 0,
+			"note": "agent run failed: "
 		}
 	]
 }
