@@ -20,6 +20,9 @@ npx @stellar-light/scout-mcp
 > *"How does Stellar's developer count compare to other L1s?"*
 > Calls `search_research` with `source=ec-developer-report`. Returns Electric Capital data for 2019–2023.
 
+> *"What has been proposed about raising Stellar's network fees?"*
+> Calls `search_research` with `category=tokenomics`. Returns the Stellar org's tokenomics discussion threads, each comment signed with its author and date.
+
 **Project discovery + idea validation**
 
 > *"Has anyone built a stablecoin off-ramp for Africa on Stellar?"*
@@ -111,7 +114,7 @@ All 28 tools wrap stellarlight.xyz public APIs. They're rate-limited but require
 
 | Tool | What it does |
 |------|--------------|
-| `search_research` | Vector search over the Stellar research corpus (SEPs, SCF Handbook, dev docs, papers, lumenloop, audits, incident reports, EC reports, Stellar Limits Proposals, core/CLI/SDK release notes). Use `source=audit` for security, `source=release` for what-shipped-when, or the `auditor`/`protocol`/`severity` filters (they imply audit scope). |
+| `search_research` | Vector search over the Stellar research corpus (SEPs, SCF Handbook, dev docs, papers, lumenloop, audits, incident reports, EC reports, Stellar Limits Proposals, the Stellar org's GitHub Discussions, core/CLI/SDK release notes). Use `source=audit` for security, `source=release` for what-shipped-when, the `auditor`/`protocol`/`severity` filters (they imply audit scope), or `category` (e.g. `tokenomics`, `core-advancement-proposals`) for GitHub Discussions (it implies `source=stellar-discussions`). |
 | `get_audits` | Enumerable security-audit registry — one row per report with normalized auditor, date, and a verified project link. 'List all audits for X' / 'what has firm Y audited'. Absence ≠ unaudited. |
 | `get_hackathons` | List curated Stellar hackathons + live DoraHacks events. Status-scoped queries include fallback channels when empty. |
 | `get_hackathon` | One hackathon's full detail (submissions, winners, prize tracks, status funnel). |

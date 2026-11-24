@@ -32,6 +32,14 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-24",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.10.1",
+		type: "fixed",
+		summary:
+			"scout-mcp 1.10.1: the README names the GitHub Discussions source and its `category` filter in the search_research row, with a tokenomics example. No tool or parameter changes.",
+	},
+	{
+		date: "2026-11-24",
 		surfaces: ["api", "skill"],
 		version: "spec@1.9.173",
 		type: "added",
