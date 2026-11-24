@@ -1,24 +1,22 @@
-import {
-	Activity,
-	ArrowLeft,
-	Calendar,
-	CheckCircle2,
-	Clock,
-	ExternalLink,
-	Trophy,
-	XCircle,
-} from "lucide-react";
+import { ArrowLeft, ExternalLink, Info, Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache, type ReactNode } from "react";
-import { BuildSourceNote } from "@/components/build-source-note";
+import {
+	type BuildCardRow,
+	HackathonBuildsGrid,
+} from "@/components/hackathon-builds-grid";
 import { Badge } from "@/components/ui/badge";
 import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
+import { libraryOf } from "@/lib/hackathon-analytics";
+import type { LinkedProject } from "@/lib/hackathon-build-links";
+import { getHackathonBuildsIndex } from "@/lib/hackathon-builds";
 import { getHackathonDetail } from "@/lib/hackathon-detail";
 import {
 	type DoraHacksHackathon,
 	fetchAllDoraHacksHackathons,
+	formatDateRange,
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -35,7 +33,7 @@ type Row = {
 	name: string;
 	url: string;
 	slug?: string | null;
-	project?: { slug: string } | null;
+	project?: LinkedProject | null;
 	category?: string | null;
 	track?: string | null;
 	hackathonPrizeTrack?: string | null;
@@ -46,6 +44,10 @@ type Row = {
 	placementRank?: number | null;
 	prizeUsd?: number | null;
 	hackathonPrize?: number | null;
+	githubUrl?: string | null;
+	demoUrl?: string | null;
+	videoUrl?: string | null;
+	builder?: string | null;
 	/** A row of a partial list: why it is stored. */
 	entryBasis?: string;
 	contracts?: readonly unknown[];
@@ -65,10 +67,15 @@ type Hackathon = {
 	organizer: { name: string } | null;
 	source?: string;
 	coverage?: string;
+	prizePoolUSD?: number | null;
+	tracks?: Array<{ name: string }> | null;
 	stats: {
 		totalSubmissions: number | null;
+		upstreamSubmissions?: number | null;
 		coverageNote: string | null;
 		winnersNote: string | null;
+		hiddenWinners?: readonly unknown[] | null;
+		totalPrizeUSD?: number | null;
 		outcomes: {
 			built: number;
 			inProgress: number;
@@ -76,8 +83,6 @@ type Hackathon = {
 		} | null;
 	};
 };
-
-const NOT_KNOWN = "not known";
 
 /** How long the page waits for the API's answer, the store's start
  * included: the bound /hackathons puts on the same DoraHacks reads.
@@ -88,6 +93,11 @@ const NOT_KNOWN = "not known";
  * store down (the API's 503), the page renders the event's own facts, and
  * the read runs on to warm the caches. */
 const DEADLINE_MS = 6000;
+
+/** How long the page waits for the builds index, for each build's stack and
+ * directory project. The answer above read the same cached index, so this
+ * is a cache hit unless that read failed; past it the cards carry neither. */
+const INDEX_DEADLINE_MS = 2000;
 
 /** What the page renders: the API's answer, or without it the event's
  * facts with its winners and submissions not loaded. */
@@ -121,6 +131,7 @@ function factsOf(h: DoraHacksHackathon): Hackathon {
 		externalUrl: getHackathonUrl(h),
 		organizer: h.organization ? { name: h.organization.name } : null,
 		source: h.source === "curated" ? "curated" : "dorahacks",
+		prizePoolUSD: h.bonus_price || null,
 		stats: {
 			totalSubmissions: null,
 			coverageNote: null,
@@ -182,6 +193,25 @@ const load = cache(async (slug: string): Promise<Loaded> => {
 	}
 });
 
+/** Each stored build of the event by id: the Stellar packages its repo
+ * declares and the directory project that lists its repo, read from the
+ * builds index. Empty when the index does not answer in time. */
+async function indexExtras(slug: string) {
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	const index = await Promise.race([
+		getHackathonBuildsIndex().catch(() => null),
+		new Promise<null>((done) => {
+			timer = setTimeout(() => done(null), INDEX_DEADLINE_MS);
+		}),
+	]);
+	clearTimeout(timer);
+	return new Map(
+		(index ?? [])
+			.filter((b) => b.hackathon.slug === slug)
+			.map((b) => [b.id, { stack: b.stack, project: b.project }]),
+	);
+}
+
 /** A DoraHacks event's description is its event page in markdown (23,058
  * characters for Real-World ZK); the page shows its first paragraph of prose
  * as plain text, or nothing when the page has none. Any other event's
@@ -208,26 +238,6 @@ function leadOf(h: Hackathon): string | null {
 	return prose ? clampSentences(prose, 600).text : null;
 }
 
-const STATUS_META = {
-	Built: {
-		label: "Built",
-		icon: CheckCircle2,
-		classes: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-	},
-	"In Progress": {
-		label: "In Progress",
-		icon: Clock,
-		classes: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-	},
-	Abandoned: {
-		label: "Abandoned",
-		icon: XCircle,
-		classes: "bg-white/5 text-muted-foreground border-border/50",
-	},
-} as const;
-
-type HackathonStatusKey = keyof typeof STATUS_META;
-
 export async function generateMetadata({
 	params,
 }: {
@@ -249,79 +259,85 @@ export async function generateMetadata({
 	};
 }
 
-// The API serves calendar dates in UTC; read in the server's zone, a date
-// west of UTC printed the day before.
-const DAY = { month: "short", day: "numeric", timeZone: "UTC" } as const;
+const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 
-function formatDate(d: string) {
-	return new Date(d).toLocaleDateString("en-US", { ...DAY, year: "numeric" });
+/** What a build's own page is, as a link label. */
+function pageLabel(url: string): string {
+	if (url.includes("dorahacks.io")) return "DoraHacks";
+	if (/\/hackproof\//i.test(url)) return "HackProof";
+	try {
+		return new URL(url).host.replace(/^www\./, "");
+	} catch {
+		return "Source";
+	}
 }
 
-function formatDateRange(start?: string | null, end?: string | null) {
-	if (!start || !end) return "";
-	const s = new Date(start);
-	const e = new Date(end);
-	const sameYear = s.getUTCFullYear() === e.getUTCFullYear();
-	const sameMonth = sameYear && s.getUTCMonth() === e.getUTCMonth();
-	if (sameMonth) {
-		return `${s.toLocaleDateString("en-US", DAY)}-${e.getUTCDate()}, ${e.getUTCFullYear()}`;
-	}
-	if (sameYear) {
-		return `${s.toLocaleDateString("en-US", DAY)} to ${e.toLocaleDateString("en-US", DAY)}, ${e.getUTCFullYear()}`;
-	}
-	return `${formatDate(start)} to ${formatDate(end)}`;
-}
+/** The list a partial event's builds come from, credited by name.
+ * ponytail: HackProof is the one list partial rows come from (see
+ * entryBasisLine); name each list here when a second lands. */
+const PARTIAL_SOURCE = {
+	name: "HackProof",
+	url: (slug: string) => `https://hackproof-six.vercel.app/hackathon/${slug}`,
+	how: "rebuilt from on-chain testnet activity and repos",
+};
 
-const CARD =
-	"group block rounded-2xl border border-border/50 hover:border-border bg-card p-5 transition-colors";
-
-/** A row with a directory project opens its page; any other opens its own
- * url (its DoraHacks page, or the page that names the win) in a new tab. */
-function RowLink({ p, children }: { p: Row; children: ReactNode }) {
+/** A row opens its repo when it names one, else its directory project,
+ * else its own page (its DoraHacks page, or the page that names the win). */
+function RowLink({
+	p,
+	className,
+	children,
+}: {
+	p: Row;
+	className: string;
+	children: ReactNode;
+}) {
 	const slug = p.slug ?? p.project?.slug;
-	return slug ? (
-		<Link href={`/project/${slug}`} className={CARD}>
+	return !p.githubUrl && slug ? (
+		<Link href={`/project/${slug}`} className={className}>
 			{children}
 		</Link>
 	) : (
-		<a href={p.url} target="_blank" rel="noopener noreferrer" className={CARD}>
+		<a
+			href={p.githubUrl ?? p.url}
+			target="_blank"
+			rel="noopener noreferrer"
+			className={className}
+		>
 			{children}
 		</a>
 	);
 }
 
-function StatusBadge({ status }: { status: HackathonStatusKey }) {
-	const meta = STATUS_META[status];
-	if (!meta) return null;
-	const Icon = meta.icon;
-	return (
-		<span
-			className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full border ${meta.classes}`}
-		>
-			<Icon className="w-3 h-3" />
-			{meta.label}
-		</span>
-	);
-}
-
-function StatBlock({
+/** One fact about the event. A word ("Not stored") where the data holds
+ * no count, never a 0 standing in for one. */
+function Tile({
 	label,
 	value,
-	sub,
+	hint,
+	className = "",
 }: {
 	label: string;
 	value: string;
-	sub?: string;
+	hint?: string | null;
+	className?: string;
 }) {
+	const numeric = /^[$\d]/.test(value);
 	return (
-		<div className="rounded-2xl border border-border/50 bg-card p-5">
-			<div className="text-xs uppercase tracking-wide text-muted-foreground/80 mb-2">
-				{label}
-			</div>
-			<div className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+		<div
+			className={`flex flex-col items-start rounded-xl border border-border/50 bg-card p-4 ${className}`}
+		>
+			<span className="text-xs text-muted-foreground">{label}</span>
+			<span
+				className={`mt-1.5 block font-semibold tracking-tight tabular-nums text-foreground ${numeric ? "text-2xl md:text-3xl" : "text-lg md:text-xl"}`}
+			>
 				{value}
-			</div>
-			{sub && <div className="text-xs text-muted-foreground mt-1">{sub}</div>}
+			</span>
+			{hint && (
+				<span className="mt-1 block text-[11px] text-muted-foreground/70 line-clamp-2">
+					{hint}
+				</span>
+			)}
 		</div>
 	);
 }
@@ -365,7 +381,7 @@ const RANK_STYLE: Record<number, string> = {
 /** The collection's placement values by name. Any other label (DoraHacks',
  * the curated roster's) is styled by its rank and split at a spaced hyphen,
  * en dash or em dash: the place goes in the badge, and what follows is a
- * prize ("1st Place - $5,000 in XLM", which the footer shows from prizeUsd)
+ * prize ("1st Place - $5,000 in XLM", which the strip shows from prizeUsd)
  * or the roster's category ("1st", then "Confidential Wallets"). */
 function placementMeta(p: Row) {
 	if (!p.hackathonPlacement) return null;
@@ -381,93 +397,116 @@ function placementMeta(p: Row) {
 	};
 }
 
-function WinnerCard({ p, event }: { p: Row; event: string }) {
+type Extras = Map<
+	string,
+	{ stack?: string[]; project?: LinkedProject | null } | undefined
+>;
+
+/** A row as its build card shows it: its name opens its repo. */
+function cardOf(p: Row, extras: Extras): BuildCardRow {
+	const extra = extras.get(p.id);
+	// A collection row is a directory project: without a repo its card
+	// opens that page.
+	const own = p.slug ?? null;
+	const linked = own ? null : (extra?.project ?? p.project ?? null);
 	const meta = placementMeta(p);
-	const prize = p.prizeUsd ?? p.hackathonPrize;
-	// The track a prize was won in: the collection's, or the roster's
-	// category from its placement. A DoraHacks track shows on the category
-	// line instead.
-	const track = p.hackathonPrizeTrack ?? meta?.category;
-	const blurb = p.shortDescription ?? p.description;
-	return (
-		<RowLink p={p}>
-			<div className="flex items-start justify-between gap-3 mb-3">
-				<div className="flex items-center gap-3 min-w-0 flex-1">
-					<div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-border/50 flex items-center justify-center flex-shrink-0">
-						<Trophy className="w-5 h-5 text-[#FDDA24]" />
-					</div>
-					<div className="min-w-0">
-						<h3 className="text-base font-semibold text-foreground group-hover:text-white transition-colors leading-tight truncate">
-							{p.name}
-						</h3>
-						<div className="text-xs text-muted-foreground truncate">
-							{p.category ?? p.track}
-						</div>
-					</div>
-				</div>
-				{meta && (
-					<span
-						className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-full border ${meta.classes} flex-shrink-0`}
-					>
-						{meta.label}
-					</span>
-				)}
-			</div>
-
-			{blurb && (
-				<p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-					{blurb}
-				</p>
-			)}
-			<BuildSourceNote row={p} event={event} />
-
-			<div className="flex items-center justify-between text-xs pt-3 border-t border-border/50">
-				{prize ? (
-					<span className="inline-flex items-center gap-1 text-foreground font-semibold">
-						<Trophy className="w-3.5 h-3.5 text-[#FDDA24]" />$
-						{prize.toLocaleString()}
-					</span>
-				) : (
-					<span className="text-muted-foreground">Prize not stated</span>
-				)}
-				{track && (
-					<span className="text-muted-foreground truncate ml-2">{track}</span>
-				)}
-			</div>
-		</RowLink>
-	);
+	const links: BuildCardRow["links"] = [];
+	if (p.demoUrl) links.push({ label: "Demo", href: p.demoUrl });
+	if (p.videoUrl) links.push({ label: "Video", href: p.videoUrl });
+	// Its own page, when the name opens the repo instead.
+	if (p.githubUrl && !own) links.push({ label: pageLabel(p.url), href: p.url });
+	return {
+		id: p.id,
+		name: p.name,
+		href: p.githubUrl ?? (own ? `/project/${own}` : p.url),
+		external: !!p.githubUrl || !own,
+		repo: p.githubUrl ?? null,
+		track: p.category ?? p.track ?? p.hackathonPrizeTrack ?? null,
+		placement: meta ? { label: meta.label, classes: meta.classes } : null,
+		isWinner: p.isWinner ?? !!p.hackathonPlacement,
+		status: p.hackathonStatus ?? null,
+		blurb: p.shortDescription ?? p.description ?? null,
+		contracts: p.contracts?.length ?? 0,
+		stack: [...new Set((extra?.stack ?? []).map(libraryOf))],
+		project: linked ? { slug: linked.slug, name: linked.name } : null,
+		links,
+	};
 }
 
-function ProjectCard({ p, event }: { p: Row; event: string }) {
-	const status = (p.hackathonStatus ?? undefined) as
-		| HackathonStatusKey
-		| undefined;
-	const blurb = p.shortDescription ?? p.description;
+/** A note's own label ("Not announced upstream: ..."), or null. */
+const noteLabel = (note: string) => {
+	const head = note.split(":")[0];
+	return head.length <= 40 && head !== note ? head : null;
+};
 
+/** One winner in the strip: place, name, prize, track; it opens the repo. */
+function WinnerItem({ p }: { p: Row }) {
+	const meta = placementMeta(p);
+	const prize = p.prizeUsd ?? p.hackathonPrize;
+	// The track a prize was won in: the row's, the collection's, or the
+	// roster's category from its placement.
+	const line = [
+		...new Set(
+			[p.category ?? p.track, p.hackathonPrizeTrack ?? meta?.category].filter(
+				Boolean,
+			),
+		),
+	].join(" · ");
+	const blurb = p.shortDescription ?? p.description;
+	const owner = p.githubUrl
+		? /github\.com\/([^/?#]+)/i.exec(p.githubUrl)?.[1]
+		: undefined;
 	return (
-		<RowLink p={p}>
-			<div className="flex items-start gap-4 mb-3">
-				<div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-border/50 flex items-center justify-center flex-shrink-0">
-					<Activity className="w-5 h-5 text-muted-foreground" />
+		<RowLink
+			p={p}
+			className="group idea-card rounded-xl p-4 flex flex-col h-full"
+		>
+			<div className="flex items-start justify-between gap-3">
+				<div className="flex items-center gap-2 min-w-0">
+					{owner && (
+						// biome-ignore lint/performance/noImgElement: a GitHub avatar, no optimisation wanted
+						<img
+							src={`https://github.com/${owner}.png?size=48`}
+							alt=""
+							width={24}
+							height={24}
+							loading="lazy"
+							className="w-6 h-6 rounded-full border border-border/50 bg-white/[0.04] flex-shrink-0"
+						/>
+					)}
+					{meta ? (
+						<span
+							className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-full border flex-shrink-0 ${meta.classes}`}
+						>
+							{meta.label}
+						</span>
+					) : (
+						<Trophy className="w-4 h-4 text-[#FDDA24] flex-shrink-0" />
+					)}
+					<h3 className="text-sm font-semibold text-foreground group-hover:text-white transition-colors leading-tight truncate">
+						{p.name}
+					</h3>
 				</div>
-				<div className="flex-1 min-w-0">
-					<div className="flex items-start justify-between gap-2 mb-1">
-						<h3 className="text-base font-semibold text-foreground group-hover:text-white transition-colors leading-tight truncate">
-							{p.name}
-						</h3>
-						{status && <StatusBadge status={status} />}
-					</div>
-					<div className="text-xs text-muted-foreground">
-						{p.category ?? p.track}
-					</div>
-				</div>
+				{prize ? (
+					<span className="text-sm font-semibold text-foreground tabular-nums flex-shrink-0">
+						{usd(prize)}
+					</span>
+				) : null}
 			</div>
-			{blurb && (
-				<p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-					{blurb}
+			{(line || p.builder) && (
+				<p className="mt-1.5 text-xs text-muted-foreground truncate">
+					{line}
+					{line && p.builder ? " · " : ""}
+					{p.builder ? `by ${p.builder}` : ""}
 				</p>
 			)}
-			<BuildSourceNote row={p} event={event} />
+			{blurb && (
+				<div className="mt-1.5 hidden sm:block">
+					<p className="text-xs text-muted-foreground/80 line-clamp-2">
+						{blurb}
+					</p>
+				</div>
+			)}
 		</RowLink>
 	);
 }
@@ -491,13 +530,6 @@ export default async function HackathonDetailPage({
 	// Only its winners on record: they show above, never as its submissions.
 	const projects = winnersOnly ? [] : loaded.submissions;
 	const submitted = stats.totalSubmissions;
-	// A record can state the field's size ("110+ submissions") that is not
-	// stored here, so the line says what is stored, not that it is unknown.
-	const coverageLine = late
-		? "This event's winners and submissions could not be loaded right now. Reload the page to try again."
-		: winnersOnly
-			? "Only this event's winners are stored here, not its full list of submissions."
-			: stats.coverageNote;
 
 	// Beside a count of unknowns, built, in progress and abandoned all 0 say
 	// nothing was classified, not that nothing survived: not known, not 0.
@@ -509,20 +541,147 @@ export default async function HackathonDetailPage({
 	const shippedPct = tracked
 		? Math.round(((builtCount + inProgressCount) / trackedCount) * 100)
 		: 0;
-	const ifTracked = (n: number) => (tracked ? n.toString() : NOT_KNOWN);
 
 	const organizer = hackathon.organizer;
 	const lead = leadOf(hackathon);
+	const short = lead ? clampSentences(lead, 240) : null;
 
 	const status = hackathon.status as
 		| "upcoming"
 		| "active"
 		| "completed"
 		| undefined;
+	const completed = status === "completed";
+
+	const extras: Extras =
+		late || projects.length === 0 ? new Map() : await indexExtras(slug);
+	// A submission row carries no rank; its winner row does, for its badge.
+	const rankOf = new Map(winners.map((w) => [w.id, w.placementRank]));
+	const cards = projects.map((p) =>
+		cardOf(
+			{ ...p, placementRank: p.placementRank ?? rankOf.get(p.id) },
+			extras,
+		),
+	);
+	const onChain = cards.filter((c) => c.contracts > 0).length;
+	// Winners the partial list's source names (a placement it lists).
+	const listedWinners =
+		partial && winners.some((w) => w.winnerSource && w.entryBasis);
+	const source = partial
+		? { ...PARTIAL_SOURCE, href: PARTIAL_SOURCE.url(hackathon.slug) }
+		: null;
+
+	// The tiles: a count where the data holds one, else a word that says why
+	// there is none.
+	const upstream = stats.upstreamSubmissions ?? null;
+	const submissionsTile = late
+		? { label: "Submissions", value: "Not loaded", hint: "reload to try again" }
+		: submitted !== null
+			? {
+					label: "Submissions",
+					value: submitted.toLocaleString("en-US"),
+					hint:
+						upstream !== null && upstream !== submitted
+							? `of ${upstream.toLocaleString("en-US")} on DoraHacks`
+							: null,
+				}
+			: partial
+				? {
+						label: "Builds found",
+						value: projects.length.toLocaleString("en-US"),
+						hint: `${onChain ? `${onChain} with testnet contracts · ` : ""}not the full field`,
+					}
+				: winnersOnly
+					? {
+							label: "Submissions",
+							value: "Not listed",
+							hint: "only the winners are on record",
+						}
+					: { label: "Submissions", value: "None on record" };
+	const winnersTile = late
+		? { label: "Winners", value: "Not loaded" }
+		: winners.length > 0
+			? {
+					label: "Winners",
+					value: String(winners.length),
+					hint: listedWinners && source ? `as ${source.name} lists them` : null,
+				}
+			: {
+					label: "Winners",
+					value: completed ? "None on record" : "Not announced",
+					hint: stats.winnersNote
+						? (noteLabel(stats.winnersNote)?.toLowerCase() ?? null)
+						: null,
+				};
+	const prize = hackathon.prizePoolUSD ?? stats.totalPrizeUSD ?? null;
+	const tracks = hackathon.tracks?.length ? hackathon.tracks : null;
+	const tileCount = tracks ? 5 : 4;
+
+	// How these were found: one short line each, from the structured
+	// fields; the API's full notes stay on the API.
+	const lines: ReactNode[] = [];
+	if (!late && source) {
+		lines.push(
+			<>
+				Found by{" "}
+				<a
+					href={source.href}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="text-foreground underline underline-offset-2"
+				>
+					{source.name}
+				</a>
+				, which rebuilt the event from Stellar testnet activity during it and
+				the builds' own repos.
+			</>,
+			`The organizer's submission list is not public, so these ${projects.length} builds are not the full field.`,
+			`A build is listed when its repo names ${hackathon.name}, or ${source.name} lists it as a winner.`,
+		);
+		if (listedWinners) lines.push(`Winners as ${source.name} lists them.`);
+	} else if (!late && submitted !== null && hackathon.source === "dorahacks") {
+		const gap = upstream === null ? 0 : upstream - submitted;
+		lines.push(
+			`Submissions from DoraHacks, refreshed daily.${
+				gap === 1
+					? " 1 more on DoraHacks was hidden or deleted by its team, or resubmitted."
+					: gap > 1
+						? ` ${gap} more on DoraHacks were hidden or deleted by their teams, or resubmitted.`
+						: gap < 0
+							? ` ${-gap} are kept here that DoraHacks no longer lists.`
+							: ""
+			}`,
+		);
+	}
+	if (!late && winnersOnly)
+		lines.push(
+			"Only this event's winners are stored here, not its full list of submissions.",
+		);
+	const hidden = stats.hiddenWinners?.length ?? 0;
+	if (hidden)
+		lines.push(
+			hidden === 1
+				? "One winning submission is not shown: its team hid or deleted it on DoraHacks."
+				: `${hidden} winning submissions are not shown: their teams hid or deleted them on DoraHacks.`,
+		);
+	else if (stats.winnersNote && !listedWinners)
+		lines.push(
+			winners.length
+				? clampSentences(stats.winnersNote, 170).text
+				: `${noteLabel(stats.winnersNote) ?? "No winners on record here"}. That is not a claim that no one won.`,
+		);
+	if (stats.outcomes && !tracked && submitted !== null)
+		lines.push(
+			"What happened to these builds after the event is not tracked yet.",
+		);
+	if (onChain)
+		lines.push(
+			"Testnet contracts: contracts a build's repo cites that exist on testnet and were created during the event.",
+		);
 
 	return (
 		<div className="min-h-screen">
-			<main className="max-w-5xl mx-auto px-4 sm:px-6 py-16 pt-28">
+			<main className="max-w-6xl mx-auto px-4 sm:px-6 py-16 pt-28">
 				<Link
 					href="/hackathons"
 					className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-150 mb-8 group"
@@ -531,9 +690,9 @@ export default async function HackathonDetailPage({
 					<span className="text-sm font-medium">All hackathons</span>
 				</Link>
 
-				{/* Hero */}
-				<div className="mb-10">
-					<div className="flex items-center gap-2 mb-3">
+				{/* Header */}
+				<div className="mb-8">
+					<div className="flex flex-wrap items-center gap-2 mb-3">
 						{status && (
 							<Badge
 								className={
@@ -557,96 +716,138 @@ export default async function HackathonDetailPage({
 								<span className="text-foreground">{organizer.name}</span>
 							</span>
 						)}
-					</div>
-					<h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
-						{hackathon.name}
-					</h1>
-					<div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
-						<span className="inline-flex items-center gap-1.5">
-							<Calendar className="w-4 h-4" />
-							{formatDateRange(hackathon.startDate, hackathon.endDate)}
-						</span>
 						{hackathon.externalUrl && (
 							<a
 								href={hackathon.externalUrl}
 								target="_blank"
 								rel="noopener noreferrer"
-								className="inline-flex items-center gap-1.5 text-foreground hover:underline underline-offset-4"
+								className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
 							>
-								<ExternalLink className="w-4 h-4" />
+								<ExternalLink className="w-3.5 h-3.5" />
 								Official site
 							</a>
 						)}
 					</div>
-					{lead && (
-						<p className="text-base text-muted-foreground leading-relaxed max-w-3xl">
-							{lead}
-						</p>
+					<h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
+						{hackathon.name}
+					</h1>
+					{lead &&
+						short &&
+						(short.clamped ? (
+							<details className="group max-w-3xl text-base text-muted-foreground leading-relaxed">
+								<summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+									<span className="block group-open:hidden">
+										<span className="line-clamp-3 md:line-clamp-none">
+											{short.text}
+										</span>
+										<span className="text-sm text-foreground underline underline-offset-4">
+											Read more
+										</span>
+									</span>
+									<span className="hidden group-open:inline text-sm text-foreground underline underline-offset-4">
+										Show less
+									</span>
+								</summary>
+								<p className="mt-2">{lead}</p>
+							</details>
+						) : (
+							<p className="text-base text-muted-foreground leading-relaxed max-w-3xl">
+								{lead}
+							</p>
+						))}
+					{source && (
+						<a
+							href={source.href}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-white/30 transition-colors"
+						>
+							<span>
+								Source: <span className="text-foreground">{source.name}</span>,{" "}
+								{source.how}
+							</span>
+							<ExternalLink className="w-3 h-3 flex-shrink-0" />
+						</a>
 					)}
 				</div>
 
-				{/* Winners highlight */}
-				{(winners.length > 0 || stats.winnersNote) && (
-					<section className="mb-12">
-						<div className="flex items-baseline gap-3 mb-5">
-							<h2 className="text-2xl font-bold text-foreground tracking-tight inline-flex items-center gap-2">
-								<Trophy className="w-5 h-5 text-[#FDDA24]" />
-								Winners
-							</h2>
-							{winners.length > 0 && (
-								<span className="text-sm text-muted-foreground">
-									{winners.length}{" "}
-									{winners.length === 1 ? "project" : "projects"}
-								</span>
-							)}
-						</div>
-						{stats.winnersNote && (
-							<p className="text-sm text-muted-foreground leading-relaxed max-w-3xl mb-5">
-								{stats.winnersNote}
-							</p>
-						)}
-						{winners.length > 0 && (
-							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-								{winners.map((p) => (
-									<WinnerCard key={p.id} p={p} event={hackathon.name} />
-								))}
-							</div>
-						)}
-					</section>
+				{late && (
+					<p className="mb-6 inline-flex items-start gap-2 rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+						<Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+						This event's winners and submissions could not be loaded right now.
+						Reload the page to try again.
+					</p>
 				)}
 
-				{/* Stats banner */}
-				{(submitted !== null || tracked) && (
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-						<StatBlock
-							label="Submitted projects"
-							value={submitted === null ? NOT_KNOWN : submitted.toString()}
+				{/* Stat tiles */}
+				<div
+					className={`grid grid-cols-2 gap-3 ${lines.length ? "mb-3" : "mb-12"} ${tileCount === 5 ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}
+				>
+					<Tile {...submissionsTile} />
+					<Tile {...winnersTile} />
+					<Tile label="Prize pool" value={prize ? usd(prize) : "Not stated"} />
+					{tracks && (
+						<Tile
+							label={tracks.length === 1 ? "Track" : "Tracks"}
+							value={String(tracks.length)}
+							hint={tracks.map((t) => t.name).join(", ")}
 						/>
-						<StatBlock
-							label="Still building"
-							value={ifTracked(builtCount + inProgressCount)}
-							sub={tracked ? `${shippedPct}% of tracked` : undefined}
-						/>
-						<StatBlock
-							label="Shipped"
-							value={ifTracked(builtCount)}
-							sub="status: Built"
-						/>
-						<StatBlock
-							label="Abandoned"
-							value={ifTracked(abandonedCount)}
-							sub="status: Abandoned"
-						/>
-					</div>
+					)}
+					<Tile
+						label="Dates"
+						value={
+							formatDateRange(hackathon.startDate, hackathon.endDate) ||
+							"Not stated"
+						}
+						className={tileCount === 5 ? "col-span-2 lg:col-span-1" : ""}
+					/>
+				</div>
+
+				{lines.length > 0 && (
+					<details className="group mb-12 rounded-xl border border-border/50 bg-card">
+						<summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm text-muted-foreground hover:text-foreground transition-colors [&::-webkit-details-marker]:hidden">
+							<Info className="w-4 h-4 flex-shrink-0" />
+							<span>How these were found</span>
+							<span className="ml-auto text-xs group-open:hidden">Show</span>
+							<span className="ml-auto text-xs hidden group-open:inline">
+								Hide
+							</span>
+						</summary>
+						<ul className="space-y-1.5 border-t border-border/50 px-4 py-3 text-sm text-muted-foreground list-disc pl-8 marker:text-muted-foreground/50">
+							{lines.map((line, i) => (
+								// biome-ignore lint/suspicious/noArrayIndexKey: fixed order
+								<li key={i} className="max-w-3xl">
+									{line}
+								</li>
+							))}
+						</ul>
+					</details>
 				)}
 
-				{/* Conversion funnel */}
+				{/* Outcomes: only where the directory classified them */}
 				{tracked && (
-					<div className="mb-12">
+					<section className="mb-12">
 						<h2 className="text-xl font-bold text-foreground mb-4">
 							Outcomes funnel
 						</h2>
-						<div className="rounded-2xl border border-border/50 bg-card p-5">
+						<div className="grid grid-cols-3 gap-3 mb-3">
+							<Tile
+								label="Still building"
+								value={String(builtCount + inProgressCount)}
+								hint={`${shippedPct}% of tracked`}
+							/>
+							<Tile
+								label="Shipped"
+								value={String(builtCount)}
+								hint="status: Built"
+							/>
+							<Tile
+								label="Abandoned"
+								value={String(abandonedCount)}
+								hint="status: Abandoned"
+							/>
+						</div>
+						<div className="rounded-xl border border-border/50 bg-card p-5">
 							<FunnelBar
 								label="Built (still alive)"
 								count={builtCount}
@@ -666,49 +867,66 @@ export default async function HackathonDetailPage({
 								color="bg-white/20"
 							/>
 						</div>
-					</div>
+					</section>
 				)}
 
-				{/* Projects gallery */}
-				<section className="mb-12">
-					<div className="flex items-baseline gap-3 mb-5">
-						<h2 className="text-2xl font-bold text-foreground tracking-tight">
-							Projects
-						</h2>
-						{projects.length > 0 && (submitted !== null || partial) && (
+				{/* Winners strip */}
+				{winners.length > 0 && (
+					<section className="mb-12">
+						<div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-4">
+							<h2 className="text-2xl font-bold text-foreground tracking-tight inline-flex items-center gap-2">
+								<Trophy className="w-5 h-5 text-[#FDDA24]" />
+								Winners
+							</h2>
 							<span className="text-sm text-muted-foreground">
-								{submitted !== null
-									? `${submitted} submitted`
-									: `${projects.length} on record, not the organizer's list`}
+								{winners.length} {winners.length === 1 ? "project" : "projects"}
 							</span>
-						)}
-					</div>
-					{coverageLine && (
-						<p className="text-sm text-muted-foreground leading-relaxed max-w-3xl mb-5">
-							{coverageLine}
-						</p>
-					)}
-
-					{projects.length === 0 ? (
-						!winnersOnly &&
-						!late && (
-							<div className="rounded-2xl border border-border/50 bg-card p-8 text-center">
-								<Trophy className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-								<p className="text-sm text-muted-foreground">
-									{status === "completed"
-										? "No submissions from this event are on record."
-										: "No submissions from this event are on record yet."}
-								</p>
-							</div>
-						)
-					) : (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-							{projects.map((p) => (
-								<ProjectCard key={p.id} p={p} event={hackathon.name} />
+							{listedWinners && source && (
+								<a
+									href={source.href}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="self-center inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+								>
+									via {source.name}
+									<ExternalLink className="w-3 h-3" />
+								</a>
+							)}
+						</div>
+						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+							{winners.map((p) => (
+								<WinnerItem key={p.id} p={p} />
 							))}
 						</div>
-					)}
-				</section>
+					</section>
+				)}
+
+				{/* Builds */}
+				{(projects.length > 0 || (!winnersOnly && !late)) && (
+					<section className="mb-12">
+						<div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-5">
+							<h2 className="text-2xl font-bold text-foreground tracking-tight">
+								Builds
+							</h2>
+							{projects.length > 0 && (submitted !== null || partial) && (
+								<span className="text-sm text-muted-foreground">
+									{submitted !== null
+										? `${submitted} submitted`
+										: `${projects.length} builds found`}
+								</span>
+							)}
+						</div>
+						{projects.length === 0 ? (
+							<p className="text-sm text-muted-foreground">
+								{completed
+									? "No submissions from this event are on record."
+									: "No submissions from this event are on record yet."}
+							</p>
+						) : (
+							<HackathonBuildsGrid rows={cards} />
+						)}
+					</section>
+				)}
 			</main>
 		</div>
 	);

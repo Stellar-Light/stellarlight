@@ -20,11 +20,15 @@ afterAll(() => {
 const detail = vi.fn();
 let payload: unknown = { find: async () => ({ docs: [] }) };
 let listing: unknown[] = [];
+let index: unknown[] = [];
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => payload),
 }));
 vi.mock("@/lib/hackathon-detail", () => ({
 	getHackathonDetail: (...args: unknown[]) => detail(...args),
+}));
+vi.mock("@/lib/hackathon-builds", () => ({
+	getHackathonBuildsIndex: vi.fn(async () => index),
 }));
 vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
 	...(await orig<typeof import("@/lib/integrations/dorahacks")>()),
@@ -81,13 +85,15 @@ const nestedAnchors = (html: string) => {
 	}
 	return false;
 };
-/** A stat block's value. */
-const zeroStat = /tracking-tight">0</;
+/** A tile's value. */
+const tile = (value: string) => `text-2xl md:text-3xl">${value}</span>`;
+const zeroStat = /md:text-3xl">0</;
 
 beforeEach(() => {
 	detail.mockReset();
 	payload = { find: async () => ({ docs: [] }) };
 	listing = [];
+	index = [];
 });
 
 /** Render with the API's answer still pending at the page's deadline. */
@@ -105,12 +111,17 @@ const renderLate = async (slug: string) => {
 
 describe("/hackathons/<slug>", () => {
 	// Audit 2026-11-04: no case rendered a partial event.
-	it("a partial event: its rows as on record, not the organizer's list, each with its basis and a secondhand placement", async () => {
+	// Audit 2026-11-04: no case rendered a partial event. Owner 2026-11-24:
+	// HackProof is a credited source, rebuilt from on-chain activity and
+	// repos; no internal basis tags, no "secondhand", no paragraph notes,
+	// every build opens its repo.
+	it("a partial event: a credited source, its builds found (never the full field), each opening its repo", async () => {
 		const FILE = "https://example.test/hackmeridian-2026.yaml";
 		const row = (id: string, over: Record<string, unknown> = {}) => ({
 			id: `curated-hackmeridian-2026-${id}`,
 			name: id,
 			url: `https://example.test/${id}.yml`,
+			githubUrl: `https://github.com/team-${id}/${id}`,
 			description: null,
 			track: null,
 			entryBasis: "repo-names-event",
@@ -130,25 +141,35 @@ describe("/hackathons/<slug>", () => {
 				coverage: "partial",
 				stats: stats({
 					winners: 1,
-					coverageNote: "Not this event's list.",
-					winnersNote: "Secondhand: placements.",
+					coverageNote: "Not this event's list. ".repeat(20),
+					winnersNote: "Secondhand: placements. ".repeat(20),
 				}),
 			}),
 			[placed],
 			[placed, row("vault", { contracts: [1, 2] }), row("quiet")],
 		);
 		const html = await render();
-		expect(html).toContain("3 on record, not the organizer&#x27;s list");
+		expect(html).toContain("3 builds found");
+		expect(html).toContain(">Builds found</span>");
+		expect(html).toContain("not the full field");
+		expect(html).toContain("1 with testnet contracts");
 		expect(html).not.toContain("Submitted projects");
-		expect(html).toContain(
-			"The team&#x27;s repo names HackMeridian 2026. 2 contracts it cites were created on testnet during the event.",
+		// The source, credited and linked, in the header and at the winners.
+		const HP = "https://hackproof-six.vercel.app/hackathon/hackmeridian-2026";
+		expect(count(html, `href="${HP}"`)).toBe(3);
+		expect(html).toContain("rebuilt from on-chain testnet activity and repos");
+		expect(html).toContain("as HackProof lists them");
+		expect(html).toContain("How these were found");
+		expect(html).toContain("are not the full field");
+		// No jargon, no secondhand framing, no paragraph-length note.
+		expect(html).not.toMatch(
+			/secondhand|partial list|winners-only|repo-names-event|placement-listed|Listed placement/i,
 		);
-		expect(html).toContain("HackProof lists this repo as a placement");
-		expect(count(html, "The placement is HackProof&#x27;s, secondhand")).toBe(
-			2,
-		);
-		// Cards are links: the source is named as text inside them.
-		expect(html).toContain("Source: example.test/hackmeridian-2026.yaml");
+		expect(html).not.toContain("Not this event&#x27;s list.");
+		// Each build and the winner open the repo.
+		expect(html).toContain('href="https://github.com/team-vault/vault"');
+		expect(count(html, 'href="https://github.com/team-nest/nest"')).toBe(3);
+		expect(html).toContain(">2 contracts on testnet</span>");
 		expect(nestedAnchors(html)).toBe(false);
 		expect(nestedAnchors("<a href=x><p><a href=y>y</a></p></a>")).toBe(true);
 	});
@@ -213,14 +234,32 @@ describe("/hackathons/<slug>", () => {
 		);
 		expect(html).not.toContain("not known");
 		expect(html).not.toContain("No submissions from this event");
-		expect(html).toContain("Prize not stated");
+		expect(html).toContain(">Not listed</span>");
+		expect(html).toContain("only the winners are on record");
+		expect(html).not.toMatch(/winners-only|Winners only/);
+		expect(html).toContain(">Not stated</span>");
 		expect(html).not.toContain("Prize awarded");
 		expect(html).toContain(
 			'href="https://stellar.org/blog/recap" target="_blank"',
 		);
 	});
 
-	it("a DoraHacks event: unclassified outcomes are not known, its page's first prose is the description", async () => {
+	it("a DoraHacks event: unclassified outcomes are not known, its page's first prose is the description, the index adds stack and project", async () => {
+		index = [
+			{
+				id: "Shade",
+				hackathon: { slug: "stellar-hacks-zk" },
+				stack: ["@stellar/stellar-sdk", "stellar-sdk", "soroban-sdk"],
+				project: { slug: "shade-wallet", name: "Shade Wallet" },
+			},
+			// Another event's build of the same id is not this one's.
+			{
+				id: "Veil",
+				hackathon: { slug: "other-event" },
+				stack: ["passkey-kit"],
+				project: null,
+			},
+		];
 		const sub = (id: string, over: Record<string, unknown> = {}) => ({
 			id,
 			name: id,
@@ -246,6 +285,7 @@ describe("/hackathons/<slug>", () => {
 					"# Stellar Hacks: Real-World ZK\n\n### Real-World ZK on Stellar\n\nThis hackathon is wide open: **build anything** with *zero-knowledge*, see the [docs](https://x.test).\n\n## Prizes\n- 1st Place: $5,000",
 				stats: stats({
 					totalSubmissions: 3,
+					upstreamSubmissions: 4,
 					coverageNote:
 						"DoraHacks counts 4 submissions for this event; 3 are served here.",
 					winners: 1,
@@ -260,15 +300,27 @@ describe("/hackathons/<slug>", () => {
 			"This hackathon is wide open: build anything with zero-knowledge, see the docs.",
 		);
 		expect(html).not.toContain("# Stellar");
-		expect(html).toContain('tracking-tight">3<');
-		expect(count(html, "not known")).toBe(3);
+		expect(html).toContain(tile("3"));
+		expect(html).toContain("of 4 on DoraHacks");
+		expect(html).toContain(
+			"1 more on DoraHacks was hidden or deleted by its team, or resubmitted.",
+		);
+		expect(html).toContain("after the event is not tracked yet");
+		expect(html).toContain(">Stellar JS SDK</span>");
+		expect(html).toContain(">Soroban Rust SDK</span>");
+		expect(html).not.toContain("Passkey Kit");
+		expect(html).toContain('href="/project/shade-wallet"');
+		expect(html).toContain(">Shade Wallet</span>");
 		expect(html).not.toMatch(zeroStat);
 		expect(html).not.toContain("Outcomes funnel");
 		expect(html).toContain("3 submitted");
-		expect(html).toContain(
-			"DoraHacks counts 4 submissions for this event; 3 are served here.",
-		);
+		// The API's coverage paragraph stays on the API.
+		expect(html).not.toContain("DoraHacks counts 4 submissions");
 		expect(html).toContain(">1st Place</span>");
+		// The submission row carries no rank; its badge takes the winner
+		// row's, in the strip and on its card alike.
+		expect(count(html, "bg-[#FDDA24]/20 text-[#FDDA24]")).toBe(2);
+		expect(html).not.toContain("bg-purple-500/15");
 		expect(html).toContain("$5,000");
 		expect(html).toContain(
 			'href="https://dorahacks.io/buidl/Shade" target="_blank"',
@@ -324,7 +376,7 @@ describe("/hackathons/<slug>", () => {
 		expect(html).toContain("Feb 27 to Mar 2, 2026");
 		expect(html).toContain("Outcomes funnel");
 		expect(html).toContain("67% of tracked");
-		expect(html).toContain('tracking-tight">2<');
+		expect(html).toContain(tile("2"));
 		expect(html).toContain('href="/project/alpha"');
 		expect(html).toContain(">1st</span>");
 		expect(html).not.toContain("not known");
@@ -335,14 +387,16 @@ describe("/hackathons/<slug>", () => {
 			"Not announced upstream: no page we could read names this program's winners.";
 		serve(event({ status: "completed", stats: stats({ winnersNote: note }) }));
 		const html = await render();
-		expect(html).toContain("Winners</h2>");
+		expect(html).toContain(">None on record</span>");
+		expect(html).toContain("not announced upstream</span>");
 		expect(html).toContain(
-			"Not announced upstream: no page we could read names this program&#x27;s winners.",
+			"Not announced upstream. That is not a claim that no one won.",
 		);
+		expect(html).not.toMatch(zeroStat);
 		expect(html).toContain("No submissions from this event are on record.");
 	});
 
-	it("a winner's track fills its category line, and its footer does not repeat it", async () => {
+	it("a winner's track fills its line in the strip once, and its card's track chip", async () => {
 		const winner = {
 			id: "dorahacks-buidl-1",
 			name: "Lendr",
@@ -371,13 +425,12 @@ describe("/hackathons/<slug>", () => {
 			[winner],
 		);
 		const html = await render("stellar-hacks-blend");
-		expect(html).toContain(
-			'text-xs text-muted-foreground truncate">Main Track</div>',
-		);
-		expect(html).not.toContain('ml-2">Main Track<');
+		expect(html).toContain('text-muted-foreground truncate">Main Track</p>');
+		expect(html).not.toContain("Main Track · Main Track");
+		expect(count(html, ">Main Track</span>")).toBe(1);
 	});
 
-	it("a roster placement shows its place in the badge and its category in the footer, with no em dash", async () => {
+	it("a roster placement shows its place in the badge and its category on its line, with no em dash", async () => {
 		serve(
 			event({
 				name: "Stellar Builder Summit 2026",
@@ -406,7 +459,7 @@ describe("/hackathons/<slug>", () => {
 		);
 		const html = await render("stellar-builder-summit-2026");
 		expect(html).toContain(">1st</span>");
-		expect(html).toContain('ml-2">Confidential Wallets</span>');
+		expect(html).toContain('truncate">Confidential Wallets · by a team</p>');
 		expect(html).toContain("$1,250");
 		expect(html).not.toMatch(/[\u2013\u2014]/);
 	});

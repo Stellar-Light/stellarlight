@@ -773,6 +773,29 @@ export function formatShortDate(timestamp: number): string {
 	});
 }
 
+// Calendar dates are UTC; read in the server's zone, a date west of UTC
+// printed the day before.
+const UTC_DAY = { month: "short", day: "numeric", timeZone: "UTC" } as const;
+
+/** An event's dates, shortest first: "Oct 25-26, 2026", "Feb 27 to Mar 2,
+ * 2026", "Dec 30, 2025 to Jan 6, 2026". "" when either is missing. */
+export function formatDateRange(
+	start?: string | null,
+	end?: string | null,
+): string {
+	if (!start || !end) return "";
+	const s = new Date(start);
+	const e = new Date(end);
+	const day = (d: Date) => d.toLocaleDateString("en-US", UTC_DAY);
+	const full = (d: Date) =>
+		d.toLocaleDateString("en-US", { ...UTC_DAY, year: "numeric" });
+	if (s.getUTCFullYear() !== e.getUTCFullYear())
+		return `${full(s)} to ${full(e)}`;
+	if (s.getUTCMonth() === e.getUTCMonth())
+		return `${day(s)}-${e.getUTCDate()}, ${e.getUTCFullYear()}`;
+	return `${day(s)} to ${day(e)}, ${e.getUTCFullYear()}`;
+}
+
 /**
  * Formats prize amount to USD
  */

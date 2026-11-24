@@ -3,9 +3,9 @@ import {
 	Building2,
 	Calendar,
 	Clock,
-	Code2,
 	DollarSign,
 	ExternalLink,
+	Info,
 	Trophy,
 	Users,
 } from "lucide-react";
@@ -22,10 +22,16 @@ import {
 	LATEST_WINNERS,
 	type RecentHackathonWinners,
 } from "@/data/recent-hackathon-winners";
+import { rosterSummary } from "@/lib/hackathon-analytics";
+import {
+	getHackathonBuildsIndex,
+	type IndexedBuild,
+} from "@/lib/hackathon-builds";
 import {
 	EVENT_KIND_LABEL,
 	fetchAllDoraHacksHackathons,
 	fetchLatestHackathonWinners,
+	formatDateRange,
 	formatPrize,
 	formatShortDate,
 	getDaysRemaining,
@@ -34,6 +40,7 @@ import {
 	parseThemes,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { newestWinners, winnersFromIndex } from "@/lib/recent-winners";
 
 export const metadata: Metadata = {
 	title: "Stellar Hackathons & Winners",
@@ -106,6 +113,33 @@ async function getDoraWithDeadline(): Promise<{
 	);
 	return Promise.race([real, fallback]);
 }
+
+/** Each event's stored rows, for its card's counts, bounded like the feed:
+ * past the deadline the cards carry no counts (not read, never 0), and the
+ * read runs on to warm the cache. */
+function getIndexWithDeadline(): Promise<IndexedBuild[] | null> {
+	return Promise.race([
+		getHackathonBuildsIndex().catch(() => null),
+		new Promise<null>((resolve) =>
+			setTimeout(() => resolve(null), DORA_DEADLINE_MS),
+		),
+	]);
+}
+
+/** A URL's host, no "www.", or null. */
+function hostOf(url?: string): string | null {
+	try {
+		return url ? new URL(url).host.replace(/^www\./, "") : null;
+	} catch {
+		return null;
+	}
+}
+
+/** An ISO calendar day of a listing timestamp, for formatDateRange. */
+const isoDay = (t: number) => new Date(t * 1000).toISOString().slice(0, 10);
+
+const CHIP =
+	"inline-flex items-center gap-1 px-2 py-0.5 text-[11px] rounded-full border whitespace-nowrap";
 
 /**
  * Normalize a hackathon name to a comparable key so we can match a DoraHacks
@@ -246,10 +280,17 @@ export default async function HackathonsPage({
 
 	// DoraHacks assembly comes from the hourly cache (see getCachedDoraHackathons);
 	// our own curated data stays a fresh Mongo read.
-	const [dora, curatedData] = await Promise.all([
+	const [dora, curatedData, index] = await Promise.all([
 		getDoraWithDeadline(),
 		fetchCuratedHackathons(),
+		getIndexWithDeadline(),
 	]);
+	const rowsBySlug = new Map<string, IndexedBuild[]>();
+	for (const b of index ?? []) {
+		const rows = rowsBySlug.get(b.hackathon.slug);
+		if (rows) rows.push(b);
+		else rowsBySlug.set(b.hackathon.slug, [b]);
+	}
 	const hackathons = dora.hackathons;
 	const curatedMap = curatedData.byName;
 	// status 1 covers both "open now" and "announced, starts later"; show live
@@ -270,9 +311,13 @@ export default async function HackathonsPage({
 	).length;
 	let pastHackathons = hackathons.filter((h) => !isHackathonActive(h));
 
-	// "Recent Winners" highlight — LIVE from DoraHacks (most-recent ended event
-	// whose winners are announced), derived inside the same hourly cache.
-	const recentWinners: RecentHackathonWinners = dora.recentWinners;
+	// "Recent Winners": the event that ended last with winners on record,
+	// stored (the builds index), live on DoraHacks or in the roster in code.
+	const recentWinners: RecentHackathonWinners =
+		newestWinners([
+			dora.recentWinners,
+			index ? winnersFromIndex(index) : null,
+		]) ?? dora.recentWinners;
 
 	// Build the set of distinct years, organizers, and tags from past hackathons (for filter UI).
 	const years = Array.from(
@@ -397,12 +442,11 @@ export default async function HackathonsPage({
 				{/* An empty list because we timed out reads as "no hackathons exist",
 				    which is a different and false claim. Say which one it is. */}
 				{dora.degraded && (
-					<div className="mb-8 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-						The live hackathon feed is still loading and took longer than
-						expected, so this view is incomplete rather than empty.{" "}
-						<strong className="text-foreground">Refresh in a moment</strong> for
-						the full list.
-					</div>
+					<p className="mb-8 inline-flex items-start gap-2 rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+						<Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+						The live feed is still loading: this list is incomplete, not empty.{" "}
+						<strong className="text-foreground">Refresh in a moment.</strong>
+					</p>
 				)}
 
 				<div className="mb-10">
@@ -439,6 +483,7 @@ export default async function HackathonsPage({
 					/>
 					<StatBlock
 						label="Hackers participated"
+						className={showTrackedStat ? "" : "col-span-2 md:col-span-1"}
 						value={
 							totalParticipants >= 1000
 								? `${(totalParticipants / 1000).toFixed(1)}K`
@@ -611,13 +656,17 @@ export default async function HackathonsPage({
 
 				{/* Empty active state */}
 				{activeHackathons.length === 0 && (
-					<div className="mb-16 py-16 text-center rounded-xl border border-border/50 bg-card">
-						<Code2 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-						<p className="text-muted-foreground">
-							Nothing open or announced right now. We track DoraHacks, Rise In,
-							HackMeridian and Luma residencies; when something is announced it
-							shows here.
-						</p>
+					<div className="mb-12 flex flex-wrap items-center gap-x-3 gap-y-2">
+						<span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card px-3 py-1 text-sm text-foreground/90">
+							<span
+								className="h-1.5 w-1.5 rounded-full bg-neutral-500"
+								aria-hidden
+							/>
+							Nothing open or announced right now
+						</span>
+						<span className="text-xs text-muted-foreground">
+							Watching DoraHacks, Rise In, HackMeridian and Luma residencies
+						</span>
 					</div>
 				)}
 
@@ -740,7 +789,24 @@ export default async function HackathonsPage({
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 							{pastHackathons.map((hackathon) => {
 								const curated = findCurated(hackathon.title);
-								const tagsForCard = parseThemes(hackathon.field).slice(0, 3);
+								const page = eventPage(hackathon);
+								const themes = parseThemes(hackathon.field).slice(0, 2);
+								// Its stored rows, as its page counts them; nothing when
+								// the index was not read or holds none (not stored, never
+								// 0). An event whose winners live in code (the roster its
+								// page serves) has winners and no stored field.
+								const roster = index
+									? rosterSummary(rowsBySlug.get(hackathon.uname) ?? [])
+									: null;
+								const winners =
+									roster?.winners ||
+									(hackathon.uname === LATEST_WINNERS.hackathonUname
+										? LATEST_WINNERS.winners.length
+										: 0);
+								const dates = formatDateRange(
+									isoDay(hackathon.start_time),
+									isoDay(hackathon.end_time),
+								);
 								const cardInner = (
 									<>
 										<HackathonCover
@@ -750,33 +816,19 @@ export default async function HackathonsPage({
 											aspect="aspect-[16/9]"
 											sizes="(max-width: 768px) 100vw, 33vw"
 										>
-											<div className="absolute top-2.5 left-2.5 right-2.5 flex items-start justify-between gap-2">
-												<div className="flex flex-wrap items-center gap-1.5">
-													{hackathon.winner_announced && (
-														<Badge className="bg-[#FDDA24]/90 text-[#171717] border-0 shadow-sm text-[10px] font-semibold px-2 py-0.5">
-															<Trophy className="w-3 h-3 mr-0.5" />
-															Winners
-														</Badge>
-													)}
-													{curated && curated.trackedProjectCount > 0 && (
-														<Badge className="bg-emerald-500/90 text-white border-0 shadow-sm text-[10px] font-semibold px-2 py-0.5">
-															{curated.trackedProjectCount} tracked
-														</Badge>
-													)}
-												</div>
-												{!curated && (
-													<ExternalLink className="w-3.5 h-3.5 text-white/70 flex-shrink-0" />
-												)}
-											</div>
+											{!page && (
+												<ExternalLink className="absolute top-2.5 right-2.5 w-3.5 h-3.5 text-white/70" />
+											)}
 										</HackathonCover>
 										<div className="p-4 sm:p-5 flex flex-col flex-1">
 											<h3 className="text-base sm:text-lg font-semibold text-foreground group-hover:text-primary transition-colors leading-tight mb-2 line-clamp-2">
 												{hackathon.title}
 											</h3>
-											<div className="text-xs text-muted-foreground flex items-center gap-1.5 mb-3">
-												<Building2 className="w-3 h-3" />
+											<div className="text-xs text-muted-foreground flex items-center gap-1.5">
+												<Building2 className="w-3 h-3 flex-shrink-0" />
 												<span className="truncate">
-													{hackathon.organization?.name ?? "-"}
+													{hackathon.organization?.name ??
+														"Organizer not stated"}
 												</span>
 												{hackathon.kind && hackathon.kind !== "hackathon" && (
 													<span className="flex-shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[10px] font-medium">
@@ -784,35 +836,86 @@ export default async function HackathonsPage({
 													</span>
 												)}
 											</div>
-											{tagsForCard.length > 0 && (
-												<div className="flex flex-wrap gap-1.5 mb-4">
-													{tagsForCard.map((t) => (
-														<span
-															key={t}
-															className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/[0.05] text-muted-foreground border border-border/50"
-														>
-															{t}
-														</span>
-													))}
-												</div>
-											)}
-											<div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
-												<span className="inline-flex items-center gap-1 text-foreground/90 font-semibold">
-													<DollarSign className="w-3.5 h-3.5 text-neutral-400" />
-													{hackathon.bonus_price > 0
-														? formatPrize(hackathon.bonus_price)
-														: "not stated"}
+											<div className="mt-1.5 text-xs text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1">
+												<span className="inline-flex items-center gap-1.5">
+													<Calendar className="w-3 h-3" />
+													{dates}
 												</span>
 												{hackathon.hackers_count > 0 && (
 													<span className="inline-flex items-center gap-1">
 														<Users className="w-3 h-3" />
-														{hackathon.hackers_count.toLocaleString()}
+														{hackathon.hackers_count.toLocaleString()} hackers
 													</span>
 												)}
-												<span className="inline-flex items-center gap-1">
-													<Calendar className="w-3 h-3" />
-													{formatShortDate(hackathon.end_time)}
+											</div>
+											<div className="mt-3 mb-4 flex flex-wrap items-center gap-1.5">
+												{roster?.coverage === "full" && (
+													<span
+														className={`${CHIP} border-border/60 text-foreground/90`}
+													>
+														{roster.rows.toLocaleString()}{" "}
+														{roster.rows === 1 ? "submission" : "submissions"}
+													</span>
+												)}
+												{roster?.coverage === "partial" && (
+													<span
+														className={`${CHIP} border-border/60 text-foreground/90`}
+														title="Builds found from on-chain testnet activity and repos; not the full field"
+													>
+														{roster.rows.toLocaleString()} builds found
+													</span>
+												)}
+												{winners > 0 ? (
+													<span
+														className={`${CHIP} border-[#FDDA24]/40 bg-[#FDDA24]/10 text-[#FDDA24]`}
+													>
+														<Trophy className="w-3 h-3" />
+														{winners} {winners === 1 ? "winner" : "winners"}
+													</span>
+												) : (
+													hackathon.winner_announced && (
+														<span
+															className={`${CHIP} border-[#FDDA24]/40 text-[#FDDA24]/90`}
+															title="DoraHacks marks this event's winners as announced; none is stored here"
+														>
+															<Trophy className="w-3 h-3" />
+															Winners announced
+														</span>
+													)
+												)}
+												{curated && curated.trackedProjectCount > 0 && (
+													<span
+														className={`${CHIP} border-emerald-500/30 bg-emerald-500/10 text-emerald-400`}
+													>
+														{curated.trackedProjectCount} tracked
+													</span>
+												)}
+												<span
+													className={`${CHIP} border-border/50 text-muted-foreground`}
+													title={
+														hackathon.source === "curated"
+															? "The organizer's own page; not on DoraHacks"
+															: "Listed on DoraHacks"
+													}
+												>
+													{hackathon.source === "curated"
+														? (hostOf(hackathon.external_url) ??
+															"Organizer page")
+														: "DoraHacks"}
 												</span>
+											</div>
+											<div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
+												{hackathon.bonus_price > 0 ? (
+													<span className="inline-flex items-center gap-1 text-foreground/90 font-semibold">
+														<DollarSign className="w-3.5 h-3.5 text-neutral-400" />
+														{formatPrize(hackathon.bonus_price)}
+													</span>
+												) : (
+													<span>Prize not stated</span>
+												)}
+												{themes.length > 0 && (
+													<span className="truncate">{themes.join(" · ")}</span>
+												)}
 											</div>
 										</div>
 									</>
@@ -821,7 +924,6 @@ export default async function HackathonsPage({
 								const cardClass =
 									"group flex flex-col rounded-2xl border border-border/50 hover:border-border bg-card overflow-hidden transition-colors";
 
-								const page = eventPage(hackathon);
 								return page ? (
 									<Link key={hackathon.id} href={page} className={cardClass}>
 										{cardInner}
@@ -852,13 +954,17 @@ function StatBlock({
 	label,
 	value,
 	sub,
+	className = "",
 }: {
 	label: string;
 	value: string;
 	sub?: string;
+	className?: string;
 }) {
 	return (
-		<div className="rounded-2xl border border-border/50 bg-card p-5">
+		<div
+			className={`rounded-2xl border border-border/50 bg-card p-5 ${className}`}
+		>
 			<div className="text-xs uppercase tracking-wide text-muted-foreground/80 mb-2">
 				{label}
 			</div>

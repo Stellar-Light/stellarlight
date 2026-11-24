@@ -21,7 +21,8 @@ const html = (
 // Audit 2026-11-04: a builder's profile listed a HackProof row as a
 // DoraHacks submission with "First place" and no word that it is secondhand.
 describe("a build's source, basis and placement, said as the event page says them", () => {
-	it("a row of a partial list: its basis, and its placement as the list's, secondhand, with the file", () => {
+	// 2026-11-24, owner: HackProof is a credited source, not "secondhand".
+	it("a row of a partial list: its basis, and its placement credited to the list, with the file", () => {
 		const out = html({
 			id: "curated-hackmeridian-2026-nest",
 			entryBasis: "placement-listed",
@@ -31,9 +32,8 @@ describe("a build's source, basis and placement, said as the event page says the
 		expect(out).toContain(
 			"HackProof lists this repo as a placement; the repo&#x27;s own text does not name the event.",
 		);
-		expect(out).toContain(
-			"The placement is HackProof&#x27;s, secondhand: no organizer page we read names the winners.",
-		);
+		expect(out).toContain("Placement as HackProof lists it.");
+		expect(out).not.toContain("secondhand");
 		expect(out).toContain(`href="${FILE}"`);
 		expect(out).not.toContain("DoraHacks submission");
 	});
