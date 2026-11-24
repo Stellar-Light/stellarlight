@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-24",
+		surfaces: ["api"],
+		version: "spec@1.9.171",
+		type: "fixed",
+		summary:
+			"Partner-only cohort data, rebuilt and corrected. A day-180 reading of no activity now needs a source that holds a value for the window (18 rows had read quiet with nothing checked); SCF funding counts every award type SCF's own records list (Build, Public Goods, Liquidity, Legacy), from the live directory; statuses, SCF awards and SCF's paid totals are the live read, so delivery by round equals /api/projects/scf-rounds. Rows gain day-180 by a two-signal definition beside the one-signal reading, a confidence level, the project's on-chain ids and deployers to exclude, distinct non-team callers, and notes where our own data contradicts a recorded status.",
+		detail:
+			"No public operation changed: the cohort operations live in the partner document, served only to keys on the cohort allowlist, and the public spec changes only in its version. Figures leave rows whose operating state was not read out of their denominators and split launches that predate the first award from later ones; every served field has a definition, and meta.asOfDates states when each kind of reading was made. Two contracts the on-chain map credited to one project are another team's and are left out of it.",
+	},
+	{
+		date: "2026-11-24",
 		surfaces: ["skill"],
 		type: "added",
 		summary:

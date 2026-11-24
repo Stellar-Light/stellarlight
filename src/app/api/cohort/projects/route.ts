@@ -8,10 +8,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { clampLimit, clampOffset, triStateBoolParam } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { PROJECT_STATUSES } from "@/lib/project-status";
 import {
 	AWARD_TYPES,
 	COHORT_DEFINITIONS,
-	COHORT_STATUSES,
 	categoriesOf,
 	cohortBadRequest,
 	cohortMeta,
@@ -66,10 +66,10 @@ export async function GET(req: NextRequest) {
 			validValues: categories,
 		});
 	const statusRaw = sp.get("status")?.trim().toLowerCase();
-	const status = COHORT_STATUSES.find((s) => s.toLowerCase() === statusRaw);
+	const status = PROJECT_STATUSES.find((s) => s.toLowerCase() === statusRaw);
 	if (statusRaw && !status)
 		return cohortBadRequest(`Invalid status '${sp.get("status")}'.`, {
-			validValues: COHORT_STATUSES,
+			validValues: PROJECT_STATUSES,
 		});
 	const limit = clampLimit(sp.get("limit"), 100, 1000);
 	const offset = clampOffset(sp.get("offset"));

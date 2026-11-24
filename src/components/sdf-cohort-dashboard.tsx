@@ -18,6 +18,7 @@ import type {
 type Meta = {
 	asOf: string;
 	launchAgesCountedTo: string;
+	asOfDates?: Record<string, string>;
 	cannotSee: string[];
 	sources: string[];
 	definitions?: Record<string, string>;
@@ -157,8 +158,16 @@ const OPERATING_HEAD = [
 const AWARD_TYPE: Record<string, string> = {
 	build: "Build",
 	legacy: "Legacy (v1 to v5)",
-	unknown: "Unknown",
+	"public-goods": "Public Goods",
+	liquidity: "Liquidity",
+	unknown: "Unknown (SCF records no type)",
 };
+/** "operatingAndDay180ReadingsTo" -> "operating and day 180 readings to" */
+const words = (k: string) =>
+	k
+		.replace(/([a-z])([A-Z0-9])/g, "$1 $2")
+		.replace(/([0-9])([A-Z])/g, "$1 $2")
+		.toLowerCase();
 
 export function SdfCohortDashboard() {
 	const [key, setKey] = useState("");
@@ -265,6 +274,17 @@ export function SdfCohortDashboard() {
 
 	const { meta, funnel, operatingNow, scfConfirmedRetention: c } = data;
 	const top = funnel[0].projects;
+	const defs = meta.definitions ?? {};
+	const open_ = journey
+		? projects.find((p) => p.slug === journey.project.slug)
+		: undefined;
+	const timingRows = (rows: CohortRetention["funnelByLaunchTiming"]) =>
+		rows.map((t) => [
+			t.group,
+			fmt(t.pastDay180),
+			ofCell(t.operating, t.read),
+			fmt(t.pastDay180 - t.read),
+		]);
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -273,20 +293,109 @@ export function SdfCohortDashboard() {
 					Partner-only
 				</p>
 				<h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-3">
-					Launched, and still operating
+					Launches, day 180, and what operates today
 				</h1>
 				<p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
 					SCF-funded and other directory projects: when each launched, how we
-					know, and what we can see of them now. A dated snapshot as of{" "}
-					{meta.asOf}; launch ages are counted to {meta.launchAgesCountedTo}.
-					Every figure comes from the same rows the cohort API serves, and every
-					one has its denominator.
+					know, what the 60 days around day 180 show, and what we can see of
+					them today. Day 180 is shown by SDF's plan definition first and ours
+					beside it; operating today is one reading, not continuity since
+					launch. Every figure comes from the same rows the cohort API serves,
+					with its denominator.
 				</p>
+				<dl className="mt-4 grid sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-muted-foreground max-w-2xl">
+					{Object.entries(meta.asOfDates ?? {}).map(([k, v]) => (
+						<div key={k} className="flex justify-between gap-3">
+							<dt>{words(k)}</dt>
+							<dd className="tabular-nums text-foreground">{v}</dd>
+						</div>
+					))}
+				</dl>
 			</header>
 
 			<Card
-				title="SCF-funded: launched, past day 180, operating now"
-				description="Each stage is a share of the stage before it. Operating now counts on-chain, product, a person's check and app evidence; code alone is not counted."
+				title="Day 180: SDF's plan definition, and ours"
+				description={defs.day180TwoSignals}
+				className="mb-6"
+			>
+				<div className="grid gap-6">
+					<Table
+						head={[
+							"SDF's plan definition",
+							"Projects",
+							"Active",
+							"One signal kind",
+							"No activity",
+							"Could not check",
+							"Too early",
+							"No launch date",
+						]}
+						rows={(
+							[
+								["SCF-funded", data.scf],
+								["Everyone else", data.notScf],
+							] as const
+						).map(([label, g]) => [
+							label,
+							fmt(g.projects),
+							fmt(g.day180TwoSignals.active),
+							fmt(g.day180TwoSignals.oneSignalKind),
+							fmt(g.day180TwoSignals.noActivitySeen),
+							fmt(g.day180TwoSignals.couldNotCheck),
+							fmt(g.day180TwoSignals.tooEarly),
+							fmt(g.day180TwoSignals.noLaunchDate),
+						])}
+					/>
+					<Table
+						head={[
+							"Ours (one signal)",
+							"Projects",
+							"Activity seen",
+							"No activity",
+							"Could not check",
+							"Too early",
+							"No launch date",
+						]}
+						rows={(
+							[
+								["SCF-funded", data.scf],
+								["Everyone else", data.notScf],
+							] as const
+						).map(([label, g]) => [
+							label,
+							fmt(g.projects),
+							fmt(g.day180.activitySeen),
+							fmt(g.day180.noActivitySeen),
+							fmt(g.day180.couldNotCheck),
+							fmt(g.day180.tooEarly),
+							fmt(g.day180.noLaunchDate),
+						])}
+					/>
+					<p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
+						SCF-funded launches on or after the first award: by SDF's plan
+						definition{" "}
+						{fmt(data.scf.launchedOnOrAfterFirstAward.activeTwoSignals)} of{" "}
+						{fmt(data.scf.launchedOnOrAfterFirstAward.withTwoSignalVerdict)}{" "}
+						with a reading are active (
+						{pct(
+							data.scf.launchedOnOrAfterFirstAward.activeTwoSignals,
+							data.scf.launchedOnOrAfterFirstAward.withTwoSignalVerdict,
+						)}
+						); by ours{" "}
+						{fmt(data.scf.launchedOnOrAfterFirstAward.activeAtDay180)} of{" "}
+						{fmt(data.scf.launchedOnOrAfterFirstAward.withDay180Verdict)} (
+						{pct(
+							data.scf.launchedOnOrAfterFirstAward.activeAtDay180,
+							data.scf.launchedOnOrAfterFirstAward.withDay180Verdict,
+						)}
+						). {defs.day180}
+					</p>
+				</div>
+			</Card>
+
+			<Card
+				title="SCF-funded: launch known, past day 180, operating now"
+				description="Each stage is a share of the stage before it, except operating now, which is a share of the rows past day 180 whose operating state was read. Operating now counts on-chain, product, a person's check and app evidence; code alone is not counted."
 				className="mb-6"
 			>
 				<div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6">
@@ -297,7 +406,7 @@ export function SdfCohortDashboard() {
 								value={fmt(s.projects)}
 								sub={
 									i
-										? `${pct(s.projects, s.of)} of ${fmt(s.of)}`
+										? `${pct(s.projects, s.of)} of ${fmt(s.of)}${i === 3 ? " read" : ""}`
 										: `of ${fmt(s.of)} in the cohort`
 								}
 							/>
@@ -310,46 +419,76 @@ export function SdfCohortDashboard() {
 						</div>
 					))}
 				</div>
-				<p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
-					Past day 180, by evidence today:{" "}
+				<p className="text-xs text-muted-foreground leading-relaxed max-w-2xl mb-4">
+					Past day 180 and read, by evidence today:{" "}
 					{Object.entries(data.funnelPastDay180Evidence)
 						.sort((a, b) => b[1] - a[1])
 						.map(([k, v]) => `${k} ${fmt(v)}`)
 						.join(", ")}
-					. not eligible: the first award is under 180 days old, so operating
-					now was not read.
+					. Not read: {fmt(data.funnelNotRead)} past day 180 whose first award
+					is under 180 days old, left out of the denominator.
 				</p>
+				<Table
+					head={[
+						"Launch against the first award",
+						"Past day 180",
+						"Operating now, of those read",
+						"Not read",
+					]}
+					rows={timingRows(data.funnelByLaunchTiming)}
+				/>
 			</Card>
 
 			<Card
 				title="After a launch SCF confirmed"
-				description={meta.definitions?.scfConfirmedRetention}
+				description={defs.scfConfirmedRetention}
 				className="mb-6"
 			>
 				<div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
 					<Stat
 						label="Operating now"
-						value={pct(c.operatingNow, c.launchAtLeast180DaysOld)}
-						sub={`${fmt(c.operatingNow)} of ${fmt(c.launchAtLeast180DaysOld)} launches at least 180 days old`}
+						value={pct(c.operatingNow, c.read)}
+						sub={`${fmt(c.operatingNow)} of ${fmt(c.read)} read launches at least 180 days old`}
 					/>
-					<Stat label="Code activity only" value={fmt(c.codeOnly)} />
+					<Stat
+						label="Code activity only"
+						value={fmt(c.codeOnly)}
+						sub={`of ${fmt(c.read)}`}
+					/>
 					<Stat
 						label="No reading"
 						value={fmt(c.noReading)}
-						sub="mostly closed-source apps, anchors and wallets"
+						sub={`of ${fmt(c.read)}: ${Object.entries(c.noReadingByCode)
+							.map(([k, v]) => `${k.split(" (")[0]} ${fmt(v)}`)
+							.join(", ")}`}
 					/>
-					<Stat label="Recorded inactive" value={fmt(c.recordedInactive)} />
+					<Stat
+						label="Recorded inactive"
+						value={fmt(c.recordedInactive)}
+						sub={`of ${fmt(c.read)}`}
+					/>
 				</div>
-				<p className="text-xs text-muted-foreground mt-4">
+				<p className="text-xs text-muted-foreground mt-4 mb-4">
 					{fmt(c.paidInFull)} directory projects have a Build award SCF paid in
-					full. Launch date: ours for {fmt(c.launchBasis.dated)}, bounded by
-					SCF's payment for {fmt(c.launchBasis.scfPaidBy)}.
+					full; {fmt(c.launchAtLeast180DaysOld)} of them launched at least 180
+					days ago ({fmt(c.notRead)} not read). Launch date: ours for{" "}
+					{fmt(c.launchBasis.dated)}, bounded by SCF's payment for{" "}
+					{fmt(c.launchBasis.scfPaidBy)}.
 				</p>
+				<Table
+					head={[
+						"Launch against the first award",
+						"Past day 180",
+						"Operating now, of those read",
+						"Not read",
+					]}
+					rows={timingRows(c.byLaunchTiming)}
+				/>
 			</Card>
 
 			<Card
 				title="SCF-funded, by year of first award"
-				description="Launch known, past day 180 and operating now are counted the way the stages above are. Day-180 readings are for dated launches only."
+				description="Launch known, past day 180 and operating now are counted the way the stages above are. The day-180 columns are SDF's plan definition and sum to the year's projects."
 				className="mb-6"
 			>
 				<Table
@@ -358,30 +497,51 @@ export function SdfCohortDashboard() {
 						"Projects",
 						"Launch known",
 						"Past day 180",
-						"Operating now",
-						"Day 180: activity",
+						"Operating now, of read",
+						"Active",
+						"One signal kind",
 						"No activity",
+						"Could not check",
 						"Too early",
+						"No launch date",
 					]}
 					rows={data.scfByFirstAwardYear.map((y) => [
 						y.year,
 						fmt(y.projects),
 						ofCell(y.launchKnown, y.projects),
 						fmt(y.pastDay180),
-						ofCell(y.operatingNowPastDay180, y.pastDay180),
-						fmt(y.day180.activitySeen),
-						fmt(y.day180.noActivitySeen),
-						fmt(y.day180.tooEarly),
+						ofCell(y.operatingNowPastDay180, y.pastDay180Read),
+						fmt(y.day180TwoSignals.active),
+						fmt(y.day180TwoSignals.oneSignalKind),
+						fmt(y.day180TwoSignals.noActivitySeen),
+						fmt(y.day180TwoSignals.couldNotCheck),
+						fmt(y.day180TwoSignals.tooEarly),
+						fmt(y.day180TwoSignals.noLaunchDate),
 					])}
 				/>
 			</Card>
 
 			<Card
 				title="Operating now, 180 or more days after the first award"
-				description={meta.definitions?.observable}
+				description={defs.operatingNow}
 				className="mb-6"
 			>
 				<div className="grid gap-6">
+					<p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
+						{fmt(operatingNow.operating)} of {fmt(operatingNow.eligible)}{" "}
+						eligible SCF projects operate now (
+						{pct(operatingNow.operating, operatingNow.eligible)}). Of the{" "}
+						{fmt(
+							operatingNow.onChainByCallers.measured +
+								operatingNow.onChainByCallers.notMeasured,
+						)}{" "}
+						counted on chain, by distinct callers outside the team in 90 days:{" "}
+						{operatingNow.onChainByCallers.bands
+							.map((b) => `${b.band}: ${fmt(b.projects)}`)
+							.join(", ")}
+						; not measured {fmt(operatingNow.onChainByCallers.notMeasured)}.{" "}
+						{defs.observable}
+					</p>
 					<Table
 						head={["First award", ...OPERATING_HEAD]}
 						rows={operatingRows(operatingNow.byFirstAwardYear)}
@@ -401,46 +561,78 @@ export function SdfCohortDashboard() {
 			</Card>
 
 			<Card
-				title="SCF-funded against everyone else"
-				description={meta.definitions?.day180}
+				title="SCF-funded, by kind of award and by SDF's plan type"
+				description={`${defs.scfFunded ?? ""} ${defs.planType ?? ""}`}
+				className="mb-6"
+			>
+				<div className="grid gap-6">
+					<Table
+						head={["Award kind held", "Projects in the cohort"]}
+						rows={Object.entries(data.scf.byAwardKind).map(([k, v]) => [
+							AWARD_TYPE[k] ?? k,
+							ofCell(v, data.scf.projects),
+						])}
+					/>
+					<p className="text-xs text-muted-foreground">
+						A project can hold several kinds. SCF-funded but not launched, so
+						outside the cohort:{" "}
+						{Object.entries(data.cohort.scfFundedOutsideCohort)
+							.map(([k, v]) => `${k} ${fmt(v)}`)
+							.join(", ")}
+						.
+					</p>
+					<Table
+						head={[
+							"SDF's plan type",
+							"Projects",
+							"Launch known",
+							"Past day 180",
+							"Operating now, of read",
+							"Named in other projects' code",
+						]}
+						rows={data.scfByPlanType.map((t) => [
+							t.type,
+							fmt(t.projects),
+							ofCell(t.launchKnown, t.projects),
+							fmt(t.pastDay180),
+							ofCell(t.operatingNowPastDay180, t.pastDay180Read),
+							ofCell(t.withDownstreamUser, t.projects),
+						])}
+					/>
+				</div>
+			</Card>
+
+			<Card
+				title="Use by others: distinct callers outside the team"
+				description={defs.usage}
 				className="mb-6"
 			>
 				<Table
 					head={[
-						"Group",
-						"Projects",
-						"On-chain launch",
-						"Product launch",
-						"Planned only",
-						"No evidence",
-						"Day 180: activity",
-						"No activity",
-						"Could not check",
-						"Too early",
+						"Distinct callers in 90 days",
+						"Projects measured",
+						"SCF-funded in the cohort",
 					]}
-					rows={(
-						[
-							["SCF-funded", data.scf],
-							["Everyone else", data.notScf],
-						] as const
-					).map(([label, g]) => [
-						label,
-						fmt(g.projects),
-						fmt(g.launchBasis.onChain),
-						fmt(g.launchBasis.product),
-						fmt(g.launchBasis.plannedOnly),
-						fmt(g.launchBasis.none),
-						fmt(g.day180.activitySeen),
-						fmt(g.day180.noActivitySeen),
-						fmt(g.day180.couldNotCheck),
-						fmt(g.day180.tooEarly),
+					rows={data.usage.all.bands.map((b, i) => [
+						b.band,
+						ofCell(b.projects, data.usage.all.measured),
+						ofCell(
+							data.usage.scf.bands[i]?.projects ?? 0,
+							data.usage.scf.measured,
+						),
 					])}
 				/>
+				<p className="text-xs text-muted-foreground mt-4 leading-relaxed max-w-2xl">
+					{fmt(data.usage.eventsLatest60dAtLeast1000)} projects have 1,000 or
+					more events in the latest 60 days, every caller counted. Each row of
+					the cohort API carries its contract ids, the deployers to leave out
+					(onchainIds) and this reading (usage).
+				</p>
 			</Card>
 
 			<Card
 				title="SCF delivery by round"
-				description={meta.definitions?.deliveryByRound}
+				description={defs.deliveryByRound}
 				className="mb-6"
 			>
 				<Table
@@ -478,7 +670,8 @@ export function SdfCohortDashboard() {
 									{p.name ?? p.slug}
 								</button>{" "}
 								<span className="text-muted-foreground">
-									{p.slug} · {p.status ?? "not in the cohort"}
+									{p.slug} · {p.status ?? "no status"}
+									{p.inCohort ? "" : " (not in the cohort)"}
 									{p.scfAwarded ? " · SCF-funded" : ""}
 								</span>
 							</li>
@@ -491,6 +684,16 @@ export function SdfCohortDashboard() {
 							{journey.project.name ?? journey.project.slug}:{" "}
 							{fmt(journey.events.length)} events
 						</h3>
+						{open_?.confidence && (
+							<p className="text-xs text-muted-foreground mt-1">
+								Confidence {open_.confidence}: {open_.confidenceBasis}.
+							</p>
+						)}
+						{open_?.evidenceNotes.map((n) => (
+							<p key={n} className="text-xs text-foreground mt-1">
+								{n}
+							</p>
+						))}
 						{journey.project.gaps.length > 0 && (
 							<p className="text-xs text-muted-foreground mt-1">
 								Not known: {journey.project.gaps.join("; ")}.
@@ -571,6 +774,24 @@ export function SdfCohortDashboard() {
 						<li key={s}>{s}</li>
 					))}
 				</ul>
+			</Card>
+
+			<Card
+				title="Definitions"
+				description="Whose each definition is, and where ours differs from SDF's plan."
+				className="mb-6"
+			>
+				<dl className="grid gap-4 text-sm">
+					{Object.entries(defs).map(([k, v]) => (
+						<div
+							key={k}
+							className="grid sm:grid-cols-[14rem_1fr] gap-1 sm:gap-4"
+						>
+							<dt className="text-foreground font-medium">{k}</dt>
+							<dd className="text-muted-foreground leading-relaxed">{v}</dd>
+						</div>
+					))}
+				</dl>
 			</Card>
 
 			<Card

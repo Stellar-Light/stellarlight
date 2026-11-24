@@ -99,9 +99,13 @@ import { PAID_SCHEDULES, PAID_SPLITS } from "./scf-paid";
 import { NOT_CARRIED_REASONS } from "./scf-round-counts";
 import {
 	AWARD_TYPES,
-	COHORT_STATUSES,
+	COHORT_DEFINITIONS,
+	CONFIDENCE_LEVELS,
+	DAY180_TWO_SIGNAL_READINGS,
 	LAUNCH_EVIDENCE,
 	LAUNCH_KNOWN_BASES,
+	PLAN_TYPES,
+	SIGNAL_KINDS,
 } from "./sdf-cohort";
 import {
 	DEPRECATED_BY,
@@ -1598,28 +1602,49 @@ const COHORT_PROJECT = {
 		inCohort: {
 			type: "boolean",
 			description:
-				"Live or Inactive in the directory when the snapshot was built.",
+				"Live or Inactive in the directory on the live read (meta.asOfDates.statuses).",
 		},
 		category: cs("Directory category."),
 		status: {
 			type: "string",
 			nullable: true,
-			enum: [...COHORT_STATUSES],
+			enum: [...PROJECT_STATUSES],
 			description:
-				"Directory status when the snapshot was built; dated by statusVerdictDate. null outside the cohort.",
+				"Directory status on the live read, as recorded (never moved by this snapshot; see evidenceNotes); dated by statusVerdictDate.",
 		},
 		statusBasis: cs("The directory's basis for the status."),
 		statusVerdictDate: cd("When the directory's status verdict was made."),
-		scfAwarded: { type: "boolean", description: "An SCF award is on record." },
-		firstScfRound: ci("Round of the first SCF award."),
+		scfAwarded: {
+			type: "boolean",
+			description:
+				"SCF's own award records list an award of any type for it (meta.definitions.scfFunded).",
+		},
+		scfAwardKinds: {
+			type: "array",
+			items: { type: "string", enum: [...AWARD_TYPES] },
+			description:
+				"Every kind of SCF award on record for it; [] when none is on record.",
+		},
+		scfAwardCount: {
+			type: "integer",
+			description: "SCF awards on record for it.",
+		},
+		firstScfRound: ci(
+			"Round of the first SCF award; null for an award with no round (quarterly Public Goods, Liquidity).",
+		),
 		firstScfSubmission: cd("First SCF submission."),
-		firstScfAward: cd("First SCF award (the round's decision date)."),
+		firstScfAward: cd(
+			"First SCF award: the round's decision date, or for an award with no round the last day of its quarter (meta.definitions.firstScfAward).",
+		),
+		firstScfAwardDateBasis: cs(
+			"How firstScfAward is dated: round decision date, or the last day of the award's quarter (no later than).",
+		),
 		firstAwardType: {
 			type: "string",
 			nullable: true,
 			enum: [...AWARD_TYPES],
 			description:
-				"Type of the first award; known when it is at least 180 days old (legacy = v1 to v5). Type tracks era.",
+				"Type of the first award; known when it is at least 180 days old (legacy = v1 to v5; unknown = SCF records no type). Type tracks era.",
 		},
 		firstAwardUsd: { type: "number", nullable: true },
 		firstAwardSize: cs(
@@ -1633,7 +1658,7 @@ const COHORT_PROJECT = {
 			description: "SCF's own paid figure on its project page.",
 		},
 		scfPaidSplit: cs(
-			"ok when the paid figure split exactly into tranche shares, else why it did not.",
+			"exact when the paid figure split exactly into tranche shares, else why it did not (no-fit, budgets-differ, ambiguous).",
 		),
 		buildAwards: {
 			type: "array",
@@ -1711,10 +1736,10 @@ const COHORT_PROJECT = {
 		),
 		plannedMainnetBy: cd("Mainnet date planned in the SCF proposal."),
 		planReading: cs(
-			"The plan against what is seen, once the planned date is over 90 days past.",
+			"The plan against what is seen, once the planned date is over 90 days past (meta.definitions.planReading).",
 		),
 		launchKnownDate: cd(
-			"The launch date used for launch ages: launchDate, else mainnetPaidBy, else meta.launchAgesCountedTo when no capture bounds SCF's payment.",
+			"The launch date used for launch ages: launchDate, else mainnetPaidBy, else meta.launchAgesCountedTo when no capture bounds SCF's payment. mainnetPaidBy also when our dated launch is later than it (evidenceNotes says so).",
 		),
 		launchKnownBasis: {
 			type: "string",
@@ -1743,8 +1768,42 @@ const COHORT_PROJECT = {
 		day180Onchain: cs(
 			"Day-180 window on chain: active, not active, not covered.",
 		),
+		day180TwoSignals: {
+			type: "string",
+			nullable: true,
+			enum: [...DAY180_TWO_SIGNAL_READINGS],
+			description:
+				"Day 180 by SDF's plan definition: two or more independent signal kinds in the window (meta.definitions.day180TwoSignals). null outside the cohort.",
+		},
+		day180SignalKinds: {
+			type: "array",
+			nullable: true,
+			items: { type: "string", enum: [...SIGNAL_KINDS] },
+			description:
+				"The signal kinds seen in the day 150 to 210 window; [] when none; null outside the cohort.",
+		},
+		confidence: {
+			type: "string",
+			nullable: true,
+			enum: [...CONFIDENCE_LEVELS],
+			description:
+				"Confidence of the record's reading (meta.definitions.confidence). null outside the cohort.",
+		},
+		confidenceScore: ci(
+			"The weighted sum behind confidence: on-chain 2; SCF, hackathon and code 1 each.",
+		),
+		confidenceBasis: cs(
+			"The evidence and the sum behind confidence, in words.",
+		),
+		planType: {
+			type: "string",
+			nullable: true,
+			enum: [...PLAN_TYPES],
+			description:
+				"SDF's plan's project type, mapped from the directory category (meta.definitions.planType).",
+		},
 		operatingNow: cs(
-			"Strongest current evidence it operates: on-chain, product, person, app; code (maintenance only), recorded inactive, none (no reading). null: first award under 180 days old or no SCF award, not read.",
+			"Strongest current evidence it operates: on-chain (any event in 90 days, the team's own included), product, person (90 days), app (a store release in 180 days); code (maintenance only), recorded inactive, none (no reading). null: first award under 180 days old or no SCF award, not read (meta.definitions.operatingNow).",
 		),
 		operatingEvidenceDate: cd("Date of the operating evidence."),
 		observable: {
@@ -1759,7 +1818,9 @@ const COHORT_PROJECT = {
 		deployersToExclude: ci("Deployer accounts to leave out of usage."),
 		accounts: ci("Own accounts."),
 		assets: ci("Own assets."),
-		usedByProjects: ci("Directory projects that use it."),
+		usedByProjects: ci(
+			"Other directory projects whose code names its contracts or packages (meta.definitions.usedByProjects).",
+		),
 		contractUpgrades: {
 			type: "integer",
 			description: "Contract upgrades in ledger metadata.",
@@ -1776,7 +1837,9 @@ const COHORT_PROJECT = {
 		lastOnchainEvent: cd("Latest on-chain event."),
 		lastCommit: cd("Latest commit."),
 		appLastUpdated: cd("Latest store update."),
-		mainnetReading: cs("What its repos' contract ids say about mainnet."),
+		mainnetReading: cs(
+			"What its repos' contract ids say about mainnet (meta.definitions.mainnetReading).",
+		),
 		reposScanned: ci("Repos scanned for contract ids."),
 		idsInReposOnMainnet: ci("Ids in its repos found on mainnet."),
 		idsInReposNotOnMainnet: ci("Ids in its repos not on mainnet."),
@@ -1799,7 +1862,52 @@ const COHORT_PROJECT = {
 		),
 		lastActivity: cd("Latest activity of any kind."),
 		lastActivityEvent: cs("The event behind lastActivity."),
-		stoppedOn: cd("Recorded as stopped."),
+		stoppedOn: cd(
+			"The first day a daily snapshot recorded it Inactive: when we recorded the verdict, not when it stopped (meta.definitions.stoppedOn).",
+		),
+		onchainIds: {
+			type: "object",
+			description:
+				"Ids our on-chain map ties to it (meta.definitions.onchainIds); an empty list means none in our map, not none on chain.",
+			properties: {
+				contracts: { type: "array", items: { type: "string" } },
+				deployersToExclude: { type: "array", items: { type: "string" } },
+				accounts: { type: "array", items: { type: "string" } },
+				assets: {
+					type: "array",
+					items: { type: "string" },
+					description: "CODE-ISSUER.",
+				},
+			},
+		},
+		usage: {
+			type: "array",
+			nullable: true,
+			description:
+				"Distinct non-team callers and events per tier of ids (meta.definitions.usage); null when not measured.",
+			items: {
+				type: "object",
+				properties: {
+					tier: { type: "string", description: "strong or labelled." },
+					distinctCallers30d: { type: "integer", nullable: true },
+					distinctCallers90d: { type: "integer", nullable: true },
+					events30d: { type: "integer", nullable: true },
+					events60d: { type: "integer", nullable: true },
+					events90d: { type: "integer", nullable: true },
+					lowerBound: {
+						type: "boolean",
+						description: "A sample or a read cap: the counts are a floor.",
+					},
+					readAt: { type: "string", format: "date-time" },
+				},
+			},
+		},
+		evidenceNotes: {
+			type: "array",
+			items: { type: "string" },
+			description:
+				"Where our own data contradicts the recorded status or reading, or a ledger-checked record adds context; [] when none (meta.definitions.evidenceNotes).",
+		},
 		gaps: {
 			type: "array",
 			items: { type: "string" },
@@ -16214,7 +16322,7 @@ export const partnerSpec: OpenAPISpec = {
 						name: "awardType",
 						in: "query",
 						description:
-							"Type of the first SCF award (known when that award is at least 180 days old): build, legacy (v1 to v5) or unknown.",
+							"Type of the first SCF award (known when that award is at least 180 days old): build, legacy (v1 to v5), public-goods, liquidity or unknown.",
 						schema: { type: "string", enum: [...AWARD_TYPES] },
 					},
 					{
@@ -16227,8 +16335,9 @@ export const partnerSpec: OpenAPISpec = {
 					{
 						name: "status",
 						in: "query",
-						description: "Directory status when the snapshot was built.",
-						schema: { type: "string", enum: [...COHORT_STATUSES] },
+						description:
+							"Directory status on the live read; the cohort is Live and Inactive.",
+						schema: { type: "string", enum: [...PROJECT_STATUSES] },
 					},
 					{
 						name: "limit",
@@ -16459,11 +16568,16 @@ export const partnerSpec: OpenAPISpec = {
 										cohort: {
 											type: "object",
 											description:
-												"Projects in the cohort (Live or Inactive), split by SCF funding.",
+												"Projects in the cohort (Live or Inactive), split by SCF funding; SCF-funded rows outside the cohort by status (not launched); cohort rows with an evidence note.",
 											properties: {
 												projects: { type: "integer" },
 												scfFunded: { type: "integer" },
 												notScf: { type: "integer" },
+												scfFundedOutsideCohort: {
+													type: "object",
+													additionalProperties: { type: "integer" },
+												},
+												withEvidenceNotes: { type: "integer" },
 											},
 										},
 										scf: {
@@ -16472,6 +16586,27 @@ export const partnerSpec: OpenAPISpec = {
 												{
 													type: "object",
 													properties: {
+														readable: {
+															type: "object",
+															description:
+																"SCF-funded projects with each kind of readable signal (columns overlap), none at all, and any on-chain id: the most an on-chain usage measure can cover.",
+															properties: {
+																of: { type: "integer" },
+																contractIds: { type: "integer" },
+																asset: { type: "integer" },
+																accounts: { type: "integer" },
+																storeData: { type: "integer" },
+																codeActive: { type: "integer" },
+																nothingReadable: { type: "integer" },
+																anyOnchainId: { type: "integer" },
+															},
+														},
+														byAwardKind: {
+															type: "object",
+															description:
+																"SCF-funded projects holding at least one award of each kind; a project can hold several.",
+															additionalProperties: { type: "integer" },
+														},
 														launchBeforeFirstAward: {
 															type: "integer",
 															description:
@@ -16480,11 +16615,13 @@ export const partnerSpec: OpenAPISpec = {
 														launchedOnOrAfterFirstAward: {
 															type: "object",
 															description:
-																"Dated launches not older than the first award, those with a day-180 verdict (activity or no activity seen), and those active at day 180.",
+																"Dated launches not older than the first award; by our reading, those with a verdict (activity or no activity seen) and those active; by SDF's plan definition, those with a verdict (active, one signal kind, no activity seen) and those active.",
 															properties: {
 																projects: { type: "integer" },
 																withDay180Verdict: { type: "integer" },
 																activeAtDay180: { type: "integer" },
+																withTwoSignalVerdict: { type: "integer" },
+																activeTwoSignals: { type: "integer" },
 															},
 														},
 														launchKnown: {
@@ -16520,7 +16657,7 @@ export const partnerSpec: OpenAPISpec = {
 										funnel: {
 											type: "array",
 											description:
-												"SCF-funded, launch known, past day 180, operating now: each stage's projects and the stage before it (of). Order is the funnel's order.",
+												"SCF-funded, launch known, past day 180, operating now: each stage's projects and its denominator (of). Operating now is of the rows past day 180 whose operating state was read; the rest are funnelNotRead. Order is the funnel's order.",
 											items: {
 												type: "object",
 												properties: {
@@ -16534,8 +16671,19 @@ export const partnerSpec: OpenAPISpec = {
 										funnelPastDay180Evidence: {
 											type: "object",
 											description:
-												"Projects past day 180 by their operating-now evidence. not eligible: the first award is under 180 days old, so it was not read.",
+												"Projects past day 180 and read, by their operating-now evidence.",
 											additionalProperties: { type: "integer" },
+										},
+										funnelNotRead: {
+											type: "integer",
+											description:
+												"Projects past day 180 whose first award is under 180 days old: operating now was not read, so they are out of the denominator.",
+										},
+										funnelByLaunchTiming: {
+											type: "array",
+											items: {
+												$ref: "#/components/schemas/CohortLaunchTiming",
+											},
 										},
 										operatingNow: {
 											type: "object",
@@ -16547,6 +16695,18 @@ export const partnerSpec: OpenAPISpec = {
 												byEvidence: {
 													type: "object",
 													additionalProperties: { type: "integer" },
+												},
+												onChainByCallers: {
+													allOf: [
+														{ $ref: "#/components/schemas/CohortCallerBands" },
+													],
+													description:
+														"The projects counted on-chain operating, by distinct non-team callers in 90 days: on-chain operating counts any event, the team's own included.",
+												},
+												withEvidenceNotes: {
+													type: "integer",
+													description:
+														"Projects counted operating whose row carries an evidence note.",
 												},
 												byFirstAwardYear: {
 													type: "array",
@@ -16581,19 +16741,61 @@ export const partnerSpec: OpenAPISpec = {
 															year: { type: "string" },
 															launchKnown: { type: "integer" },
 															pastDay180: { type: "integer" },
+															pastDay180Read: { type: "integer" },
 															operatingNowPastDay180: { type: "integer" },
 														},
 													},
 												],
 											},
 										},
+										scfByPlanType: {
+											type: "array",
+											description:
+												"SCF-funded projects by SDF's plan's project type (mapped from the category): launch known, past day 180, read, operating, and how many other projects name each in code.",
+											items: {
+												type: "object",
+												properties: {
+													type: { type: "string" },
+													projects: { type: "integer" },
+													launchKnown: { type: "integer" },
+													pastDay180: { type: "integer" },
+													pastDay180Read: { type: "integer" },
+													operatingNowPastDay180: { type: "integer" },
+													withDownstreamUser: { type: "integer" },
+												},
+											},
+										},
+										usage: {
+											type: "object",
+											description:
+												"Distinct non-team callers in 90 days (the larger tier per project), every row and SCF-funded rows in the cohort; projects with 1,000 or more events in the latest 60 days (every caller counted).",
+											properties: {
+												all: { $ref: "#/components/schemas/CohortCallerBands" },
+												scf: { $ref: "#/components/schemas/CohortCallerBands" },
+												eventsLatest60dAtLeast1000: { type: "integer" },
+											},
+										},
 										scfConfirmedRetention: {
 											type: "object",
 											description:
-												"Projects whose Build award SCF paid in full; those with a launch at least 180 days old, by launch basis and by operating-now evidence.",
+												"Projects whose Build award SCF paid in full; those with a launch at least 180 days old, by launch basis and by operating-now evidence (of those read).",
 											properties: {
 												paidInFull: { type: "integer" },
 												launchAtLeast180DaysOld: { type: "integer" },
+												read: { type: "integer" },
+												notRead: { type: "integer" },
+												noReadingByCode: {
+													type: "object",
+													description:
+														"The no-reading rows by their code activity now: no public code read, quiet, silent.",
+													additionalProperties: { type: "integer" },
+												},
+												byLaunchTiming: {
+													type: "array",
+													items: {
+														$ref: "#/components/schemas/CohortLaunchTiming",
+													},
+												},
 												launchBasis: {
 													type: "object",
 													properties: {
@@ -16680,6 +16882,12 @@ export const partnerSpec: OpenAPISpec = {
 				properties: {
 					round: { type: "integer" },
 					budgetUsd: { type: "number" },
+					schedule: {
+						type: "string",
+						nullable: true,
+						description:
+							"thirds (rounds 30 to 40, inferred from paid shares) or four-tranche (rounds 41 on, the Handbook's).",
+					},
 					paidShare: {
 						type: "number",
 						nullable: true,
@@ -16739,14 +16947,65 @@ export const partnerSpec: OpenAPISpec = {
 							none: { type: "integer" },
 						},
 					},
+					day180TwoSignals: {
+						type: "object",
+						description: "Day 180 by SDF's plan definition (the headline).",
+						properties: {
+							active: { type: "integer" },
+							oneSignalKind: { type: "integer" },
+							noActivitySeen: { type: "integer" },
+							couldNotCheck: { type: "integer" },
+							tooEarly: { type: "integer" },
+							noLaunchDate: { type: "integer" },
+						},
+					},
 					day180: {
 						type: "object",
+						description: "Day 180 by our reading (one signal).",
 						properties: {
 							activitySeen: { type: "integer" },
 							noActivitySeen: { type: "integer" },
 							couldNotCheck: { type: "integer" },
 							tooEarly: { type: "integer" },
 							noLaunchDate: { type: "integer" },
+						},
+					},
+					confidence: {
+						type: "object",
+						properties: {
+							high: { type: "integer" },
+							medium: { type: "integer" },
+							low: { type: "integer" },
+						},
+					},
+				},
+			},
+			CohortLaunchTiming: {
+				type: "object",
+				description:
+					"Past day 180, split by when the launch came against the first award: read = operating state read, operating = of those read.",
+				properties: {
+					group: { type: "string" },
+					pastDay180: { type: "integer" },
+					read: { type: "integer" },
+					operating: { type: "integer" },
+				},
+			},
+			CohortCallerBands: {
+				type: "object",
+				description:
+					"Projects by distinct non-team callers in 90 days; notMeasured = no callers read.",
+				properties: {
+					measured: { type: "integer" },
+					notMeasured: { type: "integer" },
+					bands: {
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								band: { type: "string" },
+								projects: { type: "integer" },
+							},
 						},
 					},
 				},
@@ -16778,17 +17037,9 @@ export const partnerSpec: OpenAPISpec = {
 			CohortDefinitions: {
 				type: "object",
 				description: "What each term means.",
-				properties: {
-					cohort: { type: "string" },
-					launchDate: { type: "string" },
-					launchKnown: { type: "string" },
-					launchBeforeFirstAward: { type: "string" },
-					day180: { type: "string" },
-					operatingNow: { type: "string" },
-					observable: { type: "string" },
-					scfConfirmedRetention: { type: "string" },
-					deliveryByRound: { type: "string" },
-				},
+				properties: Object.fromEntries(
+					Object.keys(COHORT_DEFINITIONS).map((k) => [k, { type: "string" }]),
+				),
 			},
 			CohortMeta: {
 				type: "object",
@@ -16801,6 +17052,12 @@ export const partnerSpec: OpenAPISpec = {
 					launchAgesCountedTo: {
 						type: "string",
 						description: "The date launch ages (past day 180) are counted to.",
+					},
+					asOfDates: {
+						type: "object",
+						description:
+							"When each kind of reading was made: the snapshot mixes dates (statuses, SCF awards and paid totals, operating and day-180 readings, on-chain events, commits, stores, the product probe, toml networks, callers, archive captures, the incident record).",
+						additionalProperties: { type: "string" },
 					},
 					builtAt: { type: "string", format: "date-time" },
 					sources: { type: "array", items: { type: "string" } },
