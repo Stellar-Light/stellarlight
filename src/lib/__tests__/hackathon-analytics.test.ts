@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	distribution,
 	distributionBy,
+	rosterSummary,
 	winnersVsOthers,
 } from "@/lib/hackathon-analytics";
 import {
@@ -530,5 +531,29 @@ describe("measured categories", () => {
 		]);
 		expect(m.get("Payments")).toEqual({ precision: 0.82, recall: 0.83 });
 		expect(m.has("Anchor")).toBe(false);
+	});
+});
+
+describe("rosterSummary: what an event card says of its stored rows", () => {
+	const row = (id: string, isWinner = false) => ({ id, isWinner });
+	it("no rows stored is null, never 0", () => {
+		expect(rosterSummary([])).toBeNull();
+	});
+	it("a DoraHacks roster is full: its rows are its submissions", () => {
+		expect(
+			rosterSummary([row("dorahacks-buidl-1", true), row("dorahacks-buidl-2")]),
+		).toEqual({ coverage: "full", rows: 2, winners: 1 });
+	});
+	it("curated rows that are not all winners are a partial list", () => {
+		expect(
+			rosterSummary([row("curated-e-a", true), row("curated-e-b")]),
+		).toEqual({ coverage: "partial", rows: 2, winners: 1 });
+	});
+	it("curated winners alone are winners only", () => {
+		expect(rosterSummary([row("curated-e-a", true)])).toEqual({
+			coverage: "winners-only",
+			rows: 1,
+			winners: 1,
+		});
 	});
 });

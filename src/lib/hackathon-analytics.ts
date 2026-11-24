@@ -197,11 +197,26 @@ export type Coverage = (typeof COVERAGE_VALUES)[number];
  * (HackMeridian 2026's, from HackProof), each row with its entryBasis. In
  * both the size and mix of the field are unknown. null: none stored. */
 export function eventCoverage(
-	builds: IndexedBuild[],
+	builds: Array<Pick<IndexedBuild, "id" | "isWinner">>,
 ): "full" | Coverage | null {
 	if (!builds.length) return null;
 	if (!builds.every((b) => CURATED_BUILD_ID.test(b.id))) return "full";
 	return builds.every((b) => b.isWinner) ? "winners-only" : "partial";
+}
+
+/** What an event card on /hackathons says of the event's stored rows, as
+ * its page counts them: the rows, what they cover and how many won. null
+ * with none stored: not stored, never a count of 0. */
+export function rosterSummary(
+	builds: Array<Pick<IndexedBuild, "id" | "isWinner">>,
+): { coverage: "full" | Coverage; rows: number; winners: number } | null {
+	const coverage = eventCoverage(builds);
+	if (!coverage) return null;
+	return {
+		coverage,
+		rows: builds.length,
+		winners: builds.filter((b) => b.isWinner).length,
+	};
 }
 
 /** The index's rows by event, in index order. */

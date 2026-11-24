@@ -12,7 +12,8 @@ export interface RecentWinner {
 	projectName: string;
 	builder?: string; // omitted for live-derived winners (DoraHacks buidls don't expose a clean builder name)
 	description: string;
-	prizeUsd: number;
+	/** USD won; null or 0 when the placement states no amount. */
+	prizeUsd: number | null;
 	dorahacksBuidlUrl?: string; // direct link to the DoraHacks BUIDL page
 	builderPassportUrl?: string; // link to Stellar Passport profile, if known
 }

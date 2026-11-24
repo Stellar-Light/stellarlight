@@ -738,7 +738,7 @@ export function placementSourceLine(row: {
 	if (!row.isWinner || !row.winnerSource) return null;
 	// ponytail: HackProof is the one list partial rows come from.
 	return row.entryBasis
-		? "The placement is HackProof's, secondhand: no organizer page we read names the winners."
+		? "Placement as HackProof lists it."
 		: "The placement is named off DoraHacks, by the page linked here.";
 }
 

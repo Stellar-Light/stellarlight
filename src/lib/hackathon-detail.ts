@@ -127,7 +127,7 @@ const SPANISH_ORDINALS: Record<string, number> = {
 	decimo: 10,
 };
 
-function placementRank(label?: string | null): number | null {
+export function placementRank(label?: string | null): number | null {
 	if (!label) return null;
 	for (const [m, r] of Object.entries(MEDALS)) if (label.includes(m)) return r;
 	// Lowercase + strip accents so "séptimo"/"1º" match.

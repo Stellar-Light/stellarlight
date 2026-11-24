@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpRight, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import {
 	Carousel,
@@ -29,7 +30,11 @@ function WinnerCard({
 	fallbackHref: string | null;
 }) {
 	const href = winner.dorahacksBuidlUrl ?? fallbackHref ?? undefined;
-	const isExternalDora = !!href?.includes("dorahacks.io");
+	const destination = href?.includes("dorahacks.io")
+		? "DoraHacks"
+		: href?.includes("github.com")
+			? "GitHub"
+			: "View project";
 
 	return (
 		<a
@@ -74,12 +79,17 @@ function WinnerCard({
 			</p>
 
 			<div className="pt-3 border-t border-border/50 flex items-center justify-between">
-				<span className="inline-flex items-center gap-1.5 text-sm text-foreground font-semibold">
-					<Trophy className="w-3.5 h-3.5 text-[#FDDA24]" />$
-					{winner.prizeUsd.toLocaleString()}
-				</span>
+				{winner.prizeUsd ? (
+					<span className="inline-flex items-center gap-1.5 text-sm text-foreground font-semibold">
+						<Trophy className="w-3.5 h-3.5 text-[#FDDA24]" />$
+						{winner.prizeUsd.toLocaleString()}
+					</span>
+				) : (
+					// No amount stated: nothing, never a $0.
+					<span />
+				)}
 				<span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors inline-flex items-center gap-1">
-					{isExternalDora ? "DoraHacks" : "View project"}
+					{destination}
 					<ArrowUpRight className="w-3 h-3" />
 				</span>
 			</div>
@@ -128,9 +138,12 @@ export function RecentWinnersCarousel({
 					<h2 className="text-2xl font-bold text-foreground tracking-tight">
 						Recent Winners
 					</h2>
-					<p className="text-sm text-muted-foreground mt-1">
+					<Link
+						href={`/hackathons/${data.hackathonUname}`}
+						className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline mt-1 inline-block"
+					>
 						{data.hackathonName}
-					</p>
+					</Link>
 				</div>
 				{winnerPage && (
 					<a
@@ -179,6 +192,7 @@ export function RecentWinnersCarousel({
 					<div className="flex items-center gap-2">
 						{scrollSnaps.map((_, i) => (
 							<button
+								// biome-ignore lint/suspicious/noArrayIndexKey: a dot is its slide's position
 								key={i}
 								type="button"
 								onClick={() => api?.scrollTo(i)}

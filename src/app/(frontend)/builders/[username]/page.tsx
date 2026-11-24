@@ -595,7 +595,7 @@ export default async function BuilderProfilePage({
 								{hackBuilds.slice(0, 8).map((b) => (
 									<div key={`${b.hackathon.slug}:${b.id}`} className="text-sm">
 										<a
-											href={b.url}
+											href={b.githubUrl ?? b.url}
 											target="_blank"
 											rel="noopener noreferrer"
 											className="text-foreground hover:underline underline-offset-2"
