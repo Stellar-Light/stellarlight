@@ -137,6 +137,52 @@ Sources, read 2026-11-23: SLP-0006 (github.com/stellar/stellar-protocol/blob/mas
 
 Sources, read 2026-11-23: SLP-0008 (github.com/stellar/stellar-protocol/blob/master/limits/slp-0008.md); Horizon horizon.stellar.org/transactions/ for each transaction above, horizon.stellar.org/accounts/GDXYRI6IONQA5YTGRLQ6O3FGJ2BWXPJTTQPUXFPSEXSRKBZLFKMZSOLP/payments and horizon.stellar.org/ledgers/65273932; Soroban RPC getLedgerEntries for the frozen ledger keys configuration setting.`,
 	},
+	{
+		id: "comet-2026-08-backstop-drain",
+		protocol: "Comet",
+		severity: "critical",
+		title:
+			"Comet (Blend backstop pool) incident: same-token swap drain on 2026-08-25, pool cannot be frozen",
+		// Script3's post-mortem, posted on X 2026-08-28 (read through the
+		// public embed mirrors: x.com answers 402 to scripts).
+		url: "https://x.com/script3official/status/2093365171846533577",
+		publishedAt: "2026-08-28",
+		tags: [
+			"incident",
+			"comet",
+			"amm",
+			"blend",
+			"backstop",
+			"blnd",
+			"usdc",
+			"security",
+			"exploit",
+			"same-token-swap",
+			"flash-loan",
+			"white-hat",
+		],
+		// Read 2026-11-24 from Horizon, Soroban RPC (pool and backstop
+		// storage), the archive ledger 64112340 metadata, Stellar Index, and
+		// the CometDEX and blend-capital repos. Left out: USD totals (no
+		// primary source states one), the ETH bridged and sent to KuCoin (off
+		// Stellar, post-mortem only), and the basis of the 2026-10-23 payout
+		// (no party has published it).
+		body: `**Key facts, checked against primary records on 2026-11-24.** Event date: 2026-08-25 (UTC). The Comet BLND:USDC pool CAS3FL6TLZKDGGSISDBWGGPXT3NRR4DYTZD7YOD3HMYO6LTJUVGRVEAM is the backstop token of both Blend backstops, V1 (CAO3AGAMZVRMHITL36EJ2VZQWKYRPWMQAPDQD5YEOF3GIF7T44U4JAL3) and V2 (CAQQR5SWBXKIGZKPBZDH3KM5GQ5GUTPKB7JAFCINLZBC5WXPJKRG3IM7). Before the first exploit transaction its records held 778,230.9517250 USDC and 73,881,376.8735538 BLND against 14,610,061.9813817 pool shares. Between 03:51:02 UTC (transaction 41c898a15b13658d45cb8fbef2e5d93f69a501c5093cb4c0296205d69e2fc622, ledger 64112340) and 04:43:56 UTC (transaction 2f3ed260643aa58f53875ead36f51e9aecb647ba13c75a5aafd6173668ef2d1d), 36 transactions from the account GCENJ4XBLXCPENO7HOIKD2DBAOBUOFZWS2DRHMCCDKC3PQYNSSGHWYHC took a net 717,518.9234092 USDC out of the pool. This was a completed drain. The account then sent 500,000 USDC (04:49:28 UTC, transaction b4ed8e914e3338d96806312c9c0b6acc45a609971556a905a9cbf023f27b24f8) and 247,800.9234056 USDC (04:54:08 UTC, transaction 3daa475373ba20bbbe18dea7d3e89a809cae33dd579e5bfd5571aaa454f69645) to GDJ4JZXZELZD737NVFORH4PSSQDWFDZTKW3AIDKHYQG23ZXBPDGGQBJK, which Script3 describes as a bridge to Ethereum, and holds no USDC now.
+
+**What happened.** The first transaction swapped 259,410.3172416 USDC into the pool for 194,119.6544582 USDC out (token in and token out both USDC), then deposited USDC, exited and swapped BLND back to USDC, funded by a 530,000 USDC flash loan from the Blend V2 pool named Fixed (CAJJZSGMMM3PD7N33TAPHGBUGTB43OC73HVIK2L2G6BNGGGYOSSYBXBD) that was repaid in the same transaction. Script3, which develops Blend, states the cause: Comet's swap functions did not reject a swap of a token for itself, so the pool's record for that token missed the tokens swapped in, and joining, calling gulp and exiting paid out the gap. Comet v1.1.0 (CometDEX/comet-contracts-v1, released 2026-09-11) adds the check (PR #12). The drained pool still runs its 2024 code: its controller account GABQT4DOTOJDRMQ6UIEH6I3JVYB4E33KZ7DHL4LGTI7PPJ36BZEQQ246 is locked (master weight 0), so no one can freeze it, and Script3 says the original Comet team no longer exists.
+
+**White hats, then a payout.** Two other accounts used the same technique the same day: GA5GLFGVHYWDDPGL2WUF3PNGFQML6MWZQWL46NAU4L52GSDMJJD725DM took 166,860.5577655 USDC (11:14:26 to 12:10:12 UTC) and GCGUW2BV5R5DUFGF5RQLV2M3VJPLOVOLBQFCNVEJRYFVH2IMLN7NHMGD took 23,152.9710724 USDC and 23,169,807.9422205 BLND (12:35:20 to 16:56:00 UTC). Both sent it to GCGWLP2YIOBV2RISNXBAXPD4E7QNQB2IOEHUFWICAQA2RLBTIKTUJXXD, the holding account Script3 names. On 2026-10-23 (17:26:23 to 19:47:08 UTC) that account paid 25,214,717.71 BLND and 201,805.65 USDC to 508 addresses, with the memo "Comet Incident Remediation" (first payment 8cab3a45f2d0d6eb1c3793ecc592aff0c089c8bce3fd8ec62311146619afe374). No party has published the basis of that payout or the shortfall. The attacker's 717,518.92 USDC is not recorded as returned.
+
+**Effect on Blend.** On 2026-11-24 the pool holds 0.5618107 USDC and 400.9196672 BLND, and both backstops still name it as their token; Script3 says the V2 token cannot be changed and V2 will wind down. These records show no on-chain pause: Blend's web app turned off pool joins and backstop deposits at 06:01 and 06:13 UTC. On 2026-09-15 a permissionless update_status call set the Fixed pool to on-ice (transaction e25e5128499209ac2ed838bb5ad775ba06cd680bc0e77420df2e6ce53c0f5e9f). A separate Blend v2.1 backstop, CCS4AZ5ORM6VLLPJTJUFRNXWBMHOO3L5WHHRPL2ZMILE35ZDMQFHOQMJ, uses a new Comet v1.1.0 pool, CASYAKK3SHDN6S2E6IUOBVRXT3KKPVQCVQO4GNBDTVE6XZQQMW4UMIHE.
+
+**Scope.** These records show a flaw in Comet's pool code, not in Blend's contracts or the Stellar protocol, and no bad debt figure for any Blend pool.
+
+**Lesson for builders.** A port of Balancer V1 must reject same-token swaps. A protocol whose insurance capital is an AMM pool share inherits that pool's bugs, and a pool whose admin is locked cannot be frozen.
+
+**Write-up.** Script3's post-mortem (2026-08-28, this record's link) gives the same USDC loss. It gives 03:31:02 UTC as the start; the first exploit transaction closed at 03:51:02 UTC.
+
+Sources, read 2026-11-24: Horizon transactions and account operations for the accounts above; Soroban RPC getLedgerEntries for the pool, both backstops and the Fixed pool; archive RPC metadata of ledger 64112340; Stellar Index contract events; github.com/CometDEX/comet-contracts-v1 PR #12 and release v1.1.0; blend-capital/blend-ui commits 3b6d8796dd and 46f26b3513; blend-capital/docs-v2 mainnet-deployments.md; Script3's post-mortem.`,
+	},
 ];
 
 async function run() {
