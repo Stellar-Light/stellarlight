@@ -9,7 +9,9 @@
  * Inputs, all built read-only from public sources:
  *   map.csv          one row per project and address: slug, address, kind,
  *                    evidence, foundAt, note, createdAt, createdLedger,
- *                    dateBasis, tier (strong, labelled, weaker)
+ *                    dateBasis, tier (strong, labelled, weaker), and
+ *                    optionally createdBy (the account that created a
+ *                    contract, from its creation ledger)
  *   openings.csv     dated events; its "account opened" rows give an
  *                    account's opening ledger, found as a CREATED entry in
  *                    that ledger's metadata (detail "<G...>; ledger <n>; ...")
@@ -29,6 +31,7 @@ import {
 import { parseCsv } from "../src/lib/awards/csv";
 import { addressesIn } from "../src/lib/onchain-join";
 import {
+	leaveOutOtherOperators,
 	ONCHAIN_MAP_ATTRIBUTION,
 	type OnchainMapLink,
 	selectLinks,
@@ -124,7 +127,9 @@ const noteOf = (note: string): string | null =>
 		.join("; ") || null;
 
 const problems: string[] = [];
-const rows: Array<Omit<OnchainMapLink, "sharedWithinFamily">> = [];
+const rows: Array<
+	Omit<OnchainMapLink, "sharedWithinFamily"> & { createdBy: string | null }
+> = [];
 for (const r of csvRows) {
 	const evidence = r.evidence.split("; ").filter(Boolean);
 	const found = r.foundat ?? "";
@@ -154,6 +159,9 @@ for (const r of csvRows) {
 		(!createdAt || !createdLedger)
 	)
 		problems.push(`${r.slug} ${r.address}: contract without a proved creation`);
+	const createdBy = r.createdby?.trim() || null;
+	if (createdBy && !/^G[A-Z2-7]{55}$/.test(createdBy))
+		problems.push(`${r.slug} ${r.address}: createdBy is not an account`);
 	rows.push({
 		slug: r.slug,
 		address: r.address,
@@ -170,10 +178,16 @@ for (const r of csvRows) {
 			: r.kind === "contract"
 				? "creation proved in the ledger"
 				: "account opening proved in the ledger (not a launch date)",
+		createdBy,
 	});
 }
 
-const { kept, left } = selectLinks(rows);
+// Who runs a contract outranks the code it runs, and is settled before the
+// sharing rule: a registry row that names the code's author must not make
+// the operator's own link ambiguous.
+const operators = leaveOutOtherOperators(rows);
+const { kept, left } = selectLinks(operators.kept);
+left.push(...operators.left);
 
 // Curator readings and hand-verified seeds outrank the map.
 const retracted = new Map<string, Set<string>>();
@@ -191,7 +205,10 @@ for (const l of kept) {
 		left.push({ row: l, reason: "a curator named it as another product's" });
 	else if (owner && owner !== l.slug)
 		left.push({ row: l, reason: `a hand-verified seed gives it to ${owner}` });
-	else links.push(l);
+	else {
+		const { createdBy: _createdBy, ...link } = l;
+		links.push(link);
+	}
 }
 links.sort(
 	(a, b) =>
@@ -212,8 +229,8 @@ for (const x of left)
 
 const out = {
 	about:
-		"Mainnet contracts and accounts linked to Stellar Light directory projects, each with why (evidence), how strong (tier), the public page it was read from (sourceUrl) and, where proved, when it was created: a contract's creation or an account's opening found in that ledger's own metadata from an archive RPC (createdLedger, createdAt; an account's opening is not a launch date). Built 2026-11-21 to 2026-11-23 read-only from public sources: the directory, the projects' own repos, pages, stellar.toml files and SCF proposals, Stellar Index, stellar-expert/public-directory, Horizon and the ledger itself. The own-code test was checked on contracts whose owner was already known: it called 1 of 112 other projects' contracts its own and recognised 53 of 70 own contracts, so a contract missing here is not proof it is not the project's. An address linked to more than one project is linked to none, except within an issuer-and-token family (kept for each member, one tier down, sharedWithinFamily naming them, issuer first) and the groups given to one member by hand (src/lib/onchain-map.ts). Weaker links (named on the project's own pages only, or the same deployer only) are left out. Built by scripts/build-onchain-map.ts; read by the on-chain lane, which serves the links on project rows (onchain.contracts, onchain.accounts) and on /api/contracts and re-checks each week that every address still exists.",
-	builtAt: "2026-11-23",
+		"Mainnet contracts and accounts linked to Stellar Light directory projects, each with why (evidence), how strong (tier), the public page it was read from (sourceUrl) and, where proved, when it was created: a contract's creation or an account's opening found in that ledger's own metadata from an archive RPC (createdLedger, createdAt; an account's opening is not a launch date). Built 2026-11-21 to 2026-11-24 read-only from public sources: the directory, the projects' own repos, pages, stellar.toml files and SCF proposals, Stellar Index, stellar-expert/public-directory, Horizon and the ledger itself. The own-code test was checked on contracts whose owner was already known: it called 1 of 112 other projects' contracts its own and recognised 53 of 70 own contracts, so a contract missing here is not proof it is not the project's. An address linked to more than one project is linked to none, except within an issuer-and-token family (kept for each member, one tier down, sharedWithinFamily naming them, issuer first) and the groups given to one member by hand (src/lib/onchain-map.ts). A contract whose only evidence is its code (a protocol registry, a code proof) is left out when the account that created it deployed another project's own contracts and none of this one's: a registry lists every contract that runs a protocol's code, whoever runs it. Weaker links (named on the project's own pages only, or the same deployer only) are left out. Built by scripts/build-onchain-map.ts; read by the on-chain lane, which serves the links on project rows (onchain.contracts, onchain.accounts) and on /api/contracts and re-checks each week that every address still exists.",
+	builtAt: "2026-11-24",
 	attribution: ONCHAIN_MAP_ATTRIBUTION,
 	licenses: { "stellar-expert/public-directory": PUBLIC_DIRECTORY_LICENSE },
 	evidenceKinds: EVIDENCE_KINDS,

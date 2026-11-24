@@ -14,6 +14,7 @@
 			"!improvements/engine/raven-routing-latest.json",
 			"!improvements/lanes/repair-attempts.json",
 			"!src/data/electric-capital-stellar.json",
+			"!src/data/onchain-map.json",
 			"!src/lib/__tests__/fixtures/served-bodies.json"
 		]
 	},

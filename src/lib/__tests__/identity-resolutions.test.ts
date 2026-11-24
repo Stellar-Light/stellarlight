@@ -455,6 +455,16 @@ describe("kedgeway is seeded from its npm release", () => {
 	});
 });
 
+describe("BLNT is created by the curation lane's seed path (2026-11-24)", () => {
+	it("the dry run plans its create, and skips it once the row exists", async () => {
+		expect(await curate(rows(), false)).toContain(
+			"  blnt: CREATE (Live, Lending)",
+		);
+		const again = await curate([...rows(), row("blnt")], false);
+		expect(again.some((l) => /^ {2}blnt: exists, skip/.test(l))).toBe(true);
+	});
+});
+
 /** The GitHub link a row ends with once the maps apply to its stored one. */
 const endLink = (slug: string, stored: string): string | null => {
 	const norm = (u: string) => u.replace(/\/+$/, "");

@@ -143,9 +143,113 @@ export const ONCHAIN_SEEDS: OnchainSeed[] = [
 				address: "CD25MNVTZDL4Y3XBCPCJXGXATV5WUHHOWMYFF4YBEGU5FCPGMYTVG5JY",
 				label: "BLND token (SAC)",
 			},
+			// 2026-11-24: the manifest's "comet" key, the BLND:USDC pool Blend's
+			// v1 and v2 backstops hold as their backstop token (Blend's docs list
+			// it under "Blend Adjacent Smart Contracts"). Blend's deployer
+			// GDJEHTBE6ZHUXSWFI642DCGLUOECLHPF3KSXHPXTSTJ7E3JF6MQ5EZYY created it
+			// through Comet's factory CA2LVIPU... (new_c_pool, tx 11a2fe3e...,
+			// ledger 51499545, 2024-05-02). It sat on the comet row only because
+			// Stellar Index's comet registry lists every pool running Comet's
+			// code. Drained 2026-08-25 (incident comet-2026-08-backstop-drain).
+			{
+				address: "CAS3FL6TLZKDGGSISDBWGGPXT3NRR4DYTZD7YOD3HMYO6LTJUVGRVEAM",
+				label: "comet (BLND:USDC backstop pool, v1 and v2)",
+			},
+			// Blend v2.1, listed by Blend's own docs (blend-capital/docs-v2
+			// mainnet-deployments.md, "v2.1 Mainnet Smart Contract Addresses",
+			// added 2026-10-07). All three were created on 2026-09-30 by
+			// GCDCMUEJDUWPXXXKYN6CMUCFRTNYJJEHKZUYE6SRSIMN7BERASCHDREB, an account
+			// opened that day and locked (master weight 0) on 2026-10-05; its last
+			// contract runs zenith-protocols/pool-status-admin v0.1.0 (release
+			// asset sha256 3dcd913e...). Each creation was found in its ledger's
+			// metadata (archive RPC). The backstop and factory run Blend v2's
+			// unchanged code (same WASM as CAQQR5SW... and CDSYOAVX...); the pool
+			// runs Comet v1.1.0, made through the deployer's own Comet factory.
+			{
+				address: "CCS4AZ5ORM6VLLPJTJUFRNXWBMHOO3L5WHHRPL2ZMILE35ZDMQFHOQMJ",
+				label: "v2.1 backstop",
+				source:
+					"https://github.com/blend-capital/docs-v2/blob/ef36127c56f24b97112d5aa7fd7f895bb51508dd/mainnet-deployments.md",
+			},
+			{
+				address: "CACUXRNBUFV7BFPKUDLVJFQI6H7EHHNSJPOFJSCWJCYUUYMORM6C63AL",
+				label: "v2.1 pool factory",
+				source:
+					"https://github.com/blend-capital/docs-v2/blob/ef36127c56f24b97112d5aa7fd7f895bb51508dd/mainnet-deployments.md",
+			},
+			{
+				address: "CASYAKK3SHDN6S2E6IUOBVRXT3KKPVQCVQO4GNBDTVE6XZQQMW4UMIHE",
+				label: "v2.1 Comet v1.1 BLND:USDC pool (backstop token)",
+				source:
+					"https://github.com/blend-capital/docs-v2/blob/ef36127c56f24b97112d5aa7fd7f895bb51508dd/mainnet-deployments.md",
+			},
 		],
 		source:
 			"https://github.com/blend-capital/blend-utils/blob/main/mainnet.contracts.json",
+	},
+	{
+		// BLNT-Protocol/blnt-contracts-v3 at 771059f6 (read 2026-11-24): the
+		// README's "Canonical mainnet addresses" table, backed by
+		// deployments/mainnet-v3-{token,comet,core,fixed-pool,lockup-backfill}.json,
+		// which name the deployer GDEA2WMOWYQ3T56A2PZH5QYYEQBAORW2AUUJYX4FFD5GDPESAICTFTAL
+		// and every creation transaction; each creation was found in its
+		// ledger's metadata (archive RPC). Labels are the table's. The WASM of
+		// the emitter, pool factory, backstop and Fixed pool is byte for byte
+		// BLNT's own v3.0.2 release files (sha256 of the release assets; the
+		// emitter and pool hashes also carry GitHub attestations to that repo);
+		// the backfill and lockup backfill match their own repos' releases; the
+		// two Comet pools run CometDEX/comet-contracts-v1 v1.1.0. The issuer
+		// GAP2ACGH... sets home_domain blnt.trade, whose toml lists it, and is
+		// locked. Left out on purpose: the YieldBlent pool CAUTPSQD... (made
+		// from BLNT's factory, but run by GDJSH2NU..., the manifest's
+		// operator), two other pools made from the factory on 2026-11-18, and
+		// the oracles the pools read (CCVTVW2C... dates from 2025, CDN7JD6S...
+		// was created by the YieldBlent operator).
+		slug: "blnt",
+		contracts: [
+			{
+				address: "CCBNWP5L7ZSXA3DBWCMFAVKFVRW3ZHWO7B5J557W42O64DDZNPJP7VDS",
+				label: "BLNT asset (SAC)",
+			},
+			{
+				address: "CDSO6FQSBJ3U3AJHBNNLHHKSMKTTDDN3GLGF3KZTMXBFV7SVB43ZJERT",
+				label: "Emitter",
+			},
+			{
+				address: "CAKLFWAHB2RIYRBSPUL6EH43AIQ5ILBEM7HTMWYSJRL7PHZQ676KMCV5",
+				label: "Pool factory",
+			},
+			{
+				address: "CAHCUKBPTW5DR5RNXOHCTJD5U76A6EEZXYZAQFRQEEQRXQ3CRUZ6Z3MO",
+				label: "Backstop",
+			},
+			{
+				address: "CANIE64BDFKLHROLOIY2KTQVBWUZNUKZP75DLXC272QM7TIN5N3M4LVA",
+				label: "BLNT backfill",
+			},
+			{
+				address: "CBNRUFL5KYTT7TQMYKRMHQU5KY4LDQEUVXLI6ECKJU7OJGHC3OLGJFBV",
+				label: "Supplemental lockup backfill",
+			},
+			{
+				address: "CACSQWCMKG45TUHCQ3LXHOB7YEEJH4W376ZHQPXH2IZ3TE4NJHFZMCY7",
+				label: "Fixed Pool V3",
+			},
+			{
+				address: "CDQMIKIHKA5UY3FQJ2UDTLNX3GOPD3GPNZWSPTOBVOHEUMQJQXOPC7Y3",
+				label: "BLNT:USDC Comet V1.1 LP",
+			},
+			{
+				address: "CA5HX3D47PQZWC2E7VWXCKH4534P2NOJEOIXAWU47MI4QV2FQUYY3FLC",
+				label: "BLNT:XLM Comet V1.1 LP",
+			},
+		],
+		asset: {
+			code: "BLNT",
+			issuer: "GAP2ACGH3O6TRFAERGM4USJ6XWU3U2BFIK224JPV6NI3CUNEEEGTBTFB",
+		},
+		source:
+			"https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/771059f6dd232fd35ea29b7b2a987f0e13bb2372/README.md#canonical-mainnet-addresses",
 	},
 	{
 		// Roles from the owner's own deployment manifests (Raven sls-085,

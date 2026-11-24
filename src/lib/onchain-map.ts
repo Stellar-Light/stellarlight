@@ -13,7 +13,10 @@
  *   - an address linked to more than one project proves nothing and is
  *     linked to none, except inside an issuer-and-token family (one company
  *     and the tokens it issues), where each member keeps it one tier down,
- *     and the groups attributed to one member by hand.
+ *     and the groups attributed to one member by hand;
+ *   - at build time, a contract whose only evidence is code is left out when
+ *     the account that created it deployed another project's own contracts
+ *     and none of this one's (leaveOutOtherOperators).
  * The lane applies the rules again to the file it reads, so a hand edit that
  * gives one address to two unrelated projects links it to neither. The
  * readers it checks each address with are in onchain-sources.ts.
@@ -153,6 +156,87 @@ export function selectLinks<
 		});
 	}
 	return { kept, left };
+}
+
+/** Evidence that says only that a contract runs a project's code: a protocol
+ * registry groups contracts by the code they run, and a code proof matches
+ * the deployed functions or build metadata to a repo. Neither says who runs
+ * the contract. */
+export const CODE_ONLY_EVIDENCE: readonly string[] = [
+	"protocol-registry",
+	"own-wasm-meta",
+	"own-repo-interface",
+];
+
+/**
+ * The operator rule (2026-11-24). A contract whose only evidence is code is
+ * left out when the account that created it deployed another project's own
+ * contracts (a strong link with evidence beyond code) and none of this
+ * project's. Stellar Index's comet registry lists every pool that runs
+ * Comet's code, so the comet row held Blend's BLND:USDC pool (created by
+ * Blend's deployer) and BLNT's two pools (created by BLNT's). A creator no
+ * other project deployed for, or one not known, leaves the link as it is:
+ * code that names its author is still evidence when nothing contradicts it.
+ * `createdBy` is the creating account, from the ledger, or null.
+ */
+export function leaveOutOtherOperators<
+	T extends {
+		slug: string;
+		kind: string;
+		tier: string;
+		evidence: readonly string[];
+		createdBy?: string | null;
+	},
+>(rows: readonly T[]): { kept: T[]; left: Array<{ row: T; reason: string }> } {
+	const codeOnly = (r: T) =>
+		r.evidence.length > 0 &&
+		r.evidence.every((e) => CODE_ONLY_EVIDENCE.includes(e));
+	const deployedFor = new Map<string, Set<string>>();
+	for (const r of rows)
+		if (
+			r.kind === "contract" &&
+			r.tier === "strong" &&
+			r.createdBy &&
+			!codeOnly(r)
+		)
+			deployedFor.set(
+				r.createdBy,
+				(deployedFor.get(r.createdBy) ?? new Set()).add(r.slug),
+			);
+	const kept: T[] = [];
+	const left: Array<{ row: T; reason: string }> = [];
+	for (const r of rows) {
+		const slugs = r.createdBy ? deployedFor.get(r.createdBy) : undefined;
+		if (r.kind === "contract" && codeOnly(r) && slugs && !slugs.has(r.slug))
+			left.push({
+				row: r,
+				reason: `created by the deployer of ${[...slugs].sort().join(", ")}, not of ${r.slug}: code alone does not say who runs it`,
+			});
+		else kept.push(r);
+	}
+	return { kept, left };
+}
+
+/**
+ * The contracts a stored row holds that a seed or the map now gives to
+ * another row (`owner`: address to slug). They leave the row even when it has
+ * no join key left: that is a curator's or the map's reading, not a read that
+ * failed. `gone` names the row that holds each one now.
+ */
+export function settledElsewhere<T extends { address?: unknown }>(
+	slug: string,
+	stored: readonly T[],
+	owner: ReadonlyMap<string, string>,
+): { keep: T[]; gone: Array<{ contract: T; to: string }> } {
+	const keep: T[] = [];
+	const gone: Array<{ contract: T; to: string }> = [];
+	for (const c of stored) {
+		const to =
+			typeof c?.address === "string" ? owner.get(c.address) : undefined;
+		if (to && to !== slug) gone.push({ contract: c, to });
+		else keep.push(c);
+	}
+	return { keep, gone };
 }
 
 /** Present, absent, or null when it could not be checked. */
