@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-11-24T18:45:20.782Z",
+	"asOf": "2026-11-24T19:19:47.293Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 113,
 	"healthy": 105,
@@ -16,8 +16,8 @@
 		},
 		{
 			"file": "raven-eval-parity.yml",
-			"state": "standing-signal",
-			"why": "18 run(s) red at its declared signal step since its last green 19d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Truth battery (guard D — rotating probes, curated answer key)\")"
+			"state": "failing",
+			"why": "19 failed run(s) since its last green 19d ago — it is trying and losing, not idle; dies at \"Code-truth probes (the defined code-level question set)\""
 		},
 		{
 			"file": "refresh-rwa.yml",
@@ -27,7 +27,7 @@
 		{
 			"file": "supersession-freshness.yml",
 			"state": "standing-signal",
-			"why": "9 run(s) red at its declared signal step since its last green 70d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Propagate the check's exit code\")"
+			"why": "10 run(s) red at its declared signal step since its last green 70d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Propagate the check's exit code\")"
 		},
 		{
 			"file": "task-lane.yml",
@@ -42,7 +42,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "82 failed run(s) since its last green 70d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "83 failed run(s) since its last green 70d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -217,10 +217,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-11-12T19:16:41Z",
-			"ageDays": 11,
+			"ageDays": 12,
 			"graceDays": 45,
 			"runs": 4,
-			"why": "last green 11d ago (manual tool — age not judged)"
+			"why": "last green 12d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "basis-from-deployment.yml",
@@ -304,10 +304,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:42:22Z",
+			"lastSuccessAt": "2026-11-24T19:06:06Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -315,7 +315,7 @@
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:42:22Z",
+			"lastSuccessAt": "2026-11-24T19:17:16Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -326,7 +326,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:42:22Z",
+			"lastSuccessAt": "2026-11-24T19:17:16Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -359,10 +359,10 @@
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T16:31:38Z",
+			"lastSuccessAt": "2026-11-24T18:58:45Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 63,
+			"runs": 64,
 			"why": "last green 0d ago"
 		},
 		{
@@ -414,10 +414,10 @@
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T17:13:36Z",
+			"lastSuccessAt": "2026-11-24T19:06:06Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -744,7 +744,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:07:02Z",
+			"lastSuccessAt": "2026-11-24T19:06:06Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 97,
@@ -766,7 +766,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:42:22Z",
+			"lastSuccessAt": "2026-11-24T19:17:16Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -810,7 +810,7 @@
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:42:22Z",
+			"lastSuccessAt": "2026-11-24T19:17:16Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -821,7 +821,7 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:03:02Z",
+			"lastSuccessAt": "2026-11-24T18:42:22Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 78,
@@ -875,12 +875,12 @@
 			"file": "raven-eval-parity.yml",
 			"name": "raven-eval-parity",
 			"cron": "30 7 * * *",
-			"state": "standing-signal",
+			"state": "failing",
 			"lastSuccessAt": "2026-11-05T15:41:15Z",
 			"ageDays": 19,
 			"graceDays": 4,
-			"runs": 40,
-			"why": "18 run(s) red at its declared signal step since its last green 19d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Truth battery (guard D — rotating probes, curated answer key)\")"
+			"runs": 41,
+			"why": "19 failed run(s) since its last green 19d ago — it is trying and losing, not idle; dies at \"Code-truth probes (the defined code-level question set)\""
 		},
 		{
 			"file": "raven-source-recall.yml",
@@ -924,6 +924,17 @@
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 28,
+			"why": "last green 0d ago"
+		},
+		{
+			"file": "refresh-research-corpus.yml",
+			"name": "Refresh Scout research corpus",
+			"cron": "0 6 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-11-24T18:43:21Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 1,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1008,7 +1019,7 @@
 			"name": "Secret scan",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:42:22Z",
+			"lastSuccessAt": "2026-11-24T19:17:16Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1107,11 +1118,11 @@
 			"name": "Status recency queue",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-17T16:58:54Z",
-			"ageDays": 7,
+			"lastSuccessAt": "2026-11-24T18:59:35Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 14,
-			"why": "last green 7d ago"
+			"runs": 15,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "supersession-freshness.yml",
@@ -1121,19 +1132,8 @@
 			"lastSuccessAt": "2026-09-15T12:53:59Z",
 			"ageDays": 70,
 			"graceDays": 21,
-			"runs": 10,
-			"why": "9 run(s) red at its declared signal step since its last green 70d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Propagate the check's exit code\")"
-		},
-		{
-			"file": "sync-hackathon-builds.yml",
-			"name": "Sync hackathon builds",
-			"cron": "43 4 * * *",
-			"state": "ok",
-			"lastSuccessAt": "2026-11-24T15:18:29Z",
-			"ageDays": 0,
-			"graceDays": 4,
-			"runs": 71,
-			"why": "last green 0d ago"
+			"runs": 11,
+			"why": "10 run(s) red at its declared signal step since its last green 70d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Propagate the check's exit code\")"
 		},
 		{
 			"file": "sync-lumenloop.yml",
@@ -1151,10 +1151,10 @@
 			"name": "Sync Stellar Scout skill to distribution repo",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:42:22Z",
+			"lastSuccessAt": "2026-11-24T19:17:16Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 6,
+			"runs": 7,
 			"why": "last green 0d ago (nothing under public/skills/stellar-scout.md, public/skills/references/** has changed since — nothing to do, not stale)"
 		},
 		{
@@ -1195,10 +1195,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:42:22Z",
+			"lastSuccessAt": "2026-11-24T19:06:06Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1250,7 +1250,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:07:02Z",
+			"lastSuccessAt": "2026-11-24T19:06:06Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -1287,7 +1287,7 @@
 			"ageDays": 70,
 			"graceDays": 21,
 			"runs": 96,
-			"why": "82 failed run(s) since its last green 70d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "83 failed run(s) since its last green 70d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
