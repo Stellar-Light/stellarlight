@@ -70,6 +70,32 @@ describe("Mercado Bitcoin incident record", () => {
 	});
 });
 
+describe("Comet incident record", () => {
+	const inc = byId("comet-2026-08-backstop-drain");
+	const text = `${inc.title}\n${inc.body}`;
+
+	it("states the date, the USDC drained, its first transaction and the attacker", () => {
+		expect(text).toContain("Event date: 2026-08-25");
+		expect(text).toContain("717,518.9234092 USDC");
+		expect(text).toContain(
+			"41c898a15b13658d45cb8fbef2e5d93f69a501c5093cb4c0296205d69e2fc622",
+		);
+		expect(text).toContain(
+			"GCENJ4XBLXCPENO7HOIKD2DBAOBUOFZWS2DRHMCCDKC3PQYNSSGHWYHC",
+		);
+		expect(text).toContain(
+			"CAS3FL6TLZKDGGSISDBWGGPXT3NRR4DYTZD7YOD3HMYO6LTJUVGRVEAM",
+		);
+	});
+
+	it("keeps drain, white-hat payout and Blend's state apart, with no USD total", () => {
+		expect(text).toContain("not recorded as returned");
+		expect(text).toContain("Comet Incident Remediation");
+		expect(text).toContain("no on-chain pause");
+		expect(text).not.toMatch(/\$\s?717|717 ?k|USD total of/i);
+	});
+});
+
 describe("every incident record", () => {
 	it("compiles to one chunk under its own title, at a URL no SLP row holds", () => {
 		const urls = new Set<string>();
