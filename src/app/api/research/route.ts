@@ -66,6 +66,8 @@ import {
 	identifierIsPresent,
 	identifiersMissingFrom,
 	isReleaseTitle,
+	liveUpgradeProtocol,
+	mainnetUpgradeBasis,
 	matchesVersionTarget,
 	normalizeQueryText,
 	queryLexTokens,
@@ -77,6 +79,7 @@ import {
 	releaseTagTargets,
 	researchOrder,
 	selectRecencySupplement,
+	titleNamesProtocol,
 	versionTargets,
 } from "@/lib/research-rank";
 import { RESEARCH_SOURCES, requestedSources } from "@/lib/research-sources";
@@ -877,6 +880,42 @@ async function research(
 		}
 	}
 
+	// A mainnet-upgrade question (research-rank.ts mainnetUpgradeIntent) is
+	// answered by the documents that name the protocol mainnet runs, which
+	// the newest-first supplement above misses once a month of roundups is
+	// newer. Fetch them by title, scored with their real cosine.
+	const liveProtocol = liveUpgradeProtocol(q);
+	if (mode === "vector" && queryEmbedding && liveProtocol !== null) {
+		try {
+			const named = await payload.find({
+				collection: "research-docs",
+				where: {
+					and: [
+						{ title: { contains: `protocol ${liveProtocol}` } },
+						...(effectiveSource
+							? [{ source: { equals: effectiveSource } }]
+							: []),
+					],
+				},
+				limit: 25,
+				depth: 0,
+				pagination: false,
+			});
+			const have = new Set(chunks.map((c) => c.id));
+			for (const d of named.docs as unknown as RawResearchDoc[]) {
+				if (
+					have.has(String(d.id)) ||
+					!titleNamesProtocol(d.title, liveProtocol)
+				)
+					continue;
+				const score = cosineVectorScore(queryEmbedding, d.embedding);
+				if (score != null) chunks.push(toRow(d, score));
+			}
+		} catch {
+			// best-effort, like the supplement above
+		}
+	}
+
 	// Lexical pool supplement (brand/lookup queries): a chunk containing EVERY
 	// query token verbatim is lookup-grade evidence cosine can miss entirely —
 	// bare q="Alchemy" embedded alone lands among low-value chunks (all dropped
@@ -1207,6 +1246,9 @@ async function research(
 					: {}),
 				...(sourceAdvisory ? { sourceAdvisory } : {}),
 				...(exactMiss ? { exactMiss } : {}),
+				...(mainnetUpgradeBasis(q)
+					? { mainnetProtocol: mainnetUpgradeBasis(q) }
+					: {}),
 				query: q,
 				mode,
 				model: mode === "vector" ? EMBEDDING_MODEL : null,
@@ -1240,7 +1282,7 @@ async function research(
 				scoreModel: {
 					version: SCORE_MODEL_VERSION,
 					fields: ["relevance", "freshness", "authority"],
-					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document; a document the query names by canonical identifier (CAP-NNNN / SEP-NNNN, any variant form) ranks first with relevance floored at 0.9. Recency-intent queries (latest/newest/recent/current/this-year…) re-rank by publication-dated freshness blended with confidence (maintenance/lastmod dates don't count), and the pool is supplemented with the corpus's newest publication-dated docs sharing the query's topic terms, scored by their real embedding similarity. Curated vertical-anchor docs (e.g. the canonical cross-chain asset-transfer how-to for consumer bridge intent) carry relevance floored at 0.85. A chunk containing EVERY query token verbatim (brand/lookup queries, e.g. a partner product name) carries relevance floored at 0.8 and is fetched into the pool even when cosine retrieval missed it, applied only while coverage is discriminating (at most 5 chunks in the pool carry it; widely-covered tokens are generic vocabulary, not a lookup key). A trailing question mark after other text is removed before the query is embedded, so a question asked with or without one retrieves the same pool. Outside source=scf-proposal, one submission per SCF project is served; further submissions of that project refill the page only after every other document.",
+					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document; a document the query names by canonical identifier (CAP-NNNN / SEP-NNNN, any variant form) ranks first with relevance floored at 0.9. Recency-intent queries (latest/newest/recent/current/this-year…) re-rank by publication-dated freshness blended with confidence (maintenance/lastmod dates don't count), and the pool is supplemented with the corpus's newest publication-dated docs sharing the query's topic terms, scored by their real embedding similarity. A recency question about the mainnet upgrade (recent mainnet upgrade, latest protocol upgrade) ranks first the documents whose title names the protocol mainnet runs, read from the mainnet ledger header and dated in meta.mainnetProtocol; a document naming a higher protocol describes an upgrade not yet voted in. Curated vertical-anchor docs (e.g. the canonical cross-chain asset-transfer how-to for consumer bridge intent) carry relevance floored at 0.85. A chunk containing EVERY query token verbatim (brand/lookup queries, e.g. a partner product name) carries relevance floored at 0.8 and is fetched into the pool even when cosine retrieval missed it, applied only while coverage is discriminating (at most 5 chunks in the pool carry it; widely-covered tokens are generic vocabulary, not a lookup key). A trailing question mark after other text is removed before the query is embedded, so a question asked with or without one retrieves the same pool. Outside source=scf-proposal, one submission per SCF project is served; further submissions of that project refill the page only after every other document.",
 				},
 			}),
 			results: rows.map((r) => pickFields(r, fieldsWanted)),
@@ -1506,6 +1548,9 @@ async function researchMany(
 								note: exactMissNote(missed, unchecked),
 							},
 						}
+					: {}),
+				...(mainnetUpgradeBasis(q)
+					? { mainnetProtocol: mainnetUpgradeBasis(q) }
 					: {}),
 				query: q,
 				mode,

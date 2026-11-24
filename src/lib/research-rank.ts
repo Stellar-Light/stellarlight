@@ -31,6 +31,10 @@
 
 import { type Confidence, researchConfidence } from "@/lib/confidence";
 import { isLowValueChunk } from "@/lib/research-ingest";
+import {
+	MAINNET_UPGRADES,
+	MAINNET_UPGRADES_ASOF,
+} from "@/lib/soroban-versions";
 
 export interface RankableChunk {
 	url: string;
@@ -574,6 +578,50 @@ export function recencyIntent(query: string | undefined): boolean {
 	return !!query && RECENCY_INTENT_RE.test(query);
 }
 
+// "Recent mainnet upgrade" asks which upgrade the network voted in, a fact
+// the mainnet ledger header holds, not a publication date. Under the dated
+// blend alone the answer drifted with the news: on 2026-10-22 the Bell
+// (Protocol 30) posts led a month before its vote, and on 2026-11-24, with
+// Bell live since ledger 65633432, no title in the top 8 named it (weekly
+// roundups led). So documents whose title names the protocol mainnet runs
+// (MAINNET_UPGRADES) rank first; one naming a higher protocol describes an
+// upgrade not voted in, and meta.mainnetProtocol dates the fact.
+const MAINNET_UPGRADE_INTENT_RE =
+	/\b(?:(?:mainnet|network|protocol|stellar)\s+(?:upgrades?|version|vote)|upgrades?\s+(?:on|to)\s+(?:mainnet|the network))\b/i;
+
+export function mainnetUpgradeIntent(query: string | undefined): boolean {
+	return recencyIntent(query) && MAINNET_UPGRADE_INTENT_RE.test(query ?? "");
+}
+
+/** Does this title name Protocol N ("Bell, Protocol 30 Upgrade Guide")? */
+export function titleNamesProtocol(
+	title: string | null | undefined,
+	protocol: number,
+): boolean {
+	return new RegExp(`\\bprotocol\\s*${protocol}(?!\\d)`, "i").test(title ?? "");
+}
+
+const liveUpgrade = () => MAINNET_UPGRADES[MAINNET_UPGRADES.length - 1];
+
+/** The protocol a mainnet-upgrade question is about, or null. */
+export function liveUpgradeProtocol(query: string | undefined): number | null {
+	return mainnetUpgradeIntent(query) ? liveUpgrade().protocol : null;
+}
+
+/** meta.mainnetProtocol: the dated basis a mainnet-upgrade answer rests on. */
+export function mainnetUpgradeBasis(query: string | undefined) {
+	if (!mainnetUpgradeIntent(query)) return null;
+	const u = liveUpgrade();
+	return {
+		protocol: u.protocol,
+		activatedAt: u.activatedAt,
+		firstLedger: u.firstLedger,
+		source: `https://horizon.stellar.org/ledgers/${u.firstLedger}`,
+		asOf: MAINNET_UPGRADES_ASOF,
+		note: `Mainnet has run Protocol ${u.protocol} since ledger ${u.firstLedger} (${u.activatedAt}), the first ledger whose header carries it, read ${MAINNET_UPGRADES_ASOF}. Rows whose title names Protocol ${u.protocol} rank first. A row naming a higher protocol describes an upgrade the network had not voted in as of that read; a release or a testnet upgrade is not a mainnet upgrade.`,
+	};
+}
+
 // Sources whose publishedAt is a MAINTENANCE date, not a publication date.
 // dev-docs rows derive publishedAt from the page's "Last updated on …" footer
 // (ingest-developers-docs.ts, added for data honesty with the explicit note
@@ -901,8 +949,10 @@ export function anchorDocUrls(query: string | undefined): string[] {
  * for 71% (first for 45%, against 8%).
  *
  * Identifier-named documents first (an exact CAP/SEP/release lookup is a
- * lookup, not a search). Then confidence, or under recency intent ("latest",
- * "recent") confidence blended with dated freshness: confidence keeps 60% so
+ * lookup, not a search). Then, for a mainnet-upgrade question, documents
+ * whose title names the protocol mainnet runs. Then confidence, or under
+ * recency intent ("latest", "recent") confidence blended with dated
+ * freshness: confidence keeps 60% so
  * a fresh but irrelevant chunk cannot hijack the page, and freshness is
  * source-aware (a lastmod-dated source cannot spend its edit date as
  * publication evidence; meeting recaps' URL-derived dates still count).
@@ -917,6 +967,9 @@ export function researchOrder(
 ) => number {
 	const pinned = exactPin(query);
 	const recent = recencyIntent(query);
+	const live = liveUpgradeProtocol(query);
+	const isLive = (c: RankableChunk) =>
+		live !== null && titleNamesProtocol(c.title, live);
 	const key = (c: RankableChunk & { confidence: { score: number } }) =>
 		recent
 			? 0.6 * c.confidence.score +
@@ -924,6 +977,7 @@ export function researchOrder(
 			: c.confidence.score;
 	return (a, b) =>
 		Number(pinned(b)) - Number(pinned(a)) ||
+		Number(isLive(b)) - Number(isLive(a)) ||
 		key(b) - key(a) ||
 		b.confidence.score - a.confidence.score ||
 		(b.score ?? 0) - (a.score ?? 0);

@@ -103,7 +103,13 @@ import {
 	LAUNCH_EVIDENCE,
 	LAUNCH_KNOWN_BASES,
 } from "./sdf-cohort";
-import { DEPRECATED_BY, VERSION_STATUSES } from "./soroban-versions";
+import {
+	DEPRECATED_BY,
+	JS_SDK_SUPPORTED_FLOOR_MAJOR,
+	PUBLISHER_DEPRECATED_JS_PACKAGES,
+	SUPPORTED_FLOOR_MAJOR,
+	VERSION_STATUSES,
+} from "./soroban-versions";
 import {
 	AUTHORITY_ROLES,
 	LOCATE_MATCH_MODES,
@@ -9468,6 +9474,22 @@ export const spec: OpenAPISpec = {
 																},
 															},
 														},
+														mainnetProtocol: {
+															type: "object",
+															description:
+																"Present only on a recency question about the mainnet upgrade (recent mainnet upgrade, latest protocol upgrade): the protocol the Stellar mainnet runs, from the header of the first mainnet ledger carrying it (source, a Horizon ledger), read on asOf. Only that ledger makes an upgrade live on mainnet; a release, a testnet upgrade or an announced vote date does not. Rows whose title names this protocol rank first; a row naming a higher protocol describes an upgrade not voted in as of asOf.",
+															properties: {
+																protocol: { type: "integer" },
+																activatedAt: {
+																	type: "string",
+																	format: "date-time",
+																},
+																firstLedger: { type: "integer" },
+																source: { type: "string" },
+																asOf: { type: "string", format: "date" },
+																note: { type: "string" },
+															},
+														},
 													},
 												},
 											],
@@ -10182,8 +10204,7 @@ export const spec: OpenAPISpec = {
 												},
 												deprecatedTotal: {
 													type: "integer",
-													description:
-														"Repos deprecated on EITHER SDK line (= byVersionStatus.deprecated). Not a soroban-sdk count: read bySorobanSdkStatus.deprecated for that, byJsSdkStatus.deprecated for the JS line. A repo deprecated on both counts once here.",
+													description: `Repos among measuredRepos (those carrying a soroban-sdk version) deprecated on EITHER SDK line, by our floors: a soroban-sdk major below ${SUPPORTED_FLOOR_MAJOR}, or a JavaScript Stellar dependency on @stellar/stellar-sdk major below ${JS_SDK_SUPPORTED_FLOOR_MAJOR} or on ${[...PUBLISHER_DEPRECATED_JS_PACKAGES].join(", ")} at any version (their npm publishers mark them deprecated). Equals byVersionStatus.deprecated. Not a soroban-sdk count: read bySorobanSdkStatus.deprecated for that, byJsSdkStatus.deprecated for the JS line. A repo deprecated on both counts once here.`,
 												},
 												deprecatedListTruncated: {
 													type: "boolean",

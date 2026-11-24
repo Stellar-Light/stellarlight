@@ -85,7 +85,7 @@ beforeEach(() => {
 			repo("c/both", "20.0.0", "stellar-sdk@^9.0.0", "deprecated"),
 			// stored "current" from the 2026-08-11 table, when 27 was newest
 			repo("d/fresh-27", "27.0.2", null, "current"),
-			repo("e/newest", "29.0.1", "@stellar/stellar-sdk@^17.4.0", "current"),
+			repo("e/newest", "30.0.0", "@stellar/stellar-sdk@^17.4.0", "current"),
 		],
 	};
 });
@@ -116,7 +116,7 @@ describe("analyze toolchain: one count per SDK line", () => {
 
 	it("derives status from the stored versions with the deployed table, not the stored status", async () => {
 		const t = await toolchain();
-		// d/fresh-27 was stored "current"; with 28 and 29 tabled it is supported.
+		// d/fresh-27 was stored "current"; with 28 to 30 tabled it is supported.
 		expect((t.bySorobanSdkStatus as Doc).current).toBe(1);
 		expect((t.bySorobanSdkStatus as Doc).supported).toBe(2);
 		expect((t.byVersionStatus as Doc).current).toBe(1);
@@ -228,6 +228,21 @@ describe("analyze toolchain: one count per SDK line", () => {
 		])
 			expect(row[k], k).toBeDefined();
 		expect(row.deprecatedBy.enum).toEqual(["soroban-sdk", "js-sdk", "both"]);
+	});
+
+	it("says in the spec which packages and versions deprecatedTotal counts, by whose rule", () => {
+		// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
+		const d: string = (spec as any).paths["/api/analyze"].get.responses["200"]
+			.content["application/json"].schema.properties.toolchain.properties
+			.deprecatedTotal.description;
+		expect(d).toContain(`soroban-sdk major below ${SUPPORTED_FLOOR_MAJOR}`);
+		expect(d).toContain(
+			`@stellar/stellar-sdk major below ${JS_SDK_SUPPORTED_FLOOR_MAJOR}`,
+		);
+		for (const p of PUBLISHER_DEPRECATED_JS_PACKAGES) expect(d).toContain(p);
+		expect(d).toMatch(/our floors/);
+		expect(d).toMatch(/npm publishers/);
+		expect(d).toMatch(/Not a soroban-sdk count/);
 	});
 });
 

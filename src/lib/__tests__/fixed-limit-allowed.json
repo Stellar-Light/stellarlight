@@ -325,7 +325,7 @@
 		"file": "src/app/api/research/route.ts",
 		"collection": "research-docs",
 		"limit": 25,
-		"count": 2,
+		"count": 3,
 		"reason": "ranking pool: bounded candidates; the response states a null total with its basis"
 	},
 	{

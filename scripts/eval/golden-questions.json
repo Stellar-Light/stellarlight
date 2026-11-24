@@ -393,7 +393,7 @@
 			"question": "latest soroban release",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": ["protocol\\s*2[6-9]|zipper"],
+				"answerRegex": ["protocol\\s*(2[6-9]|30)|zipper|bell"],
 				"minTopScore": 0.5
 			}
 		},
@@ -404,8 +404,10 @@
 			"question": "recent mainnet upgrade",
 			"expect": {
 				"liveSource": false,
-				"answerRegex": ["protocol\\s*2[6-9]|zipper"],
-				"minTopScore": 0.5
+				"answerRegex": ["protocol\\s*30|\\bbell\\b"],
+				"expectUrlIncludes": "protocol-30",
+				"minTopScore": 0.5,
+				"note": "Mainnet runs Protocol 30 (Bell) from ledger 65633432, closed 2026-11-23T17:00:06Z (Horizon, read 2026-11-24). Move both locks to the next protocol when MAINNET_UPGRADES in src/lib/soroban-versions.ts gains its row."
 			}
 		},
 		{

@@ -8058,6 +8058,17 @@ export interface operations {
                                 corpusWideTopScore?: number;
                                 corpusWideTopSource?: string | null;
                             };
+                            /** @description Present only on a recency question about the mainnet upgrade (recent mainnet upgrade, latest protocol upgrade): the protocol the Stellar mainnet runs, from the header of the first mainnet ledger carrying it (source, a Horizon ledger), read on asOf. Only that ledger makes an upgrade live on mainnet; a release, a testnet upgrade or an announced vote date does not. Rows whose title names this protocol rank first; a row naming a higher protocol describes an upgrade not voted in as of asOf. */
+                            mainnetProtocol?: {
+                                protocol?: number;
+                                /** Format: date-time */
+                                activatedAt?: string;
+                                firstLedger?: number;
+                                source?: string;
+                                /** Format: date */
+                                asOf?: string;
+                                note?: string;
+                            };
                         };
                         results?: components["schemas"]["ResearchResult"][];
                     };
@@ -8334,7 +8345,7 @@ export interface operations {
                             measuredRepos?: number;
                             /** @description false = the buckets describe only part of the population; a rate taken against scannedRepos would understate every status. */
                             measurementComplete?: boolean;
-                            /** @description Repos deprecated on EITHER SDK line (= byVersionStatus.deprecated). Not a soroban-sdk count: read bySorobanSdkStatus.deprecated for that, byJsSdkStatus.deprecated for the JS line. A repo deprecated on both counts once here. */
+                            /** @description Repos among measuredRepos (those carrying a soroban-sdk version) deprecated on EITHER SDK line, by our floors: a soroban-sdk major below 21, or a JavaScript Stellar dependency on @stellar/stellar-sdk major below 14 or on stellar-sdk, @stellar/stellar-base, soroban-client at any version (their npm publishers mark them deprecated). Equals byVersionStatus.deprecated. Not a soroban-sdk count: read bySorobanSdkStatus.deprecated for that, byJsSdkStatus.deprecated for the JS line. A repo deprecated on both counts once here. */
                             deprecatedTotal?: number;
                             /** @description true = deprecatedRepos is a capped sample (50) and shorter than deprecatedTotal; never read its length as the count. */
                             deprecatedListTruncated?: boolean;
