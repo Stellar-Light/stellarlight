@@ -1,6 +1,7 @@
 /** protocolForSdkMajor — the sdk⇄protocol leg of the CAP join. Pins the
  * documented irregularities so table edits can't silently break the join. */
 import { describe, expect, it } from "vitest";
+import { CAP_REGISTRY } from "../../data/cap-registry";
 import { parseSdkMajor, protocolForSdkMajor } from "../soroban-versions";
 
 describe("protocolForSdkMajor", () => {
@@ -13,6 +14,17 @@ describe("protocolForSdkMajor", () => {
 		// 28"; v29.0.0 moves to soroban-env 29, Protocol 29's host environment.
 		expect(protocolForSdkMajor(28)).toBe(28);
 		expect(protocolForSdkMajor(29)).toBe(29);
+		// v30.0.0: "Update soroban-env and stellar-xdr to the Protocol 30 versions".
+		expect(protocolForSdkMajor(30)).toBe(30);
+	});
+
+	it("joins Protocol 30 to the three CAPs it shipped", () => {
+		// developers.stellar.org software-versions (Protocol 30 Mainnet), the
+		// stellar-core v30.0.0 release notes and each CAP's own preamble
+		// ("Protocol version: 30") agree, read 2026-11-24.
+		expect(
+			CAP_REGISTRY.filter((r) => r.protocolVersion === 30).map((r) => r.cap),
+		).toEqual([84, 87, 88]);
 	});
 
 	it("pins the Whisk irregularity: sdk 23.x targets protocol 24", () => {

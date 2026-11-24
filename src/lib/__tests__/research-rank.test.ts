@@ -5,6 +5,8 @@ import {
 	hasFullLexicalCoverage,
 	identifiersMissingFrom,
 	identifierTargets,
+	mainnetUpgradeBasis,
+	mainnetUpgradeIntent,
 	normalizeQueryText,
 	queryLexTokens,
 	rankResearchChunks,
@@ -1452,5 +1454,117 @@ describe("incident record against its freeze proposal", () => {
 			},
 		);
 		expect(out[0].source).toBe("slp");
+	});
+});
+
+// 2026-11-24: mainnet has run Protocol 30 (Bell) since ledger 65633432
+// (2026-11-23T17:00:06Z), yet "recent mainnet upgrade" led with roundups and
+// newer posts; on 2026-10-22 the same blend put the Bell posts first a month
+// before the vote. Confidences are the ones served on 2026-11-24.
+describe("a mainnet-upgrade question ranks the upgrade mainnet runs", () => {
+	const AT = Date.parse("2026-11-24T03:00:00Z");
+	const row = (
+		title: string,
+		source: string,
+		day: string | null,
+		conf: number,
+	) => ({
+		source,
+		url: `https://example.org/${encodeURIComponent(title)}`,
+		title,
+		content: "x",
+		publishedAt: day ? `${day}T00:00:00.000Z` : null,
+		score: 0.7,
+		confidence: { score: conf },
+	});
+	const POOL = [
+		row("Q3 2026: The rail, put to work", "sdf-blog", "2026-11-16", 0.54),
+		row(
+			"Stellar Weekly Roundup: Week of Nov 20, 2026",
+			"lumenloop-research",
+			"2026-11-20",
+			0.5,
+		),
+		row("Soroban Rust SDK v30", "sdf-blog", "2026-11-23", 0.48),
+		row(
+			"SCF Q4 2026 Public Goods Award Results",
+			"lumenloop-research",
+			"2026-11-13",
+			0.5,
+		),
+		row("Software Versions", "dev-docs", "2026-10-07", 0.89),
+		row("Bell, Protocol 30 Upgrade Guide", "sdf-blog", "2026-10-20", 0.6),
+		row(
+			"Introducing Bell, Protocol 30 on Stellar",
+			"sdf-blog",
+			"2026-10-20",
+			0.53,
+		),
+		row(
+			"Stellar Zipper, Protocol 27 Upgrade Guide",
+			"sdf-blog",
+			"2026-06-04",
+			0.82,
+		),
+		// An announced upgrade, published after the last vote: not on mainnet.
+		row(
+			"Introducing Next, Protocol 31 on Stellar",
+			"sdf-blog",
+			"2026-11-22",
+			0.6,
+		),
+	];
+	const order = (q: string) =>
+		[...POOL].sort(researchOrder(q, AT)).map((r) => r.title);
+
+	it("puts the documents naming Protocol 30 first, above an announced Protocol 31", () => {
+		for (const q of ["recent mainnet upgrade", "latest protocol upgrade"]) {
+			const titles = order(q);
+			expect(titles.slice(0, 2).sort(), q).toEqual([
+				"Bell, Protocol 30 Upgrade Guide",
+				"Introducing Bell, Protocol 30 on Stellar",
+			]);
+			expect(
+				titles.indexOf("Introducing Next, Protocol 31 on Stellar"),
+			).toBeGreaterThan(1);
+		}
+	});
+
+	it("leaves other recency questions on the dated blend", () => {
+		expect(order("latest lending protocol")[0]).toBe(
+			"Introducing Next, Protocol 31 on Stellar",
+		);
+		expect(order("latest soroban release")[0]).toBe(
+			"Introducing Next, Protocol 31 on Stellar",
+		);
+	});
+
+	it("fires only on a recency question about the network upgrade", () => {
+		for (const q of [
+			"recent mainnet upgrade",
+			"latest protocol upgrade",
+			"latest network upgrade",
+			"most recent upgrade on mainnet",
+			"newest stellar protocol version",
+		])
+			expect(mainnetUpgradeIntent(q), q).toBe(true);
+		for (const q of [
+			"latest lending protocol",
+			"latest soroban release",
+			"mainnet upgrade process",
+			"what is the current protocol version",
+		])
+			expect(mainnetUpgradeIntent(q), q).toBe(false);
+	});
+
+	it("serves the ledger the answer rests on, dated", () => {
+		expect(mainnetUpgradeBasis("recent mainnet upgrade")).toMatchObject({
+			protocol: 30,
+			firstLedger: 65633432,
+			activatedAt: "2026-11-23T17:00:06Z",
+			source: "https://horizon.stellar.org/ledgers/65633432",
+			asOf: "2026-11-24",
+		});
+		expect(mainnetUpgradeBasis("latest lending protocol")).toBeNull();
 	});
 });

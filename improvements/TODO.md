@@ -14,96 +14,6 @@ item is fixed. API base URL: https://stellarlight.xyz.
 
 ## Now
 
-2. **Served fields the spec still does not declare.**
-   Probe: `/api/stablecoins` rows serve `paymentsCount24h` while the 1.9.90
-   spec never mentions it (2026-10-22). Found with one live request per GET
-   operation on 2026-10-22: getQualityReport (14 fields); getSkill
-   `skill.argumentHint`, `rawUrl`, `registry`, `userInvocable`; searchProjects and searchRepos
-   `codeVerified.ciPresent` and `codeVerified.testsPresent`; getHackathons
-   `meta.counts.curated` and `meta.counts.dorahacks`; getChanges
-   `meta.generatedAt`; getPartners `meta.counts.filteredOut`; listAudits
-   `meta.counts.matched`; listSkills `meta.counts.bySource`; getStablecoins
-   `stablecoins[].paymentsCount24h`.
-   State: the four operations named on 2026-10-20 are declared (#1850), and
-   `scripts/contract/served-shape.ts` lists any undeclared field, null or
-   enum value in a body. compareHackathons' deltas are declared by the
-   winners-only coverage round.
-   Done when: every operation's served fields and nulls are declared and a
-   test walks each operation's body with served-shape.
-
-3. **Five confirmed build-to-project links are missing.**
-   Probe: `/api/hackathons/review?link=https://github.com/hoops-finance/cometswap`
-   says no project lists the repo, while searchProjects lists
-   `Hoops-Finance/cometswap` among the hoops project's repos.
-   Found: the previous-attempts lane (2026-10-20), confirming each by reading
-   both descriptions. The causes differ, so no one rule fixes them: the link
-   rule reads a project's own `github.repos` and its `links.github`, never
-   its indexed repos (Comet x Hoops; letter case is not the cause, both sides
-   are lowercased in `src/lib/hackathon-build-links.ts`); the repo moved
-   (YieldBack.Cash, clevercon); the build has no repo and a different demo
-   host (PayZoll); only the name matches (Juntta). Broad rules measured badly
-   in that lane: name-only links were right 3 of 15 times, indexed-repo
-   links about 1 of 5.
-   State: 2026-10-23, branch `lane/lk-winner-scf-links` (not merged): two
-   measured rules link a winner by name plus a page signal, in place of a
-   curated basis for two of the five: YieldBack.Cash (its SCF page links
-   the submission, `scf-page-and-name`) and PayZoll (its page lists the
-   project's X account, `submission-links-and-name`), each on the sync
-   lane's next run; clevercon links on that run through 1.9.95's
-   `moved-repo`. Still unlinked: Comet x Hoops (its name is not the
-   project's name, though its page lists the project's X account) and
-   Juntta (not a winner; the page rules read winners only).
-   `improvements/audits/2026-10-23-winner-scf-links/`.
-   2026-11-24, live 1.9.163: YieldBack.Cash, PayZoll and clevercon are
-   linked by those rules; Comet x Hoops Finance (`dorahacks-buidl-27417`)
-   and Juntta (`dorahacks-buidl-30931`) are not. Branch
-   `lane/r1124-hackathon-truth` (spec 1.9.164, not merged) records all five
-   in `src/data/curated-build-links.ts`, each with the evidence read on
-   2026-11-24: Comet x Hoops Finance's repo sits under the hoops GitHub
-   organisation, its page lists the hoops X account and its demo is on a
-   subdomain of hoops.finance; Juntta's page lists the Instagram and
-   LinkedIn accounts juntta.org links in its footer. The sync lane reads
-   the records after its rules and serves basis `curated` when no rule
-   finds the project (a spec enum entry); a rule that finds the same
-   project keeps its basis.
-   Done when: the five verified links are recorded as a curated link basis
-   the link lane reads (a spec enum entry for the basis), the lane re-ran
-   (dry run, then execute), and the five links are live.
-
-4. **Events with announced winners show 0 winners.**
-   Probe: `/api/hackathons/build-on-stellar-philippines-2026` has
-   `stats.winners == 0`, while bitpinas.com (2026-06-08) names five winners
-   with their places.
-   Found (2026-10-22; every source fetched again by the orchestrator): of 13
-   past events served with 0 winners, 4 have winners on readable pages:
-   hackmeridian-2025 (six, waiting on the curated-builds execute);
-   build-on-stellar-philippines-2026 (AbotPera champion, PinkRaft and Axial
-   runners-up, Sobre and TyFi best use of Stellar); alebrije2026 (Mañana
-   Seguro, Seyf and Gibbor named as winning projects, no places; BAF
-   newsletter, 2026-05-04); apac-stellar-hackathon-2026 (Olio, first in the
-   Payment and Consumer Application track; risein.com, 2026-09-01; the other
-   two tracks not found). The other 9 show none announced on any readable
-   page, and each DoraHacks-sourced one reports `winner_announced: false`.
-   The earlier note that stellar-pulso-hackathon's page says winners were
-   announced was a planned timeline row.
-   State: live 1.9.163 (2026-11-24): the four events serve their confirmed
-   winners (Philippines 5, hackmeridian-2025 6, alebrije2026 2 of 3 with a
-   note that Seyf is not stored, APAC 1 with a note that only one track's
-   winners are published), and the 9 say not announced upstream. A tenth
-   event ended since with the same bare 0:
-   `/api/hackathons/blockchain-innovation-challenge-waterloo-2026` serves
-   `stats.winners` 0 with `winnersNote` null (the organizer's page and a
-   web search named no winner on 2026-11-24, six days after its final
-   awards). Cause: a curated event's note was hand-written per event, so a
-   newly ended one with none said nothing. Branch
-   `lane/r1124-hackathon-truth` (spec 1.9.164, not merged) adds Waterloo's
-   dated note and, for any ended curated event with no winner and no dated
-   note, a note that its 0 is not a count.
-   Done when: the confirmed winners are served (curated rows or an override,
-   then the curated-builds lane run), a partial event says it is partial,
-   and every ended event with no winner served says why instead of a bare 0
-   (the Waterloo probe serves a note).
-
 5. **Secret scanning covers new commits only.**
    Probe: `gh api repos/Stellar-Light/stellarlight --jq
    .security_and_analysis.secret_scanning_push_protection.status` answers
@@ -152,25 +62,26 @@ item is fixed. API base URL: https://stellarlight.xyz.
    allbridge); the general unlink is still missing.
 
 7. **"Recent mainnet upgrade" leads with an upgrade not yet on mainnet.**
-   Probe: in `/api/research?q=recent mainnet upgrade&limit=5`, no row
-   names Protocol 26 to 29 or Zipper. Rows 1 and 2 are "Introducing Bell,
-   Protocol 30 on Stellar" and the Bell upgrade guide (published
-   2026-10-20; the mainnet vote is 2026-11-23); with `limit=8` the
-   Zipper (Protocol 27) guide is sixth. The golden case `recent-mainnet-upgrade` fails on 1.9.87
-   (2026-10-21): the one research failure among 37 graded (2 more were
-   N/A).
-   State: cause measured 2026-10-22. "recent" fires recency intent, which
-   sorts by 0.6 x confidence + 0.4 x dated freshness (half-life 120 days):
-   the Bell rows (confidence 0.53, relevance 0.37 and 0.36, 2 days old)
-   score 0.713 and the Zipper guide (confidence 0.82, relevance 0.85, 140
-   days old) 0.670. No field on a row says whether an upgrade is announced
-   or live; the vote dates sit only in the posts' prose. A multiplicative
-   blend would lift the undated "Software Versions" page back to the top,
-   so a fix needs an A/B on the golden set and the recency questions.
-   Done when: the latest upgrade live on mainnet is in the top 5 for that
-   question, an announced upgrade is labelled with its vote date or ranked
-   below it, and the golden case accepts Protocol 30 once its mainnet vote
-   passes.
+   Probe: in `/api/research?q=recent mainnet upgrade&limit=5`, no row's url
+   holds `protocol-30` and `meta.mainnetProtocol` is absent (2026-11-24,
+   spec 1.9.163). Mainnet has run Protocol 30 (Bell) since ledger 65633432,
+   closed 2026-11-23T17:00:06Z (Horizon ledger headers); the top 5 are the
+   Q3 2026 report, the Nov 20 roundup, Soroban Rust SDK v30, the SCF Q4
+   award results and Software Versions. On 2026-10-22 the same rule put the
+   Bell posts first, a month before the vote: "recent" fires recency intent,
+   which sorts by 0.6 x confidence + 0.4 x dated freshness (half-life 120
+   days), so the answer followed publication dates, never the ledger.
+   State: branch `lane/r1124-answer-truth` adds MAINNET_UPGRADES (the first mainnet ledger at Protocols 25 to
+   30, read from Horizon) to `src/lib/soroban-versions.ts`; a recency
+   question about the mainnet upgrade ranks first the documents whose title
+   names the protocol mainnet runs (fetched when similarity missed them),
+   serves `meta.mainnetProtocol` with the ledger and its date, and the
+   nightly SDK table check fails when mainnet moves past the list. On a
+   read-only local run the Bell guide and announcement serve 1st and 2nd.
+   The golden case now locks `protocol-30` in the top 5.
+   Done when: on the live API the probe serves a `protocol-30` url in the
+   top 5 and `meta.mainnetProtocol.protocol` 30, checked by someone other
+   than the author.
 
 8. **vetIdea lists prior-art builds that share only words, admitted by the
    meaning score.**
@@ -235,29 +146,6 @@ item is fixed. API base URL: https://stellarlight.xyz.
     fewer builds graded 0 on it with no build graded 2 removed there or
     lost on any earlier labeled set (the short ideas included), measured as
     in that directory.
-
-12. **The toolchain deprecated count reads as a soroban-sdk count.**
-    Probe: `curl -s 'https://stellarlight.xyz/api/analyze?dimension=toolchain' | jq '.toolchain | {deprecatedTotal, soroban: .bySorobanSdkStatus.deprecated, js: .byJsSdkStatus.deprecated, rowsWithReason: ([.deprecatedRepos[] | select(.deprecatedBy)] | length)}'`
-    serves `soroban` and `js` as null and `rowsWithReason` 0 on 2026-11-12 (spec
-    1.9.136): `deprecatedTotal` 1,284 of 5,865 is Rust OR JS, but only 404
-    repos pin a deprecated soroban-sdk; 881 pin one that is not deprecated
-    (824 supported, 25 current, 32 unreadable) and are deprecated only
-    through their JavaScript Stellar dependency, as are 36 of the 50 sample
-    rows. An external
-    README cites the 1,285 as repos "on a deprecated soroban-sdk", and its
-    tool builds its deprecated-version list from the sample's
-    `sorobanSdkVersion`, which today includes 29.0.0, 27.0.2 and 26. The SDK
-    table was also stale (2026-08-11, stopping at major 27) and the "CB6"
-    check its comment promised never existed. Found from the owner's probe
-    and a full-corpus read of `/api/repos` (rounds/2026-11-12-toolchain-truth.md).
-    State: branch `lane/toolchain-truth` (spec 1.9.140, renumbered at
-    merge) serves the per-line counts, a `deprecatedBy` reason per row with
-    soroban-sdk-line rows first in the sample, and `deprecationRule`, refreshes the table to
-    soroban-sdk 29 and Protocol 29, and adds a nightly table check; waiting
-    for the owner's go on the PR.
-    Done when: the probe serves `soroban` 404, `js` about 1,041 and
-    `rowsWithReason` equal to the row count on the live API, checked by
-    someone other than the author.
 
 ## Next
 
@@ -1053,7 +941,10 @@ Found 2026-10-23 in review of the smart wallet O2 ship
 - Stored `versionStatus` lags the 2026-11-12 SDK table: 166 of 5,865 scanned
   repos (rows on soroban-sdk 27 and 28 stored "current", one stored before
   its JS read) differ from a recompute with the new table (full-corpus read of
-  `/api/repos`, rounds/2026-11-12-toolchain-truth.md). The Scout statuses
+  `/api/repos`, rounds/2026-11-12-toolchain-truth.md). Re-read 2026-11-24
+  over 5,872 rows: 3 differ from the 2026-11-12 table and 46 from the
+  2026-11-24 table (Protocol 30), 43 of them rows on soroban-sdk 29 stored
+  "current" that now read supported. The Scout statuses
   read through the table at request time; the stored value still feeds
   repoScore (current +0.20, supported +0.12) and is what the raw Payload
   `/api/repos` rows serve. A re-scan of those rows also lowers codeDepth

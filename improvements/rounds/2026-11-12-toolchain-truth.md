@@ -200,3 +200,46 @@ Pass 5 on commit 798b894b.
 ## Outcome
 
 (appended at merge and after the live re-check)
+
+Merged as #1956 (0eee7e7a), with the SDK facts in #1957. Live re-check on
+2026-11-24 at about 02:50 UTC, spec 1.9.163, by an agent that did not
+write the lane (lane/r1124-answer-truth): the queue probe served
+`deprecatedTotal` 1,291, `soroban` 404, `js` 1,041 and `rowsWithReason` 50
+of 50 rows (`measuredRepos` 5,872). The npm registry still marks
+stellar-sdk, @stellar/stellar-base and soroban-client deprecated (read the
+same day). Queue item 12 closed. That lane also makes the spec description
+of `deprecatedTotal` name the packages, versions and whose rule it counts
+by.
+
+## Protocol 30 table bump (2026-11-24, lane/r1124-answer-truth)
+
+- Upstream, read 2026-11-24 03:30 UTC: Horizon mainnet root
+  current_protocol_version 30, core_supported_protocol_version 30, stellar-core
+  30.0.0; crates.io soroban-sdk max_stable_version 30.0.0 (published
+  02:49 UTC; 30.0.0-rc.1 on 2026-10-21); npm @stellar/stellar-sdk latest
+  17.4.0, lts-16 16.4.1, no v18; npm deprecated fields of stellar-sdk,
+  @stellar/stellar-base and soroban-client unchanged.
+- Protocol sourcing: rs-soroban-sdk v30.0.0 release notes
+  (github.com/stellar/rs-soroban-sdk/releases/tag/v30.0.0) list CAP-0084 and
+  CAP-0087 under "Protocol 30" and "Update soroban-env and stellar-xdr to the
+  Protocol 30 versions"; its crates.io dependencies pin soroban-env =30.0.1,
+  stellar-xdr =30.0.0. Software versions page (stellar-docs commit 30338064,
+  2026-11-23): Protocol 30 Mainnet November 23, 2026, Host Environment
+  30.0.1, Rust SDK listed 30.0.0-rc.1, CAP-84, CAP-87, CAP-88. stellar-core
+  v30.0.0 release notes: "bumps the protocol to version 30, which includes"
+  CAP-0084, CAP-0087 and CAP-0088. The three CAP preambles read "Protocol
+  version: 30", status Implemented. rs-soroban-sdk README still supports the
+  two newest majors (29 and 30).
+- CAP registry regenerated (`scripts/data/generate-cap-registry.ts`, first
+  into a scratch directory and diffed): 84 and 87 gain Protocol 30, 88 added
+  (30), 89 and 90 added (Draft, 31), 81 loses Protocol 26 (upstream set it to
+  TBD in stellar-protocol 65e2b626, 2026-08-31), 9 rows Implemented to Final.
+- Corpus: 6 pages of `/api/repos?where[sorobanSdkVersion][exists]=true`,
+  5,872 rows, 5,872 unique ids. Recomputed with the 2026-11-12 table, the
+  counts equal the live toolchain block (soroban-sdk current 48, supported
+  5,325, deprecated 404, unknown 95; JS 116, 1,720, 1,041, 2,995; combined
+  43, 4,488, 1,291, 50). With the new table: soroban-sdk current 0 (no repo
+  pins 30), supported 5,373, deprecated 404, unknown 95; JS unchanged;
+  combined current 0, supported 4,531, deprecated 1,291, unknown 50. 48 rows
+  move current to supported on the soroban-sdk line, 43 combined. Stored
+  versionStatus differs from the table on 3 rows before, 46 after.

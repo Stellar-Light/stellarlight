@@ -22,11 +22,35 @@
  * moved to Protocol 29.
  */
 
-export const TABLE_ASOF = "2026-11-12";
+export const TABLE_ASOF = "2026-11-24";
 
 /** The latest GA protocol version as of TABLE_ASOF. Drives current/supported.
- * Horizon mainnet root on 2026-11-12: current_protocol_version 29. */
-export const LATEST_PROTOCOL = 29;
+ * Horizon mainnet root on 2026-11-24 (03:30 UTC): current_protocol_version
+ * 30, core_supported_protocol_version 30, stellar-core 30.0.0. */
+export const LATEST_PROTOCOL = 30;
+
+/**
+ * Protocol upgrades the mainnet validators voted in: the first mainnet ledger
+ * whose header carries each protocol_version, found by bisecting Horizon's
+ * /ledgers/{sequence} (read MAINNET_UPGRADES_ASOF). Only the ledger decides
+ * "on mainnet": a release, a testnet upgrade or an announced vote date does
+ * not. Newest last. Kept apart from LATEST_PROTOCOL, which drives SDK
+ * statuses and moves with the SDK table. The nightly table check flags a
+ * mainnet protocol newer than the last row (versionTableStaleness).
+ */
+export const MAINNET_UPGRADES_ASOF = "2026-11-24";
+export const MAINNET_UPGRADES: ReadonlyArray<{
+	protocol: number;
+	firstLedger: number;
+	activatedAt: string;
+}> = [
+	{ protocol: 25, firstLedger: 60889907, activatedAt: "2026-01-22T17:00:06Z" },
+	{ protocol: 26, firstLedger: 62447231, activatedAt: "2026-05-06T17:00:06Z" },
+	{ protocol: 27, firstLedger: 63386819, activatedAt: "2026-07-08T17:00:10Z" },
+	{ protocol: 28, firstLedger: 64458446, activatedAt: "2026-09-16T17:00:06Z" },
+	{ protocol: 29, firstLedger: 64717645, activatedAt: "2026-10-01T17:00:07Z" },
+	{ protocol: 30, firstLedger: 65633432, activatedAt: "2026-11-23T17:00:06Z" },
+];
 
 /**
  * soroban-sdk MAJOR version → the Stellar protocol it targets. Keyed by the sdk
@@ -60,16 +84,25 @@ export const SDK_MAJOR_PROTOCOL: ReadonlyArray<{
 	{ major: 28, protocol: 28 },
 	// v29.0.0 (2026-10-07) moves to soroban-env 29.0.0, the Smart Contract Host
 	// Environment the software-versions page lists for P29 (mainnet
-	// 2026-10-01). P29 added no CAPs; that page still lists Rust SDK 28.0.0 as
-	// the SDK for it. Use 29.0.1: 29.0.0 shipped the v28 wasmi runtime.
+	// 2026-10-01). P29 added no CAPs; that page listed Rust SDK 28.0.0 for it
+	// on 2026-11-12 and 29.0.1 on 2026-11-24. Use 29.0.1: 29.0.0 shipped the
+	// v28 wasmi runtime.
 	{ major: 29, protocol: 29 },
+	// v30.0.0 (crates.io 2026-11-24) release notes, "Protocol 30": CAP-0084
+	// and CAP-0087, and "Update soroban-env and stellar-xdr to the Protocol 30
+	// versions" (soroban-env =30.0.1, stellar-xdr =30.0.0). P30 (Bell) reached
+	// mainnet 2026-11-23 with CAP-0084, CAP-0087 and CAP-0088
+	// (software-versions page, stellar-core v30.0.0 release notes); that page
+	// still lists Rust SDK 30.0.0-rc.1 for it.
+	{ major: 30, protocol: 30 },
 ];
 
 /**
  * Oldest sdk major still "supported" (>= this → supported/current, < this →
  * deprecated). OUR floor, not the publisher's: the rs-soroban-sdk README
  * (since 2026-05-06) supports only "the two most recent soroban-sdk major
- * releases" with critical security fixes, 28 and 29 on 2026-11-12. Moving
+ * releases" with critical security fixes, 28 and 29 on 2026-11-12, 29 and
+ * 30 on 2026-11-24 (README re-read that day). Moving
  * this to the publisher's window is an owner decision (improvements/TODO.md).
  */
 export const SUPPORTED_FLOOR_MAJOR = 21;
@@ -110,10 +143,12 @@ export const DEPRECATED_BY = ["soroban-sdk", "js-sdk", "both"] as const;
  *   v13 2024-11-14 · v12 2024-05-02 · v11 2023-12-07
  * Re-read 2026-11-12: latest=17.4.0, lts-16=16.4.1, rc=17.0.0-rc.2; no v18.
  *   The js-stellar-sdk README supports v17 and v16 ("through March 2027").
+ * Re-read 2026-11-24 (Protocol 30 on mainnet): latest=17.4.0, lts-16=16.4.1;
+ *   no v18; the README and the three npm deprecated fields below unchanged.
  *
  * MAINTENANCE: re-verify against `npm view @stellar/stellar-sdk dist-tags`.
  */
-export const JS_SDK_ASOF = "2026-11-12";
+export const JS_SDK_ASOF = "2026-11-24";
 
 /** dist-tags.latest major at JS_SDK_ASOF. */
 export const JS_SDK_LATEST_MAJOR = 17;
@@ -270,10 +305,16 @@ export function versionTableStaleness(
 		networkProtocol: number;
 		jsSdkLatest: string;
 	},
-	table = {
+	table: {
+		newestSdkMajor: number;
+		latestProtocol: number;
+		jsLatestMajor: number;
+		mainnetUpgrade?: number;
+	} = {
 		newestSdkMajor: SDK_MAJOR_PROTOCOL[SDK_MAJOR_PROTOCOL.length - 1].major,
 		latestProtocol: LATEST_PROTOCOL,
 		jsLatestMajor: JS_SDK_LATEST_MAJOR,
+		mainnetUpgrade: MAINNET_UPGRADES[MAINNET_UPGRADES.length - 1].protocol,
 	},
 ): string[] {
 	const out: string[] = [];
@@ -285,6 +326,13 @@ export function versionTableStaleness(
 	if (upstream.networkProtocol > table.latestProtocol)
 		out.push(
 			`mainnet runs protocol ${upstream.networkProtocol}; LATEST_PROTOCOL is ${table.latestProtocol}.`,
+		);
+	if (
+		table.mainnetUpgrade !== undefined &&
+		upstream.networkProtocol > table.mainnetUpgrade
+	)
+		out.push(
+			`mainnet runs protocol ${upstream.networkProtocol}; MAINNET_UPGRADES stops at ${table.mainnetUpgrade}: add its first ledger.`,
 		);
 	const js = parseSdkMajor(upstream.jsSdkLatest);
 	if (js !== null && js > table.jsLatestMajor)
