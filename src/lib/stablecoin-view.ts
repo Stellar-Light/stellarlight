@@ -25,12 +25,13 @@ export function formatCount(n: number | null | undefined): string {
 }
 
 /**
- * Supply in its OWN peg, with the unit spelled out — because 100.87M GYEN is
- * yen, not dollars, and a bare number invites exactly that misreading.
+ * Supply with its unit spelled out — because 100.87M GYEN is yen, not
+ * dollars, and a bare number invites exactly that misreading. The asset page
+ * passes the token's own code (605.1K USDE), never its peg.
  */
 export function formatSupply(
 	n: number | null | undefined,
-	peg: string | null | undefined,
+	unit: string | null | undefined,
 ): string {
 	if (n == null || !Number.isFinite(n)) return "-";
 	const abs = Math.abs(n);
@@ -42,7 +43,7 @@ export function formatSupply(
 				: abs >= 1e3
 					? `${(n / 1e3).toFixed(1)}K`
 					: n.toFixed(2);
-	return peg ? `${v} ${peg}` : v;
+	return unit ? `${v} ${unit}` : v;
 }
 
 /** Signed percent, e.g. "+2.4%" / "−5.8%". Null → em dash (never "0%"). */
@@ -82,6 +83,23 @@ export function displaySupply(n: number | null | undefined): string {
 export function displayUSD(n: number | null | undefined): string {
 	if (n == null || !Number.isFinite(n)) return "N/A";
 	return `$${displaySupply(n)}`;
+}
+
+/** The 24h transfer volume tile: the USD sum over the rows that were
+ *  measured, and how many were. Null when none was: never $0 for not
+ *  measured. */
+export function transferVolumeTotal(
+	rows: Array<{ transferVolumeRaw: number | null }>,
+): { usd: number | null; measured: number } {
+	const measured = rows.flatMap((r) =>
+		r.transferVolumeRaw != null && Number.isFinite(r.transferVolumeRaw)
+			? [r.transferVolumeRaw]
+			: [],
+	);
+	return {
+		usd: measured.length ? measured.reduce((t, v) => t + v, 0) : null,
+		measured: measured.length,
+	};
 }
 
 /** Holders with separators: "2,284,095". */

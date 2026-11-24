@@ -53,6 +53,7 @@ import {
 	supplyBaseline,
 	supplyBaselineWindow,
 } from "../src/lib/stablecoin-pipeline";
+import { transferWindow } from "../src/lib/stablecoin-transfer-volume";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 
@@ -136,7 +137,15 @@ async function main() {
 		}
 	}
 
-	const measured = await measureRegistry(STABLECOIN_REGISTRY);
+	// One 24-hour window for every row, so the rows add up to a total over
+	// the same hours. Null: no row gets a transfer volume this run.
+	const transfers = await transferWindow();
+	console.log(
+		transfers
+			? `transfer window: ${transfers.from} to ${transfers.to} (ledgers ${transfers.startLedger} to ${transfers.endLedger})`
+			: "transfer window: could not be read from Soroban RPC; transfer volume is null on every row",
+	);
+	const measured = await measureRegistry(STABLECOIN_REGISTRY, { transfers });
 	const day = utcDay(new Date());
 	let created = 0;
 	let updated = 0;
@@ -227,7 +236,7 @@ async function main() {
 		};
 		const was = (k: string) => (prev?.[k] == null ? "none" : String(prev[k]));
 		console.log(
-			`  ${m.id}: ${m.basis} · supply ${was("supply")} -> ${row.supply ?? "none"} · holders ${was("holders")} -> ${row.holders ?? "none"} · measuredAt ${row.measuredAt ?? "none"}`,
+			`  ${m.id}: ${m.basis} · supply ${was("supply")} -> ${row.supply ?? "none"} · holders ${was("holders")} -> ${row.holders ?? "none"} · transfers 24h ${row.transferVolume24h ?? "none"} (USD ${row.transferVolume24hUSD ?? "none"}) · measuredAt ${row.measuredAt ?? "none"}`,
 		);
 		if (kept) {
 			keptRows++;
@@ -270,6 +279,8 @@ async function main() {
 				holders: m.holders,
 				volume24hUSD: m.volume24hUSD,
 				paymentsCountLifetime: m.paymentsCountLifetime,
+				transferVolume24h: m.transferVolume24h,
+				transferVolume24hUSD: m.transferVolume24hUSD,
 				basis: m.basis,
 				measuredAt: m.measuredAt,
 				source: "stellarlight",
@@ -350,6 +361,12 @@ async function main() {
 	const live = measured.filter((m) => m.basis === "live").length;
 	console.log(
 		`\n${measured.length} assets — ${live} live, ${measured.length - live} static/unmeasured`,
+	);
+	const moved = measured.filter((m) => m.transferVolume24h != null);
+	console.log(
+		`transfer volume measured on ${moved.length} of ${live} live row(s): $${Math.round(
+			moved.reduce((t, m) => t + (m.transferVolume24hUSD ?? 0), 0),
+		).toLocaleString("en-US")} in 24h`,
 	);
 	// Where each row's logo came from. The first YLDS refresh served no logo
 	// while the same code resolved it locally, and nothing in this log said

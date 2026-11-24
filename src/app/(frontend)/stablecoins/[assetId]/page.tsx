@@ -79,7 +79,7 @@ export async function generateMetadata({
 	};
 }
 
-/** A labelled figure. Renders an em dash for missing — never a zero. */
+/** A labelled figure. Renders a dash for missing, never a zero. */
 function Metric({
 	label,
 	value,
@@ -192,7 +192,7 @@ export default async function StablecoinDetailPage({
 					</div>
 					<p className="text-sm text-muted-foreground">
 						{issuerLine}
-						{row.company ? ` · Brand: ${row.company}` : ""}
+						{row.company ? ` · ${row.company}` : ""}
 					</p>
 				</div>
 
@@ -248,7 +248,7 @@ export default async function StablecoinDetailPage({
 					</Card>
 				)}
 
-				<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+				<div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
 					<Metric
 						label="Market cap"
 						value={formatUSD(row.marketCapUSD)}
@@ -256,8 +256,12 @@ export default async function StablecoinDetailPage({
 					/>
 					<Metric
 						label="Supply"
-						value={formatSupply(row.supply, row.peg)}
-						hint={row.peg ? `in ${row.peg}, not USD` : undefined}
+						value={formatSupply(row.supply, row.ticker)}
+						hint={
+							row.peg && row.peg !== "USD"
+								? `in ${row.peg} units, not USD`
+								: undefined
+						}
 					/>
 					<Metric
 						label="Holders"
@@ -268,6 +272,15 @@ export default async function StablecoinDetailPage({
 						label="7-day supply"
 						value={formatPct(row.supplyChange7d)}
 						hint="from our own series"
+					/>
+					<Metric
+						label="24h transfer volume"
+						value={
+							row.transferVolume24hUSD == null
+								? "not measured"
+								: formatUSD(row.transferVolume24hUSD)
+						}
+						hint="gross transfers, issuer mints and burns excluded"
 					/>
 				</div>
 
@@ -287,7 +300,6 @@ export default async function StablecoinDetailPage({
 						<h2 className="text-base font-semibold text-foreground mb-3">
 							Issuer
 						</h2>
-						<Row label="Brand">{row.company ?? "-"}</Row>
 						<Row label="Issuer of record">
 							{row.issuerOfRecordCheck === "named" && row.issuerOfRecord
 								? row.issuerOfRecord
@@ -434,8 +446,8 @@ export default async function StablecoinDetailPage({
 					A stablecoin&apos;s identity is its code <em>and</em> its issuer: two
 					live assets can share a ticker, so {row.ticker} here means
 					specifically the asset issued by{" "}
-					<code className="font-mono">{row.issuer?.slice(0, 8)}…</code>. An em
-					dash means not measured, never zero.
+					<code className="font-mono">{row.issuer?.slice(0, 8)}…</code>. A dash
+					means not measured, never zero.
 				</p>
 			</main>
 		</div>

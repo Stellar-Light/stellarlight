@@ -59,6 +59,15 @@ export const StablecoinSnapshots: CollectionConfig = {
 		{ name: "holders", type: "number" },
 		{ name: "volume24hUSD", type: "number" },
 		{
+			name: "transferVolume24h",
+			type: "number",
+			admin: {
+				description:
+					"Units moved by the asset's token contract transfer events in the 24 hours before measuredAt; null when not measured.",
+			},
+		},
+		{ name: "transferVolume24hUSD", type: "number" },
+		{
 			name: "paymentsCountLifetime",
 			type: "number",
 			admin: {

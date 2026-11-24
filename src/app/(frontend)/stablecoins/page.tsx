@@ -18,7 +18,11 @@ import {
 	pivotByToken,
 	type TokenSnapshot,
 } from "@/lib/stablecoin-series";
-import { aggregateDaily, type SnapshotPoint } from "@/lib/stablecoin-view";
+import {
+	aggregateDaily,
+	type SnapshotPoint,
+	transferVolumeTotal,
+} from "@/lib/stablecoin-view";
 import {
 	retirementOf,
 	type StoreRow,
@@ -99,7 +103,7 @@ export default async function StablecoinsPage() {
 					supplyRaw: r.supply,
 					holdersRaw: r.holders,
 					marketCapRaw: r.marketCapUSD,
-					volumeRaw: r.volume24hUSD,
+					transferVolumeRaw: r.transferVolume24hUSD,
 					priceRaw: r.priceUSD,
 				} satisfies CoinView;
 			})
@@ -147,7 +151,7 @@ export default async function StablecoinsPage() {
 
 	const totalMarketCap = coins.reduce((s, c) => s + (c.marketCapRaw ?? 0), 0);
 	const totalHolders = coins.reduce((s, c) => s + (c.holdersRaw ?? 0), 0);
-	const totalVolume24h = coins.reduce((s, c) => s + (c.volumeRaw ?? 0), 0);
+	const transferVolume24h = transferVolumeTotal(coins);
 
 	// The FULL daily series, oldest first. The explorer picks the window
 	// (30D / 90D / All) client-side — the imported history reaches back to
@@ -216,7 +220,7 @@ export default async function StablecoinsPage() {
 					value: p.holders,
 				}))}
 				totalMarketCap={totalMarketCap}
-				totalVolume24h={totalVolume24h}
+				transferVolume24h={transferVolume24h}
 				totalHolders={totalHolders}
 				marketCapByToken={marketCapByToken}
 				holdersByToken={holdersByToken}

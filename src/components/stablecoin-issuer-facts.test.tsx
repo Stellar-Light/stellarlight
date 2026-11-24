@@ -34,15 +34,15 @@ const coin: CoinView = {
 	supplyRaw: null,
 	holdersRaw: null,
 	marketCapRaw: null,
-	volumeRaw: null,
+	transferVolumeRaw: null,
 	priceRaw: null,
 };
 
 describe("IssuerFacts: each value labelled for what it is", () => {
-	it("names the brand as the brand and the issuer of record with its read date", () => {
+	it("names the issuer of record with its read date, never a Brand label (the header names the brand)", () => {
 		render(<IssuerFacts coin={coin} />);
-		expect(screen.getByText("Brand")).toBeTruthy();
-		expect(screen.getByText("Novatti Group")).toBeTruthy();
+		expect(screen.queryByText(/Brand/)).toBeNull();
+		expect(screen.queryByText("Novatti Group")).toBeNull();
 		expect(screen.getByText("Issuer of record")).toBeTruthy();
 		expect(
 			screen.getByText("AUDC PTY LTD (stellar.toml, read Nov 5, 2026)"),
@@ -109,10 +109,15 @@ describe("IssuerFacts: each value labelled for what it is", () => {
 /** Re-check item 11: the card and the drawer header put the peg's flag
  *  beside the brand with no label, which read as the brand's country. */
 describe("PegAndBrand: the flag is labelled as the peg", () => {
-	it("says the peg next to its flag, then the brand as the brand", () => {
+	// The owner, 2026-11-24: "you dont need to say brand and just keep the
+	// actual brand". The name stands alone; it is still the brand, never the
+	// issuer of record.
+	it("says the peg next to its flag, then the brand's name alone", () => {
 		const { container } = render(<PegAndBrand coin={coin} />);
 		expect(screen.getByText("AUD peg")).toBeTruthy();
-		expect(screen.getByText("Brand: Novatti Group")).toBeTruthy();
+		expect(screen.getByText("Novatti Group")).toBeTruthy();
+		expect(screen.queryByText(/Brand/)).toBeNull();
+		expect(screen.queryByText("AUDC PTY LTD")).toBeNull();
 		// The flag is decorative now that the text names the peg.
 		expect(container.querySelector("img")?.getAttribute("alt")).toBe("");
 	});

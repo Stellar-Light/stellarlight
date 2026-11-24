@@ -18,6 +18,8 @@ export const ISSUER_LOGOS: Record<string, string> = {
 	"Novatti Group": "/stablecoins/logos/novatti.png",
 	"Ondo Finance": "/stablecoins/logos/ondo.png",
 	"Tether (USDT0)": "/stablecoins/logos/usdt0.png",
+	// The favicon service answers a generic placeholder for ethena.fi.
+	Ethena: "/stablecoins/logos/ethena.png",
 };
 
 export const TOKEN_LOGOS: Record<string, string> = {
@@ -33,6 +35,11 @@ export const TOKEN_LOGOS: Record<string, string> = {
 	// toml image (the round coin, on IPFS) still wins when it loads; this is
 	// the bundled fallback when it does not.
 	USDT0: "/stablecoins/logos/usdt0.png",
+	// Ethena's logo from its own site, https://ethena.fi/shared/ethena-logo.svg
+	// (read 2026-11-24), drawn at 256 px. No toml serves one: the issuer
+	// account sets no home_domain. The site's plain "$" coin for USDe read as
+	// a generic dollar sign on the page (owner review, 2026-11-24).
+	USDE: "/stablecoins/logos/ethena.png",
 };
 
 /**

@@ -360,6 +360,10 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		},
 		noHomeDomainNote:
 			"Ethena publishes no Stellar address (its documentation at https://docs.ethena.fi, read 2026-11-23, does not mention Stellar). LayerZero's token metadata (https://metadata.layerzero-api.com/v1/metadata, read 2026-11-23) maps this asset's contract to Ethena's USDe on Ethereum, but no toml lists this account, so no issuer of record can be confirmed from the account side",
+		// No toml to read an image from, so the refresh logged "none: USDE".
+		// Ethena's own logo from https://ethena.fi/shared/ethena-logo.svg (read
+		// 2026-11-24), drawn as a 256 px PNG.
+		fallbackImageUrl: "https://stellarlight.xyz/stablecoins/logos/ethena.png",
 	},
 	{
 		code: "PYUSD",

@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-24",
 		surfaces: ["api"],
+		version: "spec@1.9.169",
+		type: "added",
+		summary:
+			"getStablecoins rows gain `transferVolume24h` (units of the asset, in its own peg, moved in the 24 hours before updatedAt) and `transferVolume24hUSD` (that times priceUSD). It is the sum of the `transfer` events of the asset's token contract, read from Soroban RPC: payments, each leg of a path payment or crossed offer, liquidity pool deposits, withdrawals and swaps, claimable balances and contract transfers. Issuer mints and burns are excluded, DEX trade legs are included, and it is gross (units moved A to B to C count twice).",
+		detail:
+			"Every row of one six-hourly run is summed over the same 24 hours, so the rows add up to a total. Null means not measured: an unmeasured or hand-checked row, or a read that did not complete; it is never carried from an earlier run and never 0 for no data. The `volume24hUSD` description is corrected: it was SDEX trade volume from Stellar Expert, not transfer volume, and stays null since that API became paid on 2026-11-06. The Stablecoin schema and getStablecoins now name Soroban RPC in place of Stellar Expert as a source. `sort=volume` now ranks by `transferVolume24hUSD`, rows not measured last; it ranked by the null `volume24hUSD`, so it returned the inventory unranked. The values appear after the refresh's next run.",
+	},
+	{
+		date: "2026-11-24",
+		surfaces: ["api"],
 		version: "spec@1.9.168",
 		type: "removed",
 		summary:

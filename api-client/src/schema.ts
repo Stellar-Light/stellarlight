@@ -843,7 +843,7 @@ export interface paths {
         };
         /**
          * Stellar stablecoins ranked by USD market cap
-         * @description Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; ARST supply is pesos, mZAR is rand), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.
+         * @description Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; ARST supply is pesos, mZAR is rand), holders, price, 24h transfer volume, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Soroban RPC and live peg FX; null = not measured, never zero.
          */
         get: operations["getStablecoins"];
         put?: never;
@@ -2924,7 +2924,7 @@ export interface components {
                 goneRepos?: string[];
             };
         };
-        /** @description One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Stellar Expert and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer); two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`. */
+        /** @description One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Soroban RPC and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer); two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`. */
         Stablecoin: {
             /** @description `CODE-<first 8 of issuer>`: the stable natural key, and the safe join key when a ticker is ambiguous. */
             assetId?: string | null;
@@ -2985,8 +2985,12 @@ export interface components {
             priceBasis?: "assumed-peg" | "measured-market" | null;
             /** @description Trustline holder count. */
             holders?: number | null;
-            /** @description 24h transfer volume in USD. */
+            /** @description 24h SDEX trade volume in USD, read from Stellar Expert until its API became paid on 2026-11-06; null on every row since. Not transfer volume: for value moved on-chain read transferVolume24hUSD. */
             volume24hUSD?: number | null;
+            /** @description Units of the asset, in its own peg, moved in the 24 hours before updatedAt: the sum of the `transfer` events of its token contract (Stellar Asset Contract), read from Soroban RPC. Since protocol 23 every movement of a classic asset emits one: payments, each leg of a path payment or crossed offer, liquidity pool deposits, withdrawals and swaps, claimable balances and contract transfers. Issuer mints and burns (`mint` and `burn` events) are excluded; DEX trade legs are included; gross, so units moved A to B to C count twice. Null = not measured (an unmeasured or hand-checked row, or the read did not complete), never zero; 0 = read in full and nothing moved. Never carried from an earlier run. */
+            transferVolume24h?: number | null;
+            /** @description transferVolume24h × priceUSD, comparable across rows (read it with priceBasis: at par on an assumed-peg row). Null when either is null. */
+            transferVolume24hUSD?: number | null;
             /** @description Count, not a dollar amount, of payment operations over the last 24 hours: Stellar Expert's lifetime payments counter diffed against our own reading of it from 20 to 28 hours earlier, the one nearest 24 hours (each row keeps two days of its six-hourly readings). Mint, redemption and peer-to-peer payments undifferentiated, not adjusted for exchange, DeFi or infrastructure activity. Null when no reading falls in that window, so also for about a day after the readings start; never a longer or shorter span, never 0 for no data. */
             paymentsCount24h?: number | null;
             /** @description Percent change in supply vs our snapshot measured 6 to 8 days back, the one nearest 7 days (e.g. -5.8 means down 5.8%). Null when no snapshot falls in that window, never a longer span; never 0 for 'no data'. */
@@ -9142,7 +9146,7 @@ export interface operations {
     getStablecoins: {
         parameters: {
             query?: {
-                /** @description Ranking order. marketcap (default, USD-comparable) | supply (raw peg units; comparable only within one peg) | holders | volume. Unrecognized values return 400. */
+                /** @description Ranking order. marketcap (default, USD-comparable) | supply (raw peg units; comparable only within one peg) | holders | volume (transferVolume24hUSD, 24h transfer volume in USD; rows not measured last). Unrecognized values return 400. */
                 sort?: "marketcap" | "supply" | "holders" | "volume";
                 /** @description Filter to one fiat peg (e.g. USD, EUR, JPY, ARS). Case-insensitive. Omit for all pegs. */
                 peg?: string;

@@ -106,7 +106,9 @@ export interface CoinView {
 	supplyRaw: number | null;
 	holdersRaw: number | null;
 	marketCapRaw: number | null;
-	volumeRaw: number | null;
+	/** USD moved by the coin's transfer events in the 24 hours before
+	 *  measuredAt (transferVolume24hUSD); null = not measured. */
+	transferVolumeRaw: number | null;
 	priceRaw: number | null;
 }
 
@@ -199,7 +201,8 @@ interface Props {
 	marketCapSeries: DayPoint[];
 	holdersSeries: DayPoint[];
 	totalMarketCap: number;
-	totalVolume24h: number;
+	/** transferVolumeTotal over the coins: null when none was measured. */
+	transferVolume24h: { usd: number | null; measured: number };
 	totalHolders: number;
 	/** Per-token daily series behind the four analytics panels. */
 	marketCapByToken: SeriesRow[];
@@ -352,16 +355,13 @@ export function issuerOfRecordText(
 }
 
 /** The asset drawer's facts beside the issuer address, each labelled for
- *  what it is: the brand, the issuer of record, the curated domain and the
- *  peg's country (the drawer called the last two Home Domain and Country). */
+ *  what it is: the issuer of record, the curated domain and the peg's
+ *  country (the drawer called the last two Home Domain and Country). The
+ *  brand is not repeated here: the drawer's header names it (PegAndBrand). */
 export function IssuerFacts({ coin }: { coin: CoinView }) {
 	const peg = countryInfo(coin.country, coin.peg);
 	return (
 		<>
-			<div>
-				<div className="text-sm text-muted-foreground mb-1">Brand</div>
-				<div className="text-sm">{coin.company || "-"}</div>
-			</div>
 			<div>
 				<div className="text-sm text-muted-foreground mb-1">
 					Issuer of record
@@ -389,8 +389,9 @@ export function IssuerFacts({ coin }: { coin: CoinView }) {
 	);
 }
 
-/** The peg's flag labelled as the peg, then the brand as the brand: a bare
- *  flag beside the brand read as the brand's country. */
+/** The peg's flag labelled as the peg, then the brand's name alone (the
+ *  owner, 2026-11-24: a "Brand:" prefix says nothing the name does not): a
+ *  bare flag beside the brand read as the brand's country. */
 export function PegAndBrand({
 	coin,
 }: {
@@ -403,7 +404,7 @@ export function PegAndBrand({
 			<img src={peg.flag} alt="" className="w-4 h-3" />
 			<span>{`${coin.peg ?? peg.label} peg`}</span>
 			<span aria-hidden="true">·</span>
-			<span>{`Brand: ${coin.company || "-"}`}</span>
+			<span>{coin.company || "-"}</span>
 		</>
 	);
 }
@@ -424,7 +425,7 @@ export function StablecoinExplorer({
 	marketCapSeries,
 	holdersSeries,
 	totalMarketCap,
-	totalVolume24h,
+	transferVolume24h,
 	totalHolders,
 	marketCapByToken,
 	holdersByToken,
@@ -718,17 +719,31 @@ export function StablecoinExplorer({
 				</div>
 			</div>
 
-			{/* ── Spotlight: USDT0's launch, from its own measured row ── */}
+			{/* ── Spotlight: USDe, from its own measured row ──
+			    Matched on its asset id: 14 other accounts issue a USDE.
+			    Sources (read 2026-11-23): LayerZero's token metadata
+			    (metadata.layerzero-api.com/v1/metadata) maps this asset's
+			    token contract to Ethena's USDe as a LayerZero OFT. Public
+			    launch 2026-11-19 per Crypto Briefing (2026-11-19) and Lumen
+			    Loop's roundup (2026-11-20); Ethena itself published no
+			    Stellar launch post. On chain since August: the contract's
+			    admin was set 2026-08-19 and the first mint was 2026-09-04
+			    (its own events). */}
 			{(() => {
-				const row = coins.find((c) => c.ticker === "USDT0");
-				if (!row || row.holdersRaw == null || row.supplyRaw == null)
+				const row = coins.find((c) => c.id === "USDE-GDJ5BNU5");
+				if (
+					!row ||
+					row.basis !== "live" ||
+					row.holdersRaw == null ||
+					row.supplyRaw == null
+				)
 					return null;
 				return (
 					<StablecoinSpotlight
-						ticker="USDT0"
-						lead="Now tracking USDT0"
-						body="Tether's omnichain USDT went live on Stellar on 2 September 2026, and already holds"
-						highlight={`${displaySupply(row.supplyRaw)} USDT0 across ${row.holdersRaw.toLocaleString("en-US")} holders`}
+						ticker="USDE"
+						lead="Now tracking USDe"
+						body="Ethena's USDe reached Stellar through LayerZero. On chain since August, it launched publicly on 19 November 2026 and now counts"
+						highlight={`${displaySupply(row.supplyRaw)} USDe and ${row.holdersRaw.toLocaleString("en-US")} trustlines`}
 						href={`/stablecoins/${row.id}`}
 					/>
 				);
@@ -751,18 +766,23 @@ export function StablecoinExplorer({
 					<Card>
 						<CardContent className="p-6">
 							<div className="text-sm text-muted-foreground mb-2">
-								24h DEX volume
+								24h transfer volume
 							</div>
 							<div className="text-3xl font-semibold tabular-nums">
-								{totalVolume24h > 0 ? displayUSD(totalVolume24h) : "N/A"}
+								{displayUSD(transferVolume24h.usd)}
 							</div>
-							{/* Volume came from Stellar Expert, whose API became paid on
-							    2026-11-06; no free source reports it, so the card says so
-							    instead of showing a stale figure. */}
+							{/* Every transfer event of each coin's token contract in
+							    the run's 24 hours: payments and trade legs in, the
+							    issuer's mints and burns out. Not DEX volume, which went
+							    unmeasured when Stellar Expert became paid (2026-11-06). */}
 							<div className="text-[11px] text-muted-foreground mt-1">
-								{totalVolume24h > 0
-									? "Traded on-chain, 7-day average"
-									: "Not measured since Nov 6, 2026"}
+								{transferVolume24h.usd == null
+									? "Not measured in the latest refresh"
+									: `Moved on-chain, mints and burns excluded${
+											transferVolume24h.measured < coins.length
+												? ` · ${transferVolume24h.measured} of ${coins.length} coins`
+												: ""
+										}`}
 							</div>
 						</CardContent>
 					</Card>
@@ -1119,7 +1139,7 @@ export function StablecoinExplorer({
 														<BasisTag basis={coin.basis} />
 													</div>
 													<div className="text-sm text-muted-foreground">
-														{coin.company ? `Brand: ${coin.company}` : "-"}
+														{coin.company || "-"}
 													</div>
 												</div>
 											</div>
@@ -1296,7 +1316,7 @@ export function StablecoinExplorer({
 												{selectedIssuer.company}
 											</DrawerTitle>
 											<DrawerDescription className="mt-1">
-												Brand · {selectedIssuer.tokens.length} asset
+												{selectedIssuer.tokens.length} asset
 												{selectedIssuer.tokens.length === 1 ? "" : "s"} ·{" "}
 												{displayUSD(selectedIssuer.totalMarketCapUSD)}
 												market cap
@@ -1623,10 +1643,8 @@ export function StablecoinExplorer({
 														: `1.00 ${selectedCoin.peg}`,
 												],
 												[
-													"24h Volume",
-													selectedCoin.volumeRaw
-														? displayUSD(selectedCoin.volumeRaw)
-														: "N/A",
+													"24h Transfers",
+													displayUSD(selectedCoin.transferVolumeRaw),
 												],
 												["Total Supply", displaySupply(selectedCoin.supplyRaw)],
 												["Holders", displayHolders(selectedCoin.holdersRaw)],

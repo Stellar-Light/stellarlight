@@ -1712,6 +1712,8 @@ describe("the date a row's figures carry", () => {
 				holders: null,
 				volume24hUSD: null,
 				paymentsCountLifetime: null,
+				transferVolume24h: null,
+				transferVolume24hUSD: null,
 			},
 			prev,
 		);

@@ -11721,7 +11721,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Ecosystem"],
 				summary: "Stellar stablecoins ranked by USD market cap",
 				description:
-					"Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; ARST supply is pesos, mZAR is rand), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.",
+					"Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; ARST supply is pesos, mZAR is rand), holders, price, 24h transfer volume, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Soroban RPC and live peg FX; null = not measured, never zero.",
 				"x-routing": {
 					purpose:
 						"Authoritative USD-comparable stablecoin ranking. Answers 'biggest stablecoin', 'largest issuer', 'total stablecoin market cap' with USD market cap, NOT raw supply, which is denominated in each asset's own peg and not comparable across rows.",
@@ -11765,7 +11765,7 @@ export const spec: OpenAPISpec = {
 						name: "sort",
 						in: "query",
 						description:
-							"Ranking order. marketcap (default, USD-comparable) | supply (raw peg units; comparable only within one peg) | holders | volume. Unrecognized values return 400.",
+							"Ranking order. marketcap (default, USD-comparable) | supply (raw peg units; comparable only within one peg) | holders | volume (transferVolume24hUSD, 24h transfer volume in USD; rows not measured last). Unrecognized values return 400.",
 						schema: {
 							type: "string",
 							enum: ["marketcap", "supply", "holders", "volume"],
@@ -15888,7 +15888,7 @@ export const spec: OpenAPISpec = {
 			Stablecoin: {
 				type: "object",
 				description:
-					"One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Stellar Expert and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer); two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`.",
+					"One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Soroban RPC and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer); two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`.",
 				properties: {
 					assetId: {
 						type: "string",
@@ -16023,7 +16023,20 @@ export const spec: OpenAPISpec = {
 					volume24hUSD: {
 						type: "number",
 						nullable: true,
-						description: "24h transfer volume in USD.",
+						description:
+							"24h SDEX trade volume in USD, read from Stellar Expert until its API became paid on 2026-11-06; null on every row since. Not transfer volume: for value moved on-chain read transferVolume24hUSD.",
+					},
+					transferVolume24h: {
+						type: "number",
+						nullable: true,
+						description:
+							"Units of the asset, in its own peg, moved in the 24 hours before updatedAt: the sum of the `transfer` events of its token contract (Stellar Asset Contract), read from Soroban RPC. Since protocol 23 every movement of a classic asset emits one: payments, each leg of a path payment or crossed offer, liquidity pool deposits, withdrawals and swaps, claimable balances and contract transfers. Issuer mints and burns (`mint` and `burn` events) are excluded; DEX trade legs are included; gross, so units moved A to B to C count twice. Null = not measured (an unmeasured or hand-checked row, or the read did not complete), never zero; 0 = read in full and nothing moved. Never carried from an earlier run.",
+					},
+					transferVolume24hUSD: {
+						type: "number",
+						nullable: true,
+						description:
+							"transferVolume24h × priceUSD, comparable across rows (read it with priceBasis: at par on an assumed-peg row). Null when either is null.",
 					},
 					paymentsCount24h: {
 						type: "number",
