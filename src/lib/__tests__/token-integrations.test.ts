@@ -13,6 +13,7 @@ import {
 	aggregate,
 	codeCandidates,
 	type Edge,
+	edgeUnread,
 	holderTier,
 	type IntegrationRow,
 	marketTier,
@@ -22,6 +23,7 @@ import {
 	poolDepth,
 	poolEdgeTier,
 	priorHolderContracts,
+	rowKey,
 	type StoredRow,
 	summarize,
 	type TokenIdentity,
@@ -570,5 +572,286 @@ describe("priorHolderContracts", () => {
 			row({ kind: "dex_pool", bestPool: C2, tokenId: "U" }),
 		]);
 		expect([...m]).toEqual([["T", new Set([C1, C2])]]);
+	});
+});
+
+// The dry run of 2026-11-24 (run 45451926000) planned 14 rows from a judged
+// tier to unrated. Stellar Index had begun withholding thin-market prices
+// (price_withheld_reason "substance": BLND, USTRY, AFR, MXN, CETES), so rows
+// judged on those prices the night before read unrated: a failed reading
+// would have overwritten a good one. Three of the 14 were real readings:
+// the USST and LUMI Aquarius pools lost their priced leg, and MXN's one used
+// classic pool read below $1,000.
+describe("a reading that could not be taken never replaces a judged tier", () => {
+	const BLND = "CD25MNVTZDL4Y3XBCPCJXGXATV5WUHHOWMYFF4YBEGU5FCPGMYTVG5JY";
+	const COMET = "CAS3FL6TLZKDGGSISDBWGGPXT3NRR4DYTZD7YOD3HMYO6LTJUVGRVEAM";
+	const NIGHT = "2026-11-24T01:49:50.579Z";
+	const DAY = "2026-11-24T17:45:05Z";
+	const WITHHELD =
+		"the BLND price was not read (Stellar Index withheld it: substance)";
+	const comet = (p: Partial<Edge>) =>
+		edge({
+			token: BLND,
+			kind: "dex_pool",
+			venue: "comet",
+			projectSlug: "comet",
+			pool: COMET,
+			events90d: 500,
+			balance: "400.9196672",
+			...p,
+		});
+	const store = (es: Edge[]): StoredRow[] =>
+		JSON.parse(JSON.stringify(aggregate(es, new Map()))).map(
+			(r: IntegrationRow, i: number) => ({ ...r, id: `id${i}` }),
+		);
+	const night = store([
+		comet({
+			tier: "available",
+			tierBasis: "priced depth $2.82 < $1000 with every leg priced",
+			balanceUsd: 2.26,
+			depthUsd: 2.82,
+			readAt: NIGHT,
+		}),
+	]);
+	const dayEdge = comet({
+		tier: "unrated",
+		tierBasis: "activity or depth not read; 1 leg(s) unpriced or unread",
+		depthUsd: 0.56,
+		readAt: DAY,
+		unread: WITHHELD,
+	});
+	const plan = (
+		es: Edge[],
+		stored: StoredRow[],
+		at = DAY,
+		judge: (s: StoredRow) => string | null = () => null,
+	) =>
+		planWrites(aggregate(es, new Map()), stored, judge, at, (k) =>
+			es.filter((e) => rowKey(e.token, e.kind, e.venue, e.projectSlug) === k),
+		);
+
+	it("a withheld price keeps the stored tier and reading, marked not refreshed with the date", () => {
+		const p = plan([dayEdge], night);
+		expect(p.update).toHaveLength(1);
+		const { row, changed } = p.update[0];
+		expect(changed).toEqual(["tierBasis"]);
+		expect(row).toMatchObject({
+			tier: "available",
+			tierBasis: `priced depth $2.82 < $1000 with every leg priced (not refreshed 2026-11-24: ${WITHHELD})`,
+			balanceUsd: 2.26,
+			depthUsd: 2.82,
+			readAt: NIGHT,
+		});
+		expect(p.keep).toEqual([
+			{
+				key: night[0].key,
+				reason: `kept available as read at ${NIGHT}; reads unrated this run only because ${WITHHELD}`,
+			},
+		]);
+	});
+
+	it("re-planning the held store plans nothing; a later run moves the mark, never stacks it", () => {
+		const held = plan([dayEdge], night).update[0].row;
+		const after = [{ ...night[0], ...JSON.parse(JSON.stringify(held)) }];
+		expect(plannedWrites(plan([dayEdge], after))).toBe(0);
+		const week = plan([dayEdge], after, "2026-12-01T04:23:00Z").update[0].row;
+		expect(week.tierBasis).toBe(
+			`priced depth $2.82 < $1000 with every leg priced (not refreshed 2026-12-01: ${WITHHELD})`,
+		);
+	});
+
+	it("once the price is read again, the fresh reading replaces the held one", () => {
+		const held = plan([dayEdge], night).update[0].row;
+		const after = [{ ...night[0], ...JSON.parse(JSON.stringify(held)) }];
+		const read = comet({
+			tier: "available",
+			tierBasis: "priced depth $3.1 < $1000 with every leg priced",
+			balanceUsd: 2.5,
+			depthUsd: 3.1,
+			readAt: DAY,
+		});
+		const p = plan([read], after);
+		expect(p.keep).toEqual([]);
+		expect(p.update[0].row).toMatchObject({
+			tierBasis: "priced depth $3.1 < $1000 with every leg priced",
+			readAt: DAY,
+		});
+	});
+
+	it("a used row whose own pool lost its price is held (USTRY's unattributed holder)", () => {
+		const USTRY = "CBLV4ATSIWU67CFSQU2NVRKINQIKUZ2ODSZBUJTJ43VJVRSBTZYOPNUR";
+		const h = (p: Partial<Edge>) =>
+			edge({
+				token: USTRY,
+				kind: "holder_unattributed",
+				venue: "holder",
+				pool: "CBMUX",
+				...p,
+			});
+		const stored = store([
+			h({
+				tier: "used",
+				tierBasis: "124 events in 90d >= 10 and priced depth $3968.53 >= $1000",
+			}),
+			h({ pool: "CB2", tier: "available", tierBasis: "3 events in 90d < 10" }),
+		]);
+		const p = plan(
+			[
+				h({
+					tier: "unrated",
+					unread:
+						"the USTRY price was not read (Stellar Index withheld it: substance)",
+				}),
+				h({ pool: "CB2", tier: "available" }),
+			],
+			stored,
+		);
+		expect(p.update[0].row.tier).toBe("used");
+		expect(p.keep).toHaveLength(1);
+	});
+
+	it("a pool read and found drained is a reading: it updates (USST's Aquarius pool)", () => {
+		const USST = "CBZ4DCE7PYMUTOAKKUTRSUPT3FJFVOWCSKWUM5A72D6SAVMUJE5JN2PJ";
+		const a = (p: Partial<Edge>) =>
+			edge({
+				token: USST,
+				kind: "dex_pool",
+				venue: "aquarius",
+				projectSlug: "aquarius",
+				pool: "CCYMZ",
+				...p,
+			});
+		const stored = store([
+			a({
+				tier: "used",
+				tierBasis:
+					"32 events in 90d >= 10 and priced depth $717354.37 >= $1000",
+			}),
+		]);
+		// USST has no price at the index at all (no withheld reason): its USDC leg was read, near empty
+		const unread = edgeUnread("unrated", null, [
+			{ code: "USST", balance: "0.0843592", priceUnread: null },
+			{ code: "USDC", balance: "0.05", priceUnread: null },
+		]);
+		expect(unread).toBeNull();
+		const p = plan([a({ tier: "unrated", unread })], stored);
+		expect(p.update[0].row.tier).toBe("unrated");
+		expect(p.keep).toEqual([]);
+	});
+
+	it("a used pool read below the floor is a reading even beside unread pools (MXN's classic pools)", () => {
+		const MXN = "CBVJZDNMOPEEPED3OBY4VLQPQKU4IOCKWACDKXPBO4E6TQI432W66BE5";
+		const c = (p: Partial<Edge>) =>
+			edge({
+				token: MXN,
+				kind: "classic_amm_pool",
+				venue: "stellar-classic-amm",
+				pool: "85a4",
+				...p,
+			});
+		const stored = store([
+			c({
+				tier: "used",
+				tierBasis: "200 events in 90d >= 10 and priced depth $1024.46 >= $1000",
+			}),
+			c({ pool: "x1", tier: "unrated" }),
+		]);
+		const p = plan(
+			[
+				c({
+					tier: "available",
+					tierBasis: "priced depth $974 < $1000 with every leg priced",
+				}),
+				c({
+					pool: "x1",
+					tier: "unrated",
+					unread:
+						"the AFR price was not read (Stellar Index withheld it: substance)",
+				}),
+			],
+			stored,
+		);
+		expect(p.update[0].row.tier).toBe("unrated");
+		expect(p.keep).toEqual([]);
+	});
+
+	it("an integrated pool its rewards config no longer pays is a reading (ETH and CETES on Aquarius)", () => {
+		const a = (p: Partial<Edge>) =>
+			edge({
+				token: USDE,
+				kind: "dex_pool",
+				venue: "aquarius",
+				projectSlug: "aquarius",
+				pool: "CARBT",
+				...p,
+			});
+		const stored = store([
+			a({
+				tier: "integrated",
+				tierBasis:
+					"the protocol's rewards config pays this pool (reward_tps 3273469)",
+			}),
+		]);
+		const p = plan(
+			[
+				a({
+					tier: "unrated",
+					unread: "activity was not read: could-not-check (http error)",
+				}),
+			],
+			stored,
+		);
+		expect(p.update[0].row.tier).toBe("unrated");
+	});
+
+	it("a used row whose pool this run did not read at all is held only while its source is unread", () => {
+		const h = (p: Partial<Edge>) =>
+			edge({
+				token: USDE,
+				kind: "holder",
+				venue: "holder",
+				projectSlug: "blend",
+				pool: "CBEST",
+				...p,
+			});
+		const stored = store([
+			h({ tier: "used" }),
+			h({ pool: "COTHER", tier: "available" }),
+		]);
+		const fresh = [h({ pool: "COTHER", tier: "available" })];
+		const unreadSource = () =>
+			"could-not-check: holders:T was not read completely this run";
+		expect(plan(fresh, stored, DAY, unreadSource).update[0].row.tier).toBe(
+			"used",
+		);
+		expect(plan(fresh, stored).update[0].row.tier).toBe("available");
+	});
+
+	it("an edge is unread only for a read that failed, never for a token with no price at all", () => {
+		const withheld = "Stellar Index withheld it: substance";
+		expect(
+			edgeUnread("unrated", null, [
+				{ code: "LUMI", balance: "7", priceUnread: null },
+			]),
+		).toBeNull();
+		expect(edgeUnread("available", "could-not-check", [])).toBeNull();
+		expect(
+			edgeUnread("unrated", null, [
+				{ code: "BLND", balance: "7", priceUnread: withheld },
+			]),
+		).toBe(`the BLND price was not read (${withheld})`);
+		// an empty leg's price moves nothing
+		expect(
+			edgeUnread("unrated", null, [
+				{ code: "BLND", balance: "0", priceUnread: withheld },
+			]),
+		).toBeNull();
+		expect(
+			edgeUnread("unrated", "could-not-check (http 503)", [
+				{ code: "AFR", balance: null, priceUnread: null },
+			]),
+		).toBe(
+			"activity was not read: could-not-check (http 503); the AFR balance was not read",
+		);
 	});
 });

@@ -8,10 +8,12 @@ name: Refresh token integrations
 # public API); nothing is signed or sent and stellar.expert is never called.
 #
 # Every run prints the planned DB diff (create / update / end, and rows kept
-# because their source could not be read). A row whose evidence is gone is
-# ended with a date and a reason, never deleted; could-not-check never ends a
-# row. An instrument failure (registry, directory or rewards config unread)
-# exits 2 and writes nothing.
+# because their source, or a price, balance or activity read behind their
+# tier, could not be read). A row whose evidence is gone is ended with a date
+# and a reason, never deleted; could-not-check never ends a row and never
+# replaces its judged tier (the row keeps its reading, marked not refreshed).
+# An instrument failure (registry, directory or rewards config unread) exits
+# 2 and writes nothing.
 #
 # Manual dispatch is a dry run unless execute=true. Scheduled runs write only
 # once the repository variable TOKEN_INTEGRATIONS_WRITE is "on": until an
@@ -53,8 +55,19 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
+      # A plan cut short is a failed run, never a green one: run 45443354264
+      # exited 0 with its log stopping inside the per-token lines.
       - name: Refresh (dry run unless writing)
-        run: pnpm exec tsx scripts/refresh-token-integrations.ts --cache "$CACHE_DIR" ${{ env.WRITE == 'yes' && '--execute' || '' }}
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm exec tsx scripts/refresh-token-integrations.ts --cache "$CACHE_DIR" ${{ env.WRITE == 'yes' && '--execute' || '' }} | tee refresh.log
+          for line in '^plan: ' '^replan: writes=[0-9]+$'; do
+            if ! grep -qE "$line" refresh.log; then
+              echo "::error::the run printed no '$line' line: its plan was cut short"
+              exit 1
+            fi
+          done
       # An execute must leave nothing planned: the same reads (this run's
       # cache, no network) planned again against the store just written must
       # plan 0 writes. Anything else is a write that did not persist as sent,
@@ -65,9 +78,9 @@ jobs:
         run: |
           set -o pipefail
           pnpm exec tsx scripts/refresh-token-integrations.ts --cache "$CACHE_DIR" --replan | tee replan.log
-          n=$(grep -oE '^replan: writes=[0-9]+' replan.log | cut -d= -f2)
-          if [ -z "$n" ]; then
-            echo "::error::the re-plan printed no plan line (could not re-plan)"
+          n=$(grep -oE '^replan: writes=[0-9]+$' replan.log | cut -d= -f2)
+          if [ -z "$n" ] || ! grep -qE '^plan: ' replan.log; then
+            echo "::error::the re-plan printed no plan: or replan: line (cut short, or could not re-plan)"
             exit 1
           fi
           echo "### Idempotence: $n write(s) planned after execute" >> "$GITHUB_STEP_SUMMARY"
