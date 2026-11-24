@@ -79,6 +79,8 @@ const research = await scout.searchResearch({
 | `verifyClaim(params)` | `GET /api/verify` |
 | `locateSource(params)` | `GET /api/sources/locate` |
 | `getRwaAssets(params)` | `GET /api/rwa` |
+| `getTokenIntegrations(params)` | `GET /api/tokens/integrations` |
+| `getAwardRoundCoverage(params)` | `GET /api/projects/scf-rounds` |
 | `getQualityReport()` | `GET /api/quality` |
 | `getPeople(params)` | `GET /api/people` |
 | `getPartner(slug)` | `GET /api/partners/{slug}` |
@@ -91,7 +93,7 @@ const research = await scout.searchResearch({
 | `getFeedbackSchema()` | `GET /api/feedback` |
 | `submitFeedback(body)` | `POST /api/feedback` |
 
-Full coverage of the live OpenAPI spec (42 operations, enforced by a repo test that fails when the spec gains an operation or query parameter the client lacks). All endpoints are
+Full coverage of the live OpenAPI spec (44 operations, enforced by a repo test that fails when the spec gains an operation or query parameter the client lacks). All endpoints are
 public and read-only except feedback and the partner POST flows; no auth,
 edge-cached.
 
