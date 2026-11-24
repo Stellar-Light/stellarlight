@@ -32,6 +32,35 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-24",
+		surfaces: ["skill"],
+		type: "added",
+		summary:
+			"The skill's API reference documents what the API serves and the reference left out: SCF payments on project rows (`scfPaid`: SCF's awarded and paid totals and, per Build award, its schedule, paid share, tranches paid and whether the final tranche, the mainnet launch, is paid), `GET /api/projects/scf-rounds` (per round: listed, carried, why an award is not carried, buildSharesRead and buildFinalTranchePaid), the stablecoin transfer volume (`transferVolume24h`, `transferVolume24hUSD`, what `sort=volume` ranks by, and `volume24hUSD` as SDEX trade volume that is null since 2026-11-06), the `integrations` count on stablecoin and RWA rows, and the getTokenIntegrations parameters it left out (`scfAwarded=true|false`, the 400 on an unknown project or parameter, the `status` default and ended edges).",
+		detail:
+			"Each addition says what null and [] mean there and what the field cannot see: a paid share that does not split exactly is null, never estimated; finalTranchePaid is SCF's payment record, not a check of the product; a delivery share is buildFinalTranchePaid over buildSharesRead, never over listed or carried; transfer volume is gross and counts DEX trade legs, so it is not payment volume. No endpoint, field or operation description changed, and SKILL.md is unchanged.",
+	},
+	{
+		date: "2026-11-24",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.9.0",
+		type: "added",
+		summary:
+			"scout-mcp 1.9.0: search_projects takes `venueRole` (amm, native-orderbook, aggregator-router, trading-ui or wallet-integrated) and `type=Derivatives`, search_research takes `source=slp` (Stellar Limits Proposals), and the tool text changed since 1.8.2 ships: search_hackathon_builds covers the curated events off DoraHacks, explain_repo describes `sourceCheck`, and get_skill returns SKILL.md content wherever its source ships one. 28 tools; no tool or parameter removed.",
+		detail:
+			"Additive: every call 1.8.2 accepted is accepted unchanged, and the new inputs are forwarded only when set.",
+	},
+	{
+		date: "2026-11-24",
+		surfaces: ["api-client"],
+		version: "api-client@2.0.0",
+		type: "changed",
+		summary:
+			"BREAKING (types only): api-client 2.0.0 catches up with spec 1.9.169. New methods `getTokenIntegrations` (`GET /api/tokens/integrations`) and `getAwardRoundCoverage` (`GET /api/projects/scf-rounds`), `getStablecoins` takes `assetType`, and the exported `paths` and `components` types are regenerated from the current spec. It is a major version because some of those response types changed in ways that can stop a build that compiled against 1.10.1.",
+		detail:
+			"Every call form 1.10.1 accepted still compiles; only response types break. Removed, 14 field paths the API stopped serving at spec 1.9.151 when the on-chain readings moved to free sources: `events`, `eventsDelta`, `subinvocations` and `subinvocationsDelta` wherever they were declared on `codeInUse` (`Repo`, listContracts and hackathonBrief rows) and on `usage` (getRepoTrust and hackathonBrief). Retyped to what the API serves: getSkill `installAlt` is an array of {label, command} entries (was a string), getClusters `meta.notes` an object (was an array), getRfps `meta.quarters[]` and `meta.categories[]` objects (were strings), and searchRepos `meta.canonical` an object (was a string). Now nullable, 20 response fields, among them `Project.shortDescription`, `StatusResponse.sources[].count`, `HackathonDetailResponse.submissions`, `Partner.services`, `sectors` and `regions`, listContracts `repo` and analyzeEcosystem `hackathons`. The data was already served this way under 1.10.1; the types now say so. Added fields, among them `scfPaid` on project rows, `integrations` on stablecoin and RWA rows and `transferVolume24h` and `transferVolume24hUSD` on stablecoin rows, are additive. The partner-only cohort operations are not in the client: they left the public spec at 1.9.168.",
+	},
+	{
+		date: "2026-11-24",
 		surfaces: ["api"],
 		version: "spec@1.9.170",
 		type: "fixed",

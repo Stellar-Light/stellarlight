@@ -111,7 +111,7 @@ All 28 tools wrap stellarlight.xyz public APIs. They're rate-limited but require
 
 | Tool | What it does |
 |------|--------------|
-| `search_research` | Vector search over the Stellar research corpus (SEPs, SCF Handbook, dev docs, papers, lumenloop, audits, incident reports, EC reports, core/CLI/SDK release notes). Use `source=audit` for security, `source=release` for what-shipped-when, or the `auditor`/`protocol`/`severity` filters (they imply audit scope). |
+| `search_research` | Vector search over the Stellar research corpus (SEPs, SCF Handbook, dev docs, papers, lumenloop, audits, incident reports, EC reports, Stellar Limits Proposals, core/CLI/SDK release notes). Use `source=audit` for security, `source=release` for what-shipped-when, or the `auditor`/`protocol`/`severity` filters (they imply audit scope). |
 | `get_audits` | Enumerable security-audit registry — one row per report with normalized auditor, date, and a verified project link. 'List all audits for X' / 'what has firm Y audited'. Absence ≠ unaudited. |
 | `get_hackathons` | List curated Stellar hackathons + live DoraHacks events. Status-scoped queries include fallback channels when empty. |
 | `get_hackathon` | One hackathon's full detail (submissions, winners, prize tracks, status funnel). |
@@ -125,7 +125,7 @@ All 28 tools wrap stellarlight.xyz public APIs. They're rate-limited but require
 | `compare_hackathons` | Side-by-side comparison of 2–5 hackathons with delta notes. |
 | `get_builders` | Stellar Passport builder directory (GitHub contributors). Filter by location or skill. |
 | `get_people` | SDF team/people index — leadership, board of directors, advisors (name → role → org). Filter by `q` or `section`. |
-| `search_projects` | Prior-art / competitor lookup across the curated project directory (live count in `get_status`). Tiered match-mode (strict → loose → majority) surfaced in `.meta.matchMode`. `category` / `type` / `status` / `scfAwarded` filters; `view=compact` for clients that cut long outputs. |
+| `search_projects` | Prior-art / competitor lookup across the curated project directory (live count in `get_status`). Tiered match-mode (strict → loose → majority) surfaced in `.meta.matchMode`. `category` / `type` / `status` / `venueRole` / `scfAwarded` filters; `view=compact` for clients that cut long outputs. |
 | `search_repos` | Code-reference index of indexed-and-scored Stellar GitHub repos (live count in `get_status`), ranked by repoScore. Synonym expansion + `language` / `activity` / `minScore` filters; `view=compact` for clients that cut long outputs. The repo layer beneath the project directory. |
 | `explain_repo` | Architectural explainer for one Stellar GitHub repo — structure, entry points, and key modules. |
 | `locate_source` | Where in Stellar source code a CLI flag or command, config option default, SDK or host function, contract interface or trait implementation is defined: scored pointers (file, symbol or heading, line, commit, pinned GitHub URL) into nine allowlisted repos (eight Stellar repos and OpenZeppelin/stellar-contracts), never file content. `repo` / `kind` / `page` filters. `pointers: []` = searched, no match; `null` = could not search. |
