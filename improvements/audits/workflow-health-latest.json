@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-11-24T19:48:13.134Z",
+	"asOf": "2026-11-24T20:11:57.624Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 113,
 	"healthy": 105,
@@ -234,6 +234,17 @@
 			"why": "last green 0d ago"
 		},
 		{
+			"file": "basis-from-onchain.yml",
+			"name": "Award onchain-activity basis (manual)",
+			"cron": "0 9 * * 2",
+			"state": "ok",
+			"lastSuccessAt": "2026-11-24T19:49:34Z",
+			"ageDays": 0,
+			"graceDays": 21,
+			"runs": 1,
+			"why": "last green 0d ago"
+		},
+		{
 			"file": "basis-from-product.yml",
 			"name": "Award product-integration basis (manual)",
 			"cron": "0 10 * * 2",
@@ -304,10 +315,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:32:11Z",
+			"lastSuccessAt": "2026-11-24T20:09:13Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -315,7 +326,7 @@
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:17:16Z",
+			"lastSuccessAt": "2026-11-24T20:09:13Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -326,7 +337,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:45:34Z",
+			"lastSuccessAt": "2026-11-24T20:09:13Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -414,10 +425,10 @@
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:17:16Z",
+			"lastSuccessAt": "2026-11-24T20:01:44Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -630,17 +641,6 @@
 			"why": "last green 101d ago (manual tool — age not judged)"
 		},
 		{
-			"file": "ingest-scf-proposals.yml",
-			"name": "Ingest SCF proposals (research corpus)",
-			"cron": "20 4 * * 1",
-			"state": "ok",
-			"lastSuccessAt": "2026-11-23T14:42:07Z",
-			"ageDays": 1,
-			"graceDays": 21,
-			"runs": 9,
-			"why": "last green 1d ago"
-		},
-		{
 			"file": "lane-autonomy.yml",
 			"name": "lane-autonomy",
 			"cron": "41 7 * * 1",
@@ -723,10 +723,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-15T19:48:09Z",
-			"ageDays": 69,
+			"ageDays": 70,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 69d ago (manual tool — age not judged)"
+			"why": "last green 70d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "migrate-research-url-host.yml",
@@ -744,7 +744,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:32:11Z",
+			"lastSuccessAt": "2026-11-24T20:06:44Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 97,
@@ -810,7 +810,7 @@
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:45:34Z",
+			"lastSuccessAt": "2026-11-24T20:09:13Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1008,7 +1008,7 @@
 			"name": "Secret scan",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:45:34Z",
+			"lastSuccessAt": "2026-11-24T20:09:13Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1129,10 +1129,10 @@
 			"name": "Sync hackathon builds",
 			"cron": "43 4 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:17:25Z",
+			"lastSuccessAt": "2026-11-24T19:45:57Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 1,
+			"runs": 2,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1195,7 +1195,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:45:34Z",
+			"lastSuccessAt": "2026-11-24T20:09:13Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1206,11 +1206,11 @@
 			"name": "Upgrade status basis from on-chain evidence (manual)",
 			"cron": "0 9 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-17T17:59:38Z",
-			"ageDays": 7,
+			"lastSuccessAt": "2026-11-24T19:49:17Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 9,
-			"why": "last green 7d ago"
+			"runs": 10,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "upgrade-status-basis.yml",
@@ -1250,7 +1250,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:06:06Z",
+			"lastSuccessAt": "2026-11-24T20:06:44Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
