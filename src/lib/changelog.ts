@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-24",
+		surfaces: ["api"],
+		version: "spec@1.9.164",
+		type: "fixed",
+		summary:
+			"The spec now declares every field, null, enum value and JSON type the GET operations served in a read of each on 2026-11-24. Newly declared: getQualityReport's byFailureMode refresh and blocked, knowledgeNotes triaged, triagedMeans and missing, thinnestEvidence source, rowQuality strongBasisSplit and deploymentSplit, and the deployment fields and types on weakestRows; verifyClaim meta.searched.stablecoins; getChanges meta.generatedAt; codeVerified.ciPresent and testsPresent on repo rows (searchRepos and searchProjects codeReferences); the fields of project rows' onchain object, which were described in prose only; meta.hints (searchProjects, searchRepos, searchResearch, getPartners); meta.advisory on getPeople, getPartners and getClusters; explainRepo codeVerified successorRepo, codeDomains and codeInUse; getHackathons meta.counts curated and dorahacks; getPartners meta.counts.filteredOut; listAudits meta.counts.matched and the severity keys of severityCounts; listSkills meta.counts.bySource; and getSkill registry, rawUrl, userInvocable and argumentHint.",
+		detail:
+			"Response data is unchanged; the contract now says what the API already served. Corrected: getSkill installAlt is an array of {label, command} entries, as on listSkills rows (the spec said a string); getClusters meta.notes is an object keyed by topic (the spec said an array); repo rows' source can be builder-owned (a repo a tracked builder owns, with no directory project); a project row's shortDescription and a lesson write-up's lessonCount can be null. Repo rows' top-level ciPresent and testsPresent were never served at that level (rows serve them inside codeVerified): they stay declared, marked deprecated, so nothing a typed client uses is removed. Measured on 2026-11-24 with 391 reads of all 39 GET operations, one per value of most enum filters: 37 undeclared field paths, 2 undeclared nulls, 1 enum value missing at 2 paths, 4 objects or arrays served where the schema declared no fields or items, and 2 values of a JSON type the schema did not allow. A test now checks one or more recorded production bodies per GET operation against the spec at every depth, and the daily drift guard reads the same requests live and checks each whole body, where it used to compare the top-level keys of eleven row types.",
+	},
+	{
 		date: "2026-11-23",
 		surfaces: ["api", "api-client"],
 		version: "spec@1.9.163",
