@@ -24,12 +24,6 @@ const { reads } = JSON.parse(
 ) as { reads: Read[] };
 const bodies = reads.filter((r) => r.body !== undefined);
 
-/** Partner-only operations: their bodies are private cohort data and this
- * fixture is public, so none is recorded here. sdf-cohort.test.ts ("cohort
- * bodies against the spec") holds each one to the spec on its synthetic
- * bundle; add an operation here only with a check there. */
-const PARTNER_ONLY = ["getCohortFigures", "listCohortRows", "getCohortJourney"];
-
 describe("recorded production bodies against the spec", () => {
 	it("every GET operation has a recorded body", () => {
 		const ops = Object.values(
@@ -38,10 +32,7 @@ describe("recorded production bodies against the spec", () => {
 		const recorded = new Set(
 			bodies.map((r) => operationOf(spec, r.url)?.operationId),
 		);
-		expect(PARTNER_ONLY.filter((op) => !ops.includes(op))).toEqual([]);
-		expect(
-			ops.filter((op) => !recorded.has(op) && !PARTNER_ONLY.includes(op)),
-		).toEqual([]);
+		expect(ops.filter((op) => !recorded.has(op))).toEqual([]);
 	});
 
 	it.each(bodies.map((r) => [r.url, r.body] as const))(

@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-24",
 		surfaces: ["api"],
+		version: "spec@1.9.168",
+		type: "removed",
+		summary:
+			"BREAKING: listCohortRows, getCohortJourney, getCohortFigures. The three partner-only cohort operations (`GET /api/cohort/projects`, `GET /api/cohort/journey` and `GET /api/cohort/retention`, in that order) leave the public contract: they are no longer in /api/openapi.json or specs/openapi.json, and the Partner-only tag and the cohort key schemes go with them.",
+		detail:
+			"The endpoints are served unchanged to partners whose key is on the cohort allowlist; nothing about their requests or responses changed. A public catalog would list endpoints that answer 401 to everyone else, so their schemas now live in a separate partner document kept with the code, and every cohort response is still tested against it. No public operation changed. Also fixed: `GET /api/status` now lists /api/tokens/integrations in its endpoints list, which it had left out since that endpoint shipped, so the list again names every path in the public spec and nothing else.",
+	},
+	{
+		date: "2026-11-24",
+		surfaces: ["api"],
 		version: "spec@1.9.167",
 		type: "added",
 		summary:

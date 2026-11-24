@@ -12,7 +12,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { GET as journeyGET } from "@/app/api/cohort/journey/route";
 import { GET as projectsGET } from "@/app/api/cohort/projects/route";
 import { GET as retentionGET } from "@/app/api/cohort/retention/route";
-import { spec } from "@/lib/openapi-spec";
+import { partnerSpec, spec } from "@/lib/openapi-spec";
 import {
 	operationOf,
 	responseSchema,
@@ -297,16 +297,39 @@ describe("cohort funnel", () => {
 	});
 });
 
-/** The cohort's bodies are partner-only, so served-bodies-spec.test.ts
- * records none in its public fixture (PARTNER_ONLY there); each is held
- * to the spec here, on this file's synthetic bundle. */
+/** The cohort operations live only in the partner document (partnerSpec),
+ * not the public contract, so served-bodies-spec.test.ts never sees them;
+ * each body is held to the partner document here, on this file's synthetic
+ * bundle. */
 const COHORT_SPEC_CHECKED = [
 	"/api/cohort/retention",
 	"/api/cohort/projects",
 	"/api/cohort/journey?slug=alpha",
 ] as const;
 
-describe("cohort bodies against the spec", () => {
+type Ops = Record<string, Record<string, Record<string, unknown>>>;
+const partnerOnlyOps = (s: { paths: Record<string, unknown> }) =>
+	Object.values(s.paths as Ops).flatMap((item) =>
+		Object.values(item).flatMap((op) =>
+			op["x-partner-only"] ? [String(op.operationId)] : [],
+		),
+	);
+
+describe("partner-only operations stay out of the public spec", () => {
+	it("the partner document carries the three cohort operations", () => {
+		expect(partnerOnlyOps(partnerSpec).sort()).toEqual([
+			"getCohortFigures",
+			"getCohortJourney",
+			"listCohortRows",
+		]);
+	});
+
+	it("the public spec carries no x-partner-only operation", () => {
+		expect(partnerOnlyOps(spec)).toEqual([]);
+	});
+});
+
+describe("cohort bodies against the partner document", () => {
 	const gets = {
 		"/api/cohort/retention": retentionGET,
 		"/api/cohort/projects": projectsGET,
@@ -317,12 +340,12 @@ describe("cohort bodies against the spec", () => {
 		async (url) => {
 			const res = await gets[url](req(url, { "x-api-key": "sk_cohort_ok" }));
 			expect(res.status).toBe(200);
-			const op = operationOf(spec, url);
+			const op = operationOf(partnerSpec, url);
 			expect(op, `no GET operation serves ${url}`).toBeDefined();
 			expect(
 				undeclaredInServed(
-					spec,
-					responseSchema(spec, op?.path ?? ""),
+					partnerSpec,
+					responseSchema(partnerSpec, op?.path ?? ""),
 					await res.json(),
 				),
 			).toEqual([]);
