@@ -1,11 +1,12 @@
 {
-	"generatedAt": "2026-11-23T16:51:51.966Z",
-	"specVersion": "1.9.157",
+	"generatedAt": "2026-11-24T16:43:18.339Z",
+	"specVersion": "1.9.169",
 	"graceDays": 10,
 	"expectedOps": [
 		"analyzeEcosystem",
 		"compareHackathons",
 		"explainRepo",
+		"getAwardRoundCoverage",
 		"getBuilders",
 		"getChangelog",
 		"getChanges",
@@ -21,6 +22,7 @@
 		"getSkill",
 		"getStablecoins",
 		"getStatus",
+		"getTokenIntegrations",
 		"hackathonBrief",
 		"listAudits",
 		"listContracts",
@@ -82,11 +84,26 @@
 	"missingFromCatalog": [],
 	"undiscoverable": [
 		"getChanges",
-		"getStablecoins",
-		"listContracts"
+		"getStablecoins"
 	],
 	"uncataloged": [],
-	"laggingInCatalog": [],
+	"laggingInCatalog": [
+		{
+			"op": "getAwardRoundCoverage",
+			"addedAt": "2026-11-23",
+			"ageDays": 1
+		},
+		{
+			"op": "getTokenIntegrations",
+			"addedAt": "2026-11-23",
+			"ageDays": 1
+		},
+		{
+			"op": "listContracts",
+			"addedAt": "2026-11-22",
+			"ageDays": 2
+		}
+	],
 	"extraInCatalog": [],
 	"claimedOpCount": null,
 	"auditArchetypeRoutesToRegistry": null,
