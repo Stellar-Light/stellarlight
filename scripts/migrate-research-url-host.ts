@@ -13,6 +13,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const OLD = "sorobansecurity.com";
@@ -54,7 +55,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(0))
+	.then(() => exitAfterFlush(0))
 	.catch((e) => {
 		console.error("FATAL", e);
 		process.exit(1);

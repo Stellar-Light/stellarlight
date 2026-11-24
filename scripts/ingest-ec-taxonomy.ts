@@ -36,6 +36,7 @@ import { getPayload } from "payload";
 import { isAllowlisted } from "../src/lib/repo-allowlist";
 import { repoGrade } from "../src/lib/repo-grade";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const args = process.argv.slice(2);
 const EXECUTE = args.includes("--execute");
@@ -578,7 +579,7 @@ async function main(): Promise<number> {
 }
 
 main()
-	.then((code) => process.exit(code))
+	.then((code) => exitAfterFlush(code))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

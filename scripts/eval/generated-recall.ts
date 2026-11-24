@@ -36,6 +36,7 @@ import {
 	gradeAttrProbe,
 	networkProbeQuery,
 } from "../../src/lib/recall-probes";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -689,7 +690,7 @@ async function main() {
 				console.log(`  [${f.bucket}] ${f.observed}`);
 		}
 	}
-	process.exit(red ? 1 : 0);
+	exitAfterFlush(red ? 1 : 0);
 }
 
 main().catch((e) => {

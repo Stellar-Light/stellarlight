@@ -18,6 +18,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(/\/$/, "");
 const KEY = join(process.cwd(), "improvements/evals/repo-ranking-answer-key.json");
@@ -73,7 +74,7 @@ async function main() {
 	console.log(
 		`\n${inverted.length ? "RED" : blind * 2 > rows.length ? "BLIND" : "GREEN"}: ${holds} hold · ${inverted.length} inverted · ${blind} could-not-check (of ${rows.length})`,
 	);
-	process.exit(blind * 2 > rows.length ? 2 : inverted.length ? 1 : 0);
+	exitAfterFlush(blind * 2 > rows.length ? 2 : inverted.length ? 1 : 0);
 }
 
 main().catch((e) => {

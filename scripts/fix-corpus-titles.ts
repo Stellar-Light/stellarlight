@@ -27,6 +27,7 @@ import config from "@payload-config";
 import { getPayload } from "payload";
 import { JUNK_URL_RE } from "../src/lib/research-rank";
 import { deriveCleanTitle, titleIssue } from "../src/lib/title-quality";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const PAGE = 1000;
@@ -247,7 +248,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("Fatal:", e);
 		process.exit(1);

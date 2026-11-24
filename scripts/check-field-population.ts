@@ -21,6 +21,7 @@
  * No DB / auth / LLM — plain fetch against the public API.
  */
 
+import { exitAfterFlush } from "./lib/exit-after-flush";
 import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
@@ -328,7 +329,7 @@ async function main() {
 	console.log(
 		`\n${PROBES.length - failures - known}/${PROBES.length} populated · ${known} known-failing${failures ? " — FAILING" : ""}`,
 	);
-	process.exit(failures ? 1 : 0);
+	exitAfterFlush(failures ? 1 : 0);
 }
 
 /**

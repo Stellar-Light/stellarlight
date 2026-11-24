@@ -33,6 +33,7 @@
  * post-deploy-eval); everything else is fix-queue material, not a red.
  */
 import { writeFileSync } from "node:fs";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -549,7 +550,7 @@ async function main() {
 		section("AMBIGUOUS — cannot probe honestly, review by hand", ambiguous);
 	}
 	// silentParams + rejectedParams are hard regression signals; the rest is fix-queue.
-	process.exit(silentParams.length > 0 || rejectedParams.length > 0 ? 1 : 0);
+	exitAfterFlush(silentParams.length > 0 || rejectedParams.length > 0 ? 1 : 0);
 }
 
 // Guarded so a test can import rowsOf without sweeping production.

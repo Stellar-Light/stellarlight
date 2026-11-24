@@ -56,6 +56,7 @@ import {
 import { transferWindow } from "../src/lib/stablecoin-transfer-volume";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 // The issuer of record reaches production only once the owner turns it on
@@ -553,7 +554,7 @@ function kept7(m: MeasuredStablecoin, problems: string[]) {
 // finding or a blind run sets it above, and exit(0) here would stomp it — the
 // class-20 bug where a run reports GREEN after its writes died.
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("Fatal:", e);
 		process.exit(1);

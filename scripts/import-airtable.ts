@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -334,7 +335,7 @@ async function run() {
 
 run()
 	.then(() => {
-		process.exit(0);
+		exitAfterFlush(0);
 	})
 	.catch((err) => {
 		console.error(

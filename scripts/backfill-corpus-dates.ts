@@ -26,6 +26,7 @@ import "./load-env";
 import { getPayload } from "payload";
 import { paperDate, preambleDate, toPublishedAt } from "../src/lib/doc-dates";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const SOURCES = ["sep", "cap", "paper"] as const;
@@ -210,7 +211,7 @@ async function run() {
 }
 
 run()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((err) => {
 		console.error("FATAL:", err);
 		process.exit(1);

@@ -5,6 +5,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const SLUG = (process.env.SLUG || "").trim();
@@ -42,7 +43,7 @@ async function main() {
 	);
 	if (!EXECUTE) {
 		console.log("\nDRY RUN — no changes.");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 
 	await payload.update({
@@ -55,7 +56,7 @@ async function main() {
 		},
 	});
 	console.log(`\nDONE: ${doc.name} → ${STATUS} (sync-protected).`);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

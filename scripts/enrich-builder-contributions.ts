@@ -20,6 +20,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "@/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const onlyIdx = process.argv.indexOf("--only");
@@ -174,7 +175,7 @@ async function main() {
 	console.log(
 		`\nchecked ${checked}, connected to indexed repos ${connected}, ${EXECUTE ? `wrote ${written}` : "DRY RUN, nothing written"}`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

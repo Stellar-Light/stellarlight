@@ -54,6 +54,7 @@ import {
 	goneRepoCandidateQuery,
 } from "../src/lib/project-repos";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -397,7 +398,7 @@ function selfTest() {
 if (process.argv.includes("--self-test")) selfTest();
 else
 	main()
-		.then((code) => process.exit(code))
+		.then((code) => exitAfterFlush(code))
 		.catch((e) => {
 			console.error(
 				"INCONCLUSIVE (the sweep did not complete):",

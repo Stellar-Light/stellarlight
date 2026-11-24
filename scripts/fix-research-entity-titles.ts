@@ -23,6 +23,7 @@ import "./load-env";
 import config from "@payload-config";
 import { getPayload } from "payload";
 import { decodeHtmlEntities } from "../src/lib/decode-entities";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const APPLY = process.argv.includes("--apply");
 const PAGE = 500;
@@ -127,7 +128,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("Fatal:", e);
 		process.exit(1);

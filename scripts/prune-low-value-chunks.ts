@@ -21,6 +21,7 @@ import "./load-env";
 import config from "@payload-config";
 import { getPayload } from "payload";
 import { isLowValueChunk } from "../src/lib/research-ingest";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const APPLY = process.argv.includes("--apply");
 const PAGE = 500;
@@ -113,7 +114,7 @@ async function main() {
 		console.log(
 			`\nDRY RUN — nothing deleted. Re-run with --apply to remove ${victims.length} chunks.`,
 		);
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 
 	console.log(`\nDeleting ${victims.length} chunks…`);
@@ -131,7 +132,7 @@ async function main() {
 		}
 	}
 	console.log(`Done. Deleted ${deleted}/${victims.length}.`);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

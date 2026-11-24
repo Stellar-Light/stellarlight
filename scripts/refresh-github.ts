@@ -1,6 +1,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 async function run() {
 	const payload = await getPayload({
@@ -24,7 +25,7 @@ async function run() {
 }
 
 run()
-	.then(() => process.exit(0))
+	.then(() => exitAfterFlush(0))
 	.catch((err) => {
 		console.error(err);
 		process.exit(1);

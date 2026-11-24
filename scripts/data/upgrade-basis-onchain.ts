@@ -40,6 +40,7 @@ import { getPayload } from "payload";
 import { isStrongStatusBasis } from "../../src/lib/project-status";
 import { llamaCitationFor } from "../../src/lib/status-checks";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const MAX_MOVEMENT_AGE_DAYS = 45; // a movement older than this is not activity now
@@ -286,7 +287,7 @@ async function main() {
 
 	if (!EXECUTE) {
 		console.log("\nDRY RUN — nothing written. Re-run with --execute.");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 
 	let wrote = 0;
@@ -329,7 +330,7 @@ async function main() {
 		);
 		process.exit(2);
 	}
-	process.exit(after.totalDocs >= wrote ? 0 : 1);
+	exitAfterFlush(after.totalDocs >= wrote ? 0 : 1);
 }
 
 main().catch((e) => {

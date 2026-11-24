@@ -20,6 +20,7 @@
  */
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(/\/$/, "");
 const OUT = join(process.cwd(), "improvements/audits/endpoint-agreement-latest.json");
@@ -113,7 +114,7 @@ async function main() {
 	console.log(
 		`\n${missing.length ? "RED" : blind * 2 > rows.length ? "BLIND" : "GREEN"}: ${agree} agree · ${missing.length} missing a resolution fact · ${blind} could-not-check (of ${rows.length})`,
 	);
-	process.exit(blind * 2 > rows.length ? 2 : missing.length ? 1 : 0);
+	exitAfterFlush(blind * 2 > rows.length ? 2 : missing.length ? 1 : 0);
 }
 
 main().catch((e) => {

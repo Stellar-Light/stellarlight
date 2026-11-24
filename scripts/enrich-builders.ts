@@ -14,6 +14,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const TOKEN = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN ?? "";
@@ -114,7 +115,7 @@ async function main() {
 	console.log(
 		`\n${EXECUTE ? "DONE" : "DRY RUN"}: ${enriched} ${EXECUTE ? "enriched" : "fillable"}; ${noChange} already complete; ${noUser} GH profile missing/failed; ${skipped} had no github_username${rateHit ? `; STOPPED on rate limit (set GITHUB_TOKEN)` : ""}.`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

@@ -39,6 +39,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -605,7 +606,7 @@ async function main() {
 // Run only as the lane's entry point: a test imports fetchDirectory.
 if (process.argv[1]?.includes("report-coverage-gaps"))
 	main()
-		.then(() => process.exit(process.exitCode ?? 0))
+		.then(() => exitAfterFlush(process.exitCode ?? 0))
 		.catch((e) => {
 			console.error("FATAL", e);
 			process.exit(1);

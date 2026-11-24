@@ -18,6 +18,7 @@ import { createRequire } from "node:module";
 import { getPayload } from "payload";
 import { embed, embedBatch } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const req = createRequire(import.meta.url);
 // biome-ignore lint/suspicious/noExplicitAny: dynamic require, no types
@@ -55,7 +56,7 @@ async function main() {
 	);
 	if (todo.length === 0) {
 		console.log("Nothing to do.");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 
 	if (!EXECUTE) {
@@ -64,7 +65,7 @@ async function main() {
 		console.log(
 			`DRY RUN ok — sample "${todo[0].name}" → ${v.length}-dim vector. ${todo.length} would be written.`,
 		);
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 
 	const URI = process.env.DATABASE_URI || process.env.MONGODB_URI;
@@ -89,7 +90,7 @@ async function main() {
 	}
 	await client.close();
 	console.log(`DONE: wrote ${done} project embeddings.`);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

@@ -46,6 +46,7 @@ import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import yaml from "js-yaml";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const JSON_OUT = process.argv.includes("--json");
 const OUT = "improvements/audits/workflow-health-latest.json";
@@ -602,7 +603,7 @@ async function main() {
 		// on the last committed snapshot forever, and a frozen board is
 		// indistinguishable from a healthy one. The artifact is the measurement;
 		// the verdict is the second run's job.
-		process.exit(JSON_OUT ? 0 : 1);
+		exitAfterFlush(JSON_OUT ? 0 : 1);
 	}
 }
 

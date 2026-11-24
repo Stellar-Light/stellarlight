@@ -16,6 +16,7 @@ import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 import { ENTITY_LINK_FIXES } from "./data/curation-maps";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const args = process.argv.slice(2);
 const dryRun = !args.includes("--execute");
@@ -364,7 +365,7 @@ async function main() {
 		);
 	}
 
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((err) => {

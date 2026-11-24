@@ -24,6 +24,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const dirIdx = process.argv.indexOf("--dir");
@@ -166,7 +167,7 @@ async function main() {
 
 	if (!EXECUTE) {
 		console.log("\nDRY RUN — nothing written. Re-run with --execute.");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 	const after = await payload.count({
 		collection: "stablecoin-snapshots",
@@ -175,7 +176,7 @@ async function main() {
 	console.log(
 		`\nread-back: ${after.totalDocs} rows now carry source=replit-import`,
 	);
-	process.exit(after.totalDocs >= created ? 0 : 1);
+	exitAfterFlush(after.totalDocs >= created ? 0 : 1);
 }
 
 main().catch((e) => {

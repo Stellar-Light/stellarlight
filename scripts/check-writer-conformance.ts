@@ -26,6 +26,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
@@ -126,9 +127,13 @@ for (const f of walk("scripts")) {
 	if (f.endsWith("check-writer-conformance.ts")) continue; // self: strings below
 	const src = read(f);
 	// statement-position only — a comment quoting the pattern is not a stomp
+	// (exitAfterFlush(0) stomps the same way, and scripts now exit through it,
+	// as a statement or as an arrow's body: main().then(() => exitAfterFlush(0)))
 	if (
 		src.includes("process.exitCode") &&
-		/^\s*process\.exit\(0\);/m.test(src)
+		/^\s*(return )?(process\.exit|exitAfterFlush)\(0\);|^(?!\s*(\/\/|\*)).*=>\s*(process\.exit|exitAfterFlush)\(0\)/m.test(
+			src,
+		)
 	) {
 		bad(
 			`${f} sets process.exitCode AND calls process.exit(0) — the stomp class`,
@@ -206,4 +211,4 @@ console.log(
 		? `\n✗ FAIL — ${failures} conformance violation(s)`
 		: "\n✓ all writers conform",
 );
-process.exit(failures ? 1 : 0);
+exitAfterFlush(failures ? 1 : 0);

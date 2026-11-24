@@ -50,6 +50,7 @@ import {
 	summarize,
 	toBaseline,
 } from "../../src/lib/partner-coverage";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const FIXTURE = "scripts/eval/partner-coverage.json";
 const BASELINE = "scripts/eval/partner-coverage-baseline.json";
@@ -301,5 +302,5 @@ async function main() {
 
 main().catch((e) => {
 	console.error(e);
-	process.exit(e instanceof EvalBroken ? 2 : 3);
+	exitAfterFlush(e instanceof EvalBroken ? 2 : 3);
 });

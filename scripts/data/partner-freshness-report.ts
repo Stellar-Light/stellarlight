@@ -13,6 +13,7 @@
 import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const DAY = 24 * 60 * 60 * 1000;
 const AGING = 90;
@@ -111,7 +112,7 @@ async function main() {
 	console.log(
 		`\nReminder EMAILS go out via the weekly partner-digest cron (needs RESEND_API_KEY).`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

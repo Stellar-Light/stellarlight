@@ -14,6 +14,7 @@
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 interface Rule {
 	re: RegExp;
@@ -87,7 +88,7 @@ function main() {
 	);
 	if (hits.length === 0) {
 		console.log("✅ No stale Stellar CLI / build commands found.");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 	console.error(`\n❌ ${hits.length} stale command(s) in authored content:\n`);
 	for (const h of hits) {

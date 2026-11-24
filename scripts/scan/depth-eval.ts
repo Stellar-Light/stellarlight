@@ -22,6 +22,7 @@
 import { computeCodeDepth } from "../../src/lib/code-depth";
 import { computeJsDepth } from "../../src/lib/js-depth";
 import { computeLangDepth } from "../../src/lib/lang-depth";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import {
 	DEEP,
 	DEEP_FRONTIER,
@@ -384,7 +385,7 @@ async function main() {
 		process.exit(1);
 	}
 	console.log("\n✅ separation holds — codeDepth gate passed.");
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

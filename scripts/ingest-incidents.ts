@@ -27,6 +27,7 @@ import {
 	type ResearchChunk,
 	upsertChunks,
 } from "../src/lib/research-ingest";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
@@ -247,7 +248,7 @@ async function run() {
 // Imported by the registry test: run only as the script.
 if (process.argv[1]?.includes("ingest-incidents"))
 	run()
-		.then(() => process.exit(0))
+		.then(() => exitAfterFlush(0))
 		.catch((e) => {
 			console.error("FATAL:", e);
 			process.exit(1);

@@ -23,6 +23,7 @@
  */
 import { readFileSync } from "node:fs";
 import { summarize } from "../../src/lib/scf-rounds-guard";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const path = process.argv[2] || "/tmp/scf.json";
 let report: unknown;
@@ -36,4 +37,4 @@ try {
 }
 const { count, text } = summarize(report);
 console.log(text);
-process.exit(count > 0 ? 1 : 0);
+exitAfterFlush(count > 0 ? 1 : 0);

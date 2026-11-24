@@ -71,6 +71,7 @@ import "../load-env";
 import { writeFileSync } from "node:fs";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import {
 	SEEDS,
 	STATUS_FIX,
@@ -606,7 +607,7 @@ async function main() {
 
 	if (!EXECUTE) {
 		console.log("DRY RUN — none applied.");
-		process.exit(process.exitCode ?? 0);
+		return exitAfterFlush(process.exitCode ?? 0);
 	}
 
 	// Per-write isolation (curate-projects precedent): a bad row fails loudly,
@@ -631,7 +632,7 @@ async function main() {
 	console.log(
 		`\nDONE: ${writes.length - failed}/${writes.length} write(s) applied.`,
 	);
-	process.exit(process.exitCode ?? 0);
+	exitAfterFlush(process.exitCode ?? 0);
 }
 
 main().catch((e) => {

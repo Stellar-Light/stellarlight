@@ -25,6 +25,7 @@ import {
 	PARTNER_PROJECT_LINKS,
 	registrableDomain,
 } from "../../src/lib/partner-project-identity";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 
@@ -195,7 +196,7 @@ async function main() {
 		);
 		process.exit(1);
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

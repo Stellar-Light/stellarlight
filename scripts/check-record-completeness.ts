@@ -69,6 +69,7 @@ import {
 	PRODUCT_KIND_UNRESOLVED,
 	VENUE_ROLE_UNRESOLVED,
 } from "./data/curation-maps";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
@@ -432,7 +433,7 @@ async function main() {
 
 	writeNightlyFindings("record-completeness", failRows);
 	console.log(failures ? "\nFAILING" : "\nall sweeps clean");
-	process.exit(failures ? 1 : 0);
+	exitAfterFlush(failures ? 1 : 0);
 }
 
 /**

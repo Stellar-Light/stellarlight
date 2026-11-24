@@ -30,6 +30,7 @@ import {
 	indexSizeVerdict,
 } from "../src/lib/builds-index-size";
 import { RESOLVABLE_PROJECT_STATUSES } from "../src/lib/project-status";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
@@ -606,5 +607,5 @@ async function buildsIndexFits() {
 		`\n${passes} passed, ${failures} failed, ${unchecked} could not check`,
 	);
 	writeNightlyFindings("live-canary", failRows);
-	process.exit(failures > 0 ? 1 : 0);
+	exitAfterFlush(failures > 0 ? 1 : 0);
 })();

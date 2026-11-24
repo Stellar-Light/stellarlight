@@ -57,6 +57,7 @@ import {
 	parseRoundVerdicts,
 	type ScfEntry,
 } from "../eval/scf-official";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 /** Surgical mode (sls-026 residual): for records exact-sync must skip because
@@ -558,7 +559,7 @@ async function main() {
 
 	writeFileSync(OUT_FILE, JSON.stringify(plan, null, 1));
 	log(`wrote ${OUT_FILE}`);
-	process.exit(process.exitCode ?? 0);
+	exitAfterFlush(process.exitCode ?? 0);
 }
 
 main().catch((e) => {

@@ -17,6 +17,7 @@
 import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
@@ -51,7 +52,7 @@ async function main() {
 	);
 	if (clusters.length === 0) {
 		console.log("✓ one row per repo");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 	for (const [key, v] of clusters.sort((a, b) => b[1].length - a[1].length)) {
 		const variants = [...new Set(v)];

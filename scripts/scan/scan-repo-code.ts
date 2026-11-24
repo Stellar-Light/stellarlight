@@ -46,6 +46,7 @@ import {
 	verifyWrites,
 } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import {
 	createGh,
 	fetchRepoCode,
@@ -176,7 +177,7 @@ async function verifyMain() {
 			}),
 		);
 	}
-	process.exit(process.exitCode ?? 0);
+	exitAfterFlush(process.exitCode ?? 0);
 }
 
 async function main() {
@@ -805,7 +806,7 @@ async function main() {
 		console.log(
 			`\n· no eligible repos this wave — the routine backlog is exhausted (${eligible} matched the state filter, ${skippedTriaged} of them triaged). Structurally unscannable rows (submodule-contracts, tree-incomplete) and prior errors are retried only under --rescan.`,
 		);
-		process.exit(process.exitCode ?? 0);
+		return exitAfterFlush(process.exitCode ?? 0);
 	}
 	// Zero-work waves are FAILURES, not successes (2026-08-08: a rate-limit
 	// stop 0.8s in exited green — the run looked healthy on every dashboard
@@ -826,7 +827,7 @@ async function main() {
 	// exitCode, not 0: a read-back mismatch above sets it, and `exit(0)` here
 	// would stomp it — the class-20 bug where a run reports GREEN after 13
 	// writes died. Zero-work and read-back both reach the run's colour.
-	process.exit(process.exitCode ?? 0);
+	exitAfterFlush(process.exitCode ?? 0);
 }
 
 main().catch((e) => {

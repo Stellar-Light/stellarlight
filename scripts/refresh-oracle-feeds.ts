@@ -34,6 +34,7 @@ import {
 	readingKey,
 } from "../src/lib/oracle-products";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const OFFLINE = process.argv.includes("--offline");
@@ -188,7 +189,7 @@ async function main() {
 
 // exitCode, never exit(0): a stomped exitCode reads as green (class 20).
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("Fatal:", e);
 		process.exit(1);

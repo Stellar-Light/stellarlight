@@ -47,6 +47,7 @@ import {
 } from "../src/lib/source-locator";
 import { buildRows, tarFiles } from "../src/lib/source-locator-extract";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 /** Bump when extraction or term rules change; changed terms are re-planned either way. 2: impl locators. */
 const BUILDER_VERSION = "2";
@@ -310,7 +311,5 @@ run()
 		console.error(e);
 		process.exitCode = 1;
 	})
-	.finally(() => {
-		// Payload keeps the Mongo pool open; exit with the code set above.
-		setTimeout(() => process.exit(), 100).unref();
-	});
+	// Payload keeps the Mongo pool open; exit with the code set above.
+	.finally(() => exitAfterFlush(process.exitCode));

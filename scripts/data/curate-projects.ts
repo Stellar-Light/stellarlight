@@ -21,6 +21,7 @@ import {
 import { fillScfFromDupe } from "../../src/lib/scf-merge";
 import { availabilityPatch } from "../../src/lib/wallet-coverage";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import {
 	ALIAS_ADD,
 	AVAILABILITY_CHECKED,
@@ -3202,7 +3203,7 @@ async function main() {
 		console.log("DRY RUN — none applied.");
 		// honor exitCode set by failed writes/creates (a bare exit(0) was
 		// stomping it — the 2026-07-09 seed failure ran green).
-		process.exit(process.exitCode ?? 0);
+		return exitAfterFlush(process.exitCode ?? 0);
 	}
 	// Per-write isolation (2026-07-09 incident: one ValidationError — an
 	// enum value missing from the Types options — aborted the whole batch,
@@ -3298,7 +3299,7 @@ async function main() {
 	);
 	// exit(0) STOMPED the exitCode set above (same bug enrich-repos fixed):
 	// failed writes exited green. Honor the failure code.
-	process.exit(process.exitCode ?? 0);
+	exitAfterFlush(process.exitCode ?? 0);
 }
 
 main().catch((e) => {

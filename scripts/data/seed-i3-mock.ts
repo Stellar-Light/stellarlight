@@ -29,6 +29,7 @@
 import "../load-env";
 import { Keypair } from "@stellar/stellar-sdk";
 import { getPayload } from "payload";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const { default: configPromise } = await import("../../src/payload.config");
 
@@ -330,7 +331,7 @@ async function main() {
 	console.log(
 		`\nDone. ${EXECUTE ? "Visit /awards to see the ballot." : "Re-run with --execute to write."}`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((err) => {

@@ -25,6 +25,7 @@
 import "./load-env";
 import config from "@payload-config";
 import { getPayload } from "payload";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 // Accepts BOTH `--flag value` and `--flag=value`. The workflow passes the
@@ -347,7 +348,7 @@ async function main() {
 		);
 		process.exit(2);
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

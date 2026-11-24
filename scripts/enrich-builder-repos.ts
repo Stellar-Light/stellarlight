@@ -44,6 +44,7 @@ import { isDenied } from "../src/lib/repo-allowlist";
 import { STELLAR_SIGNAL } from "../src/lib/repo-org-attribution";
 import { deriveTriageTags } from "../src/lib/repo-triage";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 import { findRepoDoc, takeUnknown } from "./lib/repo-doc";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -290,7 +291,7 @@ async function main() {
 
 	if (!EXECUTE) {
 		console.log("\nDRY RUN — nothing written. Re-run with --execute.");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 
 	// Create the row as a bare reference only. enrich-repos owns every derived
@@ -331,7 +332,7 @@ async function main() {
 	console.log(
 		"enrich-repos fills stars/language/scan signals on its next pass.",
 	);
-	process.exit(after.totalDocs >= wrote ? 0 : 1);
+	exitAfterFlush(after.totalDocs >= wrote ? 0 : 1);
 }
 
 main().catch((e) => {

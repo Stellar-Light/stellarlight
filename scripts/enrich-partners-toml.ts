@@ -36,6 +36,7 @@ import "./load-env";
 import config from "@payload-config";
 import { getPayload } from "payload";
 import { hasTomlRead } from "@/lib/partner-public";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 import {
 	capabilityReport,
 	domainOf,
@@ -695,7 +696,7 @@ async function main() {
 	console.log(
 		`\n${EXECUTE ? "seeded" : "would seed"}: ${seeded} · ${EXECUTE ? "enriched" : "would enrich"}: ${enriched} · skipped: ${skipped} · scanned: ${res.docs.length}`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

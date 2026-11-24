@@ -15,6 +15,7 @@ import "./load-env";
 import { getPayload } from "payload";
 import { embed } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const ROZO_ID = "69b035ea2d04b7c0f26dada6";
@@ -112,7 +113,7 @@ async function main() {
 
 	if (!EXECUTE) {
 		console.log("\nDRY RUN — no changes.");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 
 	const vec = await embed(embedText);
@@ -128,7 +129,7 @@ async function main() {
 		},
 	});
 	console.log("\nDONE: Rozo patched + re-embedded (1024-dim).");
-	process.exit(0);
+	exitAfterFlush(0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

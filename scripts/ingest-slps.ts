@@ -19,6 +19,7 @@ import {
 	upsertChunks,
 } from "../src/lib/research-ingest";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const execute = process.argv.includes("--execute");
 const replan = process.argv.includes("--replan");
@@ -77,7 +78,7 @@ async function run() {
 }
 
 run()
-	.then(() => process.exit(0))
+	.then(() => exitAfterFlush(0))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

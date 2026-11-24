@@ -22,6 +22,7 @@ import "../load-env";
 import { randomBytes } from "node:crypto";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const EMAIL = process.env.TEST_PARTNER_EMAIL || "partner-test@stellarlight.xyz";
 const PASSWORD = process.env.TEST_PARTNER_PASSWORD || genPassword();
@@ -91,7 +92,7 @@ async function main() {
 	console.log(
 		"\nLog in there, toggle 'Have a password?', and you should land on the dashboard.",
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

@@ -14,6 +14,7 @@
  * in the workflow where GITHUB_TOKEN naturally is).
  */
 import { readFileSync } from "node:fs";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const positional = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const [
@@ -407,4 +408,4 @@ lines.push(
 );
 
 console.log(lines.join("\n"));
-process.exit(red ? 1 : 0);
+exitAfterFlush(red ? 1 : 0);

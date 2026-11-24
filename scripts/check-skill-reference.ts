@@ -19,6 +19,7 @@
  */
 
 import { readFileSync } from "node:fs";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 
@@ -165,7 +166,7 @@ async function main() {
 	console.log(
 		`\n${failures ? `${failures} missing — FAILING` : "reference covers the live surface"}`,
 	);
-	process.exit(failures ? 1 : 0);
+	exitAfterFlush(failures ? 1 : 0);
 }
 
 main().catch((e) => {

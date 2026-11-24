@@ -62,6 +62,7 @@ import {
 	verifyWrites,
 } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 
@@ -382,7 +383,7 @@ async function main() {
 		`\nDONE: ${EXECUTE ? `${written} written, ${failed} failed, ${mismatches.length} did-not-persist` : "dry run, no writes"}, ${unresolved.length} could not be checked.`,
 	);
 	if (failed) process.exitCode = 1;
-	process.exit(process.exitCode ?? 0);
+	exitAfterFlush(process.exitCode ?? 0);
 }
 
 main().catch((e) => {

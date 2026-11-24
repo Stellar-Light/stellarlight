@@ -24,6 +24,7 @@
 import "./load-env";
 import config from "@payload-config";
 import { getPayload } from "payload";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const APPLY = process.argv.includes("--apply");
 const PAGE = 500;
@@ -156,7 +157,7 @@ async function main() {
 		console.log(
 			`\nDRY RUN — re-run with --apply to retitle ${retitle.length} and delete ${deletes.length}.`,
 		);
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 
 	let retitled = 0;
@@ -196,7 +197,7 @@ async function main() {
 	console.log(
 		`\nDone. Retitled ${retitled}/${retitle.length}, deleted ${removed}/${deletes.length}.`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

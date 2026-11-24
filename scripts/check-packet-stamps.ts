@@ -50,6 +50,7 @@ import { writeFileSync } from "node:fs";
 import { isIP } from "node:net";
 import { registrableDomain } from "../src/lib/partner-project-identity";
 import { STATUS_FIX } from "./data/curation-maps";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const OUT = "improvements/audits/packet-stamps-latest.json";
 const JSON_OUT = process.argv.includes("--json");
@@ -784,7 +785,7 @@ async function main() {
 	// A contradiction or a revival is the declared signal. Blind on more than
 	// half is an instrument failure and gets its own code, so nobody reads a
 	// run that could not look as a run that found nothing.
-	process.exit(
+	exitAfterFlush(
 		tally.contradicted + tally.revived > 0
 			? 1
 			: tally.couldNotCheck * 2 > tally.checked

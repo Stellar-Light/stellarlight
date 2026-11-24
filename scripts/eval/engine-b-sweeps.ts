@@ -22,6 +22,8 @@
  *      candidates (never auto-acted; class 18).
  */
 
+import { exitAfterFlush } from "../lib/exit-after-flush";
+
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
 	"",
@@ -429,7 +431,7 @@ async function main() {
 			`\nS4 staleness: ${report.s4_staleness && (report.s4_staleness as any).liveNoDatedSignal} Live w/ NO dated signal, ${(report.s4_staleness as any).liveStale365} Live stale >365d`,
 		);
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

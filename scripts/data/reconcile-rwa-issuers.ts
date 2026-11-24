@@ -54,6 +54,7 @@ import {
 	RWA_ISSUER_COVERAGE,
 	RWA_REGISTRY,
 } from "../../src/data/rwa-registry";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const UA = {
 	"User-Agent": "stellarlight-rwa-reconcile (+https://stellarlight.xyz)",
@@ -453,7 +454,7 @@ async function main() {
 			? `\n✗ ${red} finding(s)`
 			: `\n✓ every tracked issuer's toml matches the registry and the table`,
 	);
-	process.exit(red ? 1 : 0);
+	exitAfterFlush(red ? 1 : 0);
 }
 
 if (process.argv[1]?.includes("reconcile-rwa-issuers"))

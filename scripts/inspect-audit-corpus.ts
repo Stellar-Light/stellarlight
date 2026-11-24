@@ -11,6 +11,7 @@ import "./load-env";
 import { writeFileSync } from "node:fs";
 import { type AuditSeverity, chunkMarkdown } from "../src/lib/research-ingest";
 import { reassembleSpacedText } from "./ingest-soroban-security";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const API = "https://sorobansecurity.com/api/v1/reports";
 
@@ -294,7 +295,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(0))
+	.then(() => exitAfterFlush(0))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

@@ -29,6 +29,7 @@
  */
 import { strict as assert } from "node:assert";
 import { REPO_KNOWLEDGE_NOTES } from "../src/lib/repo-knowledge";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
 type Registry =
@@ -643,7 +644,7 @@ function selfTest() {
 if (process.argv.includes("--self-test")) selfTest();
 else
 	main()
-		.then((code) => process.exit(code))
+		.then((code) => exitAfterFlush(code))
 		.catch((e) => {
 			console.error("FATAL:", e);
 			process.exit(1);

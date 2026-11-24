@@ -6,6 +6,7 @@
  *   GITHUB_TOKEN=… npx tsx scripts/scan/depth-diagnose.ts [owner/repo ...]
  */
 import { computeCodeDepth } from "../../src/lib/code-depth";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import { DEEP_FRONTIER, SHALLOW_FRONTIER } from "./depth-labels";
 import { createGh, fetchRepoCode } from "./fetch-repo-code";
 
@@ -57,7 +58,7 @@ async function main() {
 			console.log(`\n═══ ${fullName}: ERROR ${(e as Error).message}`);
 		}
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

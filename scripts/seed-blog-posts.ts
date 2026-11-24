@@ -24,6 +24,7 @@ import { join } from "node:path";
 import config from "@payload-config";
 import yaml from "js-yaml";
 import { getPayload } from "payload";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 // Local dev reads .env.local; CI injects DATABASE_URI + PAYLOAD_SECRET via env.
 
@@ -205,7 +206,7 @@ async function main() {
 	}
 
 	console.log(`\nDone. ${created} created, ${updated} updated.\n`);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((err) => {

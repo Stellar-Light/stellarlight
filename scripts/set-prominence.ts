@@ -7,6 +7,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 
@@ -182,7 +183,7 @@ async function main() {
 	console.log(
 		`\n${EXECUTE ? `DONE: ${done} updated, ${skipped} already-set, ${missing} not-found.` : `DRY RUN — ${Object.keys(PROM).length - skipped - missing} would change, ${skipped} already-set, ${missing} not-found.`}`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

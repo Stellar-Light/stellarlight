@@ -32,6 +32,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 type Doc = Record<string, any>;
 
@@ -266,7 +267,7 @@ async function main() {
 			? `EXECUTED — ${hidden} of ${proposed} record(s) READ BACK as Draft (reversible)${mismatched ? `, ${mismatched} did NOT land` : ""}.`
 			: "READ-ONLY — nothing was changed.",
 	);
-	process.exit(mismatched > 0 ? 1 : 0);
+	exitAfterFlush(mismatched > 0 ? 1 : 0);
 }
 
 main().catch((e) => {

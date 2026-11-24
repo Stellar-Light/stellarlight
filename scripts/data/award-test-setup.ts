@@ -29,6 +29,7 @@
 import "../load-env";
 import { Keypair, StrKey } from "@stellar/stellar-sdk";
 import { getPayload } from "payload";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const { default: configPromise } = await import("../../src/payload.config");
 
@@ -286,7 +287,7 @@ async function main() {
 			? "\nDone. Check GET /api/awards/eligibility?address=… to confirm whitelisted."
 			: "\nDry-run only. Re-run with --execute to write.",
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((err) => {

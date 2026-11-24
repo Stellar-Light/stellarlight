@@ -68,6 +68,7 @@ import { getPayload } from "payload";
 import { codeProofTier } from "../src/lib/code-signals";
 import { CURATED_CANONICAL_REPOS } from "../src/lib/repo-search";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const RUN_ID = `ctl-${new Date().toISOString().slice(0, 10)}-${Math.abs(Date.now() % 100000)}`;
@@ -296,7 +297,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(0))
+	.then(() => exitAfterFlush(0))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

@@ -21,6 +21,7 @@ import { getPayload } from "payload";
 import { fetchRepoInfo } from "../src/lib/github";
 import { repoGrade } from "../src/lib/repo-grade";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const LIMIT = Number(process.env.INGEST_LIMIT || "0") || 0; // 0 = all
@@ -189,7 +190,7 @@ async function main() {
 	console.log(
 		`\n${EXECUTE ? "DONE" : "DRY RUN"}: ${created} created, ${lifted} lifted, ${unchanged} unchanged, ${failed} fetch-failed, ${refused} refused.`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

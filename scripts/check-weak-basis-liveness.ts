@@ -25,6 +25,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { domainState, lookupHost, probe } from "./check-packet-stamps";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -206,7 +207,7 @@ async function main() {
 	console.log(
 		`\n${blind ? "BLIND" : tally.contradicted ? "RED" : "GREEN"}: ${tally.holds} holds · ${tally.contradicted} contradicted · ${tally.couldNotCheck} could-not-check (of ${tally.checked} probed, pool ${tally.poolSize}) · domain sweep ${tally.domainSweep.checked} more rows, ${tally.domainSweep.gone} gone, ${tally.domainSweep.unknown} unknown`,
 	);
-	process.exit(blind ? 2 : tally.contradicted ? 1 : 0);
+	exitAfterFlush(blind ? 2 : tally.contradicted ? 1 : 0);
 }
 
 main().catch((e) => {

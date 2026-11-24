@@ -28,6 +28,7 @@ import { writeFileSync } from "node:fs";
 
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -431,11 +432,11 @@ async function main() {
 		console.log(
 			`| ${m.class} | ${m.endpoint.replace("/api/", "")} | ${m.query} | ${m.hits} | ${m.days} | ${m.buckets.join(",")} | ${m.evidence} |`,
 		);
-	process.exit(process.exitCode ?? 0);
+	exitAfterFlush(process.exitCode ?? 0);
 }
 
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("FATAL", e);
 		process.exit(1);

@@ -16,6 +16,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 // --- CLI args ---
 const args = process.argv.slice(2);
@@ -308,7 +309,7 @@ async function main() {
 		);
 	}
 
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((err) => {

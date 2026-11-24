@@ -26,6 +26,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const SERIES = join(
@@ -101,7 +102,7 @@ function main() {
 	}
 	if ("skip" in plan) {
 		console.log(`nothing to append: ${plan.skip}`);
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 	const { point } = plan;
 	console.log(
@@ -109,7 +110,7 @@ function main() {
 	);
 	if (!EXECUTE) {
 		console.log("DRY RUN: pass --execute to write.");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 	series.series.push(point);
 	writeFileSync(SERIES, `${JSON.stringify(series, null, "\t")}\n`);

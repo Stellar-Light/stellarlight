@@ -62,6 +62,7 @@ import {
 	isBotWall,
 } from "../src/lib/probe-external";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 import { getPayloadOrInconclusive } from "./lib/payload-connect";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -754,7 +755,7 @@ async function main() {
 
 	if (!EXECUTE) {
 		console.log("Dry run — no DB writes. Pass --execute to persist results.\n");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 
 	// Upsert results into LinkChecks collection
@@ -850,7 +851,7 @@ async function main() {
 		console.log(
 			`Persisted: ${created} created, ${updated} updated, ${writeFailed} write-failed, 0 cleaned up (skipped).`,
 		);
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 
 	// Cleanup — delete LinkCheck records whose URL no longer appears anywhere
@@ -874,7 +875,7 @@ async function main() {
 	console.log(
 		`Persisted: ${created} created, ${updated} updated, ${writeFailed} write-failed, ${deleted} cleaned up.`,
 	);
-	process.exit(writeFailed ? 1 : 0);
+	exitAfterFlush(writeFailed ? 1 : 0);
 }
 
 /**

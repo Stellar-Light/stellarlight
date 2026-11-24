@@ -4,6 +4,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
@@ -25,7 +26,7 @@ async function main() {
 		console.log(
 			"==> ZERO agent/bot calls in the entire log. No agent (incl. Pallet) has ever hit the public API.",
 		);
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 	// endpoint + bucket breakdown
 	const byEp: Record<string, number> = {};
@@ -42,7 +43,7 @@ async function main() {
 			`  ${String(r.createdAt).slice(0, 19)}  [${r.uaBucket}/${r.country || "?"}]  ${r.endpoint}  q="${r.query || ""}"`,
 		);
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

@@ -36,6 +36,7 @@
 import "./load-env";
 import { type ProbeResult, probeProduct } from "../src/lib/product-probe";
 import { STRONG_STATUS_BASES } from "../src/lib/project-status";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const LIMIT = Number(
@@ -240,7 +241,7 @@ async function main() {
 		);
 		process.exit(2);
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 if (process.argv[1]?.includes("basis-from-product")) main();

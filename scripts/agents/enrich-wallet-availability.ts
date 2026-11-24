@@ -30,6 +30,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { getPayload } from "payload";
 import { AVAILABILITY_PLATFORMS } from "../../src/lib/project-types";
 import config from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const limitIdx = process.argv.indexOf("--limit");
@@ -216,7 +217,7 @@ Reply with ONLY a JSON object: {"entries":[{"platform":"…","storeUrl":"…","n
 }
 
 main()
-	.then(() => process.exit(0))
+	.then(() => exitAfterFlush(0))
 	.catch((e) => {
 		console.error("Fatal:", e);
 		process.exit(1);
