@@ -147,6 +147,7 @@ const nextConfig = {
 			"/api/verify",
 			// Drift guard 2026-09-05: /api/rwa shipped 09-04 without the header.
 			"/api/rwa",
+			"/api/tokens/integrations",
 			// Drift guard 2026-10-23: locateSource shipped without either
 			// header, and the guard never probed a path with a {param}, so
 			// getHackathonSubmission went unseen.

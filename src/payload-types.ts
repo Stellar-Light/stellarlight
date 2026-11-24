@@ -77,6 +77,7 @@ export interface Config {
 		"stablecoin-snapshots": StablecoinSnapshot;
 		"rwa-assets": RwaAsset;
 		"oracle-readings": OracleReading;
+		"token-integrations": TokenIntegration;
 		"hackathon-builds": HackathonBuild;
 		"hackathon-events": HackathonEvent;
 		"award-rounds": AwardRound;
@@ -129,6 +130,9 @@ export interface Config {
 			| StablecoinSnapshotsSelect<true>;
 		"rwa-assets": RwaAssetsSelect<false> | RwaAssetsSelect<true>;
 		"oracle-readings": OracleReadingsSelect<false> | OracleReadingsSelect<true>;
+		"token-integrations":
+			| TokenIntegrationsSelect<false>
+			| TokenIntegrationsSelect<true>;
 		"hackathon-builds":
 			| HackathonBuildsSelect<false>
 			| HackathonBuildsSelect<true>;
@@ -1653,6 +1657,103 @@ export interface OracleReading {
 		| number
 		| boolean
 		| null;
+	updatedAt: string;
+	createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "token-integrations".
+ */
+export interface TokenIntegration {
+	id: string;
+	/**
+	 * <token>|<kind>|<venue>|<project slug or empty>
+	 */
+	key: string;
+	/**
+	 * The token's contract id (a classic asset's SAC id)
+	 */
+	tokenId: string;
+	/**
+	 * Asset code or token symbol; not an identity
+	 */
+	code?: string | null;
+	/**
+	 * Classic issuer account, native for XLM, null for a contract token
+	 */
+	issuer?: string | null;
+	tokenKind?: ("sac" | "custom") | null;
+	homeDomain?: string | null;
+	/**
+	 * Public directory label of the issuer (or contract token), with its tags
+	 */
+	issuerLabel?: string | null;
+	/**
+	 * Directory project; null for network venues and unattributed holders
+	 */
+	projectSlug?: string | null;
+	/**
+	 * Protocol, publisher, stellar-classic-amm or holder
+	 */
+	venue: string;
+	kind:
+		| "dex_pool"
+		| "lending_reserve"
+		| "vault"
+		| "bridge"
+		| "oracle_feed"
+		| "classic_amm_pool"
+		| "anchor_asset"
+		| "asset_list"
+		| "issuer"
+		| "holder"
+		| "holder_unattributed";
+	tier: "integrated" | "used" | "available" | "unrated";
+	tierBasis: string;
+	pools: number;
+	poolsByTier?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	firstDate?: string | null;
+	firstDateBasis?: string | null;
+	lastSeenAt?: string | null;
+	events90d?: number | null;
+	events90dBasis?: string | null;
+	/**
+	 * Exact decimal string: the token held across this row's pools
+	 */
+	balance?: string | null;
+	balanceUsd?: number | null;
+	balanceBasis?: string | null;
+	depthUsd?: number | null;
+	depthBasis?: string | null;
+	bestPool?: string | null;
+	evidenceUrl?: string | null;
+	method?: string | null;
+	attributionBasis?: string | null;
+	/**
+	 * The read this row comes from; a row ends only when that read finished
+	 */
+	source: string;
+	holderSweep?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	readAt: string;
+	status: "active" | "ended";
+	endedAt?: string | null;
+	endedReason?: string | null;
 	updatedAt: string;
 	createdAt: string;
 }
@@ -3473,6 +3574,10 @@ export interface PayloadLockedDocument {
 				value: string | OracleReading;
 		  } | null)
 		| ({
+				relationTo: "token-integrations";
+				value: string | TokenIntegration;
+		  } | null)
+		| ({
 				relationTo: "hackathon-builds";
 				value: string | HackathonBuild;
 		  } | null)
@@ -4139,6 +4244,48 @@ export interface OracleReadingsSelect<T extends boolean = true> {
 	lastUpdateAt?: T;
 	feedList?: T;
 	feeds?: T;
+	updatedAt?: T;
+	createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "token-integrations_select".
+ */
+export interface TokenIntegrationsSelect<T extends boolean = true> {
+	key?: T;
+	tokenId?: T;
+	code?: T;
+	issuer?: T;
+	tokenKind?: T;
+	homeDomain?: T;
+	issuerLabel?: T;
+	projectSlug?: T;
+	venue?: T;
+	kind?: T;
+	tier?: T;
+	tierBasis?: T;
+	pools?: T;
+	poolsByTier?: T;
+	firstDate?: T;
+	firstDateBasis?: T;
+	lastSeenAt?: T;
+	events90d?: T;
+	events90dBasis?: T;
+	balance?: T;
+	balanceUsd?: T;
+	balanceBasis?: T;
+	depthUsd?: T;
+	depthBasis?: T;
+	bestPool?: T;
+	evidenceUrl?: T;
+	method?: T;
+	attributionBasis?: T;
+	source?: T;
+	holderSweep?: T;
+	readAt?: T;
+	status?: T;
+	endedAt?: T;
+	endedReason?: T;
 	updatedAt?: T;
 	createdAt?: T;
 }

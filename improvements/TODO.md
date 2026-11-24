@@ -301,6 +301,16 @@ item is fixed. API base URL: https://stellarlight.xyz.
 
 ## Next
 
+- **Stablecoin and RWA rows do not carry their token integrations.**
+  getTokenIntegrations answers which projects support a
+  token, per tier; getStablecoins and getRwaAssets rows still say nothing
+  about it, so an agent on a stablecoin row has to make a second call.
+  Probe: `/api/stablecoins?limit=1` has no `integrations` field. Add a
+  compact per-row block (projects per tier, SCF-funded per tier, the
+  layer's read time; null until the lane has written that token, never
+  zero) after the integrations lane has run clean for two weeks, in one
+  spec release with both schemas.
+
 - **Stablecoin volume and payment count have no source.** `volume24hUSD`
   and `paymentsCount24h` on getStablecoins were read from Stellar Expert,
   whose API answers 402 since 2026-11-06; supply and trustlines now come from

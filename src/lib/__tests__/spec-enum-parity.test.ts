@@ -62,6 +62,11 @@ import {
 	STABLECOIN_ASSET_TYPE_FILTERS,
 	STABLECOIN_ASSET_TYPES,
 } from "../stablecoins";
+import {
+	TOKEN_INTEGRATION_KINDS,
+	TOKEN_INTEGRATION_STATUSES,
+	TOKEN_INTEGRATION_TIERS,
+} from "../token-integrations";
 import { TRUST_SIGNALS } from "../trust-report";
 
 /**
@@ -832,5 +837,28 @@ describe("oracle records (sls-029): the spec serves the code's vocabularies", ()
 		);
 		expect(src).toContain("options: [...ORACLE_CONTRACT_STATES]");
 		expect(src).toContain("options: [...ORACLE_READ_METHODS]");
+	});
+});
+
+describe("token integrations vocabularies are the code's arrays", () => {
+	const op = S.paths["/api/tokens/integrations"].get;
+	const param = (n: string): Param =>
+		op.parameters.find((p: Param) => p.name === n);
+	const edge = S.components.schemas.TokenIntegrationEdge.properties;
+	it("tier, kind and status parameters and edge fields", () => {
+		expect(sorted(param("tier").schema.enum)).toEqual(
+			sorted(TOKEN_INTEGRATION_TIERS),
+		);
+		expect(sorted(param("kind").schema.enum)).toEqual(
+			sorted(TOKEN_INTEGRATION_KINDS),
+		);
+		expect(sorted(param("status").schema.enum)).toEqual(
+			sorted([...TOKEN_INTEGRATION_STATUSES, "all"]),
+		);
+		expect(sorted(edge.tier.enum)).toEqual(sorted(TOKEN_INTEGRATION_TIERS));
+		expect(sorted(edge.kind.enum)).toEqual(sorted(TOKEN_INTEGRATION_KINDS));
+		expect(sorted(edge.status.enum)).toEqual(
+			sorted(TOKEN_INTEGRATION_STATUSES),
+		);
 	});
 });

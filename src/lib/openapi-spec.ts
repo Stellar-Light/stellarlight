@@ -118,6 +118,11 @@ import {
 	STATUS_CHECKS,
 	TVL_FRESH_DAYS,
 } from "./status-checks";
+import {
+	TOKEN_INTEGRATION_KINDS,
+	TOKEN_INTEGRATION_STATUSES,
+	TOKEN_INTEGRATION_TIERS,
+} from "./token-integrations";
 import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
 
@@ -11151,6 +11156,7 @@ export const spec: OpenAPISpec = {
 						"DeFi protocol TVL -> getLeaderboard sort=tvl",
 						"a stablecoin project's full profile/funding/repos -> searchProjects",
 						"non-stablecoin issued assets (governance/utility tokens) -> getLeaderboard sort=supply",
+						"which apps or protocols support a stablecoin, and where it can be swapped or lent -> getTokenIntegrations",
 					],
 					exampleQuestions: [
 						"What's the biggest stablecoin on Stellar?",
@@ -11301,6 +11307,329 @@ export const spec: OpenAPISpec = {
 					"400": {
 						description:
 							"Invalid sort, or an unknown query parameter (named with the supported set in hint); this registry rejects rather than ignores it.",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ErrorResponse" },
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/tokens/integrations": {
+			get: {
+				operationId: "getTokenIntegrations",
+				tags: ["Ecosystem"],
+				summary:
+					"Which projects support each token on Stellar, how, since when",
+				description:
+					"Which projects support any given token across Stellar, and how: edges per token, project/venue and kind, each with its tier (integrated means the project chose the token; used means pools with priced depth and recent trading; available; unrated), pool count, first date with its basis, recent activity, balance, USD depth, evidence, plus SCF awards. Counts stay per tier, never merged into one number. Pass token (contract address, CODE:ISSUER, bare code: several issuers return candidates, never one silent pick) and project (every token that project supports). Refreshed weekly.",
+				"x-routing": {
+					purpose:
+						"Token to project support map on Stellar: which apps, protocols, lending markets, vaults, anchors and asset lists carry a token, tiered by evidence, and which tokens a protocol supports.",
+					keywords: [
+						"token support",
+						"supports token",
+						"which apps support",
+						"which protocols support",
+						"token integrations",
+						"integrated",
+						"where can I swap",
+						"where can I lend",
+						"where can I borrow",
+						"lending reserves",
+						"pools holding",
+						"vault assets",
+						"SCF-funded protocols supporting",
+					],
+					useWhen: [
+						"which apps, protocols or SCF-funded projects support a token on Stellar, counted per tier",
+						"where a token can be swapped, lent, borrowed or deposited: the pools, lending reserves and vaults holding it",
+						"which tokens a protocol supports, lists or holds",
+					],
+					notFor: [
+						"a stablecoin's market cap, supply, holders or issuer -> getStablecoins",
+						"whether a real-world-asset token is issued and by whom -> getRwaAssets",
+						"a project's profile, status or funding -> searchProjects",
+						"an anchor's ramps, countries and services -> getPartners",
+					],
+					exampleQuestions: [
+						"Which lending protocols and exchanges support this token, and which are SCF-funded?",
+						"Where can I lend, borrow or swap this token on Stellar?",
+						"Which tokens does a lending protocol support?",
+					],
+				},
+				parameters: [
+					{
+						name: "token",
+						in: "query",
+						description:
+							"The token: a contract id (C...), CODE:ISSUER (or CODE-ISSUER), XLM, or a bare code. A code is matched case-blind among tokens in this layer; when more than one issuer carries it, the response returns `meta.token.candidates` with `edges` and `summary` null, and the caller picks one by issuer. A code is never resolved to one issuer silently.",
+						schema: { type: "string" },
+					},
+					{
+						name: "project",
+						in: "query",
+						description:
+							"Directory project slug: every token that project supports. An unknown slug answers 400.",
+						schema: { type: "string" },
+					},
+					{
+						name: "tier",
+						in: "query",
+						description: "Only edges of this tier.",
+						schema: { type: "string", enum: [...TOKEN_INTEGRATION_TIERS] },
+					},
+					{
+						name: "kind",
+						in: "query",
+						description:
+							"Only edges of this kind: dex_pool, lending_reserve, vault, bridge, oracle_feed (protocol contracts), classic_amm_pool (network venue, no project), anchor_asset (an anchor's stellar.toml), asset_list (a SEP-42 list), issuer, holder (a contract tied to a project holds it), holder_unattributed.",
+						schema: { type: "string", enum: [...TOKEN_INTEGRATION_KINDS] },
+					},
+					{
+						name: "scfAwarded",
+						in: "query",
+						description:
+							"true: only edges whose project row says SCF awarded; false: only edges whose project row does not. Edges with no project (network venues, unattributed holders) match neither. Read from the project row at request time.",
+						schema: { type: "boolean" },
+					},
+					{
+						name: "status",
+						in: "query",
+						description:
+							"active (default): edges seen at the last read. ended: edges whose evidence the lane later stopped finding, kept with endedAt and endedReason, never deleted. all: both.",
+						schema: {
+							type: "string",
+							enum: [...TOKEN_INTEGRATION_STATUSES, "all"],
+							default: "active",
+						},
+					},
+					{
+						name: "limit",
+						in: "query",
+						description: "Max edges (default 50, max 200).",
+						schema: { type: "integer", default: 50, maximum: 200 },
+					},
+					{
+						name: "offset",
+						in: "query",
+						description: "Edges to skip.",
+						schema: { type: "integer", default: 0, minimum: 0 },
+					},
+				],
+				responses: {
+					"200": {
+						description:
+							"Edges, per-tier counts and coverage. When a bare code matches more than one token, `edges`, `summary` and `meta.counts` are null and `meta.token.candidates` lists the tokens.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: ["meta", "summary", "edges"],
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												asOf: {
+													type: "string",
+													nullable: true,
+													description:
+														"The newest read behind the matched edges; cite it as the as-of time. null when nothing matched.",
+												},
+												oldestReadAt: {
+													type: "string",
+													nullable: true,
+													description:
+														"The oldest read behind the matched edges.",
+												},
+												filters: {
+													type: "object",
+													description:
+														"Echo of the request parameters, not served facts; null = not applied.",
+													properties: {
+														token: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it.",
+														},
+														project: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it.",
+														},
+														tier: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it.",
+														},
+														kind: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it.",
+														},
+														scfAwarded: {
+															type: "boolean",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it.",
+														},
+														status: {
+															type: "string",
+															description:
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it.",
+														},
+														limit: {
+															type: "integer",
+															description:
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it.",
+														},
+														offset: {
+															type: "integer",
+															description:
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it.",
+														},
+													},
+												},
+												token: {
+													type: "object",
+													nullable: true,
+													description:
+														"How `token` was resolved; null when no token was asked for.",
+													properties: {
+														query: { type: "string" },
+														resolvedTokenId: {
+															type: "string",
+															nullable: true,
+															description:
+																"The contract id the edges are for; null when a code matched no token or several.",
+														},
+														matchedBy: { type: "string", nullable: true },
+														note: { type: "string" },
+														candidates: {
+															type: "array",
+															nullable: true,
+															description:
+																"Tokens in this layer carrying the code, most integrated plus used projects first; that order is not a verdict on which issuer is genuine. null when the token was given as a contract id or CODE:ISSUER.",
+															items: {
+																type: "object",
+																properties: {
+																	tokenId: { type: "string" },
+																	code: { type: "string", nullable: true },
+																	issuer: { type: "string", nullable: true },
+																	homeDomain: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	issuerLabel: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	projectsByTier: {
+																		$ref: "#/components/schemas/TokenTierCounts",
+																	},
+																},
+															},
+														},
+													},
+												},
+												counts: {
+													type: "object",
+													nullable: true,
+													description:
+														"matched = edges matching every filter, before limit and offset; returned = edges in this response. null when a code was ambiguous.",
+													properties: {
+														matched: { type: "integer" },
+														returned: { type: "integer" },
+													},
+												},
+												tiers: {
+													type: "object",
+													description:
+														"What each tier means, with the floors in force.",
+													properties: {
+														integrated: { type: "string" },
+														used: { type: "string" },
+														available: { type: "string" },
+														unrated: { type: "string" },
+													},
+												},
+												order: { type: "string" },
+												holderSweeps: {
+													type: "object",
+													description:
+														"Per token, how complete the holder sweep was (keyed by token contract id); a token not swept has no entry.",
+													additionalProperties: {
+														$ref: "#/components/schemas/TokenHolderSweep",
+													},
+												},
+												coverage: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"What the layer reads and what it cannot see. Absence of an edge is not proof a project does not support a token.",
+												},
+												sources: { type: "array", items: { type: "string" } },
+												attribution: { type: "string" },
+											},
+										},
+										summary: {
+											type: "object",
+											nullable: true,
+											description:
+												"Counts over every matched edge (all filters applied, before paging). Never one blended number: a project counts once at its best tier; network venues and unattributed holders are counted apart and are never a project's support. The counts are not dated themselves: each counted edge carries its own readAt, and meta.asOf is the newest.",
+											properties: {
+												projectsByTier: {
+													$ref: "#/components/schemas/TokenTierCounts",
+												},
+												scfFundedByTier: {
+													$ref: "#/components/schemas/TokenTierCounts",
+												},
+												tokensByTier: {
+													$ref: "#/components/schemas/TokenTierCounts",
+												},
+												networkVenuePoolsByTier: {
+													$ref: "#/components/schemas/TokenTierCounts",
+												},
+												unattributedHolders: {
+													type: "object",
+													properties: {
+														contracts: { type: "integer" },
+														balanceUsd: { type: "number", nullable: true },
+													},
+												},
+											},
+										},
+										edges: {
+											type: "array",
+											nullable: true,
+											items: {
+												$ref: "#/components/schemas/TokenIntegrationEdge",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"An unknown query parameter, an invalid tier, kind, status or scfAwarded value, a token that is not a contract id, CODE:ISSUER or code, or an unknown project slug; the body names the valid values.",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ErrorResponse" },
+							},
+						},
+					},
+					"503": {
+						description:
+							"The store could not be read, or the refresh lane has not written the layer yet. Not a claim about any token.",
 						content: {
 							"application/json": {
 								schema: { $ref: "#/components/schemas/ErrorResponse" },
@@ -11510,7 +11839,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						items: { type: "string" },
 						description:
-							'Present only when there is something to disclose. Two kinds of line share it. (1) A backend read that failed or timed out: the line starts with "backend read failed" and the page may be incomplete; `partial` and `failedReads` carry the same fact as fields. (2) Query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. Two policies, by operation kind, both naming the supported set: the search operations (searchResearch, searchProjects, searchRepos, getPartners, listSkills, getHackathons, getClusters, getLeaderboard, getRfps, getChangelog, getQualityReport, verifyClaim) ignore an unknown parameter and name it here; the registry and lookup operations (listAudits, getChanges, getRwaAssets, getStablecoins, getBuilders, listContracts, searchHackathonBuilds, getPeople, resolveProject, getRepoTrust) reject it with 400 and list the supported parameters in the body (hint, supportedParams or validParams), because a list that looks filtered is worse than a 400.',
+							'Present only when there is something to disclose. Two kinds of line share it. (1) A backend read that failed or timed out: the line starts with "backend read failed" and the page may be incomplete; `partial` and `failedReads` carry the same fact as fields. (2) Query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. Two policies, by operation kind, both naming the supported set: the search operations (searchResearch, searchProjects, searchRepos, getPartners, listSkills, getHackathons, getClusters, getLeaderboard, getRfps, getChangelog, getQualityReport, verifyClaim) ignore an unknown parameter and name it here; the registry and lookup operations (listAudits, getChanges, getRwaAssets, getStablecoins, getTokenIntegrations, getBuilders, listContracts, searchHackathonBuilds, getPeople, resolveProject, getRepoTrust) reject it with 400 and list the supported parameters in the body (hint, supportedParams or validParams), because a list that looks filtered is worse than a 400.',
 					},
 					partial: {
 						type: "boolean",
@@ -11563,6 +11892,178 @@ export const spec: OpenAPISpec = {
 								minimum: 0,
 								description:
 									'projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in `returned` but NOT in `total`). `total` is the keyword match set and is stable across limit AND offset; it used to include these page-one-only rows, so the same query reported total 17 on page one and 6 on page two. On page one `returned` can therefore exceed `total`, and this count is exactly the difference.',
+							},
+						},
+					},
+				},
+			},
+			TokenTierCounts: {
+				type: "object",
+				description: "A count per tier.",
+				properties: {
+					integrated: { type: "integer" },
+					used: { type: "integer" },
+					available: { type: "integer" },
+					unrated: { type: "integer" },
+				},
+			},
+			TokenHolderSweep: {
+				type: "object",
+				description:
+					"How completely the holder sweep read a token's contract holders.",
+				properties: {
+					sweep: {
+						type: "string",
+						description:
+							"complete (the token's whole event history was read), partial, could-not-check, candidates only (history too large to read whole), or skipped (no contract can hold it).",
+					},
+					holdersFound: { type: "integer" },
+					foundAmountLive: {
+						type: "string",
+						description:
+							"Exact sum held by the contracts found, live entries only.",
+					},
+					archivedHoldings: { type: "integer" },
+					horizonContracts: {
+						type: "integer",
+						nullable: true,
+						description:
+							"Contracts holding the asset per Horizon; null for a contract token.",
+					},
+					horizonContractsAmount: { type: "string", nullable: true },
+					coveredPct: {
+						type: "number",
+						nullable: true,
+						description:
+							"foundAmountLive as a percentage of Horizon's contract total.",
+					},
+					readAt: { type: "string" },
+				},
+			},
+			TokenIntegrationEdge: {
+				type: "object",
+				description:
+					"One token, one project or venue, one kind: a project's support for a token, or a network venue (no project) that holds it.",
+				properties: {
+					id: {
+						type: "string",
+						description: "tokenId|kind|venue|projectSlug",
+					},
+					tokenId: {
+						type: "string",
+						description:
+							"The token's contract id (a classic asset's Stellar Asset Contract id). The identity: a code alone identifies nothing.",
+					},
+					code: { type: "string", nullable: true },
+					issuer: {
+						type: "string",
+						nullable: true,
+						description:
+							"Classic issuer account, native for XLM, null for a contract token.",
+					},
+					tokenKind: {
+						type: "string",
+						nullable: true,
+						description:
+							"Stellar Asset Contract (sac, wrapping classic asset) versus custom contract token (custom); null when unread.",
+					},
+					homeDomain: { type: "string", nullable: true },
+					issuerLabel: {
+						type: "string",
+						nullable: true,
+						description:
+							"The public directory's label for the issuer (or contract token) with its tags, e.g. a scam tag on a decoy; null when unlabelled.",
+					},
+					projectSlug: {
+						type: "string",
+						nullable: true,
+						description:
+							"Directory project; null for a network venue or an unattributed holder.",
+					},
+					projectName: { type: "string", nullable: true },
+					venue: {
+						type: "string",
+						description:
+							"Protocol (aquarius, soroswap, sushiswap_v3, blend, ...), publisher (anchor, list or issuer), stellar-classic-amm, or holder.",
+					},
+					kind: { type: "string", enum: [...TOKEN_INTEGRATION_KINDS] },
+					tier: { type: "string", enum: [...TOKEN_INTEGRATION_TIERS] },
+					tierBasis: {
+						type: "string",
+						description: "Why this tier, with the numbers read.",
+					},
+					pools: {
+						type: "integer",
+						description:
+							"Pools, contracts or documents behind this edge (the edge's tier is its best one's).",
+					},
+					poolsByTier: { $ref: "#/components/schemas/TokenTierCounts" },
+					firstDate: {
+						type: "string",
+						nullable: true,
+						description:
+							"YYYY-MM-DD of the earliest pool; null when not read (anchors, lists, issuers, classic pools).",
+					},
+					firstDateBasis: { type: "string", nullable: true },
+					lastSeenAt: {
+						type: "string",
+						nullable: true,
+						description: "Newest event of any of its pools.",
+					},
+					events90d: {
+						type: "integer",
+						nullable: true,
+						description:
+							"Events (Soroban) or operations (classic) in the 90 days before the read, summed over its pools; null = not read.",
+					},
+					events90dBasis: { type: "string", nullable: true },
+					balance: {
+						type: "string",
+						nullable: true,
+						description:
+							"Exact decimal: the token held across this edge's pools or holders; null = not read or not applicable.",
+					},
+					balanceUsd: { type: "number", nullable: true },
+					balanceBasis: { type: "string", nullable: true },
+					depthUsd: {
+						type: "number",
+						nullable: true,
+						description:
+							"Priced depth of the best pool (all its priced legs), or this holding's USD value.",
+					},
+					depthBasis: { type: "string", nullable: true },
+					bestPool: { type: "string" },
+					evidenceUrl: { type: "string" },
+					method: { type: "string", description: "How the edge was read." },
+					attributionBasis: {
+						type: "string",
+						description: "Why this project (or none).",
+					},
+					holderSweep: {
+						nullable: true,
+						allOf: [{ $ref: "#/components/schemas/TokenHolderSweep" }],
+					},
+					readAt: { type: "string" },
+					status: { type: "string", enum: [...TOKEN_INTEGRATION_STATUSES] },
+					endedAt: { type: "string", nullable: true },
+					endedReason: { type: "string", nullable: true },
+					scfAwarded: {
+						type: "boolean",
+						nullable: true,
+						description:
+							"From the project row at request time; null when the edge has no project. false is not proof SCF never funded it.",
+					},
+					scfRounds: {
+						type: "array",
+						nullable: true,
+						description:
+							"The project's SCF awards (round, award name, budget); null when the edge has no project.",
+						items: {
+							type: "object",
+							properties: {
+								round: { type: "integer", nullable: true },
+								awardName: { type: "string", nullable: true },
+								amountUSD: { type: "number", nullable: true },
 							},
 						},
 					},

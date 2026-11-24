@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
+		surfaces: ["api"],
+		version: "spec@1.9.162",
+		type: "added",
+		summary:
+			"New: getTokenIntegrations (`GET /api/tokens/integrations`) answers which projects support a token on Stellar, how, and since when. Each edge is one token, one project or venue, and one kind (DEX pool, lending reserve, vault, bridge, oracle feed, classic AMM pool, anchor toml, SEP-42 list, issuer, or a contract that holds the token), with a tier: integrated (the project chose the token), used (a pool with at least $1,000 of priced depth and at least 10 events in 90 days), available (below a floor that was read), or unrated (a floor could not be read). Edges carry pools, the first date and its basis, 90-day events, balance and USD depth, the evidence URL, and the project's SCF awards read from its project row. `summary` counts projects per tier, SCF-funded projects per tier, network venue pools and unattributed holders, each apart: never one blended number.",
+		detail:
+			"Filter by `token` (a contract id, CODE:ISSUER, XLM, or a code; a code carried by more than one issuer returns `meta.token.candidates` and no edges, so a decoy issuer is never picked silently), `project` (every token one project supports), `tier`, `kind`, `scfAwarded`, `status` (active, ended, all), `limit` and `offset`. Unknown parameters answer 400. A weekly lane fills it from free sources: Stellar Index's protocol registry and events, Soroban RPC reads, Horizon, Aquarius's rewards config, SEP-42 lists, anchors' stellar.toml files and the directory. An edge whose evidence is gone is kept with status ended and the date, never deleted, and an edge whose source could not be read is never ended. Until the lane's first run the endpoint answers 503, not an empty list. getStablecoins and searchProjects now point questions about which apps support a token here.",
+	},
+	{
+		date: "2026-11-23",
 		surfaces: ["api", "api-client", "skill"],
 		version: "spec@1.9.161",
 		type: "added",

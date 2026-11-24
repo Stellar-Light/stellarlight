@@ -43,6 +43,7 @@ import {
 } from "./collections/SourceLocators";
 import { StablecoinSnapshots } from "./collections/StablecoinSnapshots";
 import { Stablecoins } from "./collections/Stablecoins";
+import { TokenIntegrations } from "./collections/TokenIntegrations";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
 import { Users } from "./collections/Users";
 import { Banner } from "./globals/Banner";
@@ -100,6 +101,7 @@ export default buildConfig({
 		StablecoinSnapshots,
 		RwaAssets,
 		OracleReadings,
+		TokenIntegrations,
 		HackathonBuilds,
 		HackathonEvents,
 		AwardRounds,
