@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-24T16:40:24.066Z",
+ "generatedAt": "2026-11-24T19:02:43.243Z",
  "surfaces": [
   {
    "surface": "code",
@@ -9736,11 +9736,11 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1453
+     "count": 1454
     },
     {
      "label": "slowing",
-     "count": 1234
+     "count": 1233
     },
     {
      "label": "active",

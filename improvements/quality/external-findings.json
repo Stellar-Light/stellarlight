@@ -1,20 +1,18 @@
 {
- "generatedAt": "2026-11-23T19:27:31.381Z",
+ "generatedAt": "2026-11-24T19:02:49.982Z",
  "consumer": "stellar-experimental/stellar-raven",
  "definition": "Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours. Status is whatever THEIR record says, never our opinion of it. records = the records in their active folder. retired = the records that left it with a receipt in their improvements/resolved.json, the ledger their own process appends to when a distinct reviewer re-checks the fix; each gives the receipt date and the commit or PR that deleted it.",
  "counts": {
   "declined-upstream": 1,
-  "reported-upstream": 8,
-  "retired": 112
+  "reported-upstream": 2,
+  "retired": 118
  },
  "ourResponse": {
-  "fixShipped": 1,
-  "fixShippedIds": [
-   "sls-120"
-  ],
-  "fixApplicable": 8,
+  "fixShipped": 0,
+  "fixShippedIds": [],
+  "fixApplicable": 2,
   "declined": 1,
-  "distinctIssuesClosed": 1,
+  "distinctIssuesClosed": 0,
   "scoredBy": "our own linked GitHub issue state, over the records still in their active queue. This is NOT the consumer's verdict and must never be rendered as one.",
   "note": "A record can read reported-upstream on their side while our linked issue is closed: we shipped the fix and their re-verification has not run yet. Neither status is allowed to speak for the other. A retired record is closed by their own receipt, so it is not scored here."
  },
@@ -48,96 +46,6 @@
     "state": "open",
     "closedAt": null,
     "url": "https://github.com/Stellar-Light/stellarlight/issues/1952"
-   }
-  },
-  {
-   "id": "sls-117",
-   "title": "Research source sdf-org omits the SDF strategy, roadmap, service-provider, and community pages",
-   "status": "reported-upstream",
-   "discovered": "2026-11-14",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-117-sdf-org-source-missing-strategy-service-provider-pages.md",
-   "ourIssue": 1969,
-   "ourResponse": {
-    "issue": 1969,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1969"
-   }
-  },
-  {
-   "id": "sls-118",
-   "title": "Research corpus does not index Stellar Limits Proposals, so enacted Quorum Freeze votes are missing",
-   "status": "reported-upstream",
-   "discovered": "2026-11-14",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-118-research-corpus-omits-limits-proposals.md",
-   "ourIssue": 1970,
-   "ourResponse": {
-    "issue": 1970,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1970"
-   }
-  },
-  {
-   "id": "sls-119",
-   "title": "EURC stablecoin row names Circle's US reseller as issuer of record instead of Circle Internet Financial Europe SAS",
-   "status": "reported-upstream",
-   "discovered": "2026-11-14",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-119-eurc-issuer-of-record-names-reseller.md",
-   "ourIssue": 1971,
-   "ourResponse": {
-    "issue": 1971,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1971"
-   }
-  },
-  {
-   "id": "sls-120",
-   "title": "BRLT stablecoin row leaves every issuer-of-record field null, though a toml Scout already reads lists the account",
-   "status": "reported-upstream",
-   "discovered": "2026-11-17",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-120-brlt-issuer-of-record-null-with-readable-toml.md",
-   "ourIssue": 1973,
-   "ourResponse": {
-    "issue": 1973,
-    "state": "closed",
-    "closedAt": "2026-11-23",
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1973"
-   }
-  },
-  {
-   "id": "sls-121",
-   "title": "Five Wallet rows serve status Live although their own availabilityCheck, dated later, says the operator is gone",
-   "status": "reported-upstream",
-   "discovered": "2026-11-17",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-121-wallet-live-status-contradicts-availability-check.md",
-   "ourIssue": 1974,
-   "ourResponse": {
-    "issue": 1974,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1974"
-   }
-  },
-  {
-   "id": "sls-122",
-   "title": "Scout project search with q=wallet returns the Coca project twice, so pages overlap and total counts it once",
-   "status": "reported-upstream",
-   "discovered": "2026-11-17",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-122-project-search-repeats-a-row-across-pages.md",
-   "ourIssue": 1975,
-   "ourResponse": {
-    "issue": 1975,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1975"
    }
   },
   {
@@ -716,6 +624,36 @@
    "id": "sls-115",
    "retired": "2026-11-12",
    "retiredBy": "https://github.com/stellar-experimental/stellar-raven/pull/423"
+  },
+  {
+   "id": "sls-117",
+   "retired": "2026-11-23",
+   "retiredBy": "https://github.com/stellar-experimental/stellar-raven/pull/557"
+  },
+  {
+   "id": "sls-118",
+   "retired": "2026-11-23",
+   "retiredBy": "https://github.com/stellar-experimental/stellar-raven/pull/557"
+  },
+  {
+   "id": "sls-119",
+   "retired": "2026-11-23",
+   "retiredBy": "https://github.com/stellar-experimental/stellar-raven/pull/557"
+  },
+  {
+   "id": "sls-120",
+   "retired": "2026-11-23",
+   "retiredBy": "https://github.com/stellar-experimental/stellar-raven/pull/557"
+  },
+  {
+   "id": "sls-121",
+   "retired": "2026-11-23",
+   "retiredBy": "https://github.com/stellar-experimental/stellar-raven/pull/557"
+  },
+  {
+   "id": "sls-122",
+   "retired": "2026-11-23",
+   "retiredBy": "https://github.com/stellar-experimental/stellar-raven/pull/557"
   }
  ]
 }
