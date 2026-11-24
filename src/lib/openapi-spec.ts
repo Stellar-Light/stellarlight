@@ -95,6 +95,7 @@ import { REPO_MATCH_MODES } from "./repo-search";
 import { INDICATOR_KINDS } from "./repo-security";
 import { RESEARCH_SOURCES } from "./research-sources";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
+import { PAID_SCHEDULES, PAID_SPLITS } from "./scf-paid";
 import { NOT_CARRIED_REASONS } from "./scf-round-counts";
 import { DEPRECATED_BY, VERSION_STATUSES } from "./soroban-versions";
 import {
@@ -2981,6 +2982,7 @@ export const spec: OpenAPISpec = {
 												"generatedAt",
 												"scfSource",
 												"scfReadAt",
+												"scfPaidReadAt",
 												"basis",
 												"order",
 											],
@@ -2998,6 +3000,13 @@ export const spec: OpenAPISpec = {
 													nullable: true,
 													description:
 														"When the SCF sync finished its newest whole read of SCF's round pages. Null = no read stored yet.",
+												},
+												scfPaidReadAt: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+													description:
+														"When the SCF sync finished its newest read of SCF's project pages for their paid totals (buildSharesRead, buildFinalTranchePaid). Null = no paid read stored yet.",
 												},
 												basis: {
 													type: "string",
@@ -3019,6 +3028,11 @@ export const spec: OpenAPISpec = {
 												notCarried: { type: "integer" },
 												carriedOnSeveralRows: { type: "integer" },
 												notListed: { type: "integer" },
+												buildSharesRead: { type: "integer", nullable: true },
+												buildFinalTranchePaid: {
+													type: "integer",
+													nullable: true,
+												},
 											},
 										},
 										rounds: {
@@ -3133,6 +3147,18 @@ export const spec: OpenAPISpec = {
 																},
 															},
 														},
+													},
+													buildSharesRead: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Carried awards in the round that are Build awards whose paid share the SCF sync read exactly: SCF's own totalPaid on the award's project page, split by the Build tranche schedule. Null = no paid read stored yet.",
+													},
+													buildFinalTranchePaid: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Of buildSharesRead, the Build awards SCF has paid in full: its final tranche, the mainnet launch (or the final deliverable the award allowed in its place), as of meta.scfPaidReadAt. Per award: a project row's scfPaid.buildAwards.",
 													},
 												},
 											},
@@ -13058,6 +13084,121 @@ export const spec: OpenAPISpec = {
 									nullable: true,
 									description:
 										"The official SCF project page this award was read from. A row that combines two SCF pages cites one as scfSourceUrl, so check each award against its own page here. Null = the page was not recorded per award (an award not yet re-read since this field shipped); scfSourceUrl is then the citation.",
+								},
+							},
+						},
+					},
+					scfPaid: {
+						type: "object",
+						nullable: true,
+						description:
+							"SCF's own payment record for the project, read off its SCF project page(s) every week: SCF's awarded and paid totals and, per Build award, the share SCF has paid. A Build award is paid in tranches and the last one is the mainnet launch, so finalTranchePaid true is SCF's own record that the team delivered its mainnet launch, or the final deliverable the award allowed in its place. Legacy awards (rounds before 30) and Liquidity awards were paid in full when awarded, so they say nothing about a launch and are not listed. Null = no paid read is recorded for this row. Dates: the block changes only when a figure changes; a payment came after notSeenAt and by seenBy (per award: paidShareNotSeenAt, paidShareSeenBy). A payment made before the first read (late November 2026) has no date here: notSeenAt is null; web-archive captures of the SCF page can bound it and are not served.",
+						required: [
+							"totalAwardedUSD",
+							"totalPaidUSD",
+							"seenBy",
+							"notSeenAt",
+							"split",
+							"buildAwards",
+						],
+						properties: {
+							totalAwardedUSD: {
+								type: "number",
+								nullable: true,
+								description:
+									"SCF's own totalAwarded on the page (summed when the row folds two pages). Null when a page lacks it.",
+							},
+							totalPaidUSD: {
+								type: "number",
+								nullable: true,
+								description:
+									"SCF's own totalPaid on the page (summed when the row folds two pages). Null when a page lacks it.",
+							},
+							seenBy: {
+								type: "string",
+								format: "date-time",
+								description:
+									"The totals were on SCF's page by this time: the first weekly read that showed them.",
+							},
+							notSeenAt: {
+								type: "string",
+								format: "date-time",
+								nullable: true,
+								description:
+									"Start of the read before seenBy, which showed other totals: they changed after this. Null when the totals were already these at the first read.",
+							},
+							split: {
+								type: "string",
+								enum: [...PAID_SPLITS],
+								description:
+									"Whether the paid total splits into one share per award. exact. ambiguous: more than one split fits, so those shares are null. no-fit: none fits (e.g. more paid than awarded). budgets-differ: the awarded submissions' budgets do not add up to the page's total. no-figures: the page has no paid or awarded total. no-schedule: a Build award outside rounds 30 and later. A row folding two pages reports the first page that does not split.",
+							},
+							buildAwards: {
+								type: "array",
+								description:
+									"Each Build award on the page(s). [] = the page has no Build award (Legacy, Liquidity or Public Goods awards only). Order is the page's, not a rank.",
+								items: {
+									type: "object",
+									required: [
+										"round",
+										"sourceUrl",
+										"budgetUSD",
+										"schedule",
+										"paidShare",
+										"tranchesPaid",
+										"tranches",
+										"finalTranchePaid",
+										"paidShareSeenBy",
+										"paidShareNotSeenAt",
+									],
+									properties: {
+										round: { type: "integer", nullable: true },
+										sourceUrl: {
+											type: "string",
+											description: "The SCF project page the award is on.",
+										},
+										budgetUSD: { type: "number", nullable: true },
+										schedule: {
+											type: "string",
+											nullable: true,
+											enum: [...PAID_SCHEDULES],
+											description:
+												"thirds: rounds 30 to 40, three equal tranches, the third on the mainnet launch. four-tranche: rounds 41 and later, 10% on acceptance, 20% MVP, 30% testnet, 40% mainnet launch (paid shares 0.1, 0.3, 0.6, 1). Null outside those rounds.",
+										},
+										paidShare: {
+											type: "number",
+											nullable: true,
+											description:
+												"Share of the budget SCF has paid, under its schedule. Null when the page's paid total does not split exactly (see split): never estimated.",
+										},
+										tranchesPaid: {
+											type: "integer",
+											nullable: true,
+											description:
+												"Tranches paid, of tranches (e.g. 2 of 3, or 3 of 4 where the acceptance tranche counts as the first). Null with paidShare.",
+										},
+										tranches: { type: "integer", nullable: true },
+										finalTranchePaid: {
+											type: "boolean",
+											nullable: true,
+											description:
+												"true = SCF paid the award in full, its final (mainnet launch) tranche. false = not yet. null = not known (paidShare null).",
+										},
+										paidShareSeenBy: {
+											type: "string",
+											format: "date-time",
+											nullable: true,
+											description:
+												"The share was on SCF's page by this time: the first weekly read that showed it. Null with paidShare.",
+										},
+										paidShareNotSeenAt: {
+											type: "string",
+											format: "date-time",
+											nullable: true,
+											description:
+												"Start of the read before paidShareSeenBy, which showed another share: SCF paid after this. Null when the share was already this at the first read.",
+										},
+									},
 								},
 							},
 						},

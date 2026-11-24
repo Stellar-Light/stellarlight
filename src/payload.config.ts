@@ -34,6 +34,7 @@ import { Repos } from "./collections/Repos";
 import { ResearchDocs } from "./collections/ResearchDocs";
 import { RSSFeeds } from "./collections/RSSFeeds";
 import { RwaAssets } from "./collections/RwaAssets";
+import { ScfPaidReads } from "./collections/ScfPaidReads";
 import { ScfRoundReads } from "./collections/ScfRoundReads";
 import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Signals } from "./collections/Signals";
@@ -128,6 +129,7 @@ export default buildConfig({
 		PartnerLeads,
 		FundingSnapshots,
 		ScfRoundReads,
+		ScfPaidReads,
 	],
 	globals: [Banner],
 	jobs: {

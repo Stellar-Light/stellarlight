@@ -44,6 +44,7 @@ import { RATE_LIMIT_SCOPE } from "../rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
 import { REPO_MATCH_MODES } from "../repo-search";
 import { RESEARCH_SOURCES } from "../research-sources";
+import { PAID_SCHEDULES, PAID_SPLITS } from "../scf-paid";
 import { NOT_CARRIED_REASONS } from "../scf-round-counts";
 import { DEPRECATED_BY, VERSION_STATUSES } from "../soroban-versions";
 import {
@@ -448,6 +449,16 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 			].schema.properties.rounds.items.properties.notCarried.items.properties
 				.reason.enum;
 		expect(reason).toEqual([...NOT_CARRIED_REASONS]);
+	});
+
+	it("PAID_SPLITS and PAID_SCHEDULES: one spread each, Project.scfPaid", () => {
+		expect(spread("PAID_SPLITS")).toBe(1);
+		expect(spread("PAID_SCHEDULES")).toBe(1);
+		const paid = S.components.schemas.Project.properties.scfPaid.properties;
+		expect(paid.split.enum).toEqual([...PAID_SPLITS]);
+		expect(paid.buildAwards.items.properties.schedule.enum).toEqual([
+			...PAID_SCHEDULES,
+		]);
 	});
 
 	it("SOURCE_CHECK_STATES: one spread, two sites that equal it (explainRepo sourceCheck.state and knowledgeNotes[].sourceCheck.state)", () => {
