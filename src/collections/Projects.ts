@@ -907,6 +907,17 @@ export const Projects: CollectionConfig = {
 							"Official SCF project page the award facts were read from",
 					},
 				},
+				{
+					// StoredScfPaid (src/lib/scf-paid.ts). One writer: the SCF
+					// sync (scripts/enrich-from-scf.ts), only when a figure changes;
+					// every read is kept in scf-paid-reads. Served as scfPaid.
+					name: "paid",
+					type: "json",
+					admin: {
+						description:
+							"System-written by the SCF sync: SCF's own awarded and paid totals for the project's page(s), each Build award's tranche share where the paid total splits exactly, and when the sync first saw each figure. Do not edit by hand.",
+					},
+				},
 			],
 		},
 		{

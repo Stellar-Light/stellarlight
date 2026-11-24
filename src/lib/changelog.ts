@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-24",
+		surfaces: ["api", "api-client"],
+		version: "spec@1.9.165",
+		type: "added",
+		summary:
+			"Project rows gain `scfPaid`: SCF's own payment record, read off the project's SCF page every week. `totalAwardedUSD` and `totalPaidUSD` are SCF's own totals; each Build award in `buildAwards` carries the share SCF has paid under its tranche schedule (rounds 30 to 40: thirds; 41 and later: 10%, 30%, 60%, 100%), `tranchesPaid` of `tranches`, and `finalTranchePaid`. A Build award is paid in tranches and the last one is the mainnet launch, so `finalTranchePaid: true` is SCF's own record that the team delivered its mainnet launch, or the final deliverable the award allowed in its place. getAwardRoundCoverage adds per round `buildSharesRead` and `buildFinalTranchePaid`, and `meta.scfPaidReadAt`.",
+		detail:
+			"Limits. Legacy awards (rounds before 30) and Liquidity awards were paid in full when awarded, so they say nothing about a launch and are not in `buildAwards` (`[]` = no Build award on the page). A share is served only where the page's paid total splits one way across its awards; otherwise `paidShare` is null and `split` says why (`no-fit`, e.g. more paid than awarded; `ambiguous`; `budgets-differ`; `no-figures`; `no-schedule`), never an estimate. Dates: the record changes only when a figure changes, so a payment came after `notSeenAt` and by `seenBy` (per award: `paidShareNotSeenAt`, `paidShareSeenBy`). A payment made before the first weekly read has no date here (`notSeenAt` null); web-archive captures of the SCF page can bound it and are not served. `scfPaid` is null until the SCF sync's first write after this release. A read-only dry run of the sync on 2026-11-24 (UTC) read 741 SCF project pages and planned the record on 730 rows, with no other write: 613 split exactly; 383 Build awards on 359 rows, 341 with a share read, 197 of them paid in full (on 186 rows). Liqvid: SCF #37 paid in full, SCF #45 at 30% (2 of 4 tranches). Blend: a Liquidity Award only, `buildAwards: []`.",
+	},
+	{
+		date: "2026-11-24",
 		surfaces: ["api"],
 		version: "spec@1.9.164",
 		type: "fixed",

@@ -418,6 +418,9 @@ describe("2. GET /api/projects/scf-rounds", () => {
 			notCarried: 1,
 			carriedOnSeveralRows: 0,
 			notListed: 0,
+			// no row carries a paid read in this fixture: not checked, never 0
+			buildSharesRead: null,
+			buildFinalTranchePaid: null,
 		});
 		expect(body.rounds[0].roundPageUrl).toBe(
 			"https://communityfund.stellar.org/awards/rec44",

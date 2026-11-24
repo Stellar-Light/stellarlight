@@ -1572,6 +1572,57 @@ export interface components {
                 /** @description The official SCF project page this award was read from. A row that combines two SCF pages cites one as scfSourceUrl, so check each award against its own page here. Null = the page was not recorded per award (an award not yet re-read since this field shipped); scfSourceUrl is then the citation. */
                 sourceUrl?: string | null;
             }[];
+            /** @description SCF's own payment record for the project, read off its SCF project page(s) every week: SCF's awarded and paid totals and, per Build award, the share SCF has paid. A Build award is paid in tranches and the last one is the mainnet launch, so finalTranchePaid true is SCF's own record that the team delivered its mainnet launch, or the final deliverable the award allowed in its place. Legacy awards (rounds before 30) and Liquidity awards were paid in full when awarded, so they say nothing about a launch and are not listed. Null = no paid read is recorded for this row. Dates: the block changes only when a figure changes; a payment came after notSeenAt and by seenBy (per award: paidShareNotSeenAt, paidShareSeenBy). A payment made before the first read (late November 2026) has no date here: notSeenAt is null; web-archive captures of the SCF page can bound it and are not served. */
+            scfPaid?: {
+                /** @description SCF's own totalAwarded on the page (summed when the row folds two pages). Null when a page lacks it. */
+                totalAwardedUSD: number | null;
+                /** @description SCF's own totalPaid on the page (summed when the row folds two pages). Null when a page lacks it. */
+                totalPaidUSD: number | null;
+                /**
+                 * Format: date-time
+                 * @description The totals were on SCF's page by this time: the first weekly read that showed them.
+                 */
+                seenBy: string;
+                /**
+                 * Format: date-time
+                 * @description Start of the read before seenBy, which showed other totals: they changed after this. Null when the totals were already these at the first read.
+                 */
+                notSeenAt: string | null;
+                /**
+                 * @description Whether the paid total splits into one share per award. exact. ambiguous: more than one split fits, so those shares are null. no-fit: none fits (e.g. more paid than awarded). budgets-differ: the awarded submissions' budgets do not add up to the page's total. no-figures: the page has no paid or awarded total. no-schedule: a Build award outside rounds 30 and later. A row folding two pages reports the first page that does not split.
+                 * @enum {string}
+                 */
+                split: "exact" | "ambiguous" | "no-fit" | "budgets-differ" | "no-figures" | "no-schedule";
+                /** @description Each Build award on the page(s). [] = the page has no Build award (Legacy, Liquidity or Public Goods awards only). Order is the page's, not a rank. */
+                buildAwards: {
+                    round: number | null;
+                    /** @description The SCF project page the award is on. */
+                    sourceUrl: string;
+                    budgetUSD: number | null;
+                    /**
+                     * @description thirds: rounds 30 to 40, three equal tranches, the third on the mainnet launch. four-tranche: rounds 41 and later, 10% on acceptance, 20% MVP, 30% testnet, 40% mainnet launch (paid shares 0.1, 0.3, 0.6, 1). Null outside those rounds.
+                     * @enum {string|null}
+                     */
+                    schedule: "thirds" | "four-tranche" | null;
+                    /** @description Share of the budget SCF has paid, under its schedule. Null when the page's paid total does not split exactly (see split): never estimated. */
+                    paidShare: number | null;
+                    /** @description Tranches paid, of tranches (e.g. 2 of 3, or 3 of 4 where the acceptance tranche counts as the first). Null with paidShare. */
+                    tranchesPaid: number | null;
+                    tranches: number | null;
+                    /** @description true = SCF paid the award in full, its final (mainnet launch) tranche. false = not yet. null = not known (paidShare null). */
+                    finalTranchePaid: boolean | null;
+                    /**
+                     * Format: date-time
+                     * @description The share was on SCF's page by this time: the first weekly read that showed it. Null with paidShare.
+                     */
+                    paidShareSeenBy: string | null;
+                    /**
+                     * Format: date-time
+                     * @description Start of the read before paidShareSeenBy, which showed another share: SCF paid after this. Null when the share was already this at the first read.
+                     */
+                    paidShareNotSeenAt: string | null;
+                }[];
+            } | null;
             /** @description Structured corridor/coverage for Anchor-typed projects: answers 'which anchors serve currency/corridor X?' with filterable, dated fields instead of prose. Synced from the matching partner record; null for non-anchors or when no partner record matches. */
             coverage?: {
                 /** @description Primary market/jurisdiction country names. */
@@ -3789,6 +3840,11 @@ export interface operations {
                              * @description When the SCF sync finished its newest whole read of SCF's round pages. Null = no read stored yet.
                              */
                             scfReadAt: string | null;
+                            /**
+                             * Format: date-time
+                             * @description When the SCF sync finished its newest read of SCF's project pages for their paid totals (buildSharesRead, buildFinalTranchePaid). Null = no paid read stored yet.
+                             */
+                            scfPaidReadAt: string | null;
                             /** @description What listed, carried, notCarried and notListed count. Safe to surface to a user. */
                             basis: string;
                             order: string;
@@ -3801,6 +3857,8 @@ export interface operations {
                             notCarried?: number;
                             carriedOnSeveralRows?: number;
                             notListed?: number;
+                            buildSharesRead?: number | null;
+                            buildFinalTranchePaid?: number | null;
                         } | null;
                         /** @description One entry per round, newest first (not a rank). Null when no read is stored; [] = the round asked for is in neither SCF's index nor any row. */
                         rounds: {
@@ -3847,6 +3905,10 @@ export interface operations {
                                 /** @description The pages the row cites for the round. */
                                 pageUrls?: string[];
                             }[];
+                            /** @description Carried awards in the round that are Build awards whose paid share the SCF sync read exactly: SCF's own totalPaid on the award's project page, split by the Build tranche schedule. Null = no paid read stored yet. */
+                            buildSharesRead?: number | null;
+                            /** @description Of buildSharesRead, the Build awards SCF has paid in full: its final tranche, the mainnet launch (or the final deliverable the award allowed in its place), as of meta.scfPaidReadAt. Per award: a project row's scfPaid.buildAwards. */
+                            buildFinalTranchePaid?: number | null;
                         }[] | null;
                         /** @description Present only when no read is stored: why rounds is null. */
                         unavailable?: string;

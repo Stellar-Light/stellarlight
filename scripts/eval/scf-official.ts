@@ -16,6 +16,7 @@
  */
 
 import { findTitlePrefixMatch, normSpaceless } from "../../src/lib/identity";
+import type { PaidAward, PaidPage } from "../../src/lib/scf-paid";
 import type { ScfRound } from "../../src/lib/scf-round-counts";
 
 export const SCF = "https://communityfund.stellar.org";
@@ -721,7 +722,38 @@ export type ScfPage = {
 	pageSlug?: string;
 	title?: string;
 	lastAwardedRound?: number;
+	/** SCF's own payment figures, one entry per page (a fold has several);
+	 * unset when the project record was not read whole. */
+	paid?: PaidPage[];
 };
+
+/** The payment figures and awarded submissions of a page's project record,
+ * read by field name (src/lib/scf-paid.ts splits them). */
+function paidPageOf(rec: Record<string, unknown>, sourceUrl: string): PaidPage {
+	const num = (v: unknown) =>
+		typeof v === "number" && Number.isFinite(v) ? v : null;
+	const awards: PaidAward[] = [];
+	for (const s of rec.submissions as unknown[]) {
+		const o = (s ?? {}) as Record<string, unknown>;
+		const status = typeof o.status === "string" ? o.status.trim() : "";
+		if (!/^Awarded\b/.test(status)) continue;
+		if (awards.some((a) => a.submission === String(o.id))) continue;
+		const round = /SCF\s*#\s*(\d+)/i.exec(String(o.roundName ?? ""))?.[1];
+		awards.push({
+			submission: String(o.id),
+			round: round ? Number(round) : null,
+			awardType: typeof o.awardType === "string" ? o.awardType : null,
+			budgetUSD: num(o.budget),
+			status,
+		});
+	}
+	return {
+		sourceUrl,
+		totalAwarded: num(rec.totalAwarded),
+		totalPaid: num(rec.totalPaid),
+		awards,
+	};
+}
 
 /** Read one SCF project page's HTML (enrich-from-scf's per-page detail), or
  * null when the page carries no project record for `slug`. A renamed record's
@@ -854,6 +886,11 @@ export function readScfPage(html: string, slug: string): ScfPage | null {
 	result.notAwardedRounds = [...verdicts.notAwarded]
 		.map(Number)
 		.sort((a, b) => a - b);
+
+	const rec = recordObjects(txt)?.find(
+		(r) => r.slug === slug && Array.isArray(r.submissions),
+	);
+	if (rec) result.paid = [paidPageOf(rec, `${SCF}/project/${slug}`)];
 
 	return Object.keys(result).length > 0 ? result : null;
 }
@@ -1085,6 +1122,10 @@ export function foldPageDetails(
 		notAwardedRounds: [
 			...new Set(read.flatMap((d) => d.notAwardedRounds ?? [])),
 		].sort((a, b) => a - b),
+		// every page's own figures, or none: a row's paid total is their sum
+		paid: read.every((d) => d.paid)
+			? read.flatMap((d) => d.paid ?? [])
+			: undefined,
 	};
 }
 
