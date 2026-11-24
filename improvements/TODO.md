@@ -14,25 +14,6 @@ item is fixed. API base URL: https://stellarlight.xyz.
 
 ## Now
 
-1. **Raven holds our spec at 1.9.61.**
-   Probe: `gh api repos/stellar-experimental/stellar-raven/contents/inventory/stellar-light.json`
-   decodes to a snapshot whose spec version is 1.9.61 (fetched 2026-10-02);
-   Raven's drift issue #223 is open. Its routing gate scored our
-   1.9.78 at 220 / 295 / 325 correct at top 1 / 3 / 5 and 111 operation hits,
-   against floors of 219 / 298 / 326 and 112 (stellar-raven
-   `.agents/rounds/2026-10-15-truth-maintenance.md`, the table at line 46);
-   our wording pulled in questions labelled for Lumenloop and Docs. Nothing we changed since 1.9.61
-   reaches Raven's agents.
-   State: the replica (`pnpm raven:gate`, merged in #1843) reproduces
-   Raven's accepted totals exactly; on it 1.9.83 held (five hit-to-miss
-   flips). Production's spec passes it: 1.9.84 at about 19:00 UTC on
-   2026-10-21, 1.9.87 from 19:23 UTC that day, and 1.9.90 at 18:44 UTC on
-   2026-10-22, each at 220/298/326/112 with no
-   hit-to-miss flip. Waiting on Raven's re-sync.
-   Done when: the replica reproduces Raven's baseline exactly, our current
-   spec passes every gate in it, and Raven's accepted snapshot moves past
-   1.9.61.
-
 2. **Served fields the spec still does not declare.**
    Probe: `/api/stablecoins` rows serve `paymentsCount24h` while the 1.9.90
    spec never mentions it (2026-10-22). Found with one live request per GET
@@ -255,26 +236,6 @@ item is fixed. API base URL: https://stellarlight.xyz.
     `coverage: "winners-only"`; APAC `prizePerWinnerUSD` null with a note;
     `facet=placement` 68 winners of 1,371 with the left-out line;
     hackmeridian-2026 its four declared tracks and `prizeTiers` null.
-
-11. **A Live row whose DefiLlama protocol is dead reads as plainly Live.**
-    Probe: `/api/projects/search?q=allbridge` serves Allbridge `status:
-    Live`, `statusConfidence` 0.9 high and no `statusCaveat`, while
-    `https://api.llama.fi/protocols` marks `allbridge-core` deprecated with
-    `deadFrom` 2026-08-31; `/api/verify?type=live&subject=allbridge` answers
-    supported, 0.9 high (live 1.9.101, 2026-10-23).
-    Found by the owner's read of the row; measured in
-    `improvements/rounds/2026-10-23-dead-protocol-guard.md`.
-    State: merged as #1876 (spec 1.9.105); the enrich-tvl and curate-projects
-    runs are next. The guard needs the enrich-tvl lane to store
-    `llamaListing`; the Allbridge description and routes need a curate-projects
-    execute; the dispatch steps are in the ledger.
-    Done when: merged and deployed; the enrich-tvl and curate-projects lanes
-    ran (dry run read first); live, re-checked by someone other than the
-    author: every DefiLlama-linked row serves `statusChecks`, Allbridge serves
-    the reworded description, `llamaSlugs` [allbridge-next], `tvlUSD` null,
-    `routes` null, derived `supportedNetworks` and a clear listing check, and
-    no other row carries a `statusCaveat` unless DefiLlama dates its protocol
-    dead or retired it with nothing locked and no live successor.
 
 12. **The toolchain deprecated count reads as a soroban-sdk count.**
     Probe: `curl -s 'https://stellarlight.xyz/api/analyze?dimension=toolchain' | jq '.toolchain | {deprecatedTotal, soroban: .bySorobanSdkStatus.deprecated, js: .byJsSdkStatus.deprecated, rowsWithReason: ([.deprecatedRepos[] | select(.deprecatedBy)] | length)}'`
@@ -1023,8 +984,6 @@ Found 2026-10-23 by the dead-protocol guard round
   SDK bullet; `src/lib/integrations/curated-skills.ts`, slug allbridge-sdk),
   while docs-core.allbridge.io says Stellar is unavailable on the relaunched
   Core pending audit (read 2026-10-23).
-- `view=compact` project rows do not carry `statusCaveat`; adding it gives
-  every compact row a new null key.
 - The TVL rule of the status checks reads each contract's `lastEventAt`
   since spec 1.9.151 and no longer waits for 60 days of its own readings. It
   sees events only: 13 of 68 tracked contracts were used by sub-calls alone
@@ -1059,8 +1018,11 @@ Found 2026-10-23 by the dead-protocol guard round
   enrich-partner-onchain (dispatch only, last run 2026-07-20); each answers
   402 since 2026-11-06. src/lib/onchain-sources.ts holds readers for the
   same facts from Horizon and Stellar Index.
-- The status checks see only the 18 of 1,005 public rows with a DefiLlama
-  link; a dead product with no link (or a stale slug, above) is not checked.
+- The status checks see only the 20 of 1,020 public rows with a DefiLlama
+  link (18 Live, 2026-11-24); a dead product with no link (or a stale slug,
+  above) is not checked. A domain and name match of all 1,020 rows against
+  DefiLlama's 929 retired listings that day found no unlinked Live row whose
+  own protocol is dead (`rounds/2026-11-24-dead-tvl.md`).
 - enrich-onchain writes `projects.onchain` without reading it back (only
   `codeInUse` is verified).
 
@@ -1180,7 +1142,13 @@ improvements/audits/2026-11-13-regrade-drift/):
   and an SDK repo push while Allbridge Core on Stellar held $0 (DefiLlama's
   Stellar series reads $0 from 2026-08-21). Re-stamp it on Allbridge Next
   evidence, or withdraw it [withdraw to site-liveness, status unchanged,
-  until the owner re-checks Next on Stellar].
+  until the owner re-checks Next on Stellar]. Read 2026-11-24: DefiLlama
+  still dates allbridge-core dead from 2026-08-31 (its Stellar series ends
+  2026-09-03 at $0) and lists allbridge-next with no chain and no TVL, so
+  the row serves Live, 0.9 high, a clear listing check and no caveat.
+  Mapping allbridge back to [allbridge-core] in LLAMA_MAP would caveat it
+  from the next enrich-tvl run (0.9 to 0.45, "dead from 2026-08-31"),
+  simulated on that day's list [mapping unchanged].
 - Rotate `PAYLOAD_SECRET`: until the admin-auth round, every blog preview
   put it in a URL (request logs, browser history). It signs every session,
   so rotating logs every admin and partner out [no rotation unless a log
