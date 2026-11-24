@@ -68,4 +68,42 @@ describe("undeclaredInServed", () => {
 			"undeclared null: $.n",
 		]);
 	});
+
+	it("names a value of a JSON type its schema does not allow (getSkill installAlt, 2026-11-24)", () => {
+		const schema = {
+			type: "object",
+			properties: {
+				alt: { type: "string", nullable: true },
+				n: { type: "integer" },
+				x: { type: ["number", "null"] },
+			},
+		};
+		expect(check(schema, { alt: [], n: 1.5, x: 2 })).toEqual([
+			"wrong type: $.alt (served array, declared string)",
+			"wrong type: $.n (served number, declared integer)",
+		]);
+	});
+
+	it("a key two allOf parts declare is walked against both (Meta.counts beside an operation's own counts)", () => {
+		const schema = {
+			allOf: [
+				{
+					type: "object",
+					properties: {
+						counts: { type: "object", properties: { total: {} } },
+					},
+				},
+				{
+					type: "object",
+					properties: {
+						counts: { type: "object", properties: { eligible: {} } },
+					},
+				},
+			],
+		};
+		expect(check(schema, { counts: { total: 1, eligible: 2 } })).toEqual([]);
+		expect(check(schema, { counts: { other: 1 } })).toEqual([
+			"undeclared field: $.counts.other",
+		]);
+	});
 });

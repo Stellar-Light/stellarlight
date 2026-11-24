@@ -624,6 +624,8 @@ export interface CoverageRow {
 		awardedRounds?: unknown;
 		sourceUrl?: unknown;
 		roundAwards?: unknown;
+		/** StoredScfPaid (src/lib/scf-paid.ts), the SCF sync's paid read. */
+		paid?: unknown;
 	} | null;
 }
 
@@ -658,6 +660,11 @@ export interface RoundCoverage {
 	/** Served rows claiming the round whose page for it the round page does
 	 *  not list. */
 	notListed: Array<{ slug: string; pageUrls: string[] }>;
+	/** Carried Build awards whose paid share the sync read exactly, and those
+	 *  of them SCF has paid in full (the final, mainnet tranche). Null when no
+	 *  served row carries a paid read yet. */
+	buildSharesRead: number | null;
+	buildFinalTranchePaid: number | null;
 }
 
 /** The pages a row cites for one round: each award's own page, else (an
@@ -704,6 +711,28 @@ export function roundCoverage(
 					undecided: 0,
 					awards: [],
 				});
+	const paidKnown = served.some((r) => r.scf?.paid);
+	// The paid shares the carrying rows hold for one page's Build awards in
+	// the round (a page can carry more than one).
+	const sharesFor = (slugs: string[], round: number, url: string) =>
+		served
+			.filter((r) => slugs.includes(String(r.slug)))
+			.flatMap((r) => {
+				const builds = (r.scf?.paid as { builds?: unknown } | null)?.builds;
+				return Array.isArray(builds)
+					? (
+							builds as Array<{
+								round?: unknown;
+								sourceUrl?: unknown;
+								paidShare?: unknown;
+							}>
+						)
+							.filter((b) => b.round === round && b.sourceUrl === url)
+							.map((b) =>
+								typeof b.paidShare === "number" ? b.paidShare : null,
+							)
+					: [];
+			});
 	const citing = (pool: readonly CoverageRow[], round: number, url: string) =>
 		pool
 			.filter((r) => r.scf && pagesFor(r.scf, round).includes(url))
@@ -716,6 +745,8 @@ export function roundCoverage(
 				r.awards.flatMap((a) => (a.page ? [PAGE + a.page] : [])),
 			);
 			let carried = 0;
+			let sharesRead = 0;
+			let finalPaid = 0;
 			const notCarried: RoundCoverage["notCarried"] = [];
 			const carriedOnSeveralRows: RoundCoverage["carriedOnSeveralRows"] = [];
 			for (const a of r.awards) {
@@ -734,6 +765,11 @@ export function roundCoverage(
 					carriedOnSeveralRows.push({ pageUrl: url, slugs: on });
 				if (on.length) {
 					carried++;
+					const shares = sharesFor(on, r.round, url);
+					if (shares.length && shares.every((x) => x !== null)) {
+						sharesRead++;
+						if (shares.every((x) => x === 1)) finalPaid++;
+					}
 					continue;
 				}
 				const draftSlugs = citing(drafts, r.round, url);
@@ -767,6 +803,8 @@ export function roundCoverage(
 				carriedOnSeveralRows,
 				rowsClaiming: claiming.length,
 				notListed: notListed.sort((a, b) => a.slug.localeCompare(b.slug)),
+				buildSharesRead: paidKnown ? sharesRead : null,
+				buildFinalTranchePaid: paidKnown ? finalPaid : null,
 			};
 		});
 }

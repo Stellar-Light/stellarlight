@@ -38,6 +38,10 @@ vi.mock("@/lib/payload-client", () => ({
 }));
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
 const { GET } = await import("@/app/api/tokens/integrations/route");
+const { spec } = await import("@/lib/openapi-spec");
+const { responseSchema, undeclaredInServed } = await import(
+	"../../../scripts/contract/served-shape"
+);
 
 const PAXOS = "GDQE7IXJ4HUHV6RQHIUPRJSEZE4DRS5WY577O2FY6YQ5LVWZ7JZTU2V5";
 const DECOY = "GAHXL2PXFYUT7S2HO5QPJQ4DEAA7H4D3WVQGKCJEIA3TVW3ERNPQPFCF";
@@ -162,6 +166,20 @@ describe("GET /api/tokens/integrations", () => {
 			unrated: 0,
 		});
 		expect((await call("project=nope")).status).toBe(400);
+	});
+
+	it("every 200 body serves nothing the spec does not declare", async () => {
+		const schema = responseSchema(spec, "/api/tokens/integrations");
+		for (const qs of [
+			"token=pyusd",
+			`token=PYUSD:${PAXOS}`,
+			`token=${PAXOS_PYUSD}&scfAwarded=true`,
+			"project=aquarius",
+		]) {
+			const { status, body } = await call(qs);
+			expect(status, qs).toBe(200);
+			expect(undeclaredInServed(spec, schema, body), qs).toEqual([]);
+		}
 	});
 
 	it("an empty store is 503 (the lane has not run), never an empty list", async () => {

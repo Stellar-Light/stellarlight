@@ -27,7 +27,10 @@ function walk(node: unknown, path: string): void {
 	if (!node || typeof node !== "object") return;
 	const o = node as Record<string, unknown>;
 	if (
-		o.type === "object" &&
+		// ["object", "null"] too: Project.onchain and Audit.severityCounts
+		// were opaque that way until 2026-11-24, and this test missed them.
+		(o.type === "object" ||
+			(Array.isArray(o.type) && o.type.includes("object"))) &&
 		!("properties" in o) &&
 		!("additionalProperties" in o) &&
 		!("$ref" in o) &&
@@ -49,6 +52,8 @@ for (const [p, methods] of Object.entries(
 )) {
 	walk(methods, p);
 }
+// The shared schemas the operations $ref, which the walk above never enters.
+walk(spec.components, "components");
 
 if (opaque.length) {
 	console.error(
