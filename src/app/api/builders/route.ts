@@ -50,6 +50,7 @@ import {
 	withReadDeadline,
 	withReadTimeout,
 } from "@/lib/degraded-read";
+import { readContributorBuilds } from "@/lib/hackathon-build-contributors";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { PUBLIC_BUILDERS } from "@/lib/integrations/stellar-passport";
 import { matchModeMeta } from "@/lib/match-mode";
@@ -62,7 +63,7 @@ import { serverTiming } from "@/lib/server-timing";
 // sls-089: reads that only decorate served rows. Their failure leaves the
 // page partial but its total known; any other failed read nulls the total.
 const ROW_DECORATION_READ =
-	/^builders (code evidence|on-Stellar activity|collection count)/;
+	/^builders (code evidence|on-Stellar activity|hackathon builds|collection count)/;
 const withBuildersPartial = partialFor(
 	(read) => !ROW_DECORATION_READ.test(read),
 );
@@ -359,6 +360,7 @@ async function handle(req: NextRequest) {
 					match: null,
 					codeEvidence: null,
 					onStellar: null,
+					hackathonBuilds: null,
 				};
 			});
 
@@ -765,6 +767,23 @@ async function handle(req: NextRequest) {
 				// leave onStellar null — "could not compute", not "nothing" — and
 				// say which read could not compute it
 				warnings.push(degradedWarning("builders on-Stellar activity", e));
+			}
+			// The stored hackathon builds whose repo lists each returned login
+			// as a contributor (the sync lane's contributors step). Page-scoped
+			// and query-independent like onStellar: [] once the read ran, null
+			// on every row when it failed.
+			try {
+				const hb = await withReadTimeout(
+					readContributorBuilds(
+						payload,
+						builders.map((b) => b.githubUsername),
+					),
+					DEFAULT_READ_TIMEOUT_MS,
+				);
+				for (const b of builders)
+					b.hackathonBuilds = hb.get(b.githubUsername.toLowerCase()) ?? [];
+			} catch (e) {
+				warnings.push(degradedWarning("builders hackathon builds", e));
 			}
 		}
 	}

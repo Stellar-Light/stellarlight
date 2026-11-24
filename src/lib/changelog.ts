@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-24",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.173",
+		type: "added",
+		summary:
+			"Builder rows show the hackathon builds the person contributed to. `/api/builders` rows gain `hackathonBuilds[]`: each stored hackathon build (one per event entered, every event we store) whose GitHub repo lists the login as a contributor, with the build's id, name, event name and slug, placement, winner flag, page url, `basis: contributor`, the repo's human contributor count and when it was read. The builder profile page lists them too.",
+		detail:
+			"The hackathon sync lane now reads each build repo's human contributors from GitHub (the contributors API; a fork is read as the commits its parent does not hold, so a fork of a large repo does not list the parent's maintainers; bots and AI agent accounts are left out) and stores them on the build row with the read date, once a month per repo. A contributor is not necessarily a team member who entered: commits after the event count, a teammate who never committed is missed, work under another GitHub account is not seen, and a build whose repo is held for malware credits no one. [] = none of the read lists names the login; null = the read failed. No builder profile is created: only rows the endpoint already serves gain the field. No parameter or operation description changed.",
+	},
+	{
+		date: "2026-11-24",
 		surfaces: ["api", "mcp", "skill"],
 		version: "spec@1.9.172",
 		type: "added",

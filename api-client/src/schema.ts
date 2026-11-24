@@ -2694,6 +2694,33 @@ export interface components {
                     myCommits12m?: number | null;
                 }[];
             } | null;
+            /** @description Stored hackathon builds (the /api/hackathons/builds rows, one per event entered) whose GitHub repo lists this login as a contributor: a human account with commits on the repo's default branch when it was read (GitHub's contributors API; for a fork, the commits its parent does not hold; bots and AI agent accounts left out). QUERY-INDEPENDENT, on every row, newest event first; the order is not a rank. A contributor is not necessarily a team member who entered: commits made after the event count, and a teammate who never committed is missed. It cannot see a build with no repo link, a repo that was never readable (deleted or private), or this person's work under another GitHub account; a build whose repo is held for malware credits no one. [] = none of the read lists names this login; null = the read failed (meta.warnings names it), never 'none'. */
+            hackathonBuilds?: {
+                /** @description The build's id, as /api/hackathons/builds serves it and /api/hackathons/builds/{id} opens it. */
+                id?: string;
+                name?: string;
+                /** @description The event's name. */
+                hackathon?: string;
+                hackathonSlug?: string;
+                endedAt?: string | null;
+                /** @description The build's placement in this event as /api/hackathons/builds serves it; null when it placed nowhere or no placement was published. */
+                placement?: string | null;
+                isWinner?: boolean;
+                /** @description The build's own page: its DoraHacks submission, or the list a curated row comes from. */
+                url?: string;
+                /**
+                 * @description Why the build is on this row: the login is in the repo's contributor list.
+                 * @enum {string}
+                 */
+                basis?: "contributor";
+                /** @description Human contributors the repo listed when read: context for how central this person was (1 of 2 is not 1 of 200). */
+                contributorCount?: number;
+                /**
+                 * Format: date-time
+                 * @description When the repo's contributors were read.
+                 */
+                contributorsReadAt?: string;
+            }[] | null;
         };
         /** @description One SDF roster entry from /api/people: person, current role, section, and affiliation: quoted from stellar.org/foundation/team with provenance (sourceUrl + observedAt). Roster facts, not verified availability. */
         Person: {

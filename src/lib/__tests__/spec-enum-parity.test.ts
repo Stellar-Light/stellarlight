@@ -13,6 +13,7 @@ import {
 } from "@/data/rwa-registry";
 import { CODE_DOMAINS } from "../code-domains";
 import { CONTRACT_BASES } from "../contract-basis";
+import { BUILDER_BUILD_BASES } from "../hackathon-build-contributors";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "../http-params";
 import { RESEARCH_MODES } from "../match-mode";
 import { SOURCE_CHECK_STATES } from "../note-pins";
@@ -892,5 +893,16 @@ describe("token integrations vocabularies are the code's arrays", () => {
 		expect(sorted(edge.status.enum)).toEqual(
 			sorted(TOKEN_INTEGRATION_STATUSES),
 		);
+	});
+});
+
+describe("builder hackathon build basis is ONE list", () => {
+	it("the spec serves BUILDER_BUILD_BASES", () => {
+		expect(
+			sorted(
+				S.components.schemas.Builder.properties.hackathonBuilds.items.properties
+					.basis.enum,
+			),
+		).toEqual(sorted(BUILDER_BUILD_BASES));
 	});
 });

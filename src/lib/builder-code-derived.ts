@@ -9,6 +9,7 @@
 
 import { applyBuilderNameOverride } from "../data/builder-name-overrides";
 import { BUILDER_SYNONYMS } from "./builder-vocabulary";
+import type { BuilderHackathonBuild } from "./hackathon-build-contributors";
 
 export interface BuilderProject {
 	name: string;
@@ -76,6 +77,10 @@ export interface BuilderRow {
 	 * builders saw an empty ecosystem. null only when the join could not run.
 	 */
 	onStellar: BuilderOnStellar | null;
+	/** Stored hackathon builds whose repo lists this login as a contributor,
+	 * newest event first; [] = none of the read lists names them; null = the
+	 * read failed. Query-independent, on every row. */
+	hackathonBuilds: BuilderHackathonBuild[] | null;
 }
 
 /** Attribution rule (the same one the profile page enforces): `builds` =
@@ -284,7 +289,8 @@ export function codeDerivedBuilderRow(
 			basis: "repo-owner",
 		},
 		codeEvidence,
-		// filled by the route's page-level join, same as Passport rows
+		// filled by the route's page-level joins, same as Passport rows
 		onStellar: null,
+		hackathonBuilds: null,
 	};
 }

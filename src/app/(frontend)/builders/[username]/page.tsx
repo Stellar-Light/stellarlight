@@ -25,6 +25,7 @@ import {
 	type CodeActivity,
 	loginIn,
 } from "@/lib/builder-code";
+import { readContributorBuilds } from "@/lib/hackathon-build-contributors";
 import {
 	buildsForRepos,
 	getHackathonBuildsIndex,
@@ -166,11 +167,22 @@ export default async function BuilderProfilePage({
 			// An award several placements share is their category, not
 			// one build's prize.
 			const categories = prizeCategories(idx);
-			hackBuilds = buildsForRepos(
-				idx,
-				code?.repos.map((r) => r.fullName) ?? [],
-				[String(builder.github_username)],
-			)
+			const login = String(builder.github_username);
+			const key = (b: { id: string; hackathon: { slug: string } }) =>
+				`${b.hackathon.slug}::${b.id}`;
+			// Builds whose repo is one of theirs, and builds whose repo lists
+			// them as a contributor (the sync lane's contributors step).
+			const mine = new Set(
+				buildsForRepos(idx, code?.repos.map((r) => r.fullName) ?? [], [
+					login,
+				]).map(key),
+			);
+			for (const b of (await readContributorBuilds(payload, [login])).get(
+				login.toLowerCase(),
+			) ?? [])
+				mine.add(`${b.hackathonSlug}::${b.id}`);
+			hackBuilds = idx
+				.filter((b) => mine.has(key(b)))
 				.map((b) => ({ ...b, ...prizeLabels(categories, b) }))
 				.sort((a, b) =>
 					(b.hackathon.endedAt ?? "").localeCompare(a.hackathon.endedAt ?? ""),
@@ -575,8 +587,8 @@ export default async function BuilderProfilePage({
 							<CardHeader>
 								<CardTitle className="text-base">Hackathon projects</CardTitle>
 								<p className="text-xs text-muted-foreground">
-									Hackathon builds whose repository is one of theirs, each with
-									where it comes from.
+									Hackathon builds whose repository is one of theirs or lists
+									them as a contributor, each with where it comes from.
 								</p>
 							</CardHeader>
 							<CardContent className="space-y-2">

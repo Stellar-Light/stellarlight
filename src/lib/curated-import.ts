@@ -126,7 +126,7 @@ export function planCuratedImport(
 }
 
 /** The fields the daily sync derives (scripts/sync-hackathon-builds.ts
- * steps 3 to 7), the only ones it writes on a curated row: the import owns
+ * steps 3 to 8), the only ones it writes on a curated row: the import owns
  * every other field (one field, one writer). */
 export const SYNC_DERIVED_FIELDS = [
 	"repoCurrentFullName",
@@ -145,6 +145,8 @@ export const SYNC_DERIVED_FIELDS = [
 	"repoLastCommitAt",
 	"repoArchived",
 	"activityCheckedAt",
+	"contributors",
+	"contributorsReadAt",
 ] as const;
 
 /** A stored curated row the sync derives fields for: served and with a

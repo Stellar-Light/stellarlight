@@ -5,8 +5,10 @@ name: Sync hackathon builds
 # one to the directory project that lists its exact repo, embeds rows whose
 # text changed, keeps hackathon_build_vector_index in place, and reads the
 # Stellar packages each submission's repo declares (at most 400 repos a run,
-# one REST call each). /api/hackathons/builds serves this store first and
-# falls back to a live DoraHacks read.
+# one REST call each) and its human contributors (at most 300 repos a run,
+# once a month per repo; /api/builders joins builders to them).
+# /api/hackathons/builds serves this store first and falls back to a live
+# DoraHacks read.
 #
 # A row is never deleted; a failed read never blanks a stored value; an
 # instrument failure (no events, most rosters or pages unreadable) exits 2.
