@@ -26,7 +26,7 @@ const STRICT = process.env.SMOKE_STRICT === "1";
 // Declared parameters across all tools. The forwarding audit asserts this
 // exactly, so it cannot pass having probed less: change it with any tool
 // parameter change.
-const DECLARED_PARAMETERS = 90;
+const DECLARED_PARAMETERS = 91;
 
 let passed = 0;
 let failed = 0;

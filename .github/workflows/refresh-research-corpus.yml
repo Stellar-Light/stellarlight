@@ -25,7 +25,7 @@ on:
   workflow_dispatch:
     inputs:
       source:
-        description: "Optional: only run one source (sep|cap|slp|repo-docs|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper|audit|incident|security-program|sdf-org|ec-developer-report|release). Leave empty to run all."
+        description: "Optional: only run one source (sep|cap|slp|repo-docs|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper|audit|incident|security-program|sdf-org|ec-developer-report|release|stellar-discussions). Leave empty to run all."
         required: false
         default: ""
       prune_execute:
@@ -100,6 +100,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: pnpm exec tsx scripts/ingest-slps.ts --execute
+
+      # The Stellar org's GitHub Discussions (on stellar/stellar-protocol),
+      # all six categories, comments and replies included. GraphQL takes no
+      # anonymous reads, so the token is required here, not a rate lift.
+      - name: Ingest Stellar GitHub Discussions
+        if: inputs.source == '' || inputs.source == 'stellar-discussions'
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm exec tsx scripts/ingest-stellar-discussions.ts --execute
 
       # Same shape as every other source (2026-10-15): it had no source
       # filter, no continue-on-error and no token, so a source=release
@@ -207,7 +217,7 @@ jobs:
         run: |
           set +e
           planned=0; clean=0; unchecked=""
-          for s in seps caps slps repo-docs lumenloop lumenloop-research scf-handbook sdf-blog developers-docs papers protocol-releases soroban-security incidents security-program sdf-org ec-developer-report; do
+          for s in seps caps slps stellar-discussions repo-docs lumenloop lumenloop-research scf-handbook sdf-blog developers-docs papers protocol-releases soroban-security incidents security-program sdf-org ec-developer-report; do
             pnpm exec tsx "scripts/ingest-$s.ts" --replan > "replan-$s.log" 2>&1
             line=$(grep -E '^replan: writes=' "replan-$s.log" | tr '\n' ' ')
             if [ -z "$line" ]; then

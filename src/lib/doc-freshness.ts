@@ -27,7 +27,12 @@ const SPEC_SOURCES = new Set([
 	"security-program",
 ]);
 /** Sources that are dated commentary/reporting. */
-const ARTICLE_SOURCES = new Set(["sdf-blog", "lumenloop", "incident"]);
+const ARTICLE_SOURCES = new Set([
+	"sdf-blog",
+	"lumenloop",
+	"incident",
+	"stellar-discussions",
+]);
 /** Structured datasets — freshness lives in their own asOf fields. */
 const DATA_SOURCES = new Set(["ec-report", "dora-eval"]);
 

@@ -147,6 +147,16 @@ export function buildResearchVectorPipeline(opts: {
 	 * widening or deep pass is needed. See vectorIndexFilterPaths.
 	 */
 	indexFilter?: boolean;
+	/**
+	 * source=stellar-discussions only: keep one discussion category. The
+	 * category is matched after the vector stage, so with the index filter
+	 * that stage reads the whole source (VECTOR_DEEP_LIMIT covers it; 635
+	 * chunks on 2026-11-24) and a four-discussion category is never crowded
+	 * out of the pool.
+	 * ponytail: post-match over the whole source; make discussionCategory an
+	 * index filter field if the source nears VECTOR_DEEP_LIMIT chunks.
+	 */
+	category?: string | null;
 }): Record<string, unknown>[] {
 	const overfetch = researchOverfetch(opts.limit);
 	const inIndex = Boolean(opts.sourceFilter && opts.indexFilter);
@@ -156,7 +166,9 @@ export function buildResearchVectorPipeline(opts: {
 	// numCandidates well under Atlas' 10k limit while comfortably covering
 	// the corpus' per-source document counts.
 	const vsLimit = inIndex
-		? overfetch
+		? opts.category
+			? VECTOR_DEEP_LIMIT
+			: overfetch
 		: opts.deep
 			? VECTOR_DEEP_LIMIT
 			: opts.sourceFilter
@@ -177,7 +189,15 @@ export function buildResearchVectorPipeline(opts: {
 			},
 		},
 		...(opts.sourceFilter
-			? [{ $match: { source: opts.sourceFilter } }, { $limit: overfetch }]
+			? [
+					{
+						$match: {
+							source: opts.sourceFilter,
+							...(opts.category ? { discussionCategory: opts.category } : {}),
+						},
+					},
+					{ $limit: overfetch },
+				]
 			: []),
 		{
 			$project: {
@@ -199,6 +219,7 @@ export function buildResearchVectorPipeline(opts: {
 				// path was never affected (no select).
 				capStatus: 1,
 				capProtocolVersion: 1,
+				discussionCategory: 1,
 				score: { $meta: "vectorSearchScore" },
 			},
 		},

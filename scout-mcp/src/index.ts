@@ -148,10 +148,11 @@ server.registerTool(
 					"sdf-org",
 					"ec-developer-report",
 					"release",
+					"stellar-discussions",
 				])
 				.optional()
 				.describe(
-					"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'slp' for Stellar Limits Proposals, the network configuration votes (Soroban resource limit changes, and the Quorum Freeze of exploit accounts in SLP-0006 and SLP-0008; each row opens with the proposal's number, status and creation date), 'release' for stellar-core/CLI/SDK release notes (what shipped, when; protocol upgrade tags).",
+					"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'slp' for Stellar Limits Proposals, the network configuration votes (Soroban resource limit changes, and the Quorum Freeze of exploit accounts in SLP-0006 and SLP-0008; each row opens with the proposal's number, status and creation date), 'release' for stellar-core/CLI/SDK release notes (what shipped, when; protocol upgrade tags), 'stellar-discussions' for the Stellar org's GitHub Discussions, where proposals and tokenomics are argued in public (each row opens with the discussion's number, category, title and dates; comments signed by author and day; narrow by `category`).",
 				),
 			auditor: z
 				.string()
@@ -171,6 +172,19 @@ server.registerTool(
 				.describe(
 					"Audit-metadata filter (per-chunk inferred severity; 'unknown' for most PDF-derived chunks). Implies source=audit. For report-level enumeration use get_audits.",
 				),
+			category: z
+				.enum([
+					"announcements",
+					"core-advancement-proposals",
+					"general-discussion",
+					"stellar-ecosystem-proposals",
+					"stellar-limits-proposals",
+					"tokenomics",
+				])
+				.optional()
+				.describe(
+					"GitHub Discussions category filter. Implies source=stellar-discussions.",
+				),
 			limit: z
 				.number()
 				.int()
@@ -180,12 +194,13 @@ server.registerTool(
 				.describe("Max results to return (default 8, max 25)."),
 		},
 	},
-	async ({ query, source, auditor, protocol, severity, limit }) => {
+	async ({ query, source, auditor, protocol, severity, category, limit }) => {
 		const params = new URLSearchParams({ q: query });
 		if (source) params.set("source", source);
 		if (auditor) params.set("auditor", auditor);
 		if (protocol) params.set("protocol", protocol);
 		if (severity) params.set("severity", severity);
+		if (category) params.set("category", category);
 		if (limit !== undefined) params.set("limit", String(limit));
 		const result = await callScout(`/api/research?${params}`);
 		return asToolResult(result);

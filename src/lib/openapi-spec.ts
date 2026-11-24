@@ -93,7 +93,7 @@ import { CODE_SCAN_STATES, REPO_KINDS, REPO_SOURCES } from "./repo-grade";
 import { LIVE_READ_PARTS } from "./repo-live-read";
 import { REPO_MATCH_MODES } from "./repo-search";
 import { INDICATOR_KINDS } from "./repo-security";
-import { RESEARCH_SOURCES } from "./research-sources";
+import { DISCUSSION_CATEGORIES, RESEARCH_SOURCES } from "./research-sources";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
 import { PAID_SCHEDULES, PAID_SPLITS } from "./scf-paid";
 import { NOT_CARRIED_REASONS } from "./scf-round-counts";
@@ -9236,6 +9236,8 @@ export const spec: OpenAPISpec = {
 						"seps",
 						"cap",
 						"slp",
+						"github discussions",
+						"tokenomics",
 						"standards",
 						"dev docs",
 						"documentation",
@@ -9402,8 +9404,15 @@ export const spec: OpenAPISpec = {
 						name: "source",
 						in: "query",
 						description:
-							"Optional source filter. A declared source that holds no documents yet answers an empty vector page with meta.sourceEmpty true and meta.sourceDocCount 0 (an empty source, not a miss); every source-scoped call carries meta.sourceDocCount. Use 'scf-proposal' for what an SCF project proposed in its own words (one document per submission on communityfund.stellar.org, every status: the proposal's sections plus round, status, award type and requested budget), 'scf-handbook' for the program's rules, 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index, strategy, roadmap, service-provider directory, community FAQ), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'slp' for Stellar Limits Proposals, the network configuration votes (Soroban resource limit changes, and the Quorum Freeze of exploit accounts in SLP-0006 and SLP-0008; each row opens with the proposal's number, status and creation date), 'release' for stellar-core/CLI/SDK release notes (what shipped, when, protocol upgrade tags). Several sources in one call: see `sources` (a comma here is read the same way).",
+							"Optional source filter. A declared source that holds no documents yet answers an empty vector page with meta.sourceEmpty true and meta.sourceDocCount 0 (an empty source, not a miss); every source-scoped call carries meta.sourceDocCount. Use 'scf-proposal' for what an SCF project proposed in its own words (one document per submission on communityfund.stellar.org, every status: the proposal's sections plus round, status, award type and requested budget), 'scf-handbook' for the program's rules, 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index, strategy, roadmap, service-provider directory, community FAQ), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'slp' for Stellar Limits Proposals, the network configuration votes (Soroban resource limit changes, and the Quorum Freeze of exploit accounts in SLP-0006 and SLP-0008; each row opens with the proposal's number, status and creation date), 'release' for stellar-core/CLI/SDK release notes (what shipped, when, protocol upgrade tags), 'stellar-discussions' for the Stellar org's GitHub Discussions (hosted on stellar/stellar-protocol), where CAPs, SEPs, SLPs and tokenomics are argued in public: one document per discussion, its opening post then every comment and reply signed with author and day; each row opens with the discussion's number, category, title, opening date, the day GitHub last updated it and the CAP/SEP/SLP numbers its title or opening post names; publishedAt is the day it was opened; narrow by `category`. Several sources in one call: see `sources` (a comma here is read the same way).",
 						schema: { type: "string", enum: [...RESEARCH_SOURCES] },
+					},
+					{
+						name: "category",
+						in: "query",
+						description:
+							"GitHub Discussions category of source=stellar-discussions, by slug: tokenomics, core-advancement-proposals (CAP discussions), stellar-ecosystem-proposals (SEP), stellar-limits-proposals (SLP), general-discussion, announcements. Implies source=stellar-discussions and scopes retrieval to that category (an explicit other source or an audit filter is rejected with 400; an unknown category is a 400 listing validCategories). Each row serves it as discussionCategory.",
+						schema: { type: "string", enum: [...DISCUSSION_CATEGORIES] },
 					},
 					{
 						name: "auditor",
@@ -9613,7 +9622,7 @@ export const spec: OpenAPISpec = {
 					},
 					"400": {
 						description:
-							"The call is wrong: missing q, an unknown source, or audit-only filters on a non-audit source. Fix the call; do not retry it as is.",
+							"The call is wrong: missing q, an unknown source or category, audit-only filters on a non-audit source, or a category with a source other than stellar-discussions. Fix the call; do not retry it as is.",
 						content: {
 							"application/json": {
 								schema: { $ref: "#/components/schemas/RequestError" },
@@ -12985,6 +12994,12 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						description:
 							"source=cap only: the protocol version this CAP shipped in, from its own preamble. Null = not declared upstream (drafts/TBD); never guessed. The join key between protocol history and soroban-sdk versions.",
+					},
+					discussionCategory: {
+						type: "string",
+						nullable: true,
+						description:
+							"source=stellar-discussions only: the discussion's GitHub Discussions category slug (tokenomics, core-advancement-proposals, stellar-ecosystem-proposals, stellar-limits-proposals, general-discussion, announcements), the value the `category` filter takes. Null on every other source.",
 					},
 					docKind: {
 						type: "string",

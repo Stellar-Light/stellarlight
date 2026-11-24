@@ -58,6 +58,12 @@ function sourceFor(url: string): string | null {
 	if (/github\.com\/stellar\/stellar-protocol\/.*\/cap-/.test(u)) return "cap";
 	if (/github\.com\/stellar\/stellar-protocol\/.*\/slp-/.test(u)) return "slp";
 	if (
+		/github\.com\/(?:orgs\/stellar|stellar\/stellar-protocol)\/discussions\//.test(
+			u,
+		)
+	)
+		return "stellar-discussions";
+	if (
 		u.includes("stellar.gitbook.io") ||
 		u.includes("communityfund.stellar.org")
 	)

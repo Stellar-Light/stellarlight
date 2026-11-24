@@ -32,6 +32,26 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-24",
+		surfaces: ["api", "mcp", "skill"],
+		version: "spec@1.9.172",
+		type: "added",
+		summary:
+			"searchResearch gains the source `stellar-discussions`: the Stellar org's GitHub Discussions, hosted on stellar/stellar-protocol, in all six categories (Announcements, Core Advancement Proposals, General Discussion, Stellar Ecosystem Proposals, Stellar Limits Proposals, Tokenomics). One document per discussion: its opening post, then every comment and reply in order, each signed with its author and day, since a CAP thread holds most of its argument in the comments. Every row opens with the discussion's number, category, title, who opened it and on what day, the day GitHub last updated it, its comment and reply counts, and the CAP, SEP and SLP numbers its title or opening post names; `publishedAt` is the day it was opened, never the day it was read. A new `category` filter takes a category slug (category=tokenomics, core-advancement-proposals, stellar-ecosystem-proposals, stellar-limits-proposals, general-discussion, announcements), implies source=stellar-discussions and scopes retrieval to that category, as the audit filters scope to source=audit; each row serves its category as `discussionCategory`, null on every other source. An unknown category is a 400 listing validCategories, and so is a category beside another source or an audit filter. The search_research MCP tool takes the source and `category` from its next release.",
+		detail:
+			"The source holds no documents until the corpus refresh runs the new ingest (scripts/ingest-stellar-discussions.ts, daily at 06:00 UTC); until then source=stellar-discussions answers an empty page with meta.sourceEmpty true. A dry run on 2026-11-24 read 178 discussions, 657 comments and 1,641 replies as 635 chunks: Core Advancement Proposals 77 discussions (279 chunks), Stellar Ecosystem Proposals 63 (261), General Discussion 23 (72), Announcements 8 (8), Tokenomics 4 (11), Stellar Limits Proposals 3 (4); a second read gave the same 635 content hashes. The ingest reads every category, discussion, comment and reply list whole, each checked against GitHub's own totalCount, or writes nothing; deleted comments and comments hidden as spam or abuse are left out with their replies kept, and a comment minimized for another reason (outdated, resolved, off-topic: 4 on 2026-11-24) is kept and says so. A stored discussion the listing no longer holds is deleted only when GitHub answers that its number does not exist, and chunks past a discussion's new end are deleted with it; both count as planned writes in the refresh's Idempotence re-plan. The corpus has no field for related documents, so a discussion is linked to the CAP, SEP or SLP it names only by the header text and the stored tags (90 of 178 name one). With `category`, the vector stage reads the whole source before keeping the category, so a four-discussion category is never crowded out of the pool. Ranking weighs the source at 0.65 authority, below the proposals it discusses, and its age counts as for blog posts; its dated rows can join the recency supplement.",
+	},
+	{
+		date: "2026-11-24",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.10.0",
+		type: "added",
+		summary:
+			"scout-mcp 1.10.0: search_research takes `source=stellar-discussions` (the Stellar org's GitHub Discussions) and `category` (announcements, core-advancement-proposals, general-discussion, stellar-ecosystem-proposals, stellar-limits-proposals or tokenomics), forwarded to `/api/research`.",
+		detail:
+			"Additive: every call 1.9.0 accepted is accepted unchanged, and `category` is forwarded only when set.",
+	},
+	{
+		date: "2026-11-24",
 		surfaces: ["api"],
 		version: "spec@1.9.171",
 		type: "fixed",

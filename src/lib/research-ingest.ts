@@ -25,6 +25,9 @@ export type ResearchSource =
 	| "cap"
 	// Stellar Limits Proposals: the network configuration votes (sls-118).
 	| "slp"
+	// The Stellar org's GitHub Discussions (stellar/stellar-protocol), every
+	// category; the category is kept in discussionCategory.
+	| "stellar-discussions"
 	| "dev-docs"
 	| "paper"
 	| "scf-proposal"
@@ -75,6 +78,8 @@ export interface ResearchChunk {
 	auditor?: string;
 	protocol?: string;
 	severity?: AuditSeverity;
+	/** source='stellar-discussions' only: the discussion's GitHub category slug. */
+	discussionCategory?: string;
 }
 
 export function sha256(s: string): string {
@@ -604,6 +609,7 @@ export async function upsertChunks(opts: {
 			auditor: chunk.auditor,
 			protocol: chunk.protocol,
 			severity: chunk.severity,
+			discussionCategory: chunk.discussionCategory,
 			// doc-freshness signals (deterministic, idea:research-doc-freshness):
 			docKind: docKindOf({ source, url: chunk.url, title: chunk.title }),
 			docVersionStatus: docVersionStatus(chunk.content),
