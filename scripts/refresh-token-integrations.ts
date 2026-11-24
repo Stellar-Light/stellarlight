@@ -34,9 +34,10 @@
  * a balance or an activity read could not be taken keeps its stored reading,
  * its basis marked "not refreshed <date>: why" (the plan lists it under
  * keep). A price Stellar Index withholds (price_withheld_reason) is such a
- * read; a token it has no price for at all is not. Every source answer is
- * cached for the run (2xx and 404 only), so --replan re-plans the same reads
- * against the store and must plan 0 writes after an execute.
+ * read; a token it has no price for at all is not. Every read is taken once
+ * per run and its answer, could-not-check included, cached for the run, as
+ * is what the store adds to the holder sweep; so --replan re-plans the same
+ * reads against the store and must plan 0 writes after an execute.
  *
  * Exit 2: an instrument failure (the registry, the directory or the rewards
  * config could not be read): nothing written. Exit 1: a write failed or did
@@ -87,6 +88,8 @@ import {
 	poolEdgeTier,
 	priorHolderContracts,
 	ROW_FIELDS,
+	type RunCache,
+	readOnce,
 	registryTokenId,
 	rowKey,
 	type StoredRow,
@@ -229,6 +232,7 @@ function store(kind: string, key: string, v: unknown) {
 	mkdirSync(dirname(f), { recursive: true });
 	writeFileSync(f, json(v));
 }
+const RUN_CACHE: RunCache = { get: cached, set: store };
 
 const nextSlot = new Map<string, number>();
 const PACE: Record<string, number> = {
@@ -249,15 +253,19 @@ interface Got {
 	data: unknown;
 	readAt: string;
 }
-/** GET JSON (or text). 2xx and 404 (a checked empty) are cached for the run;
- * anything else is could-not-check (status null or the code) and retried by
- * a later run, never by --replan. */
+/** GET JSON (or text), read once per run (readOnce): 404 is a checked empty;
+ * anything but 2xx and 404 is could-not-check (status null or the code),
+ * retried by a later run, never by this one or its --replan. */
 async function get(url: string, text = false): Promise<Got> {
 	if (url.includes("stellar.expert"))
 		throw new Error("stellar.expert is paywalled and never called");
-	const hit = cached<Got>("http", url);
-	if (hit) return hit;
-	if (REPLAN) return { status: null, data: null, readAt: RUN_AT };
+	return readOnce(RUN_CACHE, "http", url, REPLAN, () => fetchGot(url, text), {
+		status: null,
+		data: null,
+		readAt: RUN_AT,
+	});
+}
+async function fetchGot(url: string, text: boolean): Promise<Got> {
 	const host = new URL(url).host;
 	let silent = 0;
 	for (let a = 0; a < 6; a++) {
@@ -277,11 +285,7 @@ async function get(url: string, text = false): Promise<Got> {
 			}
 			const body = await r.text();
 			const readAt = new Date().toISOString();
-			if (r.status === 404) {
-				const out = { status: 404, data: null, readAt };
-				store("http", url, out);
-				return out;
-			}
+			if (r.status === 404) return { status: 404, data: null, readAt };
 			if (!r.ok) return { status: r.status, data: null, readAt };
 			let data: unknown = body;
 			if (!text) {
@@ -291,9 +295,7 @@ async function get(url: string, text = false): Promise<Got> {
 					return { status: null, data: null, readAt };
 				}
 			}
-			const out = { status: r.status, data, readAt };
-			store("http", url, out);
-			return out;
+			return { status: r.status, data, readAt };
 		} catch {
 			// a host that does not answer at all (a dead toml domain) is
 			// could-not-check after three tries, not six minutes of them
@@ -314,24 +316,28 @@ async function si(path: string) {
 	};
 }
 
-/** getLedgerEntries over up to 200 keys, cached; null = could not read. */
+/** getLedgerEntries over up to 200 keys, read once per run; null = could
+ * not read. */
 async function entries(
 	keys: string[],
 ): Promise<Map<string, LedgerEntry> | null> {
-	const ck = `entries:${keys.join(",")}`;
-	const hit = cached<Array<[string, LedgerEntry]>>("rpc", ck);
-	if (hit) return new Map(hit);
-	if (REPLAN) return null;
-	for (let a = 0; a < 4; a++) {
-		await pace("rpc");
-		const m = await readLedgerEntries(keys);
-		if (m) {
-			store("rpc", ck, [...m]);
-			return m;
-		}
-		await sleep(2000 * (a + 1));
-	}
-	return null;
+	const hit = await readOnce<Array<[string, LedgerEntry]> | null>(
+		RUN_CACHE,
+		"rpc",
+		`entries:${keys.join(",")}`,
+		REPLAN,
+		async () => {
+			for (let a = 0; a < 4; a++) {
+				await pace("rpc");
+				const m = await readLedgerEntries(keys);
+				if (m) return [...m];
+				await sleep(2000 * (a + 1));
+			}
+			return null;
+		},
+		null,
+	);
+	return hit && new Map(hit);
 }
 async function entriesChunked(keys: string[]) {
 	const out = new Map<string, LedgerEntry>();
@@ -347,32 +353,39 @@ async function entriesChunked(keys: string[]) {
 
 const RPC = stellarOracleRpc();
 type Sim = { ok: true; value: unknown } | { ok: false; error: string } | null;
-/** A read-only simulation, cached; an error the contract returns is an
- * answer, a call that could not run is null (could-not-check). */
+/** A read-only simulation, read once per run; an error the contract returns
+ * is an answer, a call that could not run is null (could-not-check). */
 async function simulate(
 	contract: string,
 	fn: string,
 	args: xdr.ScVal[] = [],
 ): Promise<Sim> {
-	const ck = `${contract}|${fn}|${args.map((a) => a.toXDR("base64")).join(",")}`;
-	const hit = cached<{ ok: boolean; xdr?: string; error?: string }>("sim", ck);
-	const decode = (h: { ok: boolean; xdr?: string; error?: string }): Sim =>
-		h.ok && h.xdr
-			? { ok: true, value: scValToNative(xdr.ScVal.fromXDR(h.xdr, "base64")) }
-			: { ok: false, error: h.error ?? "error" };
-	if (hit) return decode(hit);
-	if (REPLAN) return null;
-	try {
-		await pace("rpc");
-		const o = await RPC.call("mainnet", contract, fn, args);
-		const h = o.ok
-			? { ok: true, xdr: o.value.toXDR("base64") }
-			: { ok: false, error: o.error.slice(0, 200) };
-		store("sim", ck, h);
-		return decode(h);
-	} catch {
-		return null;
-	}
+	const h = await readOnce<{
+		ok: boolean;
+		xdr?: string;
+		error?: string;
+	} | null>(
+		RUN_CACHE,
+		"sim",
+		`${contract}|${fn}|${args.map((a) => a.toXDR("base64")).join(",")}`,
+		REPLAN,
+		async () => {
+			try {
+				await pace("rpc");
+				const o = await RPC.call("mainnet", contract, fn, args);
+				return o.ok
+					? { ok: true, xdr: o.value.toXDR("base64") }
+					: { ok: false, error: o.error.slice(0, 200) };
+			} catch {
+				return null;
+			}
+		},
+		null,
+	);
+	if (!h) return null;
+	return h.ok && h.xdr
+		? { ok: true, value: scValToNative(xdr.ScVal.fromXDR(h.xdr, "base64")) }
+		: { ok: false, error: h.error ?? "error" };
 }
 const addr = (a: string) => new Address(a).toScVal();
 
@@ -1627,17 +1640,16 @@ async function main() {
 				e.token,
 				Math.min(preBest.get(e.token) ?? 9, TIER_RANK[e.tier]),
 			);
-	// A token swept once stays swept, so its holder rows can end when a holder empties.
+	// A token swept once stays swept, so its holder rows can end when a holder
+	// empties. What the store adds is fixed by the run's first pass (cached):
+	// --replan reads the store that pass wrote and must sweep what it swept.
 	const { payload, stored } = await readStore();
+	const prior = priorHolderContracts(stored, RUN_CACHE);
 	const priority = [
 		...new Set([
 			...edges.filter((e) => e.kind === "issuer").map((e) => e.token),
 			...[...preBest].filter(([, r]) => r <= TIER_RANK.used).map(([t]) => t),
-			...stored
-				.filter(
-					(s) => s.status !== "ended" && String(s.kind).startsWith("holder"),
-				)
-				.map((s) => String(s.tokenId)),
+			...prior.keys(),
 		]),
 	].filter(inScope);
 	const sweeps = new Map<string, Record<string, unknown>>();
@@ -1651,7 +1663,7 @@ async function main() {
 		checked,
 		sweeps,
 		notes,
-		priorHolderContracts(stored),
+		prior,
 	);
 	edges.push(...holderEdges);
 	edges.push(...(await accountSweep(priority, ident, price, checked, notes)));

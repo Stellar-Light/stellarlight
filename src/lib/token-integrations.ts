@@ -609,26 +609,75 @@ function heldRow(s: StoredRow, why: string, runAt: string): IntegrationRow {
 	return row;
 }
 
+/** A run's cache of answers, by kind and key, as the refresh keeps it. */
+export interface RunCache {
+	get(kind: string, key: string): unknown;
+	set(kind: string, key: string, value: unknown): void;
+}
+
 /**
- * The contract each live stored holder row was last read at (its bestPool),
- * by token. The holder sweep re-reads these every run, so a holder row ends
- * only after its own contract was read and found empty, never because the
- * contract fell out of the run's capped candidate lists (top contracts by
- * activity, a token's latest interactions). Account holders (G addresses)
- * are read from Horizon by the account sweep and are not listed here.
+ * One answer per read per run. The first answer a run gets for a read,
+ * could-not-check included, is kept in the run's cache and is what every
+ * later read of it this run, and --replan, gets; --replan (cache only) reads
+ * anything the run never read as `unread`. Run 45481876157: an Aquarius
+ * pool's activity read failed in the pool pass and was cached when the holder
+ * sweep read the same page, so the re-plan counted events the execute had not.
+ */
+export async function readOnce<T>(
+	cache: RunCache,
+	kind: string,
+	key: string,
+	replan: boolean,
+	read: () => Promise<T>,
+	unread: T,
+): Promise<T> {
+	const hit = cache.get(kind, key);
+	if (hit !== undefined) return hit as T;
+	if (replan) return unread;
+	// ponytail: two concurrent first reads of one key both fetch, the last
+	// answer kept; the refresh never reads one key concurrently. Share the
+	// in-flight promise per key if it ever does.
+	const v = await read();
+	cache.set(kind, key, v);
+	return v;
+}
+
+/**
+ * Every token with a live stored holder row (a token swept once stays swept),
+ * with the contract each such row was last read at (its bestPool). The holder
+ * sweep re-reads these every run, so a holder row ends only after its own
+ * contract was read and found empty, never because the contract fell out of
+ * the run's capped candidate lists (top contracts by activity, a token's
+ * latest interactions). Account holders (G addresses) are read from Horizon
+ * by the account sweep: their token is listed, the account is not.
+ *
+ * Given the run's cache, the first pass's answer is the run's: --replan reads
+ * the store that pass wrote, and must sweep what it swept. Run 45481876157:
+ * the execute moved Blend's USDC row to a new contract, the re-plan dropped
+ * the old one from the candidates, and every balance read after it missed.
  */
 export function priorHolderContracts(
 	stored: StoredRow[],
+	run?: RunCache,
 ): Map<string, Set<string>> {
+	const hit = run?.get("store", "priorHolderContracts");
+	if (hit !== undefined)
+		return new Map(
+			(hit as Array<[string, string[]]>).map(([t, cs]) => [t, new Set(cs)]),
+		);
 	const out = new Map<string, Set<string>>();
 	for (const s of stored) {
 		if (s.status === "ended" || !String(s.kind).startsWith("holder")) continue;
-		if (!s.tokenId || !/^C[A-Z2-7]{55}$/.test(s.bestPool ?? "")) continue;
-		out.set(
-			s.tokenId,
-			(out.get(s.tokenId) ?? new Set()).add(s.bestPool as string),
-		);
+		if (!s.tokenId) continue;
+		const cs = out.get(s.tokenId) ?? new Set<string>();
+		if (/^C[A-Z2-7]{55}$/.test(s.bestPool ?? "")) cs.add(s.bestPool as string);
+		out.set(s.tokenId, cs);
 	}
+	run?.set(
+		"store",
+		"priorHolderContracts",
+		[...out].map(([t, cs]) => [t, [...cs]]),
+	);
 	return out;
 }
 
