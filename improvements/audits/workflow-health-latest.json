@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-11-24T19:19:47.293Z",
+	"asOf": "2026-11-24T19:48:13.134Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 113,
 	"healthy": 105,
@@ -41,8 +41,8 @@
 		},
 		{
 			"file": "workflow-health.yml",
-			"state": "failing",
-			"why": "83 failed run(s) since its last green 70d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"state": "stale",
+			"why": "last green 70d ago, past its 21d window (cron \"41 6 * * 1\")"
 		}
 	],
 	"rows": [
@@ -129,10 +129,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-10-13T19:38:27Z",
-			"ageDays": 41,
+			"ageDays": 42,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 41d ago (manual tool — age not judged)"
+			"why": "last green 42d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "award-test-setup.yml",
@@ -227,11 +227,11 @@
 			"name": "Propagate deployment basis to status (manual)",
 			"cron": "30 8 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-17T17:48:59Z",
-			"ageDays": 7,
+			"lastSuccessAt": "2026-11-24T19:39:34Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 10,
-			"why": "last green 7d ago"
+			"runs": 11,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "basis-from-product.yml",
@@ -304,7 +304,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:06:06Z",
+			"lastSuccessAt": "2026-11-24T19:32:11Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -326,7 +326,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:17:16Z",
+			"lastSuccessAt": "2026-11-24T19:45:34Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -338,10 +338,10 @@
 			"cron": "0 8 * * 1",
 			"state": "ok",
 			"lastSuccessAt": "2026-11-23T19:33:29Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 2,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "curate-partners.yml",
@@ -414,10 +414,10 @@
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:06:06Z",
+			"lastSuccessAt": "2026-11-24T19:17:16Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -514,10 +514,10 @@
 			"cron": "0 8 * * 1",
 			"state": "ok",
 			"lastSuccessAt": "2026-11-23T19:37:42Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 6,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "enrich-scf.yml",
@@ -646,10 +646,10 @@
 			"cron": "41 7 * * 1",
 			"state": "ok",
 			"lastSuccessAt": "2026-11-23T19:28:19Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 16,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "link-canonical-slug.yml",
@@ -744,7 +744,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:06:06Z",
+			"lastSuccessAt": "2026-11-24T19:32:11Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 97,
@@ -766,7 +766,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:17:16Z",
+			"lastSuccessAt": "2026-11-24T19:27:35Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -810,7 +810,7 @@
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:17:16Z",
+			"lastSuccessAt": "2026-11-24T19:45:34Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -821,11 +821,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T18:42:22Z",
+			"lastSuccessAt": "2026-11-24T19:17:16Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 78,
-			"why": "last green 0d ago"
+			"runs": 79,
+			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -960,17 +960,6 @@
 			"why": "last green 0d ago"
 		},
 		{
-			"file": "refresh-token-integrations.yml",
-			"name": "Refresh token integrations",
-			"cron": "23 4 * * 1",
-			"state": "ok",
-			"lastSuccessAt": "2026-11-24T17:44:40Z",
-			"ageDays": 0,
-			"graceDays": 21,
-			"runs": 5,
-			"why": "last green 0d ago"
-		},
-		{
 			"file": "regrade-repos.yml",
 			"name": "Regrade repos (manual)",
 			"cron": null,
@@ -1019,7 +1008,7 @@
 			"name": "Secret scan",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:17:16Z",
+			"lastSuccessAt": "2026-11-24T19:45:34Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1136,6 +1125,17 @@
 			"why": "10 run(s) red at its declared signal step since its last green 70d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Propagate the check's exit code\")"
 		},
 		{
+			"file": "sync-hackathon-builds.yml",
+			"name": "Sync hackathon builds",
+			"cron": "43 4 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-11-24T19:17:25Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 1,
+			"why": "last green 0d ago"
+		},
+		{
 			"file": "sync-lumenloop.yml",
 			"name": "Sync Lumenloop ecosystem projects",
 			"cron": "0 7 * * *",
@@ -1195,10 +1195,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T19:06:06Z",
+			"lastSuccessAt": "2026-11-24T19:45:34Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1282,12 +1282,12 @@
 			"file": "workflow-health.yml",
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
-			"state": "failing",
+			"state": "stale",
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 70,
 			"graceDays": 21,
 			"runs": 96,
-			"why": "83 failed run(s) since its last green 70d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "last green 70d ago, past its 21d window (cron \"41 6 * * 1\")"
 		}
 	]
 }
