@@ -1,7 +1,7 @@
 {
-	"asOf": "2026-11-24T00:22:27.128Z",
+	"asOf": "2026-11-24T00:35:26.043Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 114,
+	"checked": 113,
 	"healthy": 105,
 	"broken": [
 		{
@@ -25,11 +25,6 @@
 			"why": "38 failed run(s) since its last green 17d ago — it is trying and losing, not idle; dies at \"Run pnpm exec tsx scripts/refresh-rwa.ts --execute\""
 		},
 		{
-			"file": "refresh-token-integrations.yml",
-			"state": "always-red",
-			"why": "1 runs since this file was last edited, zero successes — runs produce no jobs, how Actions reports a workflow file it refused to parse"
-		},
-		{
 			"file": "supersession-freshness.yml",
 			"state": "standing-signal",
 			"why": "9 run(s) red at its declared signal step since its last green 69d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Propagate the check's exit code\")"
@@ -47,7 +42,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "79 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "80 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -309,10 +304,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:04:34Z",
+			"lastSuccessAt": "2026-11-24T00:33:03Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -331,7 +326,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:19:59Z",
+			"lastSuccessAt": "2026-11-24T00:33:03Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -364,10 +359,10 @@
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:09:00Z",
+			"lastSuccessAt": "2026-11-24T00:16:41Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 59,
+			"runs": 60,
 			"why": "last green 0d ago"
 		},
 		{
@@ -749,7 +744,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:04:34Z",
+			"lastSuccessAt": "2026-11-24T00:28:32Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 96,
@@ -815,7 +810,7 @@
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:19:59Z",
+			"lastSuccessAt": "2026-11-24T00:33:02Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -826,11 +821,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T23:53:04Z",
+			"lastSuccessAt": "2026-11-24T00:19:59Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 76,
-			"why": "last green 0d ago"
+			"runs": 77,
+			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -925,10 +920,10 @@
 			"name": "Refresh oracle feeds",
 			"cron": "47 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T08:18:38Z",
+			"lastSuccessAt": "2026-11-24T00:24:35Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 26,
+			"runs": 27,
 			"why": "last green 0d ago"
 		},
 		{
@@ -963,17 +958,6 @@
 			"graceDays": 4,
 			"runs": 8,
 			"why": "last green 0d ago"
-		},
-		{
-			"file": "refresh-token-integrations.yml",
-			"name": ".github/workflows/refresh-token-integrations.yml",
-			"cron": "23 4 * * 1",
-			"state": "always-red",
-			"lastSuccessAt": null,
-			"ageDays": null,
-			"graceDays": 21,
-			"runs": 1,
-			"why": "1 runs since this file was last edited, zero successes — runs produce no jobs, how Actions reports a workflow file it refused to parse"
 		},
 		{
 			"file": "regrade-repos.yml",
@@ -1024,7 +1008,7 @@
 			"name": "Secret scan",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:19:59Z",
+			"lastSuccessAt": "2026-11-24T00:33:03Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1102,10 +1086,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-15T00:33:30Z",
-			"ageDays": 161,
+			"ageDays": 162,
 			"graceDays": 45,
 			"runs": 7,
-			"why": "last green 161d ago (manual tool — age not judged)"
+			"why": "last green 162d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "snapshot-project-status.yml",
@@ -1211,7 +1195,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:19:59Z",
+			"lastSuccessAt": "2026-11-24T00:33:03Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1303,7 +1287,7 @@
 			"ageDays": 69,
 			"graceDays": 21,
 			"runs": 95,
-			"why": "79 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "80 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
