@@ -540,6 +540,29 @@ export interface WritePlan {
 }
 
 /**
+ * The contract each live stored holder row was last read at (its bestPool),
+ * by token. The holder sweep re-reads these every run, so a holder row ends
+ * only after its own contract was read and found empty, never because the
+ * contract fell out of the run's capped candidate lists (top contracts by
+ * activity, a token's latest interactions). Account holders (G addresses)
+ * are read from Horizon by the account sweep and are not listed here.
+ */
+export function priorHolderContracts(
+	stored: StoredRow[],
+): Map<string, Set<string>> {
+	const out = new Map<string, Set<string>>();
+	for (const s of stored) {
+		if (s.status === "ended" || !String(s.kind).startsWith("holder")) continue;
+		if (!s.tokenId || !/^C[A-Z2-7]{55}$/.test(s.bestPool ?? "")) continue;
+		out.set(
+			s.tokenId,
+			(out.get(s.tokenId) ?? new Set()).add(s.bestPool as string),
+		);
+	}
+	return out;
+}
+
+/**
  * The DB diff. A stored active row this run did not produce is ended (kept,
  * dated, with the reason) only when its source was read completely this run
  * and its token was in the run's scope; otherwise it is kept untouched:
