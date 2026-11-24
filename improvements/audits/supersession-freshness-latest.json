@@ -1,8 +1,8 @@
 {
-	"generatedAt": "2026-11-17T17:05:22.564Z",
+	"generatedAt": "2026-11-24T19:06:18.694Z",
 	"basis": "archived repos from the public repos API (isArchived=true), restricted to the curated pool (project-linked or repoScore >= 60), compared against REPO_SUPERSESSIONS keys",
-	"archivedTotal": 291,
-	"archivedInPool": 63,
+	"archivedTotal": 292,
+	"archivedInPool": 64,
 	"covered": 39,
 	"missing": [
 		{
@@ -46,6 +46,12 @@
 			"projectSlug": "wadzzo",
 			"repoScore": 36,
 			"url": "https://github.com/Wadzzo2023/wadzz0"
+		},
+		{
+			"fullName": "RozoAI/rozo-stellar-demo-wallet",
+			"projectSlug": "rozo",
+			"repoScore": 29,
+			"url": "https://github.com/RozoAI/rozo-stellar-demo-wallet"
 		},
 		{
 			"fullName": "tracefinance/frontend-challenge",
