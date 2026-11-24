@@ -33,12 +33,42 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-24",
 		surfaces: ["api"],
-		version: "spec@1.9.164",
+		version: "spec@1.9.167",
 		type: "added",
 		summary:
 			"New, partner-only: three cohort endpoints that serve a dated snapshot of project launch and retention data to partners whose key is on the cohort allowlist. listCohortRows (`GET /api/cohort/projects`) gives one row per directory project: stage dates, launch date and its basis, the day-180 reading, operating-now evidence, SCF tranche payments and the gaps that are not known, filtered by scfAwarded, firstAwardYear, awardType, category and status. getCohortJourney (`GET /api/cohort/journey?slug=`) gives one project's dated events, each with its evidence link, source, strength and basis. getCohortFigures (`GET /api/cohort/retention`) gives the figures with their denominators: launch known by basis, day-180 readings, operating now, retention after a launch SCF confirmed, SCF-funded against the rest and by first award year, type and size, and SCF delivery by round, with the facts register's own rows for them.",
 		detail:
 			"Without a key, or with a partner key whose name is not on the allowlist, every cohort endpoint answers 401 with a one-line error and serves nothing else. Responses are never cached by a shared cache and are marked noindex; every 200 carries `meta.asOf` and `meta.cannotSee`. The spec marks the three operations with a security requirement (a bearer key or `x-api-key`) and `x-partner-only: true`. Partner keys are now compared in constant time on every endpoint. A dashboard for the same partners reads these endpoints with the partner's key; it is not linked from the site and is not indexed.",
+	},
+	{
+		date: "2026-11-24",
+		surfaces: ["api"],
+		version: "spec@1.9.166",
+		type: "fixed",
+		summary:
+			"A hackathon submission's `project.basis` gains `curated`: a link a person verified against named evidence (the same repo, the team's own accounts, or the project's own page naming the build), never a name alone, served when no rule finds that project. Two submissions no rule linked gain their project on the sync lane's next run: Comet x Hoops Finance (Stellar Hacks: Blend, 2nd place) to Hoops Finance and Juntta (Stellar Ideaton) to Juntta. getHackathon no longer serves a bare 0 winners for an ended event off DoraHacks: the Waterloo Blockchain Innovation Challenge served `stats.winners` 0 with `winnersNote` null, and now says no page we read names its winners (checked 2026-11-24).",
+		detail:
+			"Five submission-to-project links are recorded with their evidence, read on 2026-11-24. Three are already linked by a rule and keep that rule's basis (YieldBack.Cash scf-page-and-name, PayZoll submission-links-and-name, clevercon moved-repo); the record keeps each one if its page changes. Comet x Hoops Finance: its repo sits under the Hoops Finance GitHub organisation and is one of the repos the directory indexes for it, its DoraHacks page lists the project's X account, and its demo is on a subdomain of the project's website. Juntta: its DoraHacks page lists the Instagram and LinkedIn accounts the project's own website links. A record overrules a rule that finds another project, and stands aside when its project is not listed. The sync lane's dry run on this code (read-only, 2026-11-24) changed the link on 2 rows, both these, and dropped none; 43 submissions link to a project after it, 2 of them by a curated record. Any ended event off DoraHacks with no winner served and no dated note now says its 0 is not a count, rather than nothing.",
+	},
+	{
+		date: "2026-11-24",
+		surfaces: ["api", "api-client"],
+		version: "spec@1.9.165",
+		type: "added",
+		summary:
+			"Project rows gain `scfPaid`: SCF's own payment record, read off the project's SCF page every week. `totalAwardedUSD` and `totalPaidUSD` are SCF's own totals; each Build award in `buildAwards` carries the share SCF has paid under its tranche schedule (rounds 30 to 40: thirds; 41 and later: 10%, 30%, 60%, 100%), `tranchesPaid` of `tranches`, and `finalTranchePaid`. A Build award is paid in tranches and the last one is the mainnet launch, so `finalTranchePaid: true` is SCF's own record that the team delivered its mainnet launch, or the final deliverable the award allowed in its place. getAwardRoundCoverage adds per round `buildSharesRead` and `buildFinalTranchePaid`, and `meta.scfPaidReadAt`.",
+		detail:
+			"Limits. Legacy awards (rounds before 30) and Liquidity awards were paid in full when awarded, so they say nothing about a launch and are not in `buildAwards` (`[]` = no Build award on the page). A share is served only where the page's paid total splits one way across its awards; otherwise `paidShare` is null and `split` says why (`no-fit`, e.g. more paid than awarded; `ambiguous`; `budgets-differ`; `no-figures`; `no-schedule`), never an estimate. Dates: the record changes only when a figure changes, so a payment came after `notSeenAt` and by `seenBy` (per award: `paidShareNotSeenAt`, `paidShareSeenBy`). A payment made before the first weekly read has no date here (`notSeenAt` null); web-archive captures of the SCF page can bound it and are not served. `scfPaid` is null until the SCF sync's first write after this release. A read-only dry run of the sync on 2026-11-24 (UTC) read 741 SCF project pages and planned the record on 730 rows, with no other write: 613 split exactly; 383 Build awards on 359 rows, 341 with a share read, 197 of them paid in full (on 186 rows). Liqvid: SCF #37 paid in full, SCF #45 at 30% (2 of 4 tranches). Blend: a Liquidity Award only, `buildAwards: []`.",
+	},
+	{
+		date: "2026-11-24",
+		surfaces: ["api"],
+		version: "spec@1.9.164",
+		type: "fixed",
+		summary:
+			"The spec now declares every field, null, enum value and JSON type the GET operations served in a read of each on 2026-11-24. Newly declared: getQualityReport's byFailureMode refresh and blocked, knowledgeNotes triaged, triagedMeans and missing, thinnestEvidence source, rowQuality strongBasisSplit and deploymentSplit, and the deployment fields and types on weakestRows; verifyClaim meta.searched.stablecoins; getChanges meta.generatedAt; codeVerified.ciPresent and testsPresent on repo rows (searchRepos and searchProjects codeReferences); the fields of project rows' onchain object, which were described in prose only; meta.hints (searchProjects, searchRepos, searchResearch, getPartners); meta.advisory on getPeople, getPartners and getClusters; explainRepo codeVerified successorRepo, codeDomains and codeInUse; getHackathons meta.counts curated and dorahacks; getPartners meta.counts.filteredOut; listAudits meta.counts.matched and the severity keys of severityCounts; listSkills meta.counts.bySource; and getSkill registry, rawUrl, userInvocable and argumentHint.",
+		detail:
+			"Response data is unchanged; the contract now says what the API already served. Corrected: getSkill installAlt is an array of {label, command} entries, as on listSkills rows (the spec said a string); getClusters meta.notes is an object keyed by topic (the spec said an array); repo rows' source can be builder-owned (a repo a tracked builder owns, with no directory project); a project row's shortDescription and a lesson write-up's lessonCount can be null. Repo rows' top-level ciPresent and testsPresent were never served at that level (rows serve them inside codeVerified): they stay declared, marked deprecated, so nothing a typed client uses is removed. Measured on 2026-11-24 with 391 reads of all 39 GET operations, one per value of most enum filters: 37 undeclared field paths, 2 undeclared nulls, 1 enum value missing at 2 paths, 4 objects or arrays served where the schema declared no fields or items, and 2 values of a JSON type the schema did not allow. A test now checks one or more recorded production bodies per GET operation against the spec at every depth, and the daily drift guard reads the same requests live and checks each whole body, where it used to compare the top-level keys of eleven row types.",
 	},
 	{
 		date: "2026-11-23",

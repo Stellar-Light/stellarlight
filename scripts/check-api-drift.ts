@@ -14,6 +14,13 @@
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import {
+	operationOf,
+	responseSchema,
+	undeclaredInServed,
+} from "./contract/served-shape";
 import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
 let failures = 0;
@@ -374,117 +381,50 @@ async function main() {
 		"include is a documented no-op",
 	);
 
-	// ── 6b. Response FIELD coverage: live row keys ⊆ documented properties ──
+	// ── 6b. Response FIELD coverage: every served field is in the spec ─────
 	// The class behind the 2026-07-08 drift event: #353 removed anchorProfile
-	// from the spec's Project component while the live rows kept carrying it
-	// (plus canonicalSlug/lifecycle, never documented) — downstream catalogs
-	// generated from our spec then under-described reality, and the consumer's
-	// drift detector caught it before we did. Assert every field a live row
-	// actually serves is documented. One direction only: spec props MISSING
-	// from a sampled row are fine (conditional fields like placementRank).
-	console.log("◆ Response field coverage (live ⊆ spec)");
-	const fieldCoverage: Array<{
-		name: string;
-		path: string;
-		listKey: string;
-		component: string;
-	}> = [
-		{
-			name: "searchProjects row",
-			// etherfuse: an Anchor-typed row, so conditional joins (anchorProfile,
-			// coverage) are populated and their absence from the spec is caught.
-			path: "/api/projects/search?q=etherfuse&limit=3",
-			listKey: "projects",
-			component: "Project",
-		},
-		{
-			name: "partners row",
-			path: "/api/partners?all=1&limit=3",
-			listKey: "partners",
-			component: "Partner",
-		},
-		{
-			name: "audits row",
-			path: "/api/audits?limit=3",
-			listKey: "audits",
-			component: "Audit",
-		},
-		{
-			// audit-source query so the audit-only metadata fields (auditor/
-			// protocol/severity) are populated and their absence would be caught.
-			name: "research row",
-			path: "/api/research?q=blend%20audit&source=audit&limit=3",
-			listKey: "results",
-			component: "ResearchResult",
-		},
-		{
-			name: "builders row",
-			path: "/api/builders?q=soroban&limit=3",
-			listKey: "builders",
-			component: "Builder",
-		},
-		{
-			name: "people row",
-			path: "/api/people?limit=3",
-			listKey: "people",
-			component: "Person",
-		},
-		{
-			name: "rfps row",
-			path: "/api/rfps",
-			listKey: "rfps",
-			component: "Rfp",
-		},
-		{
-			name: "hackathons row",
-			path: "/api/hackathons",
-			listKey: "hackathons",
-			component: "Hackathon",
-		},
-		{
-			name: "skills row",
-			path: "/api/skills",
-			listKey: "skills",
-			component: "Skill",
-		},
-		{
-			name: "clusters row",
-			path: "/api/clusters?dimension=types",
-			listKey: "clusters",
-			component: "Cluster",
-		},
-		{
-			name: "leaderboard row",
-			path: "/api/leaderboard?limit=3",
-			listKey: "projects",
-			component: "LeaderboardProject",
-		},
-	];
-	for (const fc of fieldCoverage) {
-		try {
-			const live = await getJson(fc.path);
-			const rows: any[] = live.body?.[fc.listKey] ?? [];
-			const documented = new Set(
-				Object.keys(
-					spec?.components?.schemas?.[fc.component]?.properties ?? {},
-				),
+	// from the spec's Project component while the live rows kept carrying it,
+	// and downstream catalogs generated from our spec under-described reality.
+	// Until 2026-11-24 this compared the top-level keys of eleven row types;
+	// it now walks the whole body of every recorded read (one or more per GET
+	// operation, src/lib/__tests__/fixtures/served-bodies.json) with
+	// served-shape: an undeclared field, null, enum value, JSON type or shape
+	// at any depth is drift. One direction only: a declared field a read does
+	// not carry is fine (conditional fields like placementRank).
+	console.log("◆ Response field coverage (live ⊆ spec, every GET operation)");
+	const { reads } = JSON.parse(
+		readFileSync(
+			join(process.cwd(), "src/lib/__tests__/fixtures/served-bodies.json"),
+			"utf8",
+		),
+	) as { reads: Array<{ url: string }> };
+	for (const { url } of reads) {
+		const op = operationOf(spec, url);
+		if (!op) {
+			bad(
+				`${url} field coverage`,
+				"no GET operation in the live spec serves it",
 			);
-			if (!rows.length || documented.size === 0) {
-				bad(
-					`${fc.name} field coverage`,
-					`no sample rows (${rows.length}) or empty spec component '${fc.component}' (${documented.size} props)`,
-				);
+			continue;
+		}
+		try {
+			const live = await getJson(url);
+			if (live.status !== 200) {
+				couldNotCheck(`${op.operationId} ${url}`, `answered ${live.status}`);
 				continue;
 			}
-			const liveKeys = new Set(rows.flatMap((r) => Object.keys(r ?? {})));
-			const undocumented = [...liveKeys].filter((k) => !documented.has(k));
+			const found = undeclaredInServed(
+				spec,
+				responseSchema(spec, op.path),
+				live.body,
+			);
 			check(
-				`${fc.name}: every live field documented in ${fc.component}`,
-				undocumented.length === 0,
-				`live-but-undocumented: ${undocumented.join(", ")}`,
+				`${op.operationId} ${url}: every served field declared`,
+				found.length === 0,
+				found.slice(0, 8).join("; "),
 			);
 		} catch (err) {
-			bad(`${fc.name} field coverage`, `probe failed: ${String(err)}`);
+			bad(`${url} field coverage`, `probe failed: ${String(err)}`);
 		}
 	}
 

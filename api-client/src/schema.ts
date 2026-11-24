@@ -1285,6 +1285,8 @@ export interface components {
             };
             /** @description Optional endpoint-specific reading note: semantics a consumer needs to interpret the rows correctly (counting basis, absence semantics, handoff pointers). Present only where the endpoint has something non-obvious to say. */
             note?: string;
+            /** @description searchProjects, searchRepos, searchResearch and getPartners only, and only when the page is empty or its match is weak: fixed pointers to the endpoint that answers other question kinds ('<question kind> -> <endpoint>'). Absent on a healthy match. */
+            hints?: string[];
             /** @description Present only when there is something to disclose. Two kinds of line share it. (1) A backend read that failed or timed out: the line starts with "backend read failed" and the page may be incomplete; `partial` and `failedReads` carry the same fact as fields. (2) Query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. Two policies, by operation kind, both naming the supported set: the search operations (searchResearch, searchProjects, searchRepos, getPartners, listSkills, getHackathons, getClusters, getLeaderboard, getRfps, getChangelog, getQualityReport, verifyClaim) ignore an unknown parameter and name it here; the registry and lookup operations (listAudits, getChanges, getRwaAssets, getStablecoins, getTokenIntegrations, getBuilders, listContracts, searchHackathonBuilds, getPeople, resolveProject, getRepoTrust) reject it with 400 and list the supported parameters in the body (hint, supportedParams or validParams), because a list that looks filtered is worse than a 400. */
             warnings?: string[];
             /** @description On searchProjects, searchRepos, getBuilders, searchResearch, listSkills and getHackathons, always present: true when at least one backend read failed or timed out and the page went out anyway, so rows may be missing; false when every read completed. A limit or a filter never sets it. Count real loss on this field, not on the 200 status. When a read that feeds the count failed, counts.total is null with totalBasis "partial-read": that page cannot count its matches. A failed read that only decorates served rows (logos, attributions, code evidence) leaves a known total in place. */
@@ -1450,8 +1452,14 @@ export interface components {
             observedAt?: string | null;
             /** @description Populated when the auditor's report format parses deterministically AND round-trips its own stated count (OtterSec, Veridise, Certora, Code4rena, Hacken). null = not extracted, NOT zero. */
             findingsTotal?: number | null;
-            /** @description {critical, high, medium, low, informational} counts, only for formats carrying per-finding severity that agrees with its finding-ID prefix (Certora tables, Code4rena tier headings). null = not extracted, NOT zero. */
-            severityCounts?: Record<string, never> | null;
+            /** @description {critical, high, medium, low, informational} counts, only for formats carrying per-finding severity that agrees with its finding-ID prefix (Certora tables, Code4rena tier headings). null = not extracted, NOT zero. A severity absent from the object had zero findings. */
+            severityCounts?: {
+                critical?: number;
+                high?: number;
+                medium?: number;
+                low?: number;
+                informational?: number;
+            } | null;
             /** @description Full-text chunks serving this report via /api/research?source=audit */
             chunksIndexed?: number;
         };
@@ -1594,6 +1602,21 @@ export interface components {
                 matchMode?: "scored" | "weak";
                 /** @description Human-readable statement of the matchMode above, safe to surface verbatim to a user. */
                 matchModeLabel?: string;
+                /** @description Present only when the page has no rows: says what this index covers, so the empty page is read as a statement about its coverage and not about the ecosystem, and names where to ask instead. */
+                advisory?: {
+                    /** @description Written for this response from its own filters, so not dated on its own: it describes the page served at meta.generatedAt. */
+                    summary?: string;
+                    /** @description getPartners only: what the directory holds. */
+                    scope?: string;
+                    tryInstead?: {
+                        endpoint?: string;
+                        why?: string;
+                    }[];
+                };
+                counts?: {
+                    /** @description Published partners that pass the structured filters (type, sector, region, ramps, accepting) but not the default quality bar (a tagline and a contact path, not archived), so this page leaves them out; 0 with all=1. q is not applied to it: above 0 beside total 0 does not mean all=1 would match q. */
+                    filteredOut?: number;
+                };
             };
             partners?: components["schemas"]["Partner"][];
         };
@@ -1674,7 +1697,8 @@ export interface components {
             slug: string;
             /** @enum {string} */
             category: "Infrastructure" | "Tooling" | "User-Facing App" | "Asset" | "Protocol/Contract" | "Anchor" | "Partner Integration";
-            shortDescription?: string;
+            /** @description The one-line description; null when the row holds none. */
+            shortDescription?: string | null;
             /**
              * @description Lifecycle status of the PROJECT, never a deployment claim (sls-079). 'Live' means the product is operating for users somewhere; it does NOT assert Stellar mainnet deployment; read the sibling `deployment` field for that fact. 'Pre-Release' includes testnet-only products. 'Inactive' = defunct/archived; such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. statusAsOf/statusSourceUrl/statusBasis carry the label's provenance.
              * @enum {string}
@@ -1878,6 +1902,57 @@ export interface components {
                 /** @description The official SCF project page this award was read from. A row that combines two SCF pages cites one as scfSourceUrl, so check each award against its own page here. Null = the page was not recorded per award (an award not yet re-read since this field shipped); scfSourceUrl is then the citation. */
                 sourceUrl?: string | null;
             }[];
+            /** @description SCF's own payment record for the project, read off its SCF project page(s) every week: SCF's awarded and paid totals and, per Build award, the share SCF has paid. A Build award is paid in tranches and the last one is the mainnet launch, so finalTranchePaid true is SCF's own record that the team delivered its mainnet launch, or the final deliverable the award allowed in its place. Legacy awards (rounds before 30) and Liquidity awards were paid in full when awarded, so they say nothing about a launch and are not listed. Null = no paid read is recorded for this row. Dates: the block changes only when a figure changes; a payment came after notSeenAt and by seenBy (per award: paidShareNotSeenAt, paidShareSeenBy). A payment made before the first read (late November 2026) has no date here: notSeenAt is null; web-archive captures of the SCF page can bound it and are not served. */
+            scfPaid?: {
+                /** @description SCF's own totalAwarded on the page (summed when the row folds two pages). Null when a page lacks it. */
+                totalAwardedUSD: number | null;
+                /** @description SCF's own totalPaid on the page (summed when the row folds two pages). Null when a page lacks it. */
+                totalPaidUSD: number | null;
+                /**
+                 * Format: date-time
+                 * @description The totals were on SCF's page by this time: the first weekly read that showed them.
+                 */
+                seenBy: string;
+                /**
+                 * Format: date-time
+                 * @description Start of the read before seenBy, which showed other totals: they changed after this. Null when the totals were already these at the first read.
+                 */
+                notSeenAt: string | null;
+                /**
+                 * @description Whether the paid total splits into one share per award. exact. ambiguous: more than one split fits, so those shares are null. no-fit: none fits (e.g. more paid than awarded). budgets-differ: the awarded submissions' budgets do not add up to the page's total. no-figures: the page has no paid or awarded total. no-schedule: a Build award outside rounds 30 and later. A row folding two pages reports the first page that does not split.
+                 * @enum {string}
+                 */
+                split: "exact" | "ambiguous" | "no-fit" | "budgets-differ" | "no-figures" | "no-schedule";
+                /** @description Each Build award on the page(s). [] = the page has no Build award (Legacy, Liquidity or Public Goods awards only). Order is the page's, not a rank. */
+                buildAwards: {
+                    round: number | null;
+                    /** @description The SCF project page the award is on. */
+                    sourceUrl: string;
+                    budgetUSD: number | null;
+                    /**
+                     * @description thirds: rounds 30 to 40, three equal tranches, the third on the mainnet launch. four-tranche: rounds 41 and later, 10% on acceptance, 20% MVP, 30% testnet, 40% mainnet launch (paid shares 0.1, 0.3, 0.6, 1). Null outside those rounds.
+                     * @enum {string|null}
+                     */
+                    schedule: "thirds" | "four-tranche" | null;
+                    /** @description Share of the budget SCF has paid, under its schedule. Null when the page's paid total does not split exactly (see split): never estimated. */
+                    paidShare: number | null;
+                    /** @description Tranches paid, of tranches (e.g. 2 of 3, or 3 of 4 where the acceptance tranche counts as the first). Null with paidShare. */
+                    tranchesPaid: number | null;
+                    tranches: number | null;
+                    /** @description true = SCF paid the award in full, its final (mainnet launch) tranche. false = not yet. null = not known (paidShare null). */
+                    finalTranchePaid: boolean | null;
+                    /**
+                     * Format: date-time
+                     * @description The share was on SCF's page by this time: the first weekly read that showed it. Null with paidShare.
+                     */
+                    paidShareSeenBy: string | null;
+                    /**
+                     * Format: date-time
+                     * @description Start of the read before paidShareSeenBy, which showed another share: SCF paid after this. Null when the share was already this at the first read.
+                     */
+                    paidShareNotSeenAt: string | null;
+                }[];
+            } | null;
             /** @description Structured corridor/coverage for Anchor-typed projects: answers 'which anchors serve currency/corridor X?' with filterable, dated fields instead of prose. Synced from the matching partner record; null for non-anchors or when no partner record matches. */
             coverage?: {
                 /** @description Primary market/jurisdiction country names. */
@@ -1946,7 +2021,69 @@ export interface components {
                 profileState?: "profiled" | "not-profiled";
             } | null;
             /** @description On-chain readings for hand-verified contract/asset join keys, from Stellar Index, Horizon and the Soroban RPC. null = not tracked in our registry. NEVER 'no on-chain activity'. contracts[]: {address, label, lastEventAt, activeLedgers, ttlState, createdAt, verifiedRepo, tier, evidence, sourceUrl, createdLedger, dateBasis, sharedWithinFamily, endedAt}. lastEventAt = the newest event the contract emitted: proof of use on that date. A contract can be called without emitting an event, so a null or old lastEventAt is NOT proof it is unused. activeLedgers = lifetime count of ledgers in which it emitted an event. ttlState = 'live', or 'archived' when the contract's entry has outlived its TTL and must be restored before it can run. createdAt = when the contract was created: found in that ledger's metadata (createdLedger) where dateBasis says so, otherwise kept from the reading that first recorded it; null = neither holds a date. verifiedRepo = the GitHub repo the contract's code comes from: the deployed WASM is attested to it (its build metadata names the repo and GitHub lists a build attestation for that WASM there), or, for a WASM built without such metadata, a hand-verified seed names it; where the contract's code could not be read this time (a contract archived on chain may leave the live ledger state, or a read failed), the value the row already holds is kept, which for a row first read before 2026-11-06 can be the old explorer's validation; null = none of these, never a claim about the code. tier, evidence, sourceUrl, createdLedger, dateBasis and sharedWithinFamily come from the curated on-chain map and are null on a contract it does not hold: tier strong = the directory, a code proof, a protocol registry anchor (Stellar Index, stellarindex.io) or the project's own account; labelled = a stellar-expert/public-directory label (MIT) under the project's own domain, a third party's label and not a verification, or an address an issuer and its tokens share (sharedWithinFamily names them, issuer first). evidence = why, strongest first; sourceUrl = the public page it was read from. endedAt = the day the weekly check first read no contract instance at the address; null = present, or never read absent. accounts[]: the map's accounts for the row, {address, label, createdAt (the current account's opening, proved in that ledger's metadata, not a launch date), tier, evidence, sourceUrl, createdLedger, dateBasis, sharedWithinFamily, endedAt (the day Horizon first answered that the account does not exist: merged or never funded)}; [] = the map links none, never a claim the project has no account. Asset-issuer readings: assetHolders = accounts holding a balance now (contracts that hold the asset, such as smart wallets and pools, are not counted); assetTrustlines = open trustlines in every authorization state (reach, always >= assetHolders; do NOT read it as the holder count); assetSupply = units outside the issuer in whole asset units; assetLastMovedAt = the newest transfer, mint, burn or clawback of the asset, classic payments included (null = none among its newest 100 events, or no event on record). assetHoldersDelta = holder change since the previous reading of the same source, with prevAsOf + deltaDays defining the window; null = no comparable prior reading, NOT zero change. source + asOf date every payload. Gone since 1.9.151, because their source went paid and no free source holds them: assetPayments, assetPaymentsAmount, assetPaymentsDelta, assetTrades, and per contract events, eventsDelta, subinvocations, subinvocationsDelta and storageEntries. */
-            onchain?: Record<string, never> | null;
+            onchain?: {
+                /** @description The issued asset's code; null when the row tracks no asset. */
+                assetCode?: string | null;
+                /** @description The asset's issuer account (G...); null with no asset. */
+                issuer?: string | null;
+                assetHolders?: number | null;
+                assetHoldersDelta?: number | null;
+                /** @description Whole asset units outside the issuer. */
+                assetSupply?: number | null;
+                assetTrustlines?: number | null;
+                /** Format: date-time */
+                assetLastMovedAt?: string | null;
+                /** @description [] when the row holds no contract. */
+                contracts?: {
+                    address?: string | null;
+                    label?: string | null;
+                    /** Format: date-time */
+                    lastEventAt?: string | null;
+                    activeLedgers?: number | null;
+                    /** @description live, or archived (the entry outlived its TTL); null = not read. */
+                    ttlState?: string | null;
+                    /** Format: date-time */
+                    createdAt?: string | null;
+                    verifiedRepo?: string | null;
+                    /** @enum {string|null} */
+                    tier?: "strong" | "labelled" | null;
+                    evidence?: ("directory" | "own-repo-interface" | "own-wasm-meta" | "own-pages-confirmed" | "own-deployer-confirmed" | "own-account" | "protocol-registry" | "public-directory-label" | "named-on-own-pages" | "same-deployer")[] | null;
+                    sourceUrl?: string | null;
+                    createdLedger?: number | null;
+                    /** @description How createdAt was dated, in words (for example, creation proved in the ledger); null = undated or not the map's link. */
+                    dateBasis?: string | null;
+                    sharedWithinFamily?: string[] | null;
+                    /** Format: date-time */
+                    endedAt?: string | null;
+                }[];
+                /** @description [] = the map links none. */
+                accounts?: {
+                    address?: string | null;
+                    label?: string | null;
+                    /** Format: date-time */
+                    createdAt?: string | null;
+                    /** @enum {string|null} */
+                    tier?: "strong" | "labelled" | null;
+                    evidence?: ("directory" | "own-repo-interface" | "own-wasm-meta" | "own-pages-confirmed" | "own-deployer-confirmed" | "own-account" | "protocol-registry" | "public-directory-label" | "named-on-own-pages" | "same-deployer")[] | null;
+                    sourceUrl?: string | null;
+                    createdLedger?: number | null;
+                    dateBasis?: string | null;
+                    sharedWithinFamily?: string[] | null;
+                    /** Format: date-time */
+                    endedAt?: string | null;
+                }[];
+                /** @description Where the readings came from. */
+                source?: string | null;
+                /**
+                 * Format: date-time
+                 * @description When the readings were taken.
+                 */
+                asOf?: string;
+                /** Format: date-time */
+                prevAsOf?: string | null;
+                /** @description Days between prevAsOf and asOf: the window of assetHoldersDelta. */
+                deltaDays?: number | null;
+            } | null;
             /** @description SCF Public Goods Award recipient data: {awardRounds[] (e.g. 2025Q4: CSV-confirmed rounds only, requested-amount tranches with Status=Awarded, not payout proof), evidenceUrl}. null = not a confirmed recipient at our source. NEVER 'not a public good'. Q2'26 outcomes live on Tansu and are excluded until readable. */
             publicGoods?: {
                 awardRounds?: string[];
@@ -2125,6 +2262,12 @@ export interface components {
                  */
                 matchMode?: "all" | "filtered";
                 matchModeLabel?: string;
+                counts?: {
+                    /** @description Matching events whose own source is curated, before limit; null when a feed read failed (meta.warnings), unknown and not zero. */
+                    curated?: number | null;
+                    /** @description Matching events whose own source is dorahacks, before limit; null when a feed read failed. */
+                    dorahacks?: number | null;
+                };
                 /** @description Present when the query returns 0 events: a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array. */
                 fallbackChannels?: {
                     /** @description What this feed shows for the selected status, naming any other filter (q, organizer, source): not a claim that no Stellar hackathon is upcoming or active elsewhere. When part of the feed could not be read (meta.warnings, partial true), it says so, counts.total is null, and the empty result is not a check. */
@@ -2361,7 +2504,7 @@ export interface components {
                         awardCategory?: string | null;
                         placementRank?: number | null;
                     }[] | null;
-                    /** @description Why the winners are what they are, so a missing winner or a 0 is explained rather than silent. When hiddenWinners is non-empty: how many winning submissions are not served and why, with each one's placement and award. On an event off DoraHacks: a dated note that its winners are published only in part, not announced upstream, or secondhand (named only by the list its rows come from, which winnerSource gives). When winners carry winnerSource: the page that names them and which named winners are not served. On an ended DoraHacks event with no winner served: DoraHacks' winner_announced flag, from its event listing (refreshed hourly), says not announced upstream, or announced but not recorded here. Not announced is never a claim that no one won. null = nothing to add, or the flag could not be read. */
+                    /** @description Why the winners are what they are, so a missing winner or a 0 is explained rather than silent. When hiddenWinners is non-empty: how many winning submissions are not served and why, with each one's placement and award. On an event off DoraHacks: a dated note that its winners are published only in part, not announced upstream, or secondhand (named only by the list its rows come from, which winnerSource gives); on one that ended with no winner on record and no dated check yet, that its 0 is not a count. When winners carry winnerSource: the page that names them and which named winners are not served. On an ended DoraHacks event with no winner served: DoraHacks' winner_announced flag, from its event listing (refreshed hourly), says not announced upstream, or announced but not recorded here. Not announced is never a claim that no one won. null = nothing to add, or the flag could not be read. */
                     winnersNote?: string | null;
                     /** @description Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept. When coverage is winners-only: that only the winners are on record, so the size and mix of the field are unknown and the counts of it are null. When coverage is partial: that the rows are a partial list from a source other than the organizer, how many, the same nulls, then the event's dated note on where the list comes from and what Scout checked. */
                     coverageNote?: string | null;
@@ -2433,15 +2576,15 @@ export interface components {
                     held?: boolean;
                     note?: string;
                 };
-                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. Last, a link a person verified against named evidence (basis curated). A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                 project?: {
                     slug: string;
                     name: string;
                     /**
-                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. Absent on links stored before the basis was recorded (all by repo).
+                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. curated: a person verified the link against named evidence (the same repo, the team's own accounts, or the project's own page naming the build), never a name alone; served when no rule above finds that project. Absent on links stored before the basis was recorded (all by repo).
                      * @enum {string}
                      */
-                    basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name";
+                    basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name" | "curated";
                     /**
                      * @description The project's directory status today. Absent when it could not be read (unknown).
                      * @enum {string|null}
@@ -2585,9 +2728,15 @@ export interface components {
                 /** Format: date-time */
                 asOf?: string | null;
             } | null;
-            /** @description CI config present in-tree (.github/workflows, CircleCI, GitLab CI) per the latest code scan. Presence only. NOT a claim CI passes. null = not yet scanned for this fact. */
+            /**
+             * @deprecated
+             * @description Never served at this level: rows serve it as codeVerified.ciPresent. Kept so typed clients built on it still compile.
+             */
             ciPresent?: boolean | null;
-            /** @description Test files/dirs present in-tree (tests/, __tests__, *.test.*, *_test.*) per the latest code scan. Presence only. NOT a coverage or quality claim. null = not yet scanned for this fact. */
+            /**
+             * @deprecated
+             * @description Never served at this level: rows serve it as codeVerified.testsPresent. Kept so typed clients built on it still compile.
+             */
             testsPresent?: boolean | null;
             /** @description Mainnet usage rollup for the contracts attributed to this repo (the deployed WASM is attested to it, the code scan proved the repo's own source defines the contract, or a hand-verified seed names it; refreshed weekly): contracts = attributed contract count; activeLedgers = ledgers in which those contracts emitted an event, summed across them (lifetime; a ledger in which two of them emitted counts twice); lastEventAt = the newest event across them. A contract can be in use with no event, so a null or old lastEventAt is NOT proof of disuse. null object = no verified mainnet contract joined to this repo: absence of a join, never a claim the code is unused. The dynamic half of code truth: codeDepth says the code is serious, codeInUse says it is on mainnet and when it last emitted an event. */
             codeInUse?: {
@@ -2657,10 +2806,10 @@ export interface components {
              */
             tier?: "quality" | "community" | "archive";
             /**
-             * @description Discovery provenance: project-link = from the curated directory's github links; ec-taxonomy = from Electric Capital's public crypto-ecosystems list.
+             * @description Discovery provenance: project-link = from the curated directory's github links; ec-taxonomy = from Electric Capital's public crypto-ecosystems list; builder-owned = owned by a tracked builder, indexed with no owning directory project.
              * @enum {string}
              */
-            source?: "project-link" | "ec-taxonomy";
+            source?: "project-link" | "ec-taxonomy" | "builder-owned";
             /** @description Keyword-relevance score for the current query (higher = better match). */
             score?: number;
             /** @description DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions (e.g. where error codes / consensus / XDR are defined) beyond which-repo discovery. */
@@ -2683,6 +2832,10 @@ export interface components {
                 codeDepth?: number | null;
                 /** @description This repo's PRODUCT is a deployable Soroban contract (Cargo cdylib; vs a CLI/indexer/frontend that only uses Stellar). Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE even though they vendor cdylib crates; those are runtime/fixtures, not a deployable contract product. */
                 isDeployableContract?: boolean;
+                /** @description CI config present in-tree (.github/workflows, CircleCI, GitLab CI) per the latest code scan. Presence only. NOT a claim CI passes. null = not yet scanned for this fact. */
+                ciPresent?: boolean | null;
+                /** @description Test files/dirs present in-tree (tests/, __tests__, *.test.*, *_test.*) per the latest code scan. Presence only. NOT a coverage or quality claim. null = not yet scanned for this fact. */
+                testsPresent?: boolean | null;
                 /** @description Raw soroban-sdk version requirement (a sourced fact; never a bare protocol integer). */
                 sorobanSdkVersion?: string | null;
                 /**
@@ -3332,7 +3485,8 @@ export interface operations {
                                 file?: string;
                                 date?: string;
                                 title?: string;
-                                lessonCount?: number;
+                                /** @description Numbered lessons in the write-up; null when it has no countable numbering (not zero lessons). */
+                                lessonCount?: number | null;
                                 bytes?: number;
                             }[];
                             audits?: {
@@ -3511,10 +3665,15 @@ export interface operations {
                             /** @description The partition rule: open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. */
                             states?: string;
                             note?: string;
+                            /** @description The same five disjoint states per failure mode: open + refresh + blocked + cleared + verified = the mode's rows. */
                             byFailureMode?: {
                                 mode?: string;
                                 surface?: string;
                                 open?: number;
+                                /** @description This mode's open rows that are a refresh, not a defect (counted in refreshQueue). */
+                                refresh?: number;
+                                /** @description This mode's open rows a consumer we do not control decides (counted in blockedUpstream). */
+                                blocked?: number;
                                 cleared?: number;
                                 verified?: number;
                             }[];
@@ -3557,11 +3716,56 @@ export interface operations {
                                 status?: string | null;
                                 statusBasis?: string | null;
                                 prominence?: number;
+                                /**
+                                 * @description The row's deployment.network; unknown when it holds none.
+                                 * @enum {string}
+                                 */
+                                deploymentNetwork?: "mainnet" | "testnet" | "unknown";
+                                /**
+                                 * @description The row's deployment.basis; null when the network is unknown.
+                                 * @enum {string|null}
+                                 */
+                                deploymentBasis?: "human-verified" | "onchain-activity" | "mainnet-contract-join" | "defillama-tvl" | "rwa-registry" | "operator-toml" | null;
+                                /** @description The row holds an issued asset code, at least one on-chain contract, or a mainnet or testnet deployment. */
+                                hasOnchainFootprint?: boolean;
+                                /** @description One of the row's types is an on-chain product type (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA), so an unknown deployment is a gap; false means unknown is the correct answer for this row. */
+                                deploymentApplies?: boolean;
+                                /** @description The row's types; [] when it holds none. */
+                                types?: string[];
                                 score?: number;
                                 factsPresent?: number;
                                 factsTotal?: number;
                                 missing?: string[];
                             }[];
+                            /** @description Row counts over the scored rows (every status, Draft rows and folded duplicates left out). Weak = a status basis outside strongBases. `means` and `populationMeans` say what each count is over. */
+                            strongBasisSplit?: {
+                                /** @description Every row scored: the denominator of weakLiveRows. */
+                                population?: number;
+                                populationMeans?: string;
+                                /** @description Scored rows whose status is Live. */
+                                livePopulation?: number;
+                                /** @description Live rows with a weak status basis. */
+                                weakLiveOnly?: number;
+                                /** @description Rows of every status with a weak status basis (the name is historical). */
+                                weakLiveRows?: number;
+                                /** @description Weak rows with an on-chain footprint (hasOnchainFootprint). */
+                                onchainEligible?: number;
+                                /** @description Weak rows with no on-chain footprint. */
+                                appOnly?: number;
+                                /** @description Rows whose deployment basis is strong while their status basis is weak. */
+                                deploymentStrongStatusWeak?: number;
+                                means?: string;
+                            };
+                            /** @description Scored rows whose deployment network is unknown, split by whether the question applies to the row's types (deploymentApplies). */
+                            deploymentSplit?: {
+                                /** @description Rows with deployment network unknown. */
+                                unknown?: number;
+                                /** @description Of those, rows with an on-chain product type: a gap. */
+                                applicableUnknown?: number;
+                                /** @description Of those, rows with no on-chain product type: unknown is the correct answer. */
+                                notApplicable?: number;
+                                means?: string;
+                            };
                         };
                         repoQuality?: {
                             read?: number;
@@ -3583,6 +3787,11 @@ export interface operations {
                                     pool?: number;
                                     poolMeans?: string;
                                     withNotes?: number;
+                                    /** @description Pool repos with no public note that the curation pass examined and recorded as yielding no durable, source-citable fact. */
+                                    triaged?: number;
+                                    triagedMeans?: string;
+                                    /** @description Pool repos (owner/name, sorted) with neither a public note nor a triage verdict: the next curation worklist. [] when every pool repo has one. */
+                                    missing?: string[];
                                 };
                                 mainnetJoin?: {
                                     pool?: number;
@@ -3619,6 +3828,8 @@ export interface operations {
                                 activity?: string | null;
                                 language?: string | null;
                                 projectSlug?: string | null;
+                                /** @description How the repo entered the index (searchRepos rows' source); null when the row holds none. */
+                                source?: string | null;
                                 notes?: number;
                                 codeDepth?: number | null;
                                 /** @description the scanner marked this row a deployable contract */
@@ -3711,7 +3922,10 @@ export interface operations {
                             methodology?: string;
                             /** @description The denominators behind the verdict. */
                             searched?: {
+                                /** @description Audit reports searched (audited claims). */
                                 audits?: number;
+                                /** @description Stablecoin registry rows searched, retired assets left out (issued claims). */
+                                stablecoins?: number;
                             };
                         };
                         /** @description The parsed claim as understood. */
@@ -3956,6 +4170,11 @@ export interface operations {
                              * @description When the SCF sync finished its newest whole read of SCF's round pages. Null = no read stored yet.
                              */
                             scfReadAt: string | null;
+                            /**
+                             * Format: date-time
+                             * @description When the SCF sync finished its newest read of SCF's project pages for their paid totals (buildSharesRead, buildFinalTranchePaid). Null = no paid read stored yet.
+                             */
+                            scfPaidReadAt: string | null;
                             /** @description What listed, carried, notCarried and notListed count. Safe to surface to a user. */
                             basis: string;
                             order: string;
@@ -3968,6 +4187,8 @@ export interface operations {
                             notCarried?: number;
                             carriedOnSeveralRows?: number;
                             notListed?: number;
+                            buildSharesRead?: number | null;
+                            buildFinalTranchePaid?: number | null;
                         } | null;
                         /** @description One entry per round, newest first (not a rank). Null when no read is stored; [] = the round asked for is in neither SCF's index nor any row. */
                         rounds: {
@@ -4014,6 +4235,10 @@ export interface operations {
                                 /** @description The pages the row cites for the round. */
                                 pageUrls?: string[];
                             }[];
+                            /** @description Carried awards in the round that are Build awards whose paid share the SCF sync read exactly: SCF's own totalPaid on the award's project page, split by the Build tranche schedule. Null = no paid read stored yet. */
+                            buildSharesRead?: number | null;
+                            /** @description Of buildSharesRead, the Build awards SCF has paid in full: its final tranche, the mainnet launch (or the final deliverable the award allowed in its place), as of meta.scfPaidReadAt. Per award: a project row's scfPaid.buildAwards. */
+                            buildFinalTranchePaid?: number | null;
                         }[] | null;
                         /** @description Present only when no read is stored: why rounds is null. */
                         unavailable?: string;
@@ -4082,6 +4307,11 @@ export interface operations {
                             since?: string;
                             /** Format: date-time */
                             asOf?: string;
+                            /**
+                             * Format: date-time
+                             * @description When this response was built: asOf under the name every other operation uses.
+                             */
+                            generatedAt?: string;
                             surfaces?: string[];
                             limitPerSurface?: number;
                             /** @description Present ONLY when a source filter returned weak neighbors while stronger corpus-wide matches exist (a source-scoped vector search never goes empty; it returns the nearest in-source rows however weak). Carries inSourceTopScore, corpusWideTopScore, corpusWideTopSource and a note; treat it as the honest 'category is thin for this query' signal and consider dropping the filter. */
@@ -4462,6 +4692,18 @@ export interface operations {
                              */
                             mainnetContractBasis?: "self-validated" | "source-matched" | "sibling-matched" | "cited" | "published" | null;
                             sdkCapabilities?: string[];
+                            /** @description owner/name of the repo that continues this one, as on searchRepos rows; null when none is recorded. */
+                            successorRepo?: string | null;
+                            /** @description Code domains the scan evidenced (as on searchRepos codeVerified.codeDomains); [] when none. */
+                            codeDomains?: string[];
+                            /** @description The stored mainnet usage rollup for contracts attributed to this repo, passed through as stored (searchRepos rows' codeInUse gives the meanings). null when none is stored. {} (no keys) when the stored rollup is empty, which means the same as null: no verified mainnet contract joined. */
+                            codeInUse?: {
+                                contracts?: number | null;
+                                activeLedgers?: number | null;
+                                /** Format: date-time */
+                                lastEventAt?: string | null;
+                                asOf?: string | null;
+                            } | null;
                         } | null;
                         /** @description The answer text: answerSource states its grounding and answerAsOf its date. null when no grounded answer was produced (the routed repo is still returned). */
                         answer?: string | null;
@@ -5040,15 +5282,15 @@ export interface operations {
                             prizeUsd?: number | null;
                             votes?: number | null;
                             endedAt?: string | null;
-                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. Last, a link a person verified against named evidence (basis curated). A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                             project?: {
                                 slug: string;
                                 name: string;
                                 /**
-                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. Absent on links stored before the basis was recorded (all by repo).
+                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. curated: a person verified the link against named evidence (the same repo, the team's own accounts, or the project's own page naming the build), never a name alone; served when no rule above finds that project. Absent on links stored before the basis was recorded (all by repo).
                                  * @enum {string}
                                  */
-                                basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name";
+                                basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name" | "curated";
                                 /**
                                  * @description The project's directory status today. Absent when it could not be read (unknown).
                                  * @enum {string|null}
@@ -5249,15 +5491,15 @@ export interface operations {
                                 held?: boolean;
                                 note?: string;
                             };
-                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. Last, a link a person verified against named evidence (basis curated). A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                             project?: {
                                 slug: string;
                                 name: string;
                                 /**
-                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. Absent on links stored before the basis was recorded (all by repo).
+                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. curated: a person verified the link against named evidence (the same repo, the team's own accounts, or the project's own page naming the build), never a name alone; served when no rule above finds that project. Absent on links stored before the basis was recorded (all by repo).
                                  * @enum {string}
                                  */
-                                basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name";
+                                basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name" | "curated";
                                 /**
                                  * @description The project's directory status today. Absent when it could not be read (unknown).
                                  * @enum {string|null}
@@ -5661,15 +5903,15 @@ export interface operations {
                                     held?: boolean;
                                     note?: string;
                                 };
-                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. Last, a link a person verified against named evidence (basis curated). A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                 project?: {
                                     slug: string;
                                     name: string;
                                     /**
-                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. Absent on links stored before the basis was recorded (all by repo).
+                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. curated: a person verified the link against named evidence (the same repo, the team's own accounts, or the project's own page naming the build), never a name alone; served when no rule above finds that project. Absent on links stored before the basis was recorded (all by repo).
                                      * @enum {string}
                                      */
-                                    basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name";
+                                    basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name" | "curated";
                                     /**
                                      * @description The project's directory status today. Absent when it could not be read (unknown).
                                      * @enum {string|null}
@@ -5748,15 +5990,15 @@ export interface operations {
                                      */
                                     entryBasis?: "repo-names-event" | "placement-listed";
                                     similarity?: number;
-                                    /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                    /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. Last, a link a person verified against named evidence (basis curated). A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                     project?: {
                                         slug: string;
                                         name: string;
                                         /**
-                                         * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. Absent on links stored before the basis was recorded (all by repo).
+                                         * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. curated: a person verified the link against named evidence (the same repo, the team's own accounts, or the project's own page naming the build), never a name alone; served when no rule above finds that project. Absent on links stored before the basis was recorded (all by repo).
                                          * @enum {string}
                                          */
-                                        basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name";
+                                        basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name" | "curated";
                                         /**
                                          * @description The project's directory status today. Absent when it could not be read (unknown).
                                          * @enum {string|null}
@@ -6146,6 +6388,17 @@ export interface operations {
                              */
                             matchMode?: "all" | "filtered";
                             matchModeLabel?: string;
+                            /** @description Present only when the page has no rows: says what this index covers, so the empty page is read as a statement about its coverage and not about the ecosystem, and names where to ask instead. */
+                            advisory?: {
+                                /** @description Written for this response from its own filters, so not dated on its own: it describes the page served at meta.generatedAt. */
+                                summary?: string;
+                                /** @description getPartners only: what the directory holds. */
+                                scope?: string;
+                                tryInstead?: {
+                                    endpoint?: string;
+                                    why?: string;
+                                }[];
+                            };
                             /** @description The roster page each row is quoted from (stellar.org/foundation/team). */
                             source?: string;
                             /**
@@ -7170,15 +7423,15 @@ export interface operations {
                                     note?: string;
                                 };
                                 url?: string | null;
-                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. Last, a link a person verified against named evidence (basis curated). A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                 project?: {
                                     slug: string;
                                     name: string;
                                     /**
-                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. Absent on links stored before the basis was recorded (all by repo).
+                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. curated: a person verified the link against named evidence (the same repo, the team's own accounts, or the project's own page naming the build), never a name alone; served when no rule above finds that project. Absent on links stored before the basis was recorded (all by repo).
                                      * @enum {string}
                                      */
-                                    basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name";
+                                    basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name" | "scf-page-and-name" | "submission-links-and-name" | "curated";
                                     /**
                                      * @description The project's directory status today. Absent when it could not be read (unknown).
                                      * @enum {string|null}
@@ -7961,6 +8214,10 @@ export interface operations {
                              */
                             matchMode?: "all" | "filtered";
                             matchModeLabel?: string;
+                            counts?: {
+                                /** @description Reports that pass every filter, before limit and offset; total is the whole registry. */
+                                matched?: number;
+                            };
                         };
                         audits?: components["schemas"]["Audit"][];
                     };
@@ -8201,6 +8458,16 @@ export interface operations {
                              */
                             matchMode?: "all" | "filtered";
                             matchModeLabel?: string;
+                            counts?: {
+                                /** @description Skills in the whole catalog per source, before the source, kind and q filters (a different denominator from total). A source is null when its read failed, so its count is unknown, not zero: sdf when the registry did not answer, community when that read failed or the registry did not answer. */
+                                bySource?: {
+                                    sdf?: number | null;
+                                    stellarlight?: number;
+                                    lumenloop?: number;
+                                    external?: number;
+                                    community?: number | null;
+                                };
+                            };
                             /** @description Every value the kind filter accepts (unknown values 400 with this list). */
                             validKinds?: string[];
                             /** @description Every value the source filter accepts (unknown values 400 with this list). */
@@ -8261,7 +8528,20 @@ export interface operations {
                             kind?: string;
                             /** @description The command to install it. */
                             install?: string | null;
-                            installAlt?: string | null;
+                            /** @description Alternate install commands for other agent runtimes, as on listSkills rows: {label, command} entries. Absent when only the primary install applies. */
+                            installAlt?: {
+                                /** @description The runtime the command is for (e.g. 'Codex'): a name, not dated. */
+                                label?: string;
+                                command?: string;
+                            }[];
+                            /** @description 'skills.stellar.org' when SDF's registry lists the entry; absent otherwise (as on listSkills rows). */
+                            registry?: string;
+                            /** @description Raw SKILL.md URL for entries skills.stellar.org lists; absent elsewhere. */
+                            rawUrl?: string;
+                            /** @description Registry entries only: whether the skill is user-invocable in skills.stellar.org's sense; absent elsewhere. */
+                            userInvocable?: boolean;
+                            /** @description Registry entries only: the argument hint (e.g. '[payment task]'); absent elsewhere. */
+                            argumentHint?: string;
                             homepage?: string | null;
                             repository?: string | null;
                             docs?: string | null;
@@ -8310,8 +8590,18 @@ export interface operations {
                             population?: components["schemas"]["PopulationScope"];
                             /** @description Every value the dimension param accepts: the live vocabulary for cluster views. */
                             dimensions?: string[];
-                            /** @description Reading notes for the active dimension (counting caveats, taxonomy conventions). May be empty. */
-                            notes?: string[];
+                            /** @description Reading notes keyed by topic (an object, not an array). */
+                            notes?: {
+                                /** @description How the crowdedness score is computed and read. */
+                                crowdedness?: string;
+                            };
+                            /** @description Present only when a cluster value filter (key, category, type or q) matched no cluster: what to pass instead. */
+                            advisory?: {
+                                /** @description Written for this response from its filter, so not dated on its own. */
+                                summary?: string;
+                                /** @description Every cluster key: the category clusters, then the types clusters, so a value in both (Infrastructure) appears twice. Order is not a rank. */
+                                availableKeys?: string[];
+                            };
                         };
                         clusters?: components["schemas"]["Cluster"][];
                     };

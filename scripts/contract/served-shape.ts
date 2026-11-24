@@ -8,11 +8,13 @@
  * checked: a branch the fixture never reaches proves nothing.
  *
  * Findings: a key its object schema does not list, a null its schema does
- * not allow, a value outside its enum, an object or array served where the
- * schema declares no properties or items, and a $ref that resolves to
- * nothing. Not judged: the keys an open map allows (additionalProperties:
- * true or a schema), and types other than null. A oneOf/anyOf passes when
- * any branch passes, and null passes when any branch is nullable. Array
+ * not allow, a value outside its enum, a value of a JSON type its schema
+ * does not allow, an object or array served where the schema declares no
+ * properties or items, and a $ref that resolves to nothing. Not judged: the
+ * keys an open map allows (additionalProperties: true or a schema), and
+ * formats. A key two allOf parts declare is walked against both. A
+ * oneOf/anyOf passes when any branch passes, and null passes when any
+ * branch is nullable. Array
  * indices collapse to [] so one finding names a field once, however many
  * rows serve it.
  */
@@ -22,6 +24,18 @@ type Spec = { paths?: Record<string, unknown> };
 
 const isObject = (v: unknown): v is Node =>
 	typeof v === "object" && v !== null && !Array.isArray(v);
+const kindOf = (v: unknown) => (Array.isArray(v) ? "array" : typeof v);
+/** Whether a non-null value is of a JSON Schema type. */
+const fits = (t: string, v: unknown): boolean =>
+	t === "integer"
+		? Number.isInteger(v)
+		: t === "array"
+			? Array.isArray(v)
+			: t === "object"
+				? isObject(v)
+				: t === "null"
+					? false
+					: kindOf(v) === t;
 
 /** The JSON schema of an operation's 200 response. */
 export function responseSchema(
@@ -36,6 +50,27 @@ export function responseSchema(
 	const schema = (content?.["application/json"] as Node | undefined)?.schema;
 	if (!schema) throw new Error(`no 200 JSON schema for ${method} ${path}`);
 	return schema;
+}
+
+/** The GET operation a request URL reaches: an exact path first, then a
+ * templated one whose {param} spans one segment. */
+export function operationOf(
+	spec: Spec,
+	url: string,
+): { path: string; operationId: string } | undefined {
+	const at = new URL(url, "https://x").pathname;
+	const paths = Object.keys(spec.paths ?? {}).sort(
+		(a, b) => Number(a.includes("{")) - Number(b.includes("{")),
+	);
+	for (const path of paths) {
+		const op = (spec.paths?.[path] as Node | undefined)?.get as
+			| { operationId?: string }
+			| undefined;
+		const re = new RegExp(`^${path.replace(/\{[^}]+\}/g, "[^/]+")}$`);
+		if (op?.operationId && re.test(at))
+			return { path, operationId: op.operationId };
+	}
+	return undefined;
 }
 
 export function undeclaredInServed(
@@ -103,9 +138,15 @@ export function undeclaredInServed(
 			return;
 		}
 		const parts = [s, ...branches(s, "allOf", at)];
-		for (const p of parts)
+		for (const p of parts) {
 			if (Array.isArray(p.enum) && !p.enum.includes(v))
 				found.add(`value not in enum: ${at} = ${JSON.stringify(v)}`);
+			const types = p.type === undefined ? [] : [p.type].flat().map(String);
+			if (types.length && !types.some((t) => fits(t, v)))
+				found.add(
+					`wrong type: ${at} (served ${kindOf(v)}, declared ${types.join(" or ")})`,
+				);
+		}
 		if (Array.isArray(v)) {
 			const items = parts.find((p) => "items" in p)?.items;
 			if (items !== undefined)
@@ -115,10 +156,13 @@ export function undeclaredInServed(
 			return;
 		}
 		if (!isObject(v)) return;
-		const props: Node = Object.assign(
-			{},
-			...parts.map((p) => (isObject(p.properties) ? p.properties : {})),
-		);
+		// A key two allOf parts declare must meet both schemas (Meta.counts
+		// and an operation's own counts), so its child is walked against both.
+		const props: Node = {};
+		for (const p of parts)
+			if (isObject(p.properties))
+				for (const [k, c] of Object.entries(p.properties))
+					props[k] = Object.hasOwn(props, k) ? { allOf: [props[k], c] } : c;
 		const extra = parts.find(
 			(p) => "additionalProperties" in p,
 		)?.additionalProperties;

@@ -1,12 +1,22 @@
-name: Enrich SCF data (manual)
+name: Enrich SCF data (weekly)
 # workflow-health: signal-steps: ^(Idempotence|Round counts)$
 # Re-runs scripts/enrich-from-scf.ts against prod to fix SCF award tagging.
-# Dry-run by default; set execute=true to write. Pulls the live SCF API.
+# A manual dispatch is a dry run unless execute=true. Pulls the live SCF API.
+# Weekly (2026-11-24): the scheduled run executes, so SCF's own paid totals
+# are read every week and each change is dated between two runs
+# (projects.scf.paid, scf-paid-reads). The writes are the sync's usual
+# exact-sync, bounded by its guards (stranded ceiling, could-not-check exit 2,
+# Idempotence, Round counts).
 on:
   workflow_dispatch:
     inputs:
       execute: { description: "Write to DB? Leave false for a dry run.", type: boolean, default: false }
+  schedule:
+    - cron: "40 6 * * 3" # weekly, Wednesday 06:40 UTC: after curate (Tue 07:30)
 permissions: { contents: read }
+concurrency:
+  group: enrich-scf
+  cancel-in-progress: false
 jobs:
   enrich:
     runs-on: ubuntu-latest
@@ -33,7 +43,7 @@ jobs:
       # SYNC_DONE dates the end of the writes for Round counts below.
       - id: sync
         run: |
-          pnpm exec tsx scripts/enrich-from-scf.ts ${{ inputs.execute && '--execute' || '' }}
+          pnpm exec tsx scripts/enrich-from-scf.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
           echo "SYNC_DONE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
       # Idempotence gate (2026-09-06, same rule as curate-projects.yml): an
       # execute must leave nothing to enrich. A row still planned right after
@@ -42,7 +52,7 @@ jobs:
       # 11 SCF rows on every run. The writes above already landed; this step
       # only reports, loudly.
       - name: Idempotence
-        if: ${{ inputs.execute }}
+        if: ${{ github.event_name == 'schedule' || inputs.execute }}
         shell: bash
         run: |
           set -o pipefail
@@ -65,7 +75,7 @@ jobs:
       # BLIND. Both fail the step: a check that did not run must not read as
       # a pass. It runs even when Idempotence is red.
       - name: Round counts
-        if: ${{ !cancelled() && inputs.execute && steps.sync.outcome == 'success' }}
+        if: ${{ !cancelled() && (github.event_name == 'schedule' || inputs.execute) && steps.sync.outcome == 'success' }}
         shell: bash
         run: |
           code=0

@@ -244,6 +244,12 @@ function staticWinnersForSlug(slug: string): SubmissionRow[] {
 	}));
 }
 
+/** stats.winnersNote of an ended event off DoraHacks with no winner on
+ * record and no dated note (CURATED_WINNERS_NOTES) saying what its pages
+ * showed when checked. */
+export const NO_WINNERS_ON_RECORD_NOTE =
+	"No winners on record here: this event's record names none, and no check of its pages for winners is recorded yet, so this 0 is not a count. This is not a claim that no one won.";
+
 /** Why an ended DoraHacks event serves no winner, from DoraHacks' own
  * winner_announced flag: not announced is said as that, never as "none
  * won". With no submission read (the stored copy holds none and the live
@@ -634,7 +640,12 @@ export async function getHackathonDetail(
 					? "Winners could not be checked: Scout's stored copy of this event's rows could not be read just now, so winners is empty, not none."
 					: (!winners.some((w) => "winnerSource" in w) &&
 							CURATED_WINNERS_NOTES_UNSTORED[slug]) ||
-						(CURATED_WINNERS_NOTES[slug] ?? null);
+						CURATED_WINNERS_NOTES[slug] ||
+						// An ended event no dated note covers yet: its 0 is not a count
+						// (Waterloo served a bare 0 for days after its awards).
+						(!winners.length && status === "completed"
+							? NO_WINNERS_ON_RECORD_NOTE
+							: null);
 		else if (winners.some((w) => "winnerSource" in w))
 			winnersNote ??=
 				WINNER_OVERLAY.find((e) => e.hackathonSlug === slug)?.note ?? null;

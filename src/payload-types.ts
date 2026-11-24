@@ -104,6 +104,7 @@ export interface Config {
 		"partner-leads": PartnerLead;
 		"funding-snapshots": FundingSnapshot;
 		"scf-round-reads": ScfRoundRead;
+		"scf-paid-reads": ScfPaidRead;
 		"payload-kv": PayloadKv;
 		"payload-jobs": PayloadJob;
 		"payload-locked-documents": PayloadLockedDocument;
@@ -175,6 +176,7 @@ export interface Config {
 			| FundingSnapshotsSelect<false>
 			| FundingSnapshotsSelect<true>;
 		"scf-round-reads": ScfRoundReadsSelect<false> | ScfRoundReadsSelect<true>;
+		"scf-paid-reads": ScfPaidReadsSelect<false> | ScfPaidReadsSelect<true>;
 		"payload-kv": PayloadKvSelect<false> | PayloadKvSelect<true>;
 		"payload-jobs": PayloadJobsSelect<false> | PayloadJobsSelect<true>;
 		"payload-locked-documents":
@@ -754,6 +756,18 @@ export interface Project {
 		 * Official SCF project page the award facts were read from
 		 */
 		sourceUrl?: string | null;
+		/**
+		 * System-written by the SCF sync: SCF's own awarded and paid totals for the project's page(s), each Build award's tranche share where the paid total splits exactly, and when the sync first saw each figure. Do not edit by hand.
+		 */
+		paid?:
+			| {
+					[k: string]: unknown;
+			  }
+			| unknown[]
+			| string
+			| number
+			| boolean
+			| null;
 	};
 	/**
 	 * Aggregated consumer votes (distinct voters). Populated by scripts/aggregate-feedback.ts only.
@@ -3422,6 +3436,43 @@ export interface ScfRoundRead {
 	createdAt: string;
 }
 /**
+ * System-written by the SCF sync: every SCF project page's awarded and paid totals and Build tranche shares, per run. Do not edit by hand.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scf-paid-reads".
+ */
+export interface ScfPaidRead {
+	id: string;
+	/**
+	 * When the run started, before any page read.
+	 */
+	startedAt: string;
+	/**
+	 * When the run finished reading the pages.
+	 */
+	readAt: string;
+	pages:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	changes?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	updatedAt: string;
+	createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -3680,6 +3731,10 @@ export interface PayloadLockedDocument {
 		| ({
 				relationTo: "scf-round-reads";
 				value: string | ScfRoundRead;
+		  } | null)
+		| ({
+				relationTo: "scf-paid-reads";
+				value: string | ScfPaidRead;
 		  } | null);
 	globalSlug?: string | null;
 	user:
@@ -3959,6 +4014,7 @@ export interface ProjectsSelect<T extends boolean = true> {
 				basis?: T;
 				asOf?: T;
 				sourceUrl?: T;
+				paid?: T;
 		  };
 	feedbackSignal?:
 		| T
@@ -5001,6 +5057,18 @@ export interface FundingSnapshotsSelect<T extends boolean = true> {
 export interface ScfRoundReadsSelect<T extends boolean = true> {
 	readAt?: T;
 	rounds?: T;
+	updatedAt?: T;
+	createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scf-paid-reads_select".
+ */
+export interface ScfPaidReadsSelect<T extends boolean = true> {
+	startedAt?: T;
+	readAt?: T;
+	pages?: T;
+	changes?: T;
 	updatedAt?: T;
 	createdAt?: T;
 }
