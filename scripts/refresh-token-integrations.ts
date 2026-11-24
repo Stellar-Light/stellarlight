@@ -17,12 +17,14 @@
  *       shown publicly; the API's meta names it.
  *   Soroban RPC  getLedgerEntries (contract instances, token balances) and
  *       read-only simulation of view functions; nothing is signed or sent.
- *   Horizon  classic AMM pools and their operations, asset contract counts.
+ *   Horizon  classic AMM pools and their operations, asset contract counts,
+ *       the balances and operations of the on-chain map's accounts.
  *   Aquarius's public pools API (rewards config), the SEP-42 list catalog
  *       and its lists, anchors' own stellar.toml files.
  *   Stellar Light's public API  projects (to tie a publisher or a labelled
- *       contract to a directory row by its website domain), anchors,
- *       stablecoins, the verified contracts list.
+ *       contract to a directory row by its website domain, and the on-chain
+ *       map's accounts on each row), anchors, stablecoins, the verified
+ *       contracts list with the on-chain map's attribution of each contract.
  * stellar.expert is never called (paywalled).
  *
  * Removal is explicit: a stored row this run does not produce is ended (kept,
@@ -50,6 +52,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { Address, rpc, scValToNative, xdr } from "@stellar/stellar-sdk";
+import onchainMap from "../src/data/onchain-map.json";
 import { RWA_REGISTRY } from "../src/data/rwa-registry";
 import {
 	instanceKey,
@@ -57,23 +60,27 @@ import {
 	MAINNET_RPC,
 	readLedgerEntries,
 } from "../src/lib/contract-ownership";
+import { attributionsOf } from "../src/lib/contracts-registry";
 import { HORIZON } from "../src/lib/horizon-supply";
 import { STELLAR_INDEX as SI } from "../src/lib/onchain-sources";
 import { stellarOracleRpc } from "../src/lib/oracle-observe";
 import { sacContractId } from "../src/lib/stablecoin-defi";
 import {
+	accountHoldings,
 	addDecimals,
 	aggregate,
 	type Edge,
 	holderTier,
 	type IntegrationRow,
 	type Kind,
+	mapEvidence,
 	parseTokenParam,
 	plannedWrites,
 	planWrites,
 	poolDepth,
 	poolEdgeTier,
 	ROW_FIELDS,
+	registryTokenId,
 	type StoredRow,
 	summarize,
 	TIER_RANK,
@@ -495,6 +502,8 @@ interface DirProject {
 	name: string;
 	website: string;
 	github: string;
+	/** The served on-chain block (its map links), or null. */
+	onchain: unknown;
 }
 async function searchProjects(q: string): Promise<DirProject[]> {
 	const r = await get(
@@ -512,6 +521,7 @@ async function searchProjects(q: string): Promise<DirProject[]> {
 			name: String(o.name ?? ""),
 			website: String(links.website ?? ""),
 			github: String(links.github ?? ""),
+			onchain: o.onchain ?? null,
 		};
 	});
 }
@@ -1030,7 +1040,7 @@ async function main() {
 		throw new InstrumentFailure("/api/stablecoins could not be read");
 	checked.add("issuer:stablecoins");
 	for (const x of arr(obj(stables.data).stablecoins).map(obj)) {
-		const token = sacContractId(String(x.ticker), String(x.issuer));
+		const token = registryTokenId(str(x.ticker), str(x.issuer), null);
 		if (!token) continue;
 		const who = await projectByDomain(
 			String(x.company ?? ""),
@@ -1053,9 +1063,8 @@ async function main() {
 	}
 	checked.add("issuer:rwa");
 	for (const x of RWA_REGISTRY) {
-		const token =
-			x.code && x.issuer ? sacContractId(x.code, x.issuer) : x.contract;
-		if (!token || !CRE.test(token)) continue;
+		const token = registryTokenId(x.code, x.issuer, x.contract);
+		if (!token) continue;
 		raws.push({
 			asset: x.code && x.issuer ? `${x.code}:${x.issuer}` : undefined,
 			token,
@@ -1595,6 +1604,7 @@ async function main() {
 		notes,
 	);
 	edges.push(...holderEdges);
+	edges.push(...(await accountSweep(priority, ident, price, checked, notes)));
 
 	// 7. rows, plan, write
 	const rows = aggregate(
@@ -1649,7 +1659,7 @@ async function main() {
 	};
 	const plan = planWrites(rows, stored, judge, RUN_AT);
 	const line = (r: IntegrationRow) =>
-		`${r.code ?? r.tokenId.slice(0, 8)} ${r.kind} ${r.venue} ${r.projectSlug ?? "(no project)"} | ${r.tier}: ${r.tierBasis} | pools ${r.pools}${r.balance ? ` | balance ${r.balance}` : ""}${r.firstDate ? ` | since ${r.firstDate} (${r.firstDateBasis})` : ""}`;
+		`${r.code ?? r.tokenId.slice(0, 8)} ${r.kind} ${r.venue} ${r.projectSlug ?? "(no project)"} | ${r.tier}: ${r.tierBasis} | pools ${r.pools}${r.balance ? ` | balance ${r.balance}` : ""}${r.firstDate ? ` | since ${r.firstDate} (${r.firstDateBasis})` : ""}${r.kind === "holder" ? ` | ${r.bestPool}: ${r.attributionBasis}` : ""}`;
 	console.log(
 		`\nplan: create ${plan.create.length}, update ${plan.update.length}, end ${plan.end.length}, keep (not judged) ${plan.keep.length}, unchanged ${plan.unchanged}`,
 	);
@@ -1982,13 +1992,21 @@ async function holderSweep(
 			2,
 		);
 	}
-	for (const c of slContracts)
-		push(
-			String(c.contractId),
-			str(obj(c.project).slug),
-			`stellarlight /api/contracts (${c.contractBasis})`,
-			3,
-		);
+	// The on-chain map's link as /api/contracts serves it: strong ranks with
+	// the registry, labelled with a label; one the weekly check ended is
+	// skipped. A row the map does not hold ranks lowest, on its project.
+	for (const c of slContracts) {
+		const m = mapEvidence(c.attribution);
+		if (m === "ended") continue;
+		if (m) push(String(c.contractId), m.slug, m.basis, m.rank);
+		else
+			push(
+				String(c.contractId),
+				str(obj(c.project).slug),
+				`stellarlight /api/contracts (${c.contractBasis})`,
+				3,
+			);
+	}
 	const attribute = (c: string) => {
 		const cands = ev.get(c) ?? [];
 		if (!cands.length)
@@ -2131,6 +2149,111 @@ async function holderSweep(
 			readAt: RUN_AT,
 		});
 	}
+	return out;
+}
+
+/** Account holders: the on-chain map's accounts as the project rows serve
+ * them (read with attributionsOf, the reader /api/contracts uses for
+ * contracts, so tier, family sharing and endedAt are the lane's), holding a
+ * priority classic asset on Horizon, tiered on this holding. The map file
+ * only says which rows to read. */
+async function accountSweep(
+	priority: string[],
+	ident: Map<string, TokenIdentity>,
+	price: Map<string, number>,
+	checked: Set<string>,
+	notes: string[],
+): Promise<Edge[]> {
+	const wanted = new Map<string, string>();
+	for (const t of priority) {
+		const i = ident.get(t);
+		if (i?.code && i.issuer?.startsWith("G"))
+			wanted.set(`${i.code}:${i.issuer}`, t);
+	}
+	if (!wanted.size) return [];
+	let failed = 0;
+	const rows: DirProject[] = [];
+	const slugs = new Set(
+		onchainMap.links.filter((l) => l.kind === "account").map((l) => l.slug),
+	);
+	for (const s of [...slugs].sort()) {
+		const p = await projectBySlug(s);
+		if (p) rows.push(p);
+		else {
+			failed++;
+			notes.push(`account holders: no directory row ${s} found`);
+		}
+	}
+	const links = attributionsOf(rows, "accounts");
+	const out: Edge[] = [];
+	for (const g of [...links.keys()].sort()) {
+		const m = mapEvidence(links.get(g)?.attribution);
+		if (!m || m === "ended") continue;
+		const r = await get(`${HORIZON}/accounts/${g}`);
+		if (r.status === 404) continue; // merged away: holds nothing
+		if (r.status !== 200) {
+			failed++;
+			continue;
+		}
+		const hs = accountHoldings(r.data, wanted);
+		if (!hs.length) continue;
+		const ops = await get(
+			`${HORIZON}/accounts/${g}/operations?order=desc&limit=200`,
+		);
+		const recs = arr(obj(obj(ops.data)._embedded).records).map(obj);
+		const n =
+			ops.status === 200
+				? recs.filter((x) => String(x.created_at ?? "") >= CUT).length
+				: null;
+		const basis =
+			n === null
+				? `could-not-check (http ${ops.status})`
+				: n === 200
+					? "lower bound: page of 200 all inside window"
+					: "horizon operations affecting the account in window";
+		for (const h of hs) {
+			const usd = usdOf(h.balance, price.get(h.token));
+			// an account is never a pool or vault: the market floors only
+			const tier = holderTier({
+				projectSlug: m.slug,
+				direct: true,
+				dexProject: false,
+				label: null,
+				events90d: n,
+				eventsBasis: basis,
+				usd,
+			});
+			out.push({
+				token: h.token,
+				kind: "holder",
+				venue: "account",
+				projectSlug: m.slug,
+				attributionBasis: m.basis,
+				pool: g,
+				method: "horizon /accounts balances (an on-chain map account)",
+				source: `account-holders:${h.token}`,
+				firstAt: null,
+				firstBasis: "not read (when an account began holding is not read)",
+				lastSeenAt: str(recs[0]?.created_at),
+				events90d: n,
+				events90dBasis: basis,
+				balance: h.balance,
+				balanceUsd: usd,
+				balanceBasis: "horizon /accounts balance",
+				depthUsd: usd,
+				depthBasis: "this holding only",
+				tier: tier.tier,
+				tierBasis: tier.basis,
+				evidenceUrl: `${HORIZON}/accounts/${g}`,
+				readAt: r.readAt,
+			});
+		}
+	}
+	if (failed)
+		notes.push(
+			`account holders: ${failed} read(s) failed, so no account holder row is ended this run`,
+		);
+	else for (const t of wanted.values()) checked.add(`account-holders:${t}`);
 	return out;
 }
 

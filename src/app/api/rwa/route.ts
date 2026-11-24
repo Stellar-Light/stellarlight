@@ -16,6 +16,7 @@ import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { mergeMeasured, type RwaMeasured } from "@/lib/rwa-measured";
 import { serverTiming } from "@/lib/server-timing";
+import { readTokenBriefs, registryTokenId } from "@/lib/token-integrations";
 
 export const dynamic = "force-dynamic";
 // The caller gives up at 10 s; a request still working past 20 s is a
@@ -112,9 +113,16 @@ export async function GET(req: NextRequest) {
 			"measured state unavailable this request (store unreachable); `measured` is null on every row; not a statement about the assets.",
 		);
 	}
-	const served = rows.map((r) =>
-		mergeMeasured(r, measuredById.get(r.id) ?? null),
-	);
+	// Which projects support each served token, from the integrations layer.
+	const tokenOf = (r: RwaAsset) =>
+		registryTokenId(r.code, r.issuer, r.contract);
+	const briefs = payload
+		? await readTokenBriefs(payload, rows.map(tokenOf))
+		: null;
+	const served = rows.map((r) => ({
+		...mergeMeasured(r, measuredById.get(r.id) ?? null),
+		integrations: briefs?.get(tokenOf(r) ?? "") ?? null,
+	}));
 	const measuredCount = served.filter((r) => r.measured).length;
 
 	const byLevel: Record<string, number> = {};
@@ -171,7 +179,7 @@ export async function GET(req: NextRequest) {
 					note: "Rows are the tokenized real-world assets rwa.xyz lists on Stellar (rwaxyzListed=true), plus every other asset a tracked issuer's own stellar.toml declares under a tracked issuer account (rwaxyzListed=false), so an issuer this registry covers is covered completely; counts.rwaxyzListed / counts.issuerDeclared split them. Each row is re-verified on-chain on its verifiedAt; registryAsOf is the latest. Absence here means untracked; NOT proof an asset is not issued on Stellar; verify against Horizon (classic) or Soroban RPC (contract tokens) before asserting non-existence. Identity is (code, issuer) for a classic asset and the contract id for a Soroban token; a ticker alone identifies nothing (BENJI has 22 issuers on mainnet, 21 of them squatters).",
 				},
 				methodology:
-					"verificationLevel says what ties a row to its issuer. Only toml-bidirectional holds both ways from first-party records (the issuer's own stellar.toml names this code+issuer AND the issuer's home_domain points back), and only a row at that level lends its project a deployment. The others rest on one side or on a third party: entity-toml (the entity's toml names the issuer; the issuer's home_domain is the minting tool), on-chain-home-domain (the issuer's home_domain is the entity's; its toml omits this asset), contract-metadata (name/symbol/decimals/total_supply read from the Soroban contract itself, which its deployer sets, and rwa.xyz's listing; Horizon /assets never sees these), on-chain-only (issued; the toml was a could-not-check or there is no home_domain, so rwa.xyz's listing is the attribution). state=deployed-no-supply is a Soroban contract with zero supply and zero events, or a classic asset the issuer declares that has trustlines but nothing minted; either way it is NOT served as a live product on the project row. `discontinued`, when set, is the issuer's own dated statement that it no longer offers the product (GMO's GYEN and ZUSD, VNX's VEUR); the row stays, since the token is still on chain, and the project row serves the product as retired. rwaxyzValueUsd/rwaxyzHolders are rwa.xyz's figures, not ours: read them beside totalSupply and horizonNote, because a $500M row with one holder and eight events is a valuation, not activity. Every row is dated (verifiedAt) and cites evidenceUrl; re-verify there before asserting anything current. `measured` is the six-hour lane's reading (supply, holders, activityCount, dated by measuredAt with measureBasis live|unmeasured) and null until the lane has measured that asset: an admission, never zero. counts.measured says how many served rows carry one.",
+					"verificationLevel says what ties a row to its issuer. Only toml-bidirectional holds both ways from first-party records (the issuer's own stellar.toml names this code+issuer AND the issuer's home_domain points back), and only a row at that level lends its project a deployment. The others rest on one side or on a third party: entity-toml (the entity's toml names the issuer; the issuer's home_domain is the minting tool), on-chain-home-domain (the issuer's home_domain is the entity's; its toml omits this asset), contract-metadata (name/symbol/decimals/total_supply read from the Soroban contract itself, which its deployer sets, and rwa.xyz's listing; Horizon /assets never sees these), on-chain-only (issued; the toml was a could-not-check or there is no home_domain, so rwa.xyz's listing is the attribution). state=deployed-no-supply is a Soroban contract with zero supply and zero events, or a classic asset the issuer declares that has trustlines but nothing minted; either way it is NOT served as a live product on the project row. `discontinued`, when set, is the issuer's own dated statement that it no longer offers the product (GMO's GYEN and ZUSD, VNX's VEUR); the row stays, since the token is still on chain, and the project row serves the product as retired. rwaxyzValueUsd/rwaxyzHolders are rwa.xyz's figures, not ours: read them beside totalSupply and horizonNote, because a $500M row with one holder and eight events is a valuation, not activity. Every row is dated (verifiedAt) and cites evidenceUrl; re-verify there before asserting anything current. `measured` is the six-hour lane's reading (supply, holders, activityCount, dated by measuredAt with measureBasis live|unmeasured) and null until the lane has measured that asset: an admission, never zero. counts.measured says how many served rows carry one. `integrations` counts the directory projects that support the row's token, per tier (integrated, used, available, unrated) and SCF-funded per tier, from the weekly token integrations layer, with its newest reading (asOf) and the getTokenIntegrations URL that serves every edge and its evidence; null when the layer holds no row for the token or could not be read this request, never zero support.",
 			},
 			assets: served,
 		},

@@ -11105,6 +11105,16 @@ export const spec: OpenAPISpec = {
 															note: { type: "string", nullable: true },
 														},
 													},
+													integrations: {
+														nullable: true,
+														description:
+															"Which directory projects support this token, per tier and SCF-funded per tier, from the weekly token integrations layer; url leads to every edge. Null when the layer holds no row for the token or could not be read this request: not known, never zero support.",
+														allOf: [
+															{
+																$ref: "#/components/schemas/TokenIntegrationsBrief",
+															},
+														],
+													},
 												},
 											},
 										},
@@ -11384,7 +11394,7 @@ export const spec: OpenAPISpec = {
 						name: "kind",
 						in: "query",
 						description:
-							"Only edges of this kind: dex_pool, lending_reserve, vault, bridge, oracle_feed (protocol contracts), classic_amm_pool (network venue, no project), anchor_asset (an anchor's stellar.toml), asset_list (a SEP-42 list), issuer, holder (a contract tied to a project holds it), holder_unattributed.",
+							"Only edges of this kind: dex_pool, lending_reserve, vault, bridge, oracle_feed (protocol contracts), classic_amm_pool (network venue, no project), anchor_asset (an anchor's stellar.toml), asset_list (a SEP-42 list), issuer, holder (a contract, venue holder, or an account, venue account, tied to a project holds it), holder_unattributed.",
 						schema: { type: "string", enum: [...TOKEN_INTEGRATION_KINDS] },
 					},
 					{
@@ -11907,6 +11917,29 @@ export const spec: OpenAPISpec = {
 					unrated: { type: "integer" },
 				},
 			},
+			TokenIntegrationsBrief: {
+				type: "object",
+				description:
+					"The token integrations layer's compact count for one token, as getTokenIntegrations' summary counts it over the token's active edges: each directory project once, at its best tier, never one blended number. Only integrated and used are support; available and unrated are reported, never counted as support. Network venues and unattributed holders are not projects and are not counted here.",
+				properties: {
+					projectsByTier: {
+						$ref: "#/components/schemas/TokenTierCounts",
+					},
+					scfFundedByTier: {
+						$ref: "#/components/schemas/TokenTierCounts",
+					},
+					asOf: {
+						type: "string",
+						nullable: true,
+						description: "The newest reading among the token's edges.",
+					},
+					url: {
+						type: "string",
+						description:
+							"getTokenIntegrations for this token: every edge with its tier, basis and evidence.",
+					},
+				},
+			},
 			TokenHolderSweep: {
 				type: "object",
 				description:
@@ -11984,7 +12017,7 @@ export const spec: OpenAPISpec = {
 					venue: {
 						type: "string",
 						description:
-							"Protocol (aquarius, soroswap, sushiswap_v3, blend, ...), publisher (anchor, list or issuer), stellar-classic-amm, or holder.",
+							"Protocol (aquarius, soroswap, sushiswap_v3, blend, ...), publisher (anchor, list or issuer), stellar-classic-amm, holder (a contract holding the token) or account (an account the on-chain map ties to the project holding it).",
 					},
 					kind: { type: "string", enum: [...TOKEN_INTEGRATION_KINDS] },
 					tier: { type: "string", enum: [...TOKEN_INTEGRATION_TIERS] },
@@ -12037,10 +12070,13 @@ export const spec: OpenAPISpec = {
 					method: { type: "string", description: "How the edge was read." },
 					attributionBasis: {
 						type: "string",
-						description: "Why this project (or none).",
+						description:
+							"Why this project (or none). A holder tied by the curated on-chain map names its tier and evidence (`on-chain map strong: own-repo-interface (source)`); a strong link weighs as much as the protocol registry and a labelled one as much as a public directory label, a contract or account the map's weekly check read absent from mainnet is not attributed, and two projects tied by equal evidence leave the holder unattributed.",
 					},
 					holderSweep: {
 						nullable: true,
+						description:
+							"How complete the contract holder sweep was for this token; null on every edge that is not a contract holding (venue account included).",
 						allOf: [{ $ref: "#/components/schemas/TokenHolderSweep" }],
 					},
 					readAt: { type: "string" },
@@ -15134,6 +15170,12 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						description:
 							"When these figures were measured (dated-metrics rule). Always cite it.",
+					},
+					integrations: {
+						nullable: true,
+						description:
+							"Which directory projects support this token, per tier and SCF-funded per tier, from the weekly token integrations layer; url leads to every edge. Null when the layer holds no row for the token or could not be read this request: not known, never zero support.",
+						allOf: [{ $ref: "#/components/schemas/TokenIntegrationsBrief" }],
 					},
 				},
 			},

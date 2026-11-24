@@ -182,7 +182,7 @@ async function buildRegistryRows(payload: Payload): Promise<ContractRow[]> {
 		depth: 0,
 		select: { slug: true, name: true, onchain: true },
 	});
-	const attribution = attributionsOf(mapped.docs);
+	const attribution = attributionsOf(mapped.docs, "contracts");
 
 	// One audits query for every owning project (EXACT projectSlug join —
 	// the repo-knowledge discipline, never fuzzy).
@@ -358,15 +358,18 @@ async function buildRegistryRows(payload: Payload): Promise<ContractRow[]> {
 }
 
 /**
- * Each mapped contract's attribution, by address, from the project rows
- * that hold it. Held by one row: that row's. Held by several: only when
- * they are all members of the one issuer-and-token family each entry names,
- * and then under the family's first member present (the issuer). Anything
- * else is a contract linked to two projects, which proves neither.
+ * Each mapped contract's (or account's) attribution, by address, from the
+ * project rows that hold it. Held by one row: that row's. Held by several:
+ * only when they are all members of the one issuer-and-token family each
+ * entry names, and then under the family's first member present (the
+ * issuer). Anything else is an address linked to two projects, which proves
+ * neither. The one reader of the map's links on project rows: this registry
+ * reads `contracts`, the token integrations lane reads `accounts` too.
  */
 export function attributionsOf(
 	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 	projects: any[],
+	list: "contracts" | "accounts",
 ): Map<string, { attribution: ContractAttribution; verifiedRepo: unknown }> {
 	const holders = new Map<
 		string,
@@ -375,9 +378,7 @@ export function attributionsOf(
 	>();
 	for (const p of projects) {
 		if (typeof p?.slug !== "string" || !p.slug) continue;
-		for (const c of Array.isArray(p?.onchain?.contracts)
-			? p.onchain.contracts
-			: []) {
+		for (const c of Array.isArray(p?.onchain?.[list]) ? p.onchain[list] : []) {
 			if (typeof c?.address !== "string" || !c.address) continue;
 			if (c.tier !== "strong" && c.tier !== "labelled") continue;
 			holders.set(c.address, [

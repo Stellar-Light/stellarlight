@@ -984,6 +984,15 @@ export interface components {
             available?: number;
             unrated?: number;
         };
+        /** @description The token integrations layer's compact count for one token, as getTokenIntegrations' summary counts it over the token's active edges: each directory project once, at its best tier, never one blended number. Only integrated and used are support; available and unrated are reported, never counted as support. Network venues and unattributed holders are not projects and are not counted here. */
+        TokenIntegrationsBrief: {
+            projectsByTier?: components["schemas"]["TokenTierCounts"];
+            scfFundedByTier?: components["schemas"]["TokenTierCounts"];
+            /** @description The newest reading among the token's edges. */
+            asOf?: string | null;
+            /** @description getTokenIntegrations for this token: every edge with its tier, basis and evidence. */
+            url?: string;
+        };
         /** @description How completely the holder sweep read a token's contract holders. */
         TokenHolderSweep: {
             /** @description complete (the token's whole event history was read), partial, could-not-check, candidates only (history too large to read whole), or skipped (no contract can hold it). */
@@ -1016,7 +1025,7 @@ export interface components {
             /** @description Directory project; null for a network venue or an unattributed holder. */
             projectSlug?: string | null;
             projectName?: string | null;
-            /** @description Protocol (aquarius, soroswap, sushiswap_v3, blend, ...), publisher (anchor, list or issuer), stellar-classic-amm, or holder. */
+            /** @description Protocol (aquarius, soroswap, sushiswap_v3, blend, ...), publisher (anchor, list or issuer), stellar-classic-amm, holder (a contract holding the token) or account (an account the on-chain map ties to the project holding it). */
             venue?: string;
             /** @enum {string} */
             kind?: "dex_pool" | "lending_reserve" | "vault" | "bridge" | "oracle_feed" | "classic_amm_pool" | "anchor_asset" | "asset_list" | "issuer" | "holder" | "holder_unattributed";
@@ -1046,8 +1055,9 @@ export interface components {
             evidenceUrl?: string;
             /** @description How the edge was read. */
             method?: string;
-            /** @description Why this project (or none). */
+            /** @description Why this project (or none). A holder tied by the curated on-chain map names its tier and evidence (`on-chain map strong: own-repo-interface (source)`); a strong link weighs as much as the protocol registry and a labelled one as much as a public directory label, a contract or account the map's weekly check read absent from mainnet is not attributed, and two projects tied by equal evidence leave the holder unattributed. */
             attributionBasis?: string;
+            /** @description How complete the contract holder sweep was for this token; null on every edge that is not a contract holding (venue account included). */
             holderSweep?: components["schemas"]["TokenHolderSweep"] | null;
             readAt?: string;
             /** @enum {string} */
@@ -2849,6 +2859,8 @@ export interface components {
              * @description When these figures were measured (dated-metrics rule). Always cite it.
              */
             updatedAt?: string | null;
+            /** @description Which directory projects support this token, per tier and SCF-funded per tier, from the weekly token integrations layer; url leads to every edge. Null when the layer holds no row for the token or could not be read this request: not known, never zero support. */
+            integrations?: components["schemas"]["TokenIntegrationsBrief"] | null;
         };
         /** @description Optional reporting context is NESTED under `context` (matches the live endpoint + the GET /api/feedback self-schema). Per-kind requiredness: report kinds (bug/missing-data/wrong-answer/suggestion/other) require `message` (≥10 chars); vote kinds (worked/did-not-work) require `target` and may omit `message`. Votes aggregate nightly into per-target feedbackSignal (distinct voters, floor-gated). */
         FeedbackRequest: {
@@ -8822,6 +8834,8 @@ export interface operations {
                                 measuredAt?: string;
                                 note?: string | null;
                             } | null;
+                            /** @description Which directory projects support this token, per tier and SCF-funded per tier, from the weekly token integrations layer; url leads to every edge. Null when the layer holds no row for the token or could not be read this request: not known, never zero support. */
+                            integrations?: components["schemas"]["TokenIntegrationsBrief"] | null;
                         }[];
                     };
                 };
@@ -8920,7 +8934,7 @@ export interface operations {
                 project?: string;
                 /** @description Only edges of this tier. */
                 tier?: "integrated" | "used" | "available" | "unrated";
-                /** @description Only edges of this kind: dex_pool, lending_reserve, vault, bridge, oracle_feed (protocol contracts), classic_amm_pool (network venue, no project), anchor_asset (an anchor's stellar.toml), asset_list (a SEP-42 list), issuer, holder (a contract tied to a project holds it), holder_unattributed. */
+                /** @description Only edges of this kind: dex_pool, lending_reserve, vault, bridge, oracle_feed (protocol contracts), classic_amm_pool (network venue, no project), anchor_asset (an anchor's stellar.toml), asset_list (a SEP-42 list), issuer, holder (a contract, venue holder, or an account, venue account, tied to a project holds it), holder_unattributed. */
                 kind?: "dex_pool" | "lending_reserve" | "vault" | "bridge" | "oracle_feed" | "classic_amm_pool" | "anchor_asset" | "asset_list" | "issuer" | "holder" | "holder_unattributed";
                 /** @description true: only edges whose project row says SCF awarded; false: only edges whose project row does not. Edges with no project (network venues, unattributed holders) match neither. Read from the project row at request time. */
                 scfAwarded?: boolean;

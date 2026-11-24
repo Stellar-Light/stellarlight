@@ -46,6 +46,7 @@ import {
 	type StoreRow,
 	storeRowToApi,
 } from "@/lib/stablecoins";
+import { readTokenBriefs, registryTokenId } from "@/lib/token-integrations";
 
 export const dynamic = "force-dynamic";
 // The caller gives up at 10 s; a request still working past 20 s is a
@@ -189,6 +190,14 @@ export async function GET(req: NextRequest) {
 	if (assetType) rows = filterByAssetType(rows, assetType);
 	const total = rows.length;
 	rows = rankStablecoins(rows, sort as StablecoinSort).slice(0, limit);
+	// Which projects support each served token, from the integrations layer.
+	const tokenOf = (r: (typeof rows)[number]) =>
+		registryTokenId(r.ticker, r.issuer, null);
+	const briefs = await readTokenBriefs(payload, rows.map(tokenOf));
+	const served = rows.map((r) => ({
+		...r,
+		integrations: briefs?.get(tokenOf(r) ?? "") ?? null,
+	}));
 
 	// dataAsOf = the freshest measurement among the rows we served.
 	let dataAsOf: string | null = null;
@@ -234,9 +243,9 @@ export async function GET(req: NextRequest) {
 					note: "Rows are a hand-curated registry of verified (code, issuer) pairs, measured every 6h. Absence from this list means the asset is not tracked here: NOT proof it is not issued on Stellar; verify against Horizon before asserting non-existence. Asset identity is (code, issuer): two assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on ticker alone.",
 				},
 				methodology:
-					"marketCapUSD = circulating supply × priceUSD. It is the ONLY cross-row-comparable size metric; `supply` is raw units in each asset's own `peg` and comparable only within a peg. Default sort=marketcap. null on any metric = not measured, never 'zero'. Every row carries `basis`: live = measured this cycle; curated-static = hand-checked figures for an asset no public API reports reliably; unmeasured = the fetch failed and the row is retained so its absence is never read as a delisting. `updatedAt` dates the figures (when they were measured, internally `measuredAt`): cite it. `logoUrl` is the issuer's own mark when one resolves, null otherwise; `logoSource` says where it came from. `priceBasis` says how each unit was priced: assumed-peg = the peg's live FX rate and peg deviation is NOT measured; measured-market = the unit's own market price, used where the unit is not 1:1 with its peg (USDY accrues, USDM1 is a bond above par). `company` is the brand; `issuerOfRecord` is the ORG_NAME the issuer's own stellar.toml names (at the issuer account's home_domain), read every 6h with its toml URL and date, null unless named; where the issuer's own terms name a different legal issuer, `issuerOfRecordNote` quotes them (EURC). `assetType` is never null: what backs the unit as its issuer states it (Fiat-Backed, Crypto-Backed, Multi-Asset-Backed, Treasury-Backed, Yield Stablecoin), with the issuer's page in `assetTypeSourceUrl` and the day it was read in `assetTypeAsOf`; Unclassified where no issuer statement could be read, and `assetTypeNote` says what was checked. A class is the issuer's claim, not an audit. `volume24hUSD` and `paymentsCount24h` are null on every row since 2026-11-06: they were read from Stellar Expert, whose API became paid, and no free source reports either; supply and holders (open trustlines) come from Horizon. sort=volume therefore has nothing to rank by and returns the inventory unranked.",
+					"marketCapUSD = circulating supply × priceUSD. It is the ONLY cross-row-comparable size metric; `supply` is raw units in each asset's own `peg` and comparable only within a peg. Default sort=marketcap. null on any metric = not measured, never 'zero'. Every row carries `basis`: live = measured this cycle; curated-static = hand-checked figures for an asset no public API reports reliably; unmeasured = the fetch failed and the row is retained so its absence is never read as a delisting. `updatedAt` dates the figures (when they were measured, internally `measuredAt`): cite it. `logoUrl` is the issuer's own mark when one resolves, null otherwise; `logoSource` says where it came from. `priceBasis` says how each unit was priced: assumed-peg = the peg's live FX rate and peg deviation is NOT measured; measured-market = the unit's own market price, used where the unit is not 1:1 with its peg (USDY accrues, USDM1 is a bond above par). `company` is the brand; `issuerOfRecord` is the ORG_NAME the issuer's own stellar.toml names (at the issuer account's home_domain), read every 6h with its toml URL and date, null unless named; where the issuer's own terms name a different legal issuer, `issuerOfRecordNote` quotes them (EURC). `assetType` is never null: what backs the unit as its issuer states it (Fiat-Backed, Crypto-Backed, Multi-Asset-Backed, Treasury-Backed, Yield Stablecoin), with the issuer's page in `assetTypeSourceUrl` and the day it was read in `assetTypeAsOf`; Unclassified where no issuer statement could be read, and `assetTypeNote` says what was checked. A class is the issuer's claim, not an audit. `volume24hUSD` and `paymentsCount24h` are null on every row since 2026-11-06: they were read from Stellar Expert, whose API became paid, and no free source reports either; supply and holders (open trustlines) come from Horizon. sort=volume therefore has nothing to rank by and returns the inventory unranked. `integrations` counts the directory projects that support the row's token, per tier (integrated, used, available, unrated) and SCF-funded per tier, from the weekly token integrations layer, with its newest reading (asOf) and the getTokenIntegrations URL that serves every edge and its evidence; null when the layer holds no row for the token or could not be read this request, never zero support.",
 			},
-			stablecoins: rows,
+			stablecoins: served,
 		},
 		{
 			headers: {

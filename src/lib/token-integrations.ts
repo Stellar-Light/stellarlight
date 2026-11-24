@@ -1,8 +1,9 @@
 /**
  * Token integrations: which projects support a token on Stellar, how, since
  * when. The pure half (tiers, the depth rule, aggregation into stored rows,
- * the write plan, the per-tier counts, the token parameter). The reads live
- * in scripts/refresh-token-integrations.ts, the serving in
+ * the write plan, the per-tier counts, the token parameter), plus the one
+ * store read behind the `integrations` block on stablecoin and RWA rows. The
+ * reads live in scripts/refresh-token-integrations.ts, the serving in
  * src/app/api/tokens/integrations/route.ts.
  *
  * Tiers (owner-approved definition, 2026-11-23), never one blended count:
@@ -21,6 +22,7 @@
  * design. Network venues (classic AMM pools) carry a tier and no project.
  */
 import { Asset, Networks } from "@stellar/stellar-sdk";
+import type { Payload } from "payload";
 
 export const TOKEN_INTEGRATION_TIERS = [
 	"integrated",
@@ -174,6 +176,56 @@ export function holderTier(h: {
 		h.usd ?? 0,
 		h.usd === null ? 1 : 0,
 	);
+}
+
+/**
+ * A holder's link to a project in the curated on-chain map, as
+ * /api/contracts serves it (`attribution`) and as attributionsOf
+ * (src/lib/contracts-registry.ts, the one reader) reads accounts off the
+ * project rows. A strong link ranks with the protocol registry (1), a
+ * labelled one with a public directory label (2); the basis names the tier
+ * and the evidence. "ended": the weekly check read the address absent from
+ * mainnet, so it attributes nothing. Null: no map link.
+ */
+export function mapEvidence(
+	a: unknown,
+): { slug: string; basis: string; rank: 1 | 2 } | "ended" | null {
+	const o = a && typeof a === "object" ? (a as Record<string, unknown>) : null;
+	const p = o?.project as Record<string, unknown> | null | undefined;
+	const slug = typeof p?.slug === "string" && p.slug ? p.slug : null;
+	if (!o || !slug) return null;
+	if (o.endedAt) return "ended";
+	if (o.tier !== "strong" && o.tier !== "labelled") return null;
+	const ev = Array.isArray(o.evidence)
+		? o.evidence.filter((x): x is string => typeof x === "string")
+		: [];
+	const src = typeof o.sourceUrl === "string" && o.sourceUrl ? o.sourceUrl : "";
+	return {
+		slug,
+		rank: o.tier === "strong" ? 1 : 2,
+		basis: `on-chain map ${o.tier}: ${ev.join(", ") || "no evidence named"}${src ? ` (${src})` : ""}`,
+	};
+}
+
+/** An account's holdings of the wanted classic assets ("CODE:ISSUER" to
+ * token id) from Horizon's /accounts/{G} `balances`. XLM is never a holding
+ * here: every account must hold it to exist. */
+export function accountHoldings(
+	account: unknown,
+	wanted: ReadonlyMap<string, string>,
+): Array<{ token: string; balance: string }> {
+	const bs = (account as { balances?: unknown } | null)?.balances;
+	const out: Array<{ token: string; balance: string }> = [];
+	for (const b of Array.isArray(bs) ? bs : []) {
+		const t = wanted.get(`${b?.asset_code}:${b?.asset_issuer}`);
+		const v = b?.balance;
+		if (!t || typeof v !== "string" || !(Number(v) > 0)) continue;
+		out.push({
+			token: t,
+			balance: v.includes(".") ? v.replace(/\.?0+$/, "") : v,
+		});
+	}
+	return out;
 }
 
 /** One token's balance in one pool, as read. balance null = not read. */
@@ -397,10 +449,9 @@ export function aggregate(
 			method: best.method,
 			attributionBasis: best.attributionBasis,
 			source: best.source,
+			// the contract sweep's completeness; an account holding is not swept
 			holderSweep:
-				best.kind === "holder" || best.kind === "holder_unattributed"
-					? (sweeps.get(best.token) ?? null)
-					: null,
+				best.venue === "holder" ? (sweeps.get(best.token) ?? null) : null,
 			readAt: maxStr(es.map((e) => e.readAt)) ?? best.readAt,
 			status: "active",
 			endedAt: null,
@@ -624,6 +675,135 @@ export function summarize(
 			balanceUsd: unUsd === null ? null : Math.round(unUsd * 100) / 100,
 		},
 	};
+}
+
+/** The compact block a stablecoin or RWA row carries for its token. */
+export interface TokenIntegrationsBrief {
+	projectsByTier: TierCounts;
+	scfFundedByTier: TierCounts;
+	/** The newest reading among the token's rows. */
+	asOf: string | null;
+	/** Every edge, with its evidence. */
+	url: string;
+}
+type BriefRow = Pick<
+	IntegrationRow,
+	| "tokenId"
+	| "projectSlug"
+	| "kind"
+	| "tier"
+	| "pools"
+	| "poolsByTier"
+	| "balanceUsd"
+	| "readAt"
+	| "status"
+	| "endedAt"
+>;
+
+/** Per token: projects and SCF-funded projects per tier over its active
+ * rows (summarize, never blended), its newest reading, and the full
+ * endpoint. A token with no row at all gets no entry: the caller serves
+ * null (the lane has not written it), never zeros. */
+export function tokenBriefs(
+	rows: BriefRow[],
+	scfAwarded: (slug: string) => boolean,
+): Map<string, TokenIntegrationsBrief> {
+	const byToken = new Map<string, BriefRow[]>();
+	for (const r of rows)
+		byToken.set(r.tokenId, [...(byToken.get(r.tokenId) ?? []), r]);
+	const out = new Map<string, TokenIntegrationsBrief>();
+	for (const [t, rs] of byToken) {
+		const s = summarize(
+			rs.filter((r) => r.status !== "ended"),
+			scfAwarded,
+		);
+		out.set(t, {
+			projectsByTier: s.projectsByTier,
+			scfFundedByTier: s.scfFundedByTier,
+			asOf: maxStr(rs.flatMap((r) => [r.readAt, r.endedAt])),
+			url: `https://stellarlight.xyz/api/tokens/integrations?token=${t}`,
+		});
+	}
+	return out;
+}
+
+/** The briefs for these tokens from the store, SCF read from the project
+ * rows (their own lane writes it). Null when the store could not be read:
+ * every row then serves null, never zeros. */
+export async function readTokenBriefs(
+	payload: Pick<Payload, "find">,
+	tokenIds: Array<string | null>,
+): Promise<Map<string, TokenIntegrationsBrief> | null> {
+	const ids = [...new Set(tokenIds.filter((t): t is string => !!t))];
+	if (!ids.length) return new Map();
+	try {
+		const rows = (
+			await payload.find({
+				collection: "token-integrations",
+				where: { tokenId: { in: ids } },
+				limit: 0,
+				pagination: false,
+				depth: 0,
+				select: {
+					tokenId: true,
+					projectSlug: true,
+					kind: true,
+					tier: true,
+					pools: true,
+					poolsByTier: true,
+					balanceUsd: true,
+					readAt: true,
+					status: true,
+					endedAt: true,
+				},
+			})
+		).docs as unknown as BriefRow[];
+		const slugs = [
+			...new Set(
+				rows.map((r) => r.projectSlug).filter((s): s is string => !!s),
+			),
+		];
+		const awarded = new Set(
+			slugs.length
+				? (
+						(
+							await payload.find({
+								collection: "projects",
+								where: { slug: { in: slugs } },
+								limit: slugs.length,
+								depth: 0,
+								pagination: false,
+								select: { slug: true, scf: { awarded: true } },
+							})
+						).docs as unknown as Array<{
+							slug: string;
+							scf?: { awarded?: boolean | null };
+						}>
+					)
+						.filter((p) => p.scf?.awarded)
+						.map((p) => p.slug)
+				: [],
+		);
+		return tokenBriefs(rows, (s) => awarded.has(s));
+	} catch {
+		return null;
+	}
+}
+
+/** A registry row's token id: a classic asset's Stellar Asset Contract,
+ * else its contract. The refresh and the stablecoin and RWA rows key on it. */
+export function registryTokenId(
+	code: string | null | undefined,
+	issuer: string | null | undefined,
+	contract: string | null | undefined,
+): string | null {
+	if (code && issuer?.startsWith("G"))
+		try {
+			return new Asset(code, issuer).contractId(Networks.PUBLIC);
+		} catch {
+			return null;
+		}
+	return contract && /^C[A-Z2-7]{55}$/.test(contract) ? contract : null;
 }
 
 /** XLM's Stellar Asset Contract on mainnet. A literal, not derived at load:

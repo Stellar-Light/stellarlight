@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-23",
+		surfaces: ["api", "api-client"],
+		version: "spec@1.9.163",
+		type: "added",
+		summary:
+			"getStablecoins and getRwaAssets rows gain `integrations`: how many directory projects support the row's token per tier (integrated, used, available, unrated), how many of those are SCF-funded per tier, the newest reading (`asOf`) and the getTokenIntegrations URL that serves every edge. It is null when the layer holds no row for the token or could not be read, never zero support. getTokenIntegrations now ties holders through the curated on-chain map as the API serves it: a strong link weighs as much as the protocol registry and a labelled one as much as a public directory label, `attributionBasis` names the tier and the evidence, an address the map's weekly check read absent from mainnet is not attributed, and the map's accounts are read as holders (`venue: account`).",
+		detail:
+			"A dry run of the refresh on USDC, EURC (Circle), PYUSD and USDe (offline, both runs on the same reads, taken 2026-11-24 from 01:57 UTC) planned the same contract holder edges as before, same projects and tiers, now with the map's tier and evidence in attributionBasis, plus 33 account holder edges. Projects per tier (integrated, used, available, unrated), before and after: USDC 12, 4, 15, 0 and 12, 11, 33, 0 (accounts of Binance, Bitstamp, Coinbase, Kraken, WhiteBIT, Decaf and Astrograph hold USDC worth at least $1,000 with at least 10 operations in 90 days); EURC 9, 1, 2, 1 and 9, 1, 4, 1; PYUSD 7, 1, 0, 0 and 7, 2, 0, 0 (Kraken); USDe 2, 2, 0, 0 both. An account is never integrated by holding a token: it is judged by the market floors on its own holding and operations. XLM is not counted for accounts, since every account must hold it, and a contract token an account holds is not read. holderSweep is now null on account edges. `integrations` stays null on every row until the token integrations lane's first execute writes the layer.",
+	},
+	{
+		date: "2026-11-23",
 		surfaces: ["api"],
 		version: "spec@1.9.162",
 		type: "added",

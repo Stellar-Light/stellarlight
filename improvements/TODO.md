@@ -301,15 +301,23 @@ item is fixed. API base URL: https://stellarlight.xyz.
 
 ## Next
 
-- **Stablecoin and RWA rows do not carry their token integrations.**
-  getTokenIntegrations answers which projects support a
-  token, per tier; getStablecoins and getRwaAssets rows still say nothing
-  about it, so an agent on a stablecoin row has to make a second call.
-  Probe: `/api/stablecoins?limit=1` has no `integrations` field. Add a
-  compact per-row block (projects per tier, SCF-funded per tier, the
-  layer's read time; null until the lane has written that token, never
-  zero) after the integrations lane has run clean for two weeks, in one
-  spec release with both schemas.
+- **A holder contract is integrated only by a public directory label.**
+  getTokenIntegrations calls a holder integrated when the public directory
+  labels it the project's own pool or vault. The layer's first build
+  (2026-11-23, outside this repo) also counted a holder whose project's own
+  repo names the token (its contract id in an address or config file, or
+  CODE:ISSUER) and the on-chain map's own label ("Liquidity Pool: USDC
+  (Stellar)" on allbridge's CAOTMWRK, "USDyc Vault" on untangled's
+  CBLC4NWJ). That is the whole gap on USDC: 12 projects integrated here
+  against 23 in that build. Of the other 11, 9 are attributed here at used
+  or available (7 integrated there by the repo rule, 2 by the map's label),
+  and smart-treasury and stellar-router-sdk are tied to their contracts
+  there only by a repo scan this lane does not read. Probe: the refresh dry
+  run with `--tokens
+  USDC:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN` prints
+  `projects integrated 12` (2026-11-24). Owner decision: whether either rule
+  widens the approved `integrated` tier. Also not read: a contract token
+  (SEP-41) held by a map account.
 
 - **Stablecoin volume and payment count have no source.** `volume24hUSD`
   and `paymentsCount24h` on getStablecoins were read from Stellar Expert,
@@ -1033,15 +1041,6 @@ Found 2026-10-23 by the dead-protocol guard round
   (src/data/onchain-map.json) carries the proved creation of the 336
   contracts it holds, and the lane writes it. A contract that joins through
   a seed or the repo scan alone still has none.
-- The token integrations lane (scripts/refresh-token-integrations.ts, not on
-  main yet) attributes holder contracts from /api/contracts at its weakest
-  rank (3), below a public-directory label (2), and reads only `contractId`
-  and `project`. Since spec 1.9.161 a row's `attribution` says how strong the
-  link is: rank a strong-tier attribution with the protocol registry (1), a
-  labelled one with the label (2), name the tier and evidence in its basis,
-  and skip a contract with `attribution.endedAt`. Account holders need
-  `onchain.accounts[]` from the project rows. Found while moving the map in
-  (2026-11-23).
 - enrich-onchain names rows that hold an on-chain block and have no join key
   any more (ORPHAN lines) and leaves them as they were, because a join can
   also drop out on a failed toml or Horizon read. Each needs a decision by

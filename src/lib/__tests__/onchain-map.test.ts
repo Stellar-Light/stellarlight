@@ -226,13 +226,19 @@ describe("/api/contracts serves the map's contracts through the project rows", (
 	});
 
 	it("a contract two projects hold outside one family is never attributed", () => {
-		const a = attributionsOf([mapped("acta", C1), mapped("kindfi", C1)]);
+		const a = attributionsOf(
+			[mapped("acta", C1), mapped("kindfi", C1)],
+			"contracts",
+		);
 		expect(a.has(C1)).toBe(false);
 		// Two rows that name different families do not make one family.
-		const b = attributionsOf([
-			mapped("fxdao", C1, { sharedWithinFamily: ["fxdao", "usdx"] }),
-			mapped("ondo", C1, { sharedWithinFamily: ["ondo", "usdy"] }),
-		]);
+		const b = attributionsOf(
+			[
+				mapped("fxdao", C1, { sharedWithinFamily: ["fxdao", "usdx"] }),
+				mapped("ondo", C1, { sharedWithinFamily: ["ondo", "usdy"] }),
+			],
+			"contracts",
+		);
 		expect(b.has(C1)).toBe(false);
 	});
 

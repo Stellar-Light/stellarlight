@@ -94,6 +94,7 @@ const bad = (error: string, extra: Record<string, unknown> = {}) =>
 const COVERAGE = [
 	"The registry layer is every pool, vault and reserve of the AMM, lending, vault, bridge and oracle protocols Stellar Index's protocol registry indexes (Aquarius, Soroswap, SushiSwap v3, Phoenix, Comet, Blend, BLNT, DeFindex, Spectra, Upshift, Rozo, Circle CCTP, Reflector DEX). A DEX, market or vault outside that registry is seen only through the holder sweep, so only where it holds a swept token.",
 	"The holder sweep reads every contract holding a swept token (stablecoins, RWA tokens, and every token integrated or used anywhere): the token's whole event history when it is small enough, else a candidate set. A token's `holderSweep` says how complete it was against Horizon's contract total. USDC's sweep is the furthest from complete (about a third of the amount Horizon counts in contracts on 2026-11-23): most USDC contract holders are smart wallets no candidate set enumerates.",
+	"A holder is tied to a project by the curated on-chain map (a strong link weighs as much as the protocol registry, a labelled one as much as a public directory label; attributionBasis names the tier and evidence), the registry, a public directory label, or the verified contracts list. An address the map's weekly check read absent from mainnet is not attributed. The map's accounts are read on Horizon for every swept classic asset (venue account), tiered by the same floors on the holding and the account's operations in 90 days; XLM is not counted (every account must hold it), nor a contract token an account holds, and an account outside the map is not seen.",
 	"Unattributed holders (summary.unattributedHolders, kind holder_unattributed) are contracts holding the token that no public evidence ties to one project; their balance is real and never counted as any project's support.",
 	"Classic AMM pools are network venues: tiered, no project, counted apart. They are carried for tokens already in the layer; a token seen only in classic pools has no row here (check Horizon /liquidity_pools?reserves=).",
 	"Not covered: the order book (SDEX), aggregators and routers, wallets (a wallet showing what an account holds is never support), centralised exchanges, SoroCredit, and the StellarExpert Top 50 list (its host is paywalled). Absence here is not proof a project does not support a token.",
@@ -391,9 +392,9 @@ function meta(
 		sources: [
 			"Stellar Index (stellarindex.io): protocol registry, contract events, prices, ledger times, directory labels",
 			"Soroban RPC: contract instances, token balances, read-only simulation",
-			"Horizon: classic AMM pools and operations, asset contract totals",
+			"Horizon: classic AMM pools and operations, asset contract totals, the on-chain map's accounts' balances and operations",
 			"Aquarius pools API (rewards config), SEP-42 asset lists, anchors' stellar.toml",
-			"Stellar Light directory: projects, anchors, stablecoins, RWA registry, verified contracts",
+			"Stellar Light directory: projects, anchors, stablecoins, RWA registry, verified contracts, the curated on-chain map's links",
 		],
 		attribution:
 			"Pool, event and price data from Stellar Index, https://stellarindex.io",
