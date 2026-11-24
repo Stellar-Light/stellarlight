@@ -89,6 +89,7 @@ export type ReviewSubmissionParams = QueryOf<"/api/hackathons/review">;
 export type VerifyClaimParams = QueryOf<"/api/verify">;
 export type LocateSourceParams = QueryOf<"/api/sources/locate">;
 export type GetRwaAssetsParams = QueryOf<"/api/rwa">;
+export type GetTokenIntegrationsParams = QueryOf<"/api/tokens/integrations">;
 
 export interface ScoutClientOptions {
 	/** API origin. Defaults to https://stellarlight.xyz */
@@ -393,6 +394,13 @@ export class ScoutClient {
 		params: GetRwaAssetsParams = {},
 	): Promise<Record<string, unknown>> {
 		return this.get("/api/rwa", params);
+	}
+
+	/** Which projects support a token on Stellar, per tier (integrated, used, available, unrated); a code carried by several issuers returns candidates. */
+	getTokenIntegrations(
+		params: GetTokenIntegrationsParams = {},
+	): Promise<Record<string, unknown>> {
+		return this.get("/api/tokens/integrations", params);
 	}
 
 	/** One partner's full profile by slug. */

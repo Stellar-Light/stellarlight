@@ -854,6 +854,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tokens/integrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Which projects support each token on Stellar, how, since when
+         * @description Which projects support any given token across Stellar, and how: edges per token, project/venue and kind, each with its tier (integrated means the project chose the token; used means pools with priced depth and recent trading; available; unrated), pool count, first date with its basis, recent activity, balance, USD depth, evidence, plus SCF awards. Counts stay per tier, never merged into one number. Pass token (contract address, CODE:ISSUER, bare code: several issuers return candidates, never one silent pick) and project (every token that project supports). Refreshed weekly.
+         */
+        get: operations["getTokenIntegrations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -935,7 +955,7 @@ export interface components {
             };
             /** @description Optional endpoint-specific reading note: semantics a consumer needs to interpret the rows correctly (counting basis, absence semantics, handoff pointers). Present only where the endpoint has something non-obvious to say. */
             note?: string;
-            /** @description Present only when there is something to disclose. Two kinds of line share it. (1) A backend read that failed or timed out: the line starts with "backend read failed" and the page may be incomplete; `partial` and `failedReads` carry the same fact as fields. (2) Query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. Two policies, by operation kind, both naming the supported set: the search operations (searchResearch, searchProjects, searchRepos, getPartners, listSkills, getHackathons, getClusters, getLeaderboard, getRfps, getChangelog, getQualityReport, verifyClaim) ignore an unknown parameter and name it here; the registry and lookup operations (listAudits, getChanges, getRwaAssets, getStablecoins, getBuilders, listContracts, searchHackathonBuilds, getPeople, resolveProject, getRepoTrust) reject it with 400 and list the supported parameters in the body (hint, supportedParams or validParams), because a list that looks filtered is worse than a 400. */
+            /** @description Present only when there is something to disclose. Two kinds of line share it. (1) A backend read that failed or timed out: the line starts with "backend read failed" and the page may be incomplete; `partial` and `failedReads` carry the same fact as fields. (2) Query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. Two policies, by operation kind, both naming the supported set: the search operations (searchResearch, searchProjects, searchRepos, getPartners, listSkills, getHackathons, getClusters, getLeaderboard, getRfps, getChangelog, getQualityReport, verifyClaim) ignore an unknown parameter and name it here; the registry and lookup operations (listAudits, getChanges, getRwaAssets, getStablecoins, getTokenIntegrations, getBuilders, listContracts, searchHackathonBuilds, getPeople, resolveProject, getRepoTrust) reject it with 400 and list the supported parameters in the body (hint, supportedParams or validParams), because a list that looks filtered is worse than a 400. */
             warnings?: string[];
             /** @description On searchProjects, searchRepos, getBuilders, searchResearch, listSkills and getHackathons, always present: true when at least one backend read failed or timed out and the page went out anyway, so rows may be missing; false when every read completed. A limit or a filter never sets it. Count real loss on this field, not on the 200 status. When a read that feeds the count failed, counts.total is null with totalBasis "partial-read": that page cannot count its matches. A failed read that only decorates served rows (logos, attributions, code evidence) leaves a known total in place. */
             partial?: boolean;
@@ -956,6 +976,92 @@ export interface components {
                 /** @description projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in `returned` but NOT in `total`). `total` is the keyword match set and is stable across limit AND offset; it used to include these page-one-only rows, so the same query reported total 17 on page one and 6 on page two. On page one `returned` can therefore exceed `total`, and this count is exactly the difference. */
                 semantic?: number;
             };
+        };
+        /** @description A count per tier. */
+        TokenTierCounts: {
+            integrated?: number;
+            used?: number;
+            available?: number;
+            unrated?: number;
+        };
+        /** @description How completely the holder sweep read a token's contract holders. */
+        TokenHolderSweep: {
+            /** @description complete (the token's whole event history was read), partial, could-not-check, candidates only (history too large to read whole), or skipped (no contract can hold it). */
+            sweep?: string;
+            holdersFound?: number;
+            /** @description Exact sum held by the contracts found, live entries only. */
+            foundAmountLive?: string;
+            archivedHoldings?: number;
+            /** @description Contracts holding the asset per Horizon; null for a contract token. */
+            horizonContracts?: number | null;
+            horizonContractsAmount?: string | null;
+            /** @description foundAmountLive as a percentage of Horizon's contract total. */
+            coveredPct?: number | null;
+            readAt?: string;
+        };
+        /** @description One token, one project or venue, one kind: a project's support for a token, or a network venue (no project) that holds it. */
+        TokenIntegrationEdge: {
+            /** @description tokenId|kind|venue|projectSlug */
+            id?: string;
+            /** @description The token's contract id (a classic asset's Stellar Asset Contract id). The identity: a code alone identifies nothing. */
+            tokenId?: string;
+            code?: string | null;
+            /** @description Classic issuer account, native for XLM, null for a contract token. */
+            issuer?: string | null;
+            /** @description Stellar Asset Contract (sac, wrapping classic asset) versus custom contract token (custom); null when unread. */
+            tokenKind?: string | null;
+            homeDomain?: string | null;
+            /** @description The public directory's label for the issuer (or contract token) with its tags, e.g. a scam tag on a decoy; null when unlabelled. */
+            issuerLabel?: string | null;
+            /** @description Directory project; null for a network venue or an unattributed holder. */
+            projectSlug?: string | null;
+            projectName?: string | null;
+            /** @description Protocol (aquarius, soroswap, sushiswap_v3, blend, ...), publisher (anchor, list or issuer), stellar-classic-amm, or holder. */
+            venue?: string;
+            /** @enum {string} */
+            kind?: "dex_pool" | "lending_reserve" | "vault" | "bridge" | "oracle_feed" | "classic_amm_pool" | "anchor_asset" | "asset_list" | "issuer" | "holder" | "holder_unattributed";
+            /** @enum {string} */
+            tier?: "integrated" | "used" | "available" | "unrated";
+            /** @description Why this tier, with the numbers read. */
+            tierBasis?: string;
+            /** @description Pools, contracts or documents behind this edge (the edge's tier is its best one's). */
+            pools?: number;
+            poolsByTier?: components["schemas"]["TokenTierCounts"];
+            /** @description YYYY-MM-DD of the earliest pool; null when not read (anchors, lists, issuers, classic pools). */
+            firstDate?: string | null;
+            firstDateBasis?: string | null;
+            /** @description Newest event of any of its pools. */
+            lastSeenAt?: string | null;
+            /** @description Events (Soroban) or operations (classic) in the 90 days before the read, summed over its pools; null = not read. */
+            events90d?: number | null;
+            events90dBasis?: string | null;
+            /** @description Exact decimal: the token held across this edge's pools or holders; null = not read or not applicable. */
+            balance?: string | null;
+            balanceUsd?: number | null;
+            balanceBasis?: string | null;
+            /** @description Priced depth of the best pool (all its priced legs), or this holding's USD value. */
+            depthUsd?: number | null;
+            depthBasis?: string | null;
+            bestPool?: string;
+            evidenceUrl?: string;
+            /** @description How the edge was read. */
+            method?: string;
+            /** @description Why this project (or none). */
+            attributionBasis?: string;
+            holderSweep?: components["schemas"]["TokenHolderSweep"] | null;
+            readAt?: string;
+            /** @enum {string} */
+            status?: "active" | "ended";
+            endedAt?: string | null;
+            endedReason?: string | null;
+            /** @description From the project row at request time; null when the edge has no project. false is not proof SCF never funded it. */
+            scfAwarded?: boolean | null;
+            /** @description The project's SCF awards (round, award name, budget); null when the edge has no project. */
+            scfRounds?: {
+                round?: number | null;
+                awardName?: string | null;
+                amountUSD?: number | null;
+            }[] | null;
         };
         ErrorResponse: {
             error: string;
@@ -8796,6 +8902,140 @@ export interface operations {
             };
             /** @description Invalid sort, or an unknown query parameter (named with the supported set in hint); this registry rejects rather than ignores it. */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getTokenIntegrations: {
+        parameters: {
+            query?: {
+                /** @description The token: a contract id (C...), CODE:ISSUER (or CODE-ISSUER), XLM, or a bare code. A code is matched case-blind among tokens in this layer; when more than one issuer carries it, the response returns `meta.token.candidates` with `edges` and `summary` null, and the caller picks one by issuer. A code is never resolved to one issuer silently. */
+                token?: string;
+                /** @description Directory project slug: every token that project supports. An unknown slug answers 400. */
+                project?: string;
+                /** @description Only edges of this tier. */
+                tier?: "integrated" | "used" | "available" | "unrated";
+                /** @description Only edges of this kind: dex_pool, lending_reserve, vault, bridge, oracle_feed (protocol contracts), classic_amm_pool (network venue, no project), anchor_asset (an anchor's stellar.toml), asset_list (a SEP-42 list), issuer, holder (a contract tied to a project holds it), holder_unattributed. */
+                kind?: "dex_pool" | "lending_reserve" | "vault" | "bridge" | "oracle_feed" | "classic_amm_pool" | "anchor_asset" | "asset_list" | "issuer" | "holder" | "holder_unattributed";
+                /** @description true: only edges whose project row says SCF awarded; false: only edges whose project row does not. Edges with no project (network venues, unattributed holders) match neither. Read from the project row at request time. */
+                scfAwarded?: boolean;
+                /** @description active (default): edges seen at the last read. ended: edges whose evidence the lane later stopped finding, kept with endedAt and endedReason, never deleted. all: both. */
+                status?: "active" | "ended" | "all";
+                /** @description Max edges (default 50, max 200). */
+                limit?: number;
+                /** @description Edges to skip. */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Edges, per-tier counts and coverage. When a bare code matches more than one token, `edges`, `summary` and `meta.counts` are null and `meta.token.candidates` lists the tokens. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** @description The newest read behind the matched edges; cite it as the as-of time. null when nothing matched. */
+                            asOf?: string | null;
+                            /** @description The oldest read behind the matched edges. */
+                            oldestReadAt?: string | null;
+                            /** @description Echo of the request parameters, not served facts; null = not applied. */
+                            filters?: {
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. */
+                                token?: string | null;
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. */
+                                project?: string | null;
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. */
+                                tier?: string | null;
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. */
+                                kind?: string | null;
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. */
+                                scfAwarded?: boolean | null;
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. */
+                                status?: string;
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. */
+                                limit?: number;
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. */
+                                offset?: number;
+                            };
+                            /** @description How `token` was resolved; null when no token was asked for. */
+                            token?: {
+                                query?: string;
+                                /** @description The contract id the edges are for; null when a code matched no token or several. */
+                                resolvedTokenId?: string | null;
+                                matchedBy?: string | null;
+                                note?: string;
+                                /** @description Tokens in this layer carrying the code, most integrated plus used projects first; that order is not a verdict on which issuer is genuine. null when the token was given as a contract id or CODE:ISSUER. */
+                                candidates?: {
+                                    tokenId?: string;
+                                    code?: string | null;
+                                    issuer?: string | null;
+                                    homeDomain?: string | null;
+                                    issuerLabel?: string | null;
+                                    projectsByTier?: components["schemas"]["TokenTierCounts"];
+                                }[] | null;
+                            } | null;
+                            /** @description matched = edges matching every filter, before limit and offset; returned = edges in this response. null when a code was ambiguous. */
+                            counts?: {
+                                matched?: number;
+                                returned?: number;
+                            } | null;
+                            /** @description What each tier means, with the floors in force. */
+                            tiers?: {
+                                integrated?: string;
+                                used?: string;
+                                available?: string;
+                                unrated?: string;
+                            };
+                            order?: string;
+                            /** @description Per token, how complete the holder sweep was (keyed by token contract id); a token not swept has no entry. */
+                            holderSweeps?: {
+                                [key: string]: components["schemas"]["TokenHolderSweep"];
+                            };
+                            /** @description What the layer reads and what it cannot see. Absence of an edge is not proof a project does not support a token. */
+                            coverage?: string[];
+                            sources?: string[];
+                            attribution?: string;
+                        };
+                        /** @description Counts over every matched edge (all filters applied, before paging). Never one blended number: a project counts once at its best tier; network venues and unattributed holders are counted apart and are never a project's support. The counts are not dated themselves: each counted edge carries its own readAt, and meta.asOf is the newest. */
+                        summary: {
+                            projectsByTier?: components["schemas"]["TokenTierCounts"];
+                            scfFundedByTier?: components["schemas"]["TokenTierCounts"];
+                            tokensByTier?: components["schemas"]["TokenTierCounts"];
+                            networkVenuePoolsByTier?: components["schemas"]["TokenTierCounts"];
+                            unattributedHolders?: {
+                                contracts?: number;
+                                balanceUsd?: number | null;
+                            };
+                        } | null;
+                        edges: components["schemas"]["TokenIntegrationEdge"][] | null;
+                    };
+                };
+            };
+            /** @description An unknown query parameter, an invalid tier, kind, status or scfAwarded value, a token that is not a contract id, CODE:ISSUER or code, or an unknown project slug; the body names the valid values. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The store could not be read, or the refresh lane has not written the layer yet. Not a claim about any token. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

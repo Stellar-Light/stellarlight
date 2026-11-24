@@ -1,0 +1,75 @@
+name: Refresh token integrations
+# workflow-health: signal-steps: ^Idempotence$
+
+# Which projects support each token on Stellar, how, and since when: the
+# token-integrations collection behind /api/tokens/integrations. Reads free
+# sources only (Stellar Index, Soroban RPC read-only calls, Horizon, Aquarius's
+# public pools API, SEP-42 lists, anchors' stellar.toml files, the directory's
+# public API); nothing is signed or sent and stellar.expert is never called.
+#
+# Every run prints the planned DB diff (create / update / end, and rows kept
+# because their source could not be read). A row whose evidence is gone is
+# ended with a date and a reason, never deleted; could-not-check never ends a
+# row. An instrument failure (registry, directory or rewards config unread)
+# exits 2 and writes nothing.
+#
+# Manual dispatch is a dry run unless execute=true. Scheduled runs write only
+# once the repository variable TOKEN_INTEGRATIONS_WRITE is "on": until an
+# owner has read a dry run and an executed run read back cleanly, every
+# scheduled run is a dry run that prints its plan.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+  schedule:
+    - cron: "23 4 * * 1" # Mondays 04:23 UTC, off the hour
+
+concurrency:
+  group: refresh-token-integrations
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    # The holder sweep reads about 300,000 balance keys at one request at a
+    # time; a full run took close to two hours when measured privately.
+    timeout-minutes: 240
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      CACHE_DIR: ${{ runner.temp }}/token-integrations-cache
+      WRITE: ${{ ((github.event_name == 'schedule' && vars.TOKEN_INTEGRATIONS_WRITE == 'on') || inputs.execute) && 'yes' || 'no' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Refresh (dry run unless writing)
+        run: pnpm exec tsx scripts/refresh-token-integrations.ts --cache "$CACHE_DIR" ${{ env.WRITE == 'yes' && '--execute' || '' }}
+      # An execute must leave nothing planned: the same reads (this run's
+      # cache, no network) planned again against the store just written must
+      # plan 0 writes. Anything else is a write that did not persist as sent,
+      # or a second writer on these rows.
+      - name: Idempotence
+        if: env.WRITE == 'yes'
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm exec tsx scripts/refresh-token-integrations.ts --cache "$CACHE_DIR" --replan | tee replan.log
+          n=$(grep -oE '^replan: writes=[0-9]+' replan.log | cut -d= -f2)
+          if [ -z "$n" ]; then
+            echo "::error::the re-plan printed no plan line (could not re-plan)"
+            exit 1
+          fi
+          echo "### Idempotence: $n write(s) planned after execute" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$n" != "0" ]; then
+            echo "::error::$n write(s) still planned after execute"
+            exit 1
+          fi
