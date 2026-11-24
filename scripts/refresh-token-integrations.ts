@@ -29,9 +29,14 @@
  *
  * Removal is explicit: a stored row this run does not produce is ended (kept,
  * dated, with the reason), and only when the read that produced it finished
- * this run; could-not-check never ends a row. Every source answer is cached
- * for the run (2xx and 404 only), so --replan re-plans the same reads against
- * the store and must plan 0 writes after an execute.
+ * this run; could-not-check never ends a row, and never replaces a stored
+ * judged tier: a row this run reads unrated or lower only because a price,
+ * a balance or an activity read could not be taken keeps its stored reading,
+ * its basis marked "not refreshed <date>: why" (the plan lists it under
+ * keep). A price Stellar Index withholds (price_withheld_reason) is such a
+ * read; a token it has no price for at all is not. Every source answer is
+ * cached for the run (2xx and 404 only), so --replan re-plans the same reads
+ * against the store and must plan 0 writes after an execute.
  *
  * Exit 2: an instrument failure (the registry, the directory or the rewards
  * config could not be read): nothing written. Exit 1: a write failed or did
@@ -70,6 +75,7 @@ import {
 	addDecimals,
 	aggregate,
 	type Edge,
+	edgeUnread,
 	holderTier,
 	type IntegrationRow,
 	type Kind,
@@ -82,6 +88,7 @@ import {
 	priorHolderContracts,
 	ROW_FIELDS,
 	registryTokenId,
+	rowKey,
 	type StoredRow,
 	summarize,
 	TIER_RANK,
@@ -90,6 +97,7 @@ import {
 	XLM_SAC,
 } from "../src/lib/token-integrations";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const argv = process.argv.slice(2);
 const flag = (f: string) => argv.includes(f);
@@ -299,6 +307,7 @@ async function get(url: string, text = false): Promise<Got> {
 async function si(path: string) {
 	const r = await get(SI + path);
 	return {
+		status: r.status,
 		ok: r.status === 200,
 		data: r.status === 200 ? obj(obj(r.data).data) : null,
 		readAt: r.readAt,
@@ -461,6 +470,16 @@ async function balances(pairs: Array<[string, string]>) {
 	);
 	return { out, failed };
 }
+
+/** Tokens whose price this run could not take: Stellar Index withheld it or
+ * could not answer. A token it has no price for at all is not here. */
+const unreadPrice = new Map<string, string>();
+/** One leg of an edge, as edgeUnread reads it. */
+const leg = (token: string | null, code: string, balance: string | null) => ({
+	code,
+	balance,
+	priceUnread: (token && unreadPrice.get(token)) || null,
+});
 
 const toDecimal = (raw: string, decimals: number) => {
 	const neg = raw.startsWith("-");
@@ -1157,7 +1176,16 @@ async function main() {
 			id.homeDomain = str(a.data.home_domain);
 			const p = Number(a.data.price_usd);
 			if (a.data.price_usd != null && Number.isFinite(p)) price.set(t, p);
-		}
+			else if (str(a.data.price_withheld_reason))
+				unreadPrice.set(
+					t,
+					`Stellar Index withheld it: ${a.data.price_withheld_reason}`,
+				);
+		} else if (a.status !== 404)
+			unreadPrice.set(
+				t,
+				`Stellar Index /assets could not be read (http ${a.status})`,
+			);
 		if (!id.code && assetOf.has(t)) {
 			[id.code, id.issuer] = assetOf.get(t) as [string, string];
 			id.tokenKind = "sac";
@@ -1360,12 +1388,16 @@ async function main() {
 		);
 	}
 	for (const [pool, rs] of byPool) {
-		const legs = rs
+		const holds = rs
 			.filter((r) => r.kind !== "oracle_feed" && r.role !== "token_minter")
-			.map((r) => {
-				const b = bal.get(`${pool}|${r.token}`)?.balance ?? null;
-				return { balance: b, usd: usdOf(b, price.get(r.token)) };
-			});
+			.map((r) => ({
+				token: r.token,
+				balance: bal.get(`${pool}|${r.token}`)?.balance ?? null,
+			}));
+		const legs = holds.map((h) => ({
+			balance: h.balance,
+			usd: usdOf(h.balance, price.get(h.token)),
+		}));
 		const proto = rs[0].venue;
 		const cp =
 			proto === "soroswap" ||
@@ -1393,6 +1425,13 @@ async function main() {
 			a?.n ?? null,
 			a?.basis ?? null,
 			depth,
+		);
+		const unread = edgeUnread(
+			tier.tier,
+			a && a.n !== null ? null : (a?.basis ?? "not read"),
+			holds.map((h) =>
+				leg(h.token, ident.get(h.token)?.code ?? h.token, h.balance),
+			),
 		);
 		const who = slugOk.get(proto) ?? { slug: null, basis: "" };
 		for (const r of rs) {
@@ -1424,6 +1463,7 @@ async function main() {
 						? `${SI}/protocols/${proto}`
 						: r.evidenceUrl,
 				readAt: r.readAt,
+				unread,
 			});
 		}
 	}
@@ -1505,6 +1545,7 @@ async function main() {
 			.map(obj)
 			.map((x) => ({
 				token: tokenOfAsset(String(x.asset)),
+				code: String(x.asset).split(":")[0],
 				amount: String(x.amount),
 			}));
 		if (!legs.some((l) => l.token && layer.has(l.token))) continue;
@@ -1541,6 +1582,12 @@ async function main() {
 			basis || null,
 			depth,
 		);
+		// activity skipped by design (priced depth under $100) is not a failed read
+		const unread = edgeUnread(
+			tier.tier,
+			n === null && basis.startsWith("could-not-check") ? basis : null,
+			legs.map((l) => leg(l.token, l.code, l.amount)),
+		);
 		for (const l of legs) {
 			if (!l.token || !layer.has(l.token) || !inScope(l.token)) continue;
 			edges.push({
@@ -1567,6 +1614,7 @@ async function main() {
 				tierBasis: tier.basis,
 				evidenceUrl: `${HORIZON}/liquidity_pools/${id}`,
 				readAt: String(p._readAt),
+				unread,
 			});
 		}
 	}
@@ -1659,7 +1707,20 @@ async function main() {
 			return `could-not-check: ${s.source} was not read completely this run`;
 		return null;
 	};
-	const plan = planWrites(rows, stored, judge, RUN_AT);
+	const edgesOf = new Map<string, Edge[]>();
+	for (const e of edges) {
+		const k = rowKey(e.token, e.kind, e.venue, e.projectSlug);
+		const g = edgesOf.get(k);
+		if (g) g.push(e);
+		else edgesOf.set(k, [e]);
+	}
+	const plan = planWrites(
+		rows,
+		stored,
+		judge,
+		RUN_AT,
+		(k) => edgesOf.get(k) ?? [],
+	);
 	const line = (r: IntegrationRow) =>
 		`${r.code ?? r.tokenId.slice(0, 8)} ${r.kind} ${r.venue} ${r.projectSlug ?? "(no project)"} | ${r.tier}: ${r.tierBasis} | pools ${r.pools}${r.balance ? ` | balance ${r.balance}` : ""}${r.firstDate ? ` | since ${r.firstDate} (${r.firstDateBasis})` : ""}${r.kind === "holder" ? ` | ${r.bestPool}: ${r.attributionBasis}` : ""}`;
 	console.log(
@@ -2101,6 +2162,9 @@ async function holderSweep(
 			eventsBasis: a.basis,
 			usd,
 		});
+		const unread = edgeUnread(tier.tier, a.n === null ? a.basis : null, [
+			leg(h.t, ident.get(h.t)?.code ?? h.t, h.balance),
+		]);
 		const first =
 			swept.get(h.t)?.state === "complete"
 				? (swept.get(h.t)?.first.get(h.c) ?? null)
@@ -2130,6 +2194,7 @@ async function holderSweep(
 			tierBasis: tier.basis,
 			evidenceUrl: `${SI}/contracts/${h.c}`,
 			readAt: a.readAt,
+			unread,
 		});
 	}
 	// completeness per token: live holdings found against Horizon's contract total
@@ -2229,6 +2294,9 @@ async function accountSweep(
 				eventsBasis: basis,
 				usd,
 			});
+			const unread = edgeUnread(tier.tier, n === null ? basis : null, [
+				leg(h.token, ident.get(h.token)?.code ?? h.token, h.balance),
+			]);
 			out.push({
 				token: h.token,
 				kind: "holder",
@@ -2252,6 +2320,7 @@ async function accountSweep(
 				tierBasis: tier.basis,
 				evidenceUrl: `${HORIZON}/accounts/${g}`,
 				readAt: r.readAt,
+				unread,
 			});
 		}
 	}
@@ -2291,16 +2360,19 @@ function summary(
 	);
 }
 
-// exitCode, never exit(0): a stomped exitCode reads as green.
+// exitCode, never exit(0): a stomped exitCode reads as green. The exit waits
+// for stdout and stderr to drain: process.exit() dropped the tail of a dry
+// run's plan on the runner (run 45443354264) and still exited 0.
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		if (e instanceof InstrumentFailure) {
 			console.error(
 				`✗ instrument failure, nothing written (exit 2): ${e.message}`,
 			);
-			process.exit(2);
+			exitAfterFlush(2);
+			return;
 		}
 		console.error("Fatal:", e);
-		process.exit(1);
+		exitAfterFlush(1);
 	});

@@ -319,6 +319,35 @@ export interface Edge {
 	tierBasis: string;
 	evidenceUrl: string;
 	readAt: string;
+	/** Why this edge reads unrated because a reading could not be taken this
+	 * run (edgeUnread); not stored. */
+	unread?: string | null;
+}
+
+/** Why an unrated edge is unrated because a reading could not be taken this
+ * run, or null when it was read (or is not unrated): its activity, a leg's
+ * balance, or a leg's price the source withheld or could not serve this run
+ * (`priceUnread`). A token the source has no price for at all is a reading
+ * (checked, no price): an edge unrated on it alone is a reading too. Any one
+ * of these could move the edge off unrated, so any one makes it unread. */
+export function edgeUnread(
+	tier: Tier,
+	activityUnread: string | null,
+	legs: Array<{
+		code: string;
+		balance: string | null;
+		priceUnread: string | null;
+	}>,
+): string | null {
+	if (tier !== "unrated") return null;
+	const why = activityUnread
+		? [`activity was not read: ${activityUnread}`]
+		: [];
+	for (const l of legs)
+		if (l.balance === null) why.push(`the ${l.code} balance was not read`);
+		else if (l.priceUnread && Number(l.balance) !== 0)
+			why.push(`the ${l.code} price was not read (${l.priceUnread})`);
+	return why.length ? [...new Set(why)].join("; ") : null;
 }
 
 export interface TokenIdentity {
@@ -534,9 +563,50 @@ export interface WritePlan {
 		key: string;
 		data: Pick<IntegrationRow, "status" | "endedAt" | "endedReason">;
 	}>;
-	/** Stored active rows this run could not judge: never ended. */
+	/** Stored active rows this run could not judge: never ended, and a
+	 * judged tier is never replaced by an unread one (heldReading). */
 	keep: Array<{ key: string; reason: string }>;
 	unchanged: number;
+}
+
+/**
+ * Why this run could not re-judge a stored row's judged tier, or null when
+ * the reading that replaces it was taken. A used row stands on the pool that
+ * carried it (bestPool): held when that pool now reads unrated for an unread
+ * input. An available row stands on all its pools (available ranks last):
+ * held when every pool that now reads unrated does so for an unread input. A
+ * row whose best pool this run did not produce is held when its source was
+ * not read completely (`sourceUnread`, the judge's reason). Integrated rests
+ * on configuration, not market reads: a pool read below it is a reading.
+ */
+export function heldReading(
+	stored: StoredRow,
+	edges: Edge[],
+	sourceUnread: string | null,
+): string | null {
+	if (stored.tier === "available") {
+		const un = edges.filter((e) => e.tier === "unrated");
+		return un.length && un.every((e) => e.unread)
+			? [...new Set(un.map((e) => e.unread))].join("; ")
+			: null;
+	}
+	const best = edges.find((e) => e.pool === stored.bestPool);
+	if (!best) return sourceUnread;
+	return stored.tier === "used" && best.tier === "unrated"
+		? (best.unread ?? null)
+		: null;
+}
+
+const NOT_REFRESHED = / \(not refreshed \d{4}-\d{2}-\d{2}: .*\)$/;
+
+/** The stored row as it was read, its basis marked with this run's date and
+ * why it could not be refreshed (one mark, replaced on each run). */
+function heldRow(s: StoredRow, why: string, runAt: string): IntegrationRow {
+	const row = Object.fromEntries(
+		ROW_FIELDS.map((f) => [f, s[f] ?? null]),
+	) as unknown as IntegrationRow;
+	row.tierBasis = `${String(s.tierBasis ?? "").replace(NOT_REFRESHED, "")} (not refreshed ${runAt.slice(0, 10)}: ${why})`;
+	return row;
 }
 
 /**
@@ -566,14 +636,19 @@ export function priorHolderContracts(
  * The DB diff. A stored active row this run did not produce is ended (kept,
  * dated, with the reason) only when its source was read completely this run
  * and its token was in the run's scope; otherwise it is kept untouched:
- * could-not-check never removes. A row that comes back is reactivated.
- * Planning the same reads against the store a plan produced plans nothing.
+ * could-not-check never removes. A stored judged tier that this run reads
+ * unrated or lower only for want of a reading (heldReading, over the row's
+ * edges this run) is kept as stored, its basis marked not refreshed: an
+ * unread input never overwrites a reading. A row that comes back is
+ * reactivated. Planning the same reads against the store a plan produced
+ * plans nothing.
  */
 export function planWrites(
 	desired: IntegrationRow[],
 	stored: StoredRow[],
 	judge: (row: StoredRow) => string | null,
 	runAt: string,
+	edgesOf: (key: string) => Edge[] = () => [],
 ): WritePlan {
 	const plan: WritePlan = {
 		create: [],
@@ -584,12 +659,29 @@ export function planWrites(
 	};
 	const byKey = new Map(stored.map((s) => [s.key, s]));
 	const want = new Set<string>();
-	for (const row of desired) {
+	for (let row of desired) {
 		want.add(row.key);
 		const s = byKey.get(row.key);
 		if (!s) {
 			plan.create.push(row);
 			continue;
+		}
+		const was = s.tier;
+		if (
+			s.status !== "ended" &&
+			was &&
+			was !== "unrated" &&
+			was !== row.tier &&
+			(row.tier === "unrated" || TIER_RANK[row.tier] > TIER_RANK[was])
+		) {
+			const why = heldReading(s, edgesOf(row.key), judge(s));
+			if (why) {
+				plan.keep.push({
+					key: s.key,
+					reason: `kept ${was} as read at ${s.readAt}; reads ${row.tier} this run only because ${why}`,
+				});
+				row = heldRow(s, why, runAt);
+			}
 		}
 		const changed = changedFields(row, s);
 		if (changed.length) plan.update.push({ id: s.id, row, changed });
