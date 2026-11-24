@@ -24,6 +24,27 @@ describe("GitHub Actions workflow files", () => {
 		expect(FILES.length).toBeGreaterThan(50);
 	});
 
+	// Third instance of the class, 2026-11-23: refresh-token-integrations.yml set
+	// `CACHE_DIR: ${{ runner.temp }}/...` in its job-level env. The `runner`
+	// context exists only inside steps, so GitHub rejected the file outright
+	// (the dispatch API answered 422 "Unrecognized named-value: 'runner'") and
+	// its weekly schedule could never have run. YAML parses fine; only the
+	// context rule catches it.
+	it.each(FILES)("%s — no runner context in workflow- or job-level env", (file) => {
+		// biome-ignore lint/suspicious/noExplicitAny: workflow YAML
+		const doc = yaml.load(readFileSync(join(DIR, file), "utf8")) as any;
+		const bad: string[] = [];
+		const scan = (env: unknown, where: string) => {
+			if (!env || typeof env !== "object") return;
+			for (const [k, v] of Object.entries(env as Record<string, unknown>))
+				if (typeof v === "string" && /\$\{\{[^}]*\brunner\./.test(v)) bad.push(`${where}.env.${k}`);
+		};
+		scan(doc?.env, "workflow");
+		for (const [id, job] of Object.entries((doc?.jobs ?? {}) as Record<string, { env?: unknown }>))
+			scan(job?.env, `jobs.${id}`);
+		expect(bad).toEqual([]);
+	});
+
 	it.each(FILES)("%s — parses with no duplicate keys", (file) => {
 		const src = readFileSync(join(DIR, file), "utf8");
 		// Default schema: duplicate mapping keys throw, matching Actions' parser.
