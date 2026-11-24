@@ -43,6 +43,13 @@
  * that later got funded can keep the product and drop the hackathon repo,
  * as PayZoll (no repo) and YieldBack.Cash (repo gone) did, and then no repo
  * rule sees it.
+ *
+ * Last, a link a person verified (src/data/curated-build-links.ts), for a
+ * submission no rule links or could lose: each record names its evidence (the
+ * same repo, the team's own accounts, the project's own page naming the
+ * build), never a name alone. It names the project; the link keeps the
+ * basis of a rule that finds that same project, and is `curated` otherwise
+ * (withCuratedLink).
  */
 
 /** owner/name of a GitHub repository URL, lowercased. null for an account or
@@ -78,6 +85,7 @@ export const LINK_BASES = [
 	"moved-owner-and-name",
 	"scf-page-and-name",
 	"submission-links-and-name",
+	"curated",
 ] as const;
 /** reviewSubmission: how the link was resolved, and its check ids.
  * Here (pure) so the spec can spread them. */
@@ -144,6 +152,34 @@ export function indexProjectRepos(
 		}
 	}
 	return out;
+}
+
+/** slug -> the project a curated link (src/data/curated-build-links.ts)
+ * names: a duplicate row resolves to its canonical project; a hidden draft,
+ * or a slug no row holds, is absent. */
+export function indexProjectSlugs(
+	rows: ProjectRepoRow[],
+): Map<string, LinkedProject> {
+	const names = new Map(rows.map((r) => [r.slug, r.name]));
+	const out = new Map<string, LinkedProject>();
+	for (const r of rows) {
+		const slug = r.canonicalSlug || (r.status === "Draft" ? null : r.slug);
+		if (slug) out.set(r.slug, { slug, name: names.get(slug) ?? r.name });
+	}
+	return out;
+}
+
+/** A row's link once its curated record is read: the record's project,
+ * under the basis of the rule that found it when one did, else `curated`
+ * (a rule that found another project is overruled: the record is a
+ * person's reading of named evidence). No record, or one whose project is
+ * not listed (undefined): the rules' link stands. */
+export function withCuratedLink(
+	found: LinkedProject | null,
+	curated: LinkedProject | undefined,
+): LinkedProject | null {
+	if (!curated || found?.slug === curated.slug) return found;
+	return { slug: curated.slug, name: curated.name, basis: "curated" };
 }
 
 /** Hosts that belong to a platform, not to one product: a demo or website
