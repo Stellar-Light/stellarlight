@@ -1484,6 +1484,14 @@ export interface Stablecoin {
 	 */
 	volume24hUSD?: number | null;
 	/**
+	 * Units of the asset moved by `transfer` events of its token contract in the 24 hours before measuredAt (Soroban RPC): payments, path payment and trade legs, pool and contract transfers. Issuer mints and burns excluded. Gross. Null = not measured, never carried forward.
+	 */
+	transferVolume24h?: number | null;
+	/**
+	 * transferVolume24h × priceUSD. Null when either is null.
+	 */
+	transferVolume24hUSD?: number | null;
+	/**
 	 * Stellar Expert's lifetime count of payment operations for this asset (not SDEX trades, not an amount). Internal bookkeeping — refresh-stablecoins.ts diffs it against yesterday's snapshot into paymentsCount24h below; not comparable across assets on its own.
 	 */
 	paymentsCountLifetime?: number | null;
@@ -1555,6 +1563,11 @@ export interface StablecoinSnapshot {
 	marketCapUSD?: number | null;
 	holders?: number | null;
 	volume24hUSD?: number | null;
+	/**
+	 * Units moved by the asset's token contract transfer events in the 24 hours before measuredAt; null when not measured.
+	 */
+	transferVolume24h?: number | null;
+	transferVolume24hUSD?: number | null;
 	/**
 	 * Stellar Expert's lifetime payment-op counter on this day — the raw value the CURRENT row's paymentsCount24h is diffed from, same role supply plays for supplyChange7d.
 	 */
@@ -4232,6 +4245,8 @@ export interface StablecoinsSelect<T extends boolean = true> {
 	marketCapUSD?: T;
 	holders?: T;
 	volume24hUSD?: T;
+	transferVolume24h?: T;
+	transferVolume24hUSD?: T;
 	paymentsCountLifetime?: T;
 	paymentsCount24h?: T;
 	paymentsCountHistory?: T;
@@ -4260,6 +4275,8 @@ export interface StablecoinSnapshotsSelect<T extends boolean = true> {
 	marketCapUSD?: T;
 	holders?: T;
 	volume24hUSD?: T;
+	transferVolume24h?: T;
+	transferVolume24hUSD?: T;
 	paymentsCountLifetime?: T;
 	basis?: T;
 	measuredAt?: T;

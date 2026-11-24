@@ -50,6 +50,8 @@ export interface StoreRow {
 	marketCapUSD?: number | null;
 	holders?: number | null;
 	volume24hUSD?: number | null;
+	transferVolume24h?: number | null;
+	transferVolume24hUSD?: number | null;
 	paymentsCount24h?: number | null;
 	supplyChange7d?: number | null;
 	logoUrl?: string | null;
@@ -130,6 +132,14 @@ export interface StablecoinRow {
 	 *  when the 24h figure is absent. NOT payment/transfer volume; see
 	 *  paymentsCount24h for the payments-side signal we can actually measure. */
 	volume24hUSD: number | null;
+	/** Units of the asset (its own peg) moved by `transfer` events of its
+	 *  token contract in the 24 hours before updatedAt: payments, path
+	 *  payment and trade legs, pool and contract transfers; issuer mints and
+	 *  burns excluded; gross. Null = not measured, never zero. */
+	transferVolume24h: number | null;
+	/** transferVolume24h × priceUSD; comparable across rows. Null when
+	 *  either is null. */
+	transferVolume24hUSD: number | null;
 	/** Count (not a dollar amount) of payment operations in the last ~24h —
 	 *  mint, redemption and peer-to-peer payments undifferentiated, and NOT
 	 *  adjusted for CEX/DeFi/infrastructure activity. Stellar Expert's
@@ -519,6 +529,8 @@ export function storeRowToApi(d: StoreRow): StablecoinRow {
 		priceBasis,
 		holders: num(d.holders),
 		volume24hUSD: num(d.volume24hUSD),
+		transferVolume24h: num(d.transferVolume24h),
+		transferVolume24hUSD: num(d.transferVolume24hUSD),
 		paymentsCount24h: num(d.paymentsCount24h),
 		supplyChange7d: num(d.supplyChange7d),
 		logoUrl: d.logoUrl ?? null,
@@ -539,8 +551,10 @@ function sortValue(r: StablecoinRow, sort: StablecoinSort): number | null {
 			return r.supply;
 		case "holders":
 			return r.holders;
+		// 24h transfer volume: SDEX volume (volume24hUSD) has had no source
+		// since 2026-11-06, so this ranked nothing.
 		case "volume":
-			return r.volume24hUSD;
+			return r.transferVolume24hUSD;
 	}
 }
 

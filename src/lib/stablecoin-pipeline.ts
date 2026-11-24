@@ -16,6 +16,8 @@
  *   Horizon: the asset record (existence, supply as the balances held
  *     outside the issuer, and open trustlines in every authorization state)
  *   CoinGecko: live FX for every peg, via the XLM cross
+ *   Soroban RPC: the asset's token contract events, summed into 24h
+ *     transfer volume (stablecoin-transfer-volume.ts)
  *   <domain>/.well-known/stellar.toml: the issuer's own logo
  *   <issuer account's home_domain>/.well-known/stellar.toml: the issuer of
  *     record (ORG_NAME), read off the account Horizon reports
@@ -27,10 +29,10 @@
  * continuous with the explorer's on most assets; onchain-sources.ts records
  * where the two differ (checked 2026-11-22).
  *
- * NOT a source here: dollar-denominated payment volume. Horizon's payments
- * and operations collections take no asset filter, so one asset's payments
- * are a full-ledger scan; SDF's Hubble warehouse and Dune hold it, and both
- * need accounts and keys this repo does not have (researched 2026-09-02).
+ * NOT a source here: Horizon's payments and operations collections, which
+ * take no asset filter (one asset's payments are a full-ledger scan). Value
+ * moved is read instead from the asset's token contract events, which every
+ * classic movement emits since protocol 23 (CAP-67; checked 2026-11-24).
  */
 
 import {
@@ -43,6 +45,10 @@ import {
 	supplyOfAssetRecord,
 	trustlinesOfAssetRecord,
 } from "./horizon-supply";
+import {
+	type TransferWindow,
+	transferVolume,
+} from "./stablecoin-transfer-volume";
 import {
 	type IssuerOfRecordCheck,
 	namedIssuingParty,
@@ -124,6 +130,12 @@ export interface MeasuredStablecoin {
 	 *  against yesterday's snapshot into the period metric that IS
 	 *  comparable, `paymentsCount24h`. */
 	paymentsCountLifetime: number | null;
+	/** Units of the asset moved by its token contract's `transfer` events in
+	 *  the run's 24-hour window (stablecoin-transfer-volume.ts): issuer mints
+	 *  and burns excluded, DEX trade legs included. Null = not measured. */
+	transferVolume24h: number | null;
+	/** transferVolume24h × priceUSD. Null when either is null. */
+	transferVolume24hUSD: number | null;
 	logoUrl: string | null;
 	logoSource: "toml" | "toml-org" | "fallback" | "country-flag" | "none";
 	/** How each figure was obtained — a consumer can weigh a stale row. */
@@ -911,7 +923,8 @@ export function storedMeasuredAt(
  *  blanks a good number in current state); priceBasis moves with priceUSD.
  *  Volume and the payment count are stored as measured, never carried: no
  *  free source reports them since 2026-11-06, so a carried value would be
- *  the last paid reading served under a later date. */
+ *  the last paid reading served under a later date. Transfer volume is a
+ *  24-hour figure, so it is never carried either: a missed read is null. */
 export function figuresToStore(
 	m: Pick<
 		MeasuredStablecoin,
@@ -922,6 +935,8 @@ export function figuresToStore(
 		| "holders"
 		| "volume24hUSD"
 		| "paymentsCountLifetime"
+		| "transferVolume24h"
+		| "transferVolume24hUSD"
 	>,
 	prev: Record<string, unknown> | null | undefined,
 ) {
@@ -942,6 +957,8 @@ export function figuresToStore(
 		holders: keep(m.holders, prev?.holders),
 		volume24hUSD: m.volume24hUSD,
 		paymentsCountLifetime: m.paymentsCountLifetime,
+		transferVolume24h: m.transferVolume24h,
+		transferVolume24hUSD: m.transferVolume24hUSD,
 	};
 	return { figures, kept };
 }
@@ -1043,6 +1060,8 @@ function withRegistryNotes(
 /** Measure one asset. Never throws: a failure comes back as an unmeasured row. */
 export async function measureStablecoin(
 	asset: StablecoinAsset,
+	/** The run's 24-hour transfer window; without one, no transfer volume. */
+	transfers: TransferWindow | null = null,
 ): Promise<MeasuredStablecoin> {
 	const now = new Date().toISOString();
 	// Read for every row, whatever happens to its metrics below: who issues
@@ -1131,6 +1150,8 @@ export async function measureStablecoin(
 			holders: asset.hardcodedData.holders,
 			volume24hUSD: null,
 			paymentsCountLifetime: null,
+			transferVolume24h: null,
+			transferVolume24hUSD: null,
 			logoUrl,
 			logoSource,
 			basis: "curated-static",
@@ -1155,6 +1176,8 @@ export async function measureStablecoin(
 				holders: null,
 				volume24hUSD: null,
 				paymentsCountLifetime: null,
+				transferVolume24h: null,
+				transferVolume24hUSD: null,
 				logoUrl,
 				logoSource,
 				basis: "unmeasured",
@@ -1168,6 +1191,14 @@ export async function measureStablecoin(
 			basis: priceBasis,
 			note: priceNote,
 		} = await unitPriceUSD(asset);
+		// Only on a live row: an unmeasured one keeps older figures under their
+		// older date, and a fresh volume beside them would read as theirs.
+		const moved =
+			supply != null && transfers
+				? await transferVolume(asset.code, asset.issuer, transfers).catch(
+						() => null,
+					)
+				: null;
 
 		return {
 			...base,
@@ -1180,6 +1211,8 @@ export async function measureStablecoin(
 			// (2026-11-06): null, never an estimate.
 			volume24hUSD: null,
 			paymentsCountLifetime: null,
+			transferVolume24h: moved?.units ?? null,
+			transferVolume24hUSD: moved && price != null ? moved.units * price : null,
 			logoUrl,
 			logoSource,
 			basis: supply == null ? "unmeasured" : "live",
@@ -1205,6 +1238,8 @@ export async function measureStablecoin(
 			holders: null,
 			volume24hUSD: null,
 			paymentsCountLifetime: null,
+			transferVolume24h: null,
+			transferVolume24hUSD: null,
 			logoUrl,
 			logoSource,
 			basis: "unmeasured",
@@ -1219,11 +1254,14 @@ async function measureBatch(
 	assets: StablecoinAsset[],
 	concurrency: number,
 	staggerMs: number,
+	transfers: TransferWindow | null,
 ): Promise<MeasuredStablecoin[]> {
 	const out: MeasuredStablecoin[] = [];
 	for (let i = 0; i < assets.length; i += concurrency) {
 		const batch = assets.slice(i, i + concurrency);
-		out.push(...(await Promise.all(batch.map(measureStablecoin))));
+		out.push(
+			...(await Promise.all(batch.map((a) => measureStablecoin(a, transfers)))),
+		);
 		if (i + concurrency < assets.length) await sleep(staggerMs);
 	}
 	return out;
@@ -1266,9 +1304,16 @@ export async function measureRegistry(
 	{
 		concurrency = 3,
 		staggerMs = 700,
-	}: { concurrency?: number; staggerMs?: number } = {},
+		transfers = null,
+	}: {
+		concurrency?: number;
+		staggerMs?: number;
+		/** One 24-hour window for every row (transferWindow()), so the rows
+		 *  sum to a total over the same hours. */
+		transfers?: TransferWindow | null;
+	} = {},
 ): Promise<MeasuredStablecoin[]> {
-	const out = await measureBatch(assets, concurrency, staggerMs);
+	const out = await measureBatch(assets, concurrency, staggerMs, transfers);
 
 	const retryAt = out
 		.map((m, i) => (m.note?.includes(RATE_LIMIT_MARK) ? i : -1))
@@ -1280,6 +1325,7 @@ export async function measureRegistry(
 		retryAt.map((i) => assets[i]),
 		1,
 		1000,
+		transfers,
 	);
 	retryAt.forEach((origIndex, j) => {
 		out[origIndex] = retried[j];

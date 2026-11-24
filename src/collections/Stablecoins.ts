@@ -208,6 +208,21 @@ export const Stablecoins: CollectionConfig = {
 			},
 		},
 		{
+			name: "transferVolume24h",
+			type: "number",
+			admin: {
+				description:
+					"Units of the asset moved by `transfer` events of its token contract in the 24 hours before measuredAt (Soroban RPC): payments, path payment and trade legs, pool and contract transfers. Issuer mints and burns excluded. Gross. Null = not measured, never carried forward.",
+			},
+		},
+		{
+			name: "transferVolume24hUSD",
+			type: "number",
+			admin: {
+				description: "transferVolume24h × priceUSD. Null when either is null.",
+			},
+		},
+		{
 			name: "paymentsCountLifetime",
 			type: "number",
 			admin: {
