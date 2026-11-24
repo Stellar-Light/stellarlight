@@ -570,8 +570,12 @@ describe("priorHolderContracts", () => {
 			row({ kind: "holder", bestPool: G1 }), // an account holder: Horizon reads it
 			row({ kind: "holder", bestPool: C2, status: "ended" }),
 			row({ kind: "dex_pool", bestPool: C2, tokenId: "U" }),
+			row({ kind: "holder", bestPool: G1, tokenId: "V" }), // swept still, nothing to re-read
 		]);
-		expect([...m]).toEqual([["T", new Set([C1, C2])]]);
+		expect([...m]).toEqual([
+			["T", new Set([C1, C2])],
+			["V", new Set()],
+		]);
 	});
 });
 
