@@ -12,6 +12,12 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { GET as journeyGET } from "@/app/api/cohort/journey/route";
 import { GET as projectsGET } from "@/app/api/cohort/projects/route";
 import { GET as retentionGET } from "@/app/api/cohort/retention/route";
+import { spec } from "@/lib/openapi-spec";
+import {
+	operationOf,
+	responseSchema,
+	undeclaredInServed,
+} from "../../../scripts/contract/served-shape";
 import {
 	type CohortBundle,
 	type CohortProject,
@@ -289,4 +295,37 @@ describe("cohort funnel", () => {
 			launchAtLeast180DaysOld: 0,
 		});
 	});
+});
+
+/** The cohort's bodies are partner-only, so served-bodies-spec.test.ts
+ * records none in its public fixture (PARTNER_ONLY there); each is held
+ * to the spec here, on this file's synthetic bundle. */
+const COHORT_SPEC_CHECKED = [
+	"/api/cohort/retention",
+	"/api/cohort/projects",
+	"/api/cohort/journey?slug=alpha",
+] as const;
+
+describe("cohort bodies against the spec", () => {
+	const gets = {
+		"/api/cohort/retention": retentionGET,
+		"/api/cohort/projects": projectsGET,
+		"/api/cohort/journey?slug=alpha": journeyGET,
+	};
+	it.each(COHORT_SPEC_CHECKED)(
+		"%s serves nothing its schema does not declare",
+		async (url) => {
+			const res = await gets[url](req(url, { "x-api-key": "sk_cohort_ok" }));
+			expect(res.status).toBe(200);
+			const op = operationOf(spec, url);
+			expect(op, `no GET operation serves ${url}`).toBeDefined();
+			expect(
+				undeclaredInServed(
+					spec,
+					responseSchema(spec, op?.path ?? ""),
+					await res.json(),
+				),
+			).toEqual([]);
+		},
+	);
 });
