@@ -13,7 +13,10 @@ export function useStellarTVL() {
 	return useQuery<number | null>({
 		queryKey: ["/api/defillama/stellar-tvl"],
 		queryFn: async () => {
-			const response = await fetch("https://api.llama.fi/chains");
+			// v2: the chain TVL defillama.com shows. The old /chains endpoint adds
+			// CEX reserves (Binance CEX alone was $195.8M on Stellar, 2026-11-24),
+			// which read as DeFi TVL.
+			const response = await fetch("https://api.llama.fi/v2/chains");
 			// Review 2026-11-04: a failed read or a missing Stellar row read as $0.
 			if (!response.ok) return null;
 			const chains: Chain[] = await response.json();

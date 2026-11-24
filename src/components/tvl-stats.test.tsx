@@ -44,9 +44,23 @@ afterEach(() => {
 });
 
 describe("TVL cards never show an invented figure", () => {
+	it("DeFi TVL is DefiLlama's v2 chain TVL, never the old endpoint's CEX-inclusive figure", async () => {
+		renderWith({
+			// the old /chains endpoint adds CEX reserves; it must not be read
+			"https://api.llama.fi/chains": () =>
+				json([{ name: "Stellar", tvl: 377_596_655 }]),
+			"https://api.llama.fi/v2/chains": () =>
+				json([{ name: "Stellar", tvl: 182_144_716 }]),
+			"https://api.llama.fi/protocols": () => json([]),
+			"/api/rwa-tvl": () => json({ topIssuers: [], totalAssets: 0 }),
+		});
+		expect(await screen.findByText(/182\.14/)).toBeTruthy();
+		expect(document.body.textContent).not.toMatch(/377\.6/);
+	});
+
 	it("failed reads show Unavailable on both cards", async () => {
 		renderWith({
-			"https://api.llama.fi/chains": () => json({ error: "down" }, 500),
+			"https://api.llama.fi/v2/chains": () => json({ error: "down" }, 500),
 			"https://api.llama.fi/protocols": () => json({ error: "down" }, 500),
 			"/api/rwa-tvl": () => json({ error: "rwa.xyz read failed" }, 503),
 		});
@@ -56,7 +70,8 @@ describe("TVL cards never show an invented figure", () => {
 
 	it("reads that succeed without the figure show Unavailable too", async () => {
 		renderWith({
-			"https://api.llama.fi/chains": () => json([{ name: "Ethereum", tvl: 5 }]),
+			"https://api.llama.fi/v2/chains": () =>
+				json([{ name: "Ethereum", tvl: 5 }]),
 			"https://api.llama.fi/protocols": () => json([]),
 			"/api/rwa-tvl": () => json({ topIssuers: [], totalAssets: 0 }),
 		});
@@ -65,7 +80,7 @@ describe("TVL cards never show an invented figure", () => {
 
 	it("a dated reading shows its figure and its date", async () => {
 		renderWith({
-			"https://api.llama.fi/chains": () =>
+			"https://api.llama.fi/v2/chains": () =>
 				json([{ name: "Stellar", tvl: 120_000_000 }]),
 			"https://api.llama.fi/protocols": () => json([]),
 			"/api/rwa-tvl": () =>
