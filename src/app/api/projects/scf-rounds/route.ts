@@ -64,14 +64,23 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	if (!payload) return outage();
 	let read: { readAt?: unknown; rounds?: unknown } | undefined;
+	let paidReadAt: unknown;
 	let rows: CoverageRow[];
 	try {
-		const [reads, projects] = await Promise.all([
+		const [reads, paidReads, projects] = await Promise.all([
 			payload.find({
 				collection: "scf-round-reads",
 				sort: "-readAt",
 				limit: 1,
 				depth: 0,
+				overrideAccess: true,
+			}),
+			payload.find({
+				collection: "scf-paid-reads",
+				sort: "-readAt",
+				limit: 1,
+				depth: 0,
+				select: { readAt: true },
 				overrideAccess: true,
 			}),
 			findWholeSet(payload, {
@@ -85,6 +94,7 @@ export async function GET(req: NextRequest) {
 		// a cut read would turn carried awards into gaps
 		if (!projects.complete) return outage();
 		read = reads.docs[0];
+		paidReadAt = paidReads.docs[0]?.readAt;
 		rows = projects.docs as unknown as CoverageRow[];
 	} catch {
 		return outage();
@@ -101,8 +111,9 @@ export async function GET(req: NextRequest) {
 		generatedAt: new Date().toISOString(),
 		scfSource: "https://communityfund.stellar.org/awards",
 		scfReadAt: typeof read?.readAt === "string" ? read.readAt : null,
+		scfPaidReadAt: typeof paidReadAt === "string" ? paidReadAt : null,
 		basis:
-			"listed = the awards SCF's round page lists: its Awarded submissions, plus a project whose own page names the round as its last award while its submission sits in a pipeline status. carried = listed awards a served row (any status but Draft) carries: a row whose award for that round cites that award's own SCF project page (scfRoundAwards[].sourceUrl, else the row's scfSourceUrl). notCarried names each listed award no served row carries, with why. notListed names served rows that claim the round (scfAwardedRounds) with a page the round page does not list. SCF's side is as of scfReadAt (and each round's readAt); the rows are read at generatedAt.",
+			"listed = the awards SCF's round page lists: its Awarded submissions, plus a project whose own page names the round as its last award while its submission sits in a pipeline status. carried = listed awards a served row (any status but Draft) carries: a row whose award for that round cites that award's own SCF project page (scfRoundAwards[].sourceUrl, else the row's scfSourceUrl). notCarried names each listed award no served row carries, with why. notListed names served rows that claim the round (scfAwardedRounds) with a page the round page does not list. SCF's side is as of scfReadAt (and each round's readAt); the rows are read at generatedAt. buildSharesRead = carried Build awards whose paid share the SCF sync read exactly off the award's SCF page (SCF's own totalPaid split by the tranche schedule); buildFinalTranchePaid = those SCF has paid in full, its final (mainnet launch) tranche, as of scfPaidReadAt. Null when no paid read is stored.",
 		order: "rounds newest first; the order is not a rank",
 	};
 	if (!read || !Array.isArray(read.rounds)) {
@@ -122,6 +133,8 @@ export async function GET(req: NextRequest) {
 	);
 	const sum = (f: (r: (typeof rounds)[number]) => number) =>
 		rounds.reduce((n, r) => n + f(r), 0);
+	const paidSum = (f: (r: (typeof rounds)[number]) => number | null) =>
+		rounds.some((r) => f(r) === null) ? null : sum((r) => f(r) ?? 0);
 	return NextResponse.json(
 		{
 			meta,
@@ -132,6 +145,8 @@ export async function GET(req: NextRequest) {
 				notCarried: sum((r) => r.notCarried.length),
 				carriedOnSeveralRows: sum((r) => r.carriedOnSeveralRows.length),
 				notListed: sum((r) => r.notListed.length),
+				buildSharesRead: paidSum((r) => r.buildSharesRead),
+				buildFinalTranchePaid: paidSum((r) => r.buildFinalTranchePaid),
 			},
 			rounds,
 		},

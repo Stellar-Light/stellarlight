@@ -56,6 +56,7 @@
 import "./load-env";
 import { createRequire } from "node:module";
 import { getPayload } from "payload";
+import { CURATED_BUILD_LINKS } from "../src/data/curated-build-links";
 import {
 	curatedLinkInput,
 	curatedSyncRow,
@@ -83,6 +84,7 @@ import {
 	indexProjectOwners,
 	indexProjectRepos,
 	indexProjectSites,
+	indexProjectSlugs,
 	type LinkedProject,
 	linkBuild,
 	linkChangeLine,
@@ -95,6 +97,7 @@ import {
 	repoFullNameOf,
 	scfSiteUrlsBuidls,
 	siteKeyOf,
+	withCuratedLink,
 } from "../src/lib/hackathon-build-links";
 import {
 	JUDGING_HEADING,
@@ -692,6 +695,7 @@ async function main() {
 	let sites: Map<string, LinkedProject | null> | null = null;
 	let owners: Map<string, LinkedProject[]> | null = null;
 	let names: Map<string, NamedProject | null> | null = null;
+	let slugs: Map<string, LinkedProject> | null = null;
 	try {
 		const projects = await payload.find({
 			collection: "projects",
@@ -712,6 +716,7 @@ async function main() {
 		sites = indexProjectSites(projects.docs as unknown as ProjectRepoRow[]);
 		owners = indexProjectOwners(projects.docs as unknown as ProjectRepoRow[]);
 		names = indexProjectNames(projects.docs as unknown as ProjectRepoRow[]);
+		slugs = indexProjectSlugs(projects.docs as unknown as ProjectRepoRow[]);
 		console.log(
 			`\n${projects.docs.length} directory projects read; ${links.size} repos listed by a project`,
 		);
@@ -723,7 +728,7 @@ async function main() {
 	let ambiguous = 0;
 	// Every stored link this run leaves unlinked, by entryKey, and why.
 	const dropWhy = new Map<string, string>();
-	if (links && sites && owners && names) {
+	if (links && sites && owners && names && slugs) {
 		const idx = { repos: links, sites, owners };
 		// A submission that won any of its entries, so all its rows link alike.
 		const won = new Set(
@@ -751,6 +756,34 @@ async function main() {
 				});
 		}
 		await linkByPages(named, pageLinks, stored);
+		// Links a person verified (src/data/curated-build-links.ts), last.
+		const curatedLinks = new Map(
+			CURATED_BUILD_LINKS.map((l) => [l.buildId, l.projectSlug]),
+		);
+		for (const r of rows.values()) {
+			const want = curatedLinks.get(r.buildId);
+			if (!want) continue;
+			const found = r.projectSlug
+				? ({
+						slug: r.projectSlug,
+						name: r.projectName ?? "",
+						basis: r.projectLinkBasis,
+					} as LinkedProject)
+				: null;
+			const c = slugs.get(want);
+			const link = withCuratedLink(found, c);
+			const what = !c
+				? "no listed project holds that slug, not applied"
+				: link === found
+					? `a rule finds it (${found?.basis ?? "repo"})`
+					: found
+						? `overrules the ${found.basis ?? "repo"} link to ${found.slug}`
+						: "no rule finds it, linked as curated";
+			console.log(`  curated link: ${r.entryKey} names ${want}: ${what}`);
+			r.projectSlug = link?.slug ?? null;
+			r.projectName = link?.name ?? null;
+			r.projectLinkBasis = link?.basis ?? null;
+		}
 		for (const r of rows.values()) {
 			const old = stored.get(r.entryKey);
 			if (old?.projectSlug && !r.projectSlug)
@@ -1042,7 +1075,7 @@ async function main() {
 		.filter((r) => r.projectSlug)
 		.sort((a, b) => Number(!!b.isWinner) - Number(!!a.isWinner));
 	console.log(
-		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners; ${linked.filter((r) => r.projectLinkBasis === "website").length} by website, ${linked.filter((r) => r.projectLinkBasis === "owner-and-name").length} by owner and name, ${linked.filter((r) => r.projectLinkBasis?.startsWith("moved-")).length} through a renamed or transferred repo, ${linked.filter((r) => r.projectLinkBasis === "scf-page-and-name").length} by name and SCF page, ${linked.filter((r) => r.projectLinkBasis === "submission-links-and-name").length} by name and the submission's own links, the rest by repo); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
+		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners; ${linked.filter((r) => r.projectLinkBasis === "website").length} by website, ${linked.filter((r) => r.projectLinkBasis === "owner-and-name").length} by owner and name, ${linked.filter((r) => r.projectLinkBasis?.startsWith("moved-")).length} through a renamed or transferred repo, ${linked.filter((r) => r.projectLinkBasis === "scf-page-and-name").length} by name and SCF page, ${linked.filter((r) => r.projectLinkBasis === "submission-links-and-name").length} by name and the submission's own links, ${linked.filter((r) => r.projectLinkBasis === "curated").length} by a curated record, the rest by repo); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
 	);
 	// Every link change from the diff above, old to new, for every rule; a
 	// stored link left unlinked is named as dropped, with why. A drop never
@@ -1066,17 +1099,20 @@ async function main() {
 		`link changes: ${linkLines.length} rows; ${linkLines.filter((l) => l.startsWith("  dropped ")).length} stored links dropped`,
 	);
 	for (const l of linkLines) console.log(l);
-	// The newest rules first: page rules, a moved repo, then owner and name.
+	// Curated records first, then the newest rules: page rules, a moved
+	// repo, then owner and name.
 	const isPage = (b?: string | null) =>
 		(PAGE_LINK_BASES as readonly unknown[]).includes(b);
 	const rank = (b?: string | null) =>
-		isPage(b)
-			? 3
-			: b?.startsWith("moved-")
-				? 2
-				: b === "owner-and-name"
-					? 1
-					: 0;
+		b === "curated"
+			? 4
+			: isPage(b)
+				? 3
+				: b?.startsWith("moved-")
+					? 2
+					: b === "owner-and-name"
+						? 1
+						: 0;
 	linked.sort((a, b) => rank(b.projectLinkBasis) - rank(a.projectLinkBasis));
 	for (const r of linked.slice(0, 80))
 		console.log(

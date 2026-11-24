@@ -274,6 +274,15 @@ export const CODE_SCAN_STATES = [
 ] as const;
 export type CodeScanState = (typeof CODE_SCAN_STATES)[number];
 
+/** How a repo entered the index: ONE list, the collection's `source`
+ * options and the spec's Repo.source enum (spec-enum-parity.test.ts). The
+ * spec's hand-typed copy lacked builder-owned while rows served it. */
+export const REPO_SOURCES = [
+	"project-link",
+	"ec-taxonomy",
+	"builder-owned",
+] as const;
+
 /**
  * Serving filter: a repo GitHub 404s must never be RECOMMENDED. Merge into the
  * `where` of any query that answers "which repos?" — search, builder evidence.

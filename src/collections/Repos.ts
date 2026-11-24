@@ -1,6 +1,10 @@
 import type { CollectionConfig } from "payload";
 import { CONTRACT_BASES } from "../lib/contract-basis";
-import { activityStateOf, CODE_SCAN_STATES } from "../lib/repo-grade";
+import {
+	activityStateOf,
+	CODE_SCAN_STATES,
+	REPO_SOURCES,
+} from "../lib/repo-grade";
 import { repoSupersession } from "../lib/repo-relations";
 import { adminOnly, isAdmin } from "./access";
 
@@ -330,7 +334,7 @@ export const Repos: CollectionConfig = {
 			// builder-owned: indexed because a tracked PERSON owns it, not
 			// because a directory project links it. Individual contributors
 			// were invisible to a project-driven index until this existed.
-			options: ["project-link", "ec-taxonomy", "builder-owned"],
+			options: [...REPO_SOURCES],
 			defaultValue: "project-link",
 			index: true,
 			admin: {

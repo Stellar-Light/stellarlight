@@ -13,6 +13,7 @@
  * Partner keys (see partnerOf) lift a caller onto a per-key tier.
  */
 
+import { createHash, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 
 interface Bucket {
@@ -65,10 +66,16 @@ export function partnerOf(req: NextRequest): string | null {
 		req.headers.get("x-api-key")?.trim() ||
 		(auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : "");
 	if (!key) return null;
+	// Compared as equal-length digests in constant time, so the time a
+	// mismatch takes says nothing about how much of a key was right.
+	const sent = createHash("sha256").update(key).digest();
 	for (const pair of (process.env.SCOUT_PARTNER_KEYS ?? "").split(",")) {
 		const i = pair.indexOf(":");
-		if (i > 0 && pair.slice(i + 1).trim() === key)
-			return pair.slice(0, i).trim();
+		if (i < 1) continue;
+		const known = createHash("sha256")
+			.update(pair.slice(i + 1).trim())
+			.digest();
+		if (timingSafeEqual(sent, known)) return pair.slice(0, i).trim();
 	}
 	return null;
 }

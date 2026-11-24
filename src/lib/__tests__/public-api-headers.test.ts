@@ -40,8 +40,13 @@ describe("public API headers", () => {
 	});
 
 	it("covers every GET path the spec documents", () => {
+		// Partner-only paths (x-partner-only) are keyed and same-origin by
+		// design: no open CORS for them.
 		const uncovered = Object.keys(spec.paths)
-			.filter((p) => spec.paths[p].get)
+			.filter((p) => {
+				const get = spec.paths[p].get as Record<string, unknown> | undefined;
+				return get && !get["x-partner-only"];
+			})
 			.map((p) => p.replace(/\{[^}]+\}/g, "x"))
 			.filter((p) => !listed.some((source) => covers(source, p)));
 		expect(uncovered).toEqual([]);

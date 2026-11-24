@@ -46,6 +46,10 @@ const nextConfig = {
 			},
 		],
 	},
+	// The cohort routes read their encrypted bundle from disk at request time.
+	outputFileTracingIncludes: {
+		"/api/cohort/*": ["./data/cohort/**"],
+	},
 	// Exclude problematic packages from server-side bundling
 	// This prevents Next.js from trying to bundle these packages
 	serverExternalPackages: [

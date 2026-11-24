@@ -54,6 +54,18 @@ item is fixed. API base URL: https://stellarlight.xyz.
    project's name, though its page lists the project's X account) and
    Juntta (not a winner; the page rules read winners only).
    `improvements/audits/2026-10-23-winner-scf-links/`.
+   2026-11-24, live 1.9.163: YieldBack.Cash, PayZoll and clevercon are
+   linked by those rules; Comet x Hoops Finance (`dorahacks-buidl-27417`)
+   and Juntta (`dorahacks-buidl-30931`) are not. Branch
+   `lane/r1124-hackathon-truth` (spec 1.9.164, not merged) records all five
+   in `src/data/curated-build-links.ts`, each with the evidence read on
+   2026-11-24: Comet x Hoops Finance's repo sits under the hoops GitHub
+   organisation, its page lists the hoops X account and its demo is on a
+   subdomain of hoops.finance; Juntta's page lists the Instagram and
+   LinkedIn accounts juntta.org links in its footer. The sync lane reads
+   the records after its rules and serves basis `curated` when no rule
+   finds the project (a spec enum entry); a rule that finds the same
+   project keeps its basis.
    Done when: the five verified links are recorded as a curated link basis
    the link lane reads (a spec enum entry for the basis), the lane re-ran
    (dry run, then execute), and the five links are live.
@@ -74,11 +86,23 @@ item is fixed. API base URL: https://stellarlight.xyz.
    page, and each DoraHacks-sourced one reports `winner_announced: false`.
    The earlier note that stellar-pulso-hackathon's page says winners were
    announced was a planned timeline row.
-   State: not started. alebrije2026's submissions are stored from DoraHacks,
-   so its winners need an override on the stored rows, not new curated rows.
+   State: live 1.9.163 (2026-11-24): the four events serve their confirmed
+   winners (Philippines 5, hackmeridian-2025 6, alebrije2026 2 of 3 with a
+   note that Seyf is not stored, APAC 1 with a note that only one track's
+   winners are published), and the 9 say not announced upstream. A tenth
+   event ended since with the same bare 0:
+   `/api/hackathons/blockchain-innovation-challenge-waterloo-2026` serves
+   `stats.winners` 0 with `winnersNote` null (the organizer's page and a
+   web search named no winner on 2026-11-24, six days after its final
+   awards). Cause: a curated event's note was hand-written per event, so a
+   newly ended one with none said nothing. Branch
+   `lane/r1124-hackathon-truth` (spec 1.9.164, not merged) adds Waterloo's
+   dated note and, for any ended curated event with no winner and no dated
+   note, a note that its 0 is not a count.
    Done when: the confirmed winners are served (curated rows or an override,
    then the curated-builds lane run), a partial event says it is partial,
-   and the 9 say winners were not announced upstream instead of a bare 0.
+   and every ended event with no winner served says why instead of a bare 0
+   (the Waterloo probe serves a note).
 
 5. **Secret scanning covers new commits only.**
    Probe: `gh api repos/Stellar-Light/stellarlight --jq
@@ -212,31 +236,6 @@ item is fixed. API base URL: https://stellarlight.xyz.
     lost on any earlier labeled set (the short ideas included), measured as
     in that directory.
 
-10. **Events whose stored rows are their winners only serve the winners as
-    their whole field.**
-    Probe: `/api/hackathons/compare?slugs=hackmeridian-2025,hackmeridian-2026`
-    serves hackmeridian-2025 `submissionCount` 6, its `winnerCount`, and no
-    `coverage` (live 1.9.99, 2026-10-23 15:38Z); `/api/hackathons/hackmeridian-2025`
-    serves `stats.totalSubmissions` 6 and tracks of 3 and 3, where its
-    record says 110+ submissions.
-    Found by the benchmark check "2025 submission count is null or >= 100"
-    (null on 1.9.94, 6 after the curated import stored the winners of three
-    events off DoraHacks).
-    The same class, found in the round: compare serves
-    apac-stellar-hackathon-2026 `prizePerWinnerUSD` 60,000 (its pool over
-    the 1 winner it publishes); `/api/hackathons/analyze?facet=placement`
-    counts 80 winners of 1,383, 12 of them curated winners whose field is
-    not stored; `/api/hackathons/hackmeridian-2026` serves `tracks: []` and
-    `prizeTiers: []` beside two categories and two tracks its record states.
-    State: all three fixed on branch `lane/v-winners-only-coverage` (spec
-    1.9.101), not pushed. Replay and sweep:
-    `improvements/audits/2026-10-23-winners-only-coverage/`.
-    Done when: merged and deployed, and live, re-checked by someone other
-    than the author: the probe serves `submissionCount` null with
-    `coverage: "winners-only"`; APAC `prizePerWinnerUSD` null with a note;
-    `facet=placement` 68 winners of 1,371 with the left-out line;
-    hackmeridian-2026 its four declared tracks and `prizeTiers` null.
-
 12. **The toolchain deprecated count reads as a soroban-sdk count.**
     Probe: `curl -s 'https://stellarlight.xyz/api/analyze?dimension=toolchain' | jq '.toolchain | {deprecatedTotal, soroban: .bySorobanSdkStatus.deprecated, js: .byJsSdkStatus.deprecated, rowsWithReason: ([.deprecatedRepos[] | select(.deprecatedBy)] | length)}'`
     serves `soroban` and `js` as null and `rowsWithReason` 0 on 2026-11-12 (spec
@@ -261,6 +260,17 @@ item is fixed. API base URL: https://stellarlight.xyz.
     someone other than the author.
 
 ## Next
+
+- **A prize per winner counts only the winners served.** compareHackathons
+  serves alebrije2026 `prizePerWinnerUSD` 4,000 (its $8,000 pool over the 2
+  winners served, where BAF's newsletter names 3 and the event's own
+  winnersNote says Seyf is not stored) and buildonstellarchile 71 ($1,000
+  over 14 served, where 15 placed and one is hidden by its team). Probe:
+  `/api/hackathons/compare?slugs=alebrije2026,buildonstellarchile` (live
+  1.9.163, 2026-11-24). Found as leads by the 2026-10-23 winners-only
+  coverage round, which kept full events byte identical on purpose;
+  `incompleteRows` in `src/lib/hackathon-analytics.ts` reads only curated
+  events' notes, never WINNER_OVERLAY's or a hidden winner.
 
 - **A holder contract is integrated only by a public directory label.**
   getTokenIntegrations calls a holder integrated when the public directory

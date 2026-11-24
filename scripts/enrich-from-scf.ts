@@ -22,6 +22,15 @@
 import "./load-env";
 import { writeFileSync } from "node:fs";
 import { getPayload } from "payload";
+import {
+	nextScfPaid,
+	type PaidReadPage,
+	type PreviousPaidRead,
+	pageSlugOf,
+	paidReadPage,
+	type StoredScfPaid,
+	samePaid,
+} from "../src/lib/scf-paid";
 import { listedRounds, readScfSide } from "../src/lib/scf-round-counts";
 import configPromise from "../src/payload.config";
 import { curatedFieldsFor } from "./data/curation-maps";
@@ -91,12 +100,19 @@ const stats = {
 	skipped: 0,
 	held: 0,
 	stranded: 0,
+	paidUpdated: 0,
 	errors: 0,
 };
+/** Before any page is read: the earliest a page this run read could show. */
+const runStartedAt = new Date().toISOString();
+/** SCF's paid figures per page read this run, for the scf-paid-reads row. */
+const paidRead = new Map<string, PaidReadPage>();
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /** Joined pages that could not be read this run (could not check). */
 const pagesUnread: string[] = [];
+/** Pages read whose project record (and so its paid figures) was not whole. */
+const paidUnread: string[] = [];
 /** Every write this run plans, for --plan-out. */
 const planned: Array<{ slug: string; data: Record<string, unknown> }> = [];
 
@@ -267,6 +283,31 @@ async function main() {
 	console.log(
 		`Loaded ${ourProjects.length} projects from ${rowsFrom ? `${rowsFrom}/api/projects` : "DB"}\n`,
 	);
+	// The newest stored paid read: a figure that differs from it changed after
+	// that run started. None with --rows-from (the collection is not public),
+	// so that plan dates no change.
+	// ponytail: the newest row only; a page that run could not read dates
+	// its next change from this run on.
+	const lastPaid = payload
+		? (
+				await payload.find({
+					collection: "scf-paid-reads",
+					sort: "-readAt",
+					limit: 1,
+					depth: 0,
+					overrideAccess: true,
+				})
+			).docs[0]
+		: undefined;
+	const previousPaid: PreviousPaidRead | null =
+		lastPaid && Array.isArray(lastPaid.pages)
+			? {
+					startedAt: String(lastPaid.startedAt),
+					pages: new Map(
+						(lastPaid.pages as PaidReadPage[]).map((p) => [p.page, p]),
+					),
+				}
+			: null;
 
 	const bySlug = new Map<string, any>();
 	for (const p of ourProjects) bySlug.set(p.slug, p);
@@ -777,6 +818,37 @@ async function main() {
 			stats.scfDataUpdated++;
 		}
 
+		// --- SCF's own payment record (scf.paid): the page's awarded and paid
+		// totals and each Build award's tranche share, written only when a
+		// figure changes. A held row takes it only when it cites this page for
+		// its award (a human-verified record of the same page): a removal or an
+		// unlinked row is not this page's project. ---
+		if (detail && !detail.paid) paidUnread.push(`${scf.slug} (${ours.slug})`);
+		if (detail?.paid) {
+			for (const p of detail.paid)
+				paidRead.set(pageSlugOf(p.sourceUrl), paidReadPage(p));
+			const stored = (currentScf.paid ?? null) as StoredScfPaid | null;
+			const owns =
+				!hold ||
+				(currentScf.awarded === true && currentScf.sourceUrl === pageUrl);
+			const next = owns
+				? nextScfPaid({
+						pages: detail.paid,
+						stored,
+						previous: previousPaid,
+						now: new Date().toISOString(),
+					})
+				: null;
+			if (!owns) console.log(`    SCF PAID: not written (${hold})`);
+			else if (next && !samePaid(next, stored)) {
+				updateData.scf = { ...(updateData.scf ?? {}), paid: next };
+				stats.paidUpdated++;
+				console.log(
+					`    SCF PAID: awarded ${next.totalAwarded ?? "?"}, paid ${next.totalPaid ?? "?"} (${next.split})${next.builds.map((b) => ` #${b.round ?? "?"}:${b.paidShare === null ? "?" : +b.paidShare.toFixed(4)}`).join("")}${stored ? `; stored paid ${stored.totalPaid ?? "?"}` : "; first read"}`,
+				);
+			}
+		}
+
 		// --- Thumbnail: use SCF image if project has no logo ---
 		if (!scfOnly && !ours.logo && scf.thumbnail) {
 			const imgUrl =
@@ -951,6 +1023,8 @@ async function main() {
 				basis: null,
 				asOf: null,
 				sourceUrl: null,
+				// the page's payment record goes with its award
+				paid: null,
 			},
 		};
 		planned.push({ slug: row.slug, data });
@@ -984,6 +1058,52 @@ async function main() {
 			`  ${r.slug}: its stored page ${r.scf.slug} joins no row this run; rounds [${(r.scf.awardedRounds ?? []).join(", ")}] stand, unread`,
 		);
 
+	// 7. The paid read (scf-paid-reads): one row per execute with every page's
+	// figures, the history that dates each change to between two runs. The
+	// changes against the newest stored read are listed for a reader.
+	const paidChanges = [...paidRead.values()].flatMap((p) => {
+		const was = previousPaid?.pages.get(p.page);
+		return was &&
+			(was.totalAwarded !== p.totalAwarded || was.totalPaid !== p.totalPaid)
+			? [
+					{
+						page: p.page,
+						notSeenAt: previousPaid?.startedAt ?? null,
+						before: {
+							totalAwarded: was.totalAwarded,
+							totalPaid: was.totalPaid,
+						},
+						after: { totalAwarded: p.totalAwarded, totalPaid: p.totalPaid },
+					},
+				]
+			: [];
+	});
+	console.log(
+		`\nPaid read: ${paidRead.size} pages, ${paidChanges.length} changed since the stored read of ${previousPaid?.startedAt ?? "(none)"}${dryRun ? " (dry run: not stored)" : ""}`,
+	);
+	for (const c of paidChanges)
+		console.log(
+			`  ${c.page}: paid ${c.before.totalPaid} -> ${c.after.totalPaid}, awarded ${c.before.totalAwarded} -> ${c.after.totalAwarded}`,
+		);
+	if (!dryRun && payload && paidRead.size > 0) {
+		try {
+			await payload.create({
+				collection: "scf-paid-reads",
+				data: {
+					startedAt: runStartedAt,
+					readAt: new Date().toISOString(),
+					pages: [...paidRead.values()],
+					changes: paidChanges,
+				},
+			});
+		} catch (err) {
+			console.log(
+				`    PAID READ WRITE ERROR: ${err instanceof Error ? err.message : String(err)}`,
+			);
+			stats.errors++;
+		}
+	}
+
 	if (planOut) {
 		writeFileSync(planOut, `${JSON.stringify(planned, null, 1)}\n`);
 		console.log(
@@ -1004,6 +1124,9 @@ async function main() {
 	console.log(`Skipped (no new):   ${stats.skipped}`);
 	console.log(`SCF held (scfHold): ${stats.held}`);
 	console.log(`Stranded removed:   ${stats.stranded}`);
+	console.log(`SCF paid record:    ${stats.paidUpdated}`);
+	console.log(`Paid figures unread: ${paidUnread.length}`);
+	for (const s of paidUnread) console.log(`  could not read:      ${s}`);
 	console.log(`Stored page unread: ${unreadAwards.length}`);
 	console.log(`Joined page unread: ${pagesUnread.length}`);
 	for (const s of pagesUnread) console.log(`  could not read:      ${s}`);
@@ -1051,6 +1174,12 @@ async function main() {
 	if (roundsUnstored) {
 		console.error(
 			`\n✗ SCF's round pages were not read whole (${roundsUnstored}), so the round coverage was not stored; exiting 2.`,
+		);
+		process.exit(2);
+	}
+	if (paidUnread.length > 0) {
+		console.error(
+			`\n✗ ${paidUnread.length} SCF page(s) read without a whole project record, so their paid figures were not checked; exiting 2.`,
 		);
 		process.exit(2);
 	}

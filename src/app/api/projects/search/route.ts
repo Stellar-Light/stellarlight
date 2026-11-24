@@ -84,6 +84,7 @@ import {
 	type ProductsCoverage,
 	productsCoverage,
 } from "@/lib/rwa-products";
+import { type ServedScfPaid, servedScfPaid } from "@/lib/scf-paid";
 import { serverTiming } from "@/lib/server-timing";
 import {
 	llamaPageFor,
@@ -261,6 +262,7 @@ async function semanticProjectRows(
 			scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
 			scfAwardedRounds: p.scf?.awardedRounds ?? [],
 			scfRoundAwards: pickScfRoundAwards(p.scf),
+			scfPaid: servedScfPaid(p.scf?.paid),
 			products: mergeProducts(pickProducts(p.products), p.slug),
 			productsCoverage: productsCoverage(p.slug),
 			links: pickLinks(p.links),
@@ -554,6 +556,8 @@ interface ProjectRow {
 		/** sls-116: the SCF page this award was read from. */
 		sourceUrl: string | null;
 	}>;
+	/** SCF's own paid record for the row's page(s); null = not read. */
+	scfPaid: ServedScfPaid | null;
 	hackathon: { id: string; name: string; slug: string } | null;
 	hackathonPlacement: string | null;
 	hackathonPrize: number | null;
@@ -1553,6 +1557,7 @@ async function handle(req: NextRequest) {
 						basis?: string;
 						asOf?: string;
 						sourceUrl?: string;
+						paid?: unknown;
 					};
 					hackathon?:
 						| { id: string; name: string; slug: string }
@@ -1683,6 +1688,7 @@ async function handle(req: NextRequest) {
 					),
 					scfAwardedRounds: p.scf?.awardedRounds ?? [],
 					scfRoundAwards: pickScfRoundAwards(p.scf),
+					scfPaid: servedScfPaid(p.scf?.paid),
 					products: mergeProducts(pickProducts(p.products), p.slug),
 					productsCoverage: productsCoverage(p.slug),
 					hackathon: hk,
@@ -2417,6 +2423,7 @@ async function handle(req: NextRequest) {
 					),
 					scfAwardedRounds: c.scf?.awardedRounds ?? [],
 					scfRoundAwards: pickScfRoundAwards(c.scf),
+					scfPaid: servedScfPaid(c.scf?.paid),
 					products: mergeProducts(pickProducts(c.products), c.slug),
 					productsCoverage: productsCoverage(c.slug),
 					prominence: typeof c.prominence === "number" ? c.prominence : 0,

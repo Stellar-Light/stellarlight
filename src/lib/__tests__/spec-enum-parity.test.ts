@@ -41,9 +41,10 @@ import {
 	VENUE_ROLES,
 } from "../project-types";
 import { RATE_LIMIT_SCOPE } from "../rate-limit";
-import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
+import { CODE_SCAN_STATES, REPO_KINDS, REPO_SOURCES } from "../repo-grade";
 import { REPO_MATCH_MODES } from "../repo-search";
 import { RESEARCH_SOURCES } from "../research-sources";
+import { PAID_SCHEDULES, PAID_SPLITS } from "../scf-paid";
 import { NOT_CARRIED_REASONS } from "../scf-round-counts";
 import { DEPRECATED_BY, VERSION_STATUSES } from "../soroban-versions";
 import {
@@ -402,14 +403,35 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 	const spread = (name: string) =>
 		(src.match(new RegExp(`\\[\\.\\.\\.${name}\\]`, "g")) ?? []).length;
 
-	it("Project.deployment.network is DEPLOYMENT_NETWORKS", () => {
+	it("Project.deployment.network is DEPLOYMENT_NETWORKS, and so is the quality report's weakestRows.deploymentNetwork", () => {
 		expect(
 			sorted(
 				S.components.schemas.Project.properties.deployment.properties.network
 					.enum,
 			),
 		).toEqual(sorted(DEPLOYMENT_NETWORKS));
-		expect(spread("DEPLOYMENT_NETWORKS")).toBe(1);
+		expect(
+			sorted(
+				S.paths["/api/quality"].get.responses["200"].content["application/json"]
+					.schema.properties.rowQuality.properties.weakestRows.items.properties
+					.deploymentNetwork.enum,
+			),
+		).toEqual(sorted(DEPLOYMENT_NETWORKS));
+		expect(spread("DEPLOYMENT_NETWORKS")).toBe(2);
+	});
+
+	it("Repo.source is REPO_SOURCES, the collection's options too (builder-owned was missing from the spec)", () => {
+		expect(S.components.schemas.Repo.properties.source.enum).toEqual([
+			...REPO_SOURCES,
+		]);
+		expect(spread("REPO_SOURCES")).toBe(1);
+		const repos = readFileSync(
+			resolve(__dirname, "../../collections/Repos.ts"),
+			"utf8",
+		);
+		expect(repos).toMatch(
+			/name:\s*"source",[\s\S]*?options:\s*\[\.\.\.REPO_SOURCES\]/,
+		);
 	});
 
 	it("partnerType (getPartners param, submit-listing body, matchPartners body, Partner schema) is PARTNER_TYPES", () => {
@@ -448,6 +470,16 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 			].schema.properties.rounds.items.properties.notCarried.items.properties
 				.reason.enum;
 		expect(reason).toEqual([...NOT_CARRIED_REASONS]);
+	});
+
+	it("PAID_SPLITS and PAID_SCHEDULES: one spread each, Project.scfPaid", () => {
+		expect(spread("PAID_SPLITS")).toBe(1);
+		expect(spread("PAID_SCHEDULES")).toBe(1);
+		const paid = S.components.schemas.Project.properties.scfPaid.properties;
+		expect(paid.split.enum).toEqual([...PAID_SPLITS]);
+		expect(paid.buildAwards.items.properties.schedule.enum).toEqual([
+			...PAID_SCHEDULES,
+		]);
 	});
 
 	it("SOURCE_CHECK_STATES: one spread, two sites that equal it (explainRepo sourceCheck.state and knowledgeNotes[].sourceCheck.state)", () => {

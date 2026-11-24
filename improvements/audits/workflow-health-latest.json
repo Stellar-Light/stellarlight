@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-11-24T00:35:26.043Z",
+	"asOf": "2026-11-24T03:49:56.800Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 113,
 	"healthy": 105,
@@ -42,7 +42,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "80 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "81 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -65,7 +65,7 @@
 			"lastSuccessAt": "2026-11-22T20:20:25Z",
 			"ageDays": 1,
 			"graceDays": 4,
-			"runs": 39,
+			"runs": 40,
 			"why": "last green 1d ago"
 		},
 		{
@@ -304,7 +304,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:33:03Z",
+			"lastSuccessAt": "2026-11-24T03:47:20Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -315,7 +315,7 @@
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:19:59Z",
+			"lastSuccessAt": "2026-11-24T01:01:17Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -326,7 +326,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:33:03Z",
+			"lastSuccessAt": "2026-11-24T03:47:20Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -520,17 +520,6 @@
 			"why": "last green 0d ago"
 		},
 		{
-			"file": "enrich-scf.yml",
-			"name": "Enrich SCF data (manual)",
-			"cron": null,
-			"state": "ok",
-			"lastSuccessAt": "2026-11-23T23:12:35Z",
-			"ageDays": 0,
-			"graceDays": 45,
-			"runs": 6,
-			"why": "last green 0d ago (manual tool — age not judged)"
-		},
-		{
 			"file": "enrich-tvl.yml",
 			"name": "enrich-tvl",
 			"cron": "0 5 * * 1",
@@ -569,10 +558,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T03:20:14Z",
-			"ageDays": 83,
+			"ageDays": 84,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 83d ago (manual tool — age not judged)"
+			"why": "last green 84d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "fix-zenex.yml",
@@ -580,10 +569,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-14T03:00:41Z",
-			"ageDays": 162,
+			"ageDays": 163,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 162d ago (manual tool — age not judged)"
+			"why": "last green 163d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "generated-recall.yml",
@@ -602,10 +591,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-22T02:25:42Z",
-			"ageDays": 93,
+			"ageDays": 94,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 93d ago (manual tool — age not judged)"
+			"why": "last green 94d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "ingest-dora-evals.yml",
@@ -744,7 +733,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:28:32Z",
+			"lastSuccessAt": "2026-11-24T03:34:02Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 96,
@@ -766,7 +755,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:19:59Z",
+			"lastSuccessAt": "2026-11-24T03:47:20Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -810,7 +799,7 @@
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:33:02Z",
+			"lastSuccessAt": "2026-11-24T03:47:20Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -821,11 +810,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:19:59Z",
+			"lastSuccessAt": "2026-11-24T03:32:02Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 77,
-			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -833,10 +822,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-11-13T03:15:53Z",
-			"ageDays": 10,
+			"ageDays": 11,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 10d ago (manual tool — age not judged)"
+			"why": "last green 11d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "publish-packages.yml",
@@ -909,11 +898,11 @@
 			"name": "Refresh Electric Capital developer snapshot",
 			"cron": "0 15 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-22T20:53:26Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-11-24T01:57:51Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 78,
-			"why": "last green 1d ago"
+			"runs": 79,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "refresh-oracle-feeds.yml",
@@ -960,6 +949,17 @@
 			"why": "last green 0d ago"
 		},
 		{
+			"file": "refresh-token-integrations.yml",
+			"name": "Refresh token integrations",
+			"cron": "23 4 * * 1",
+			"state": "ok",
+			"lastSuccessAt": "2026-11-24T02:34:40Z",
+			"ageDays": 0,
+			"graceDays": 21,
+			"runs": 3,
+			"why": "last green 0d ago"
+		},
+		{
 			"file": "regrade-repos.yml",
 			"name": "Regrade repos (manual)",
 			"cron": null,
@@ -975,10 +975,10 @@
 			"name": "Repo security holds",
 			"cron": "29 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T07:58:10Z",
+			"lastSuccessAt": "2026-11-24T00:10:00Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 96,
+			"runs": 97,
 			"why": "last green 0d ago"
 		},
 		{
@@ -986,7 +986,7 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-23T14:52:35Z",
+			"lastSuccessAt": "2026-11-24T02:56:19Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 95,
@@ -1008,7 +1008,7 @@
 			"name": "Secret scan",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:33:03Z",
+			"lastSuccessAt": "2026-11-24T03:48:59Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1042,21 +1042,21 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-29T03:29:14Z",
-			"ageDays": 86,
+			"ageDays": 87,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 86d ago (manual tool — age not judged)"
+			"why": "last green 87d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "self-audit.yml",
 			"name": "Self-audit (data-quality guard)",
 			"cron": "0 13 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-22T20:16:13Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-11-24T00:42:16Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 86,
-			"why": "last green 1d ago"
+			"runs": 87,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "set-project-status.yml",
@@ -1195,10 +1195,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:33:03Z",
+			"lastSuccessAt": "2026-11-24T03:47:20Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1250,10 +1250,10 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-24T00:04:34Z",
+			"lastSuccessAt": "2026-11-24T03:34:02Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1286,8 +1286,8 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 69,
 			"graceDays": 21,
-			"runs": 95,
-			"why": "80 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 96,
+			"why": "81 failed run(s) since its last green 69d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
