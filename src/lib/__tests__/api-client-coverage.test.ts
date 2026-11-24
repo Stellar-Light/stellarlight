@@ -61,8 +61,15 @@ for (const item of Object.values(spec.paths)) {
 	}
 }
 
-// Operations deliberately without a client method, with the reason. Empty today.
-const EXCLUDED_OPERATIONS: Record<string, string> = {};
+// Operations deliberately without a client method, with the reason.
+const EXCLUDED_OPERATIONS: Record<string, string> = {
+	listCohortRows:
+		"partner-only (x-partner-only): a key on the cohort allowlist reads it; the public client does not carry it",
+	getCohortJourney:
+		"partner-only (x-partner-only): a key on the cohort allowlist reads it; the public client does not carry it",
+	getCohortFigures:
+		"partner-only (x-partner-only): a key on the cohort allowlist reads it; the public client does not carry it",
+};
 // Query parameters a method deliberately does not accept: "operationId.param".
 const EXCLUDED_PARAMS: Record<string, string> = {
 	"compareHackathons.slugs":
@@ -120,7 +127,7 @@ describe("api-client covers the spec", () => {
 
 	it("every GET method accepts every query parameter the spec declares", () => {
 		const checks = ops
-			.filter((o) => o.method === "GET")
+			.filter((o) => o.method === "GET" && !EXCLUDED_OPERATIONS[o.id])
 			.flatMap((o) =>
 				o.queryParams
 					.filter((p) => !EXCLUDED_PARAMS[`${o.id}.${p}`])

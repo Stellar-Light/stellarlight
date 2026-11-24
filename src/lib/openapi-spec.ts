@@ -96,6 +96,12 @@ import { INDICATOR_KINDS } from "./repo-security";
 import { RESEARCH_SOURCES } from "./research-sources";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
 import { NOT_CARRIED_REASONS } from "./scf-round-counts";
+import {
+	AWARD_TYPES,
+	COHORT_STATUSES,
+	LAUNCH_EVIDENCE,
+	LAUNCH_KNOWN_BASES,
+} from "./sdf-cohort";
 import { DEPRECATED_BY, VERSION_STATUSES } from "./soroban-versions";
 import {
 	AUTHORITY_ROLES,
@@ -1508,6 +1514,266 @@ const MAJOR_SHARE = {
 	},
 } as const;
 
+/** Partner-only cohort endpoints (src/lib/sdf-cohort.ts): either key form. */
+const COHORT_SECURITY = [{ cohortPartnerKey: [] }, { cohortPartnerApiKey: [] }];
+const COHORT_ERROR = {
+	content: {
+		"application/json": {
+			schema: { $ref: "#/components/schemas/ErrorResponse" },
+		},
+	},
+};
+const COHORT_400 = {
+	description:
+		"An unknown query parameter or value; the body names the valid ones.",
+	...COHORT_ERROR,
+};
+const COHORT_401 = {
+	description:
+		"No key, or a key not on the cohort allowlist. The body is one line (`error`, `hint`) and nothing else is served.",
+	...COHORT_ERROR,
+};
+const COHORT_503 = {
+	description:
+		"The cohort snapshot could not be opened on this deployment. A configuration fault, not a claim about any project.",
+	...COHORT_ERROR,
+};
+const cs = (description: string) => ({
+	type: "string",
+	nullable: true,
+	description,
+});
+const cd = (description: string) => ({
+	type: "string",
+	nullable: true,
+	description: `${description} YYYY-MM-DD; null when not known.`,
+});
+const ci = (description: string) => ({
+	type: "integer",
+	nullable: true,
+	description,
+});
+const COHORT_PROJECT = {
+	type: "object",
+	description:
+		"One directory project in the cohort snapshot (meta.asOf). null means not known or not read, never none; a count of 0 was read.",
+	properties: {
+		slug: { type: "string" },
+		name: cs("Name in the cohort file; null for projects outside the cohort."),
+		inCohort: {
+			type: "boolean",
+			description:
+				"Live or Inactive in the directory when the snapshot was built.",
+		},
+		category: cs("Directory category."),
+		status: {
+			type: "string",
+			nullable: true,
+			enum: [...COHORT_STATUSES],
+			description:
+				"Directory status when the snapshot was built; dated by statusVerdictDate. null outside the cohort.",
+		},
+		statusBasis: cs("The directory's basis for the status."),
+		statusVerdictDate: cd("When the directory's status verdict was made."),
+		scfAwarded: { type: "boolean", description: "An SCF award is on record." },
+		firstScfRound: ci("Round of the first SCF award."),
+		firstScfSubmission: cd("First SCF submission."),
+		firstScfAward: cd("First SCF award (the round's decision date)."),
+		firstAwardType: {
+			type: "string",
+			nullable: true,
+			enum: [...AWARD_TYPES],
+			description:
+				"Type of the first award; known when it is at least 180 days old (legacy = v1 to v5). Type tracks era.",
+		},
+		firstAwardUsd: { type: "number", nullable: true },
+		firstAwardSize: cs(
+			"Band of the first award: under $50K, $50K to $100K, $100K to $150K, $150K and over, undisclosed.",
+		),
+		scfPage: cs("The SCF project page the payment figures were read from."),
+		scfTotalAwardedUsd: { type: "number", nullable: true },
+		scfTotalPaidUsd: {
+			type: "number",
+			nullable: true,
+			description: "SCF's own paid figure on its project page.",
+		},
+		scfPaidSplit: cs(
+			"ok when the paid figure split exactly into tranche shares, else why it did not.",
+		),
+		buildAwards: {
+			type: "array",
+			nullable: true,
+			items: { $ref: "#/components/schemas/CohortBuildAward" },
+			description: "Build awards on the SCF page; null without an SCF page.",
+		},
+		mainnetTranchePaid: {
+			type: "boolean",
+			nullable: true,
+			description:
+				"SCF paid the final (mainnet) tranche of a Build award: SCF's own record of a delivered mainnet launch or allowed equivalent. null without a Build award or when the figures do not split.",
+		},
+		mainnetPaidBy: cd(
+			"The first web archive capture of the SCF page showing the payment: an upper bound.",
+		),
+		mainnetNotYetPaidOn: cd(
+			"The last capture showing the payment not yet made: a lower bound.",
+		),
+		scfBuildStageNow: cs("The Build award's latest paid tranche, in words."),
+		scfTestnetTrancheBy: cd("The testnet tranche was paid by this date."),
+		scfMainnetTrancheWindow: cs(
+			"The window the mainnet tranche was paid in (from to).",
+		),
+		events: {
+			type: "integer",
+			description: "Events in the project's journey.",
+		},
+		sourcesSeeingIt: {
+			type: "integer",
+			description: "Distinct sources with an event for it.",
+		},
+		firstSignal: cd(
+			"First strong signal (a domain or archive date never counts).",
+		),
+		firstSignalEvent: cs("The event behind firstSignal."),
+		domainRegistered: cs(
+			"RDAP registration date, with flags such as a likely earlier owner or a shared domain.",
+		),
+		siteFirstSeen: cd(
+			"First web archive capture of the current site: weak, never a launch date.",
+		),
+		firstRepo: cd("First repository created."),
+		startedBuildingOnStellar: cd(
+			"The commit that first added a Stellar SDK to a manifest.",
+		),
+		firstHackathon: cd("First hackathon entry."),
+		mainnetContractCreated: cd("Own contract created on mainnet."),
+		firstContractEventInclSetup: cd(
+			"First contract event, including the setup call.",
+		),
+		appReleased: cd("App first released in a store."),
+		firstPackage: cd("First package published."),
+		firstRelease: cd("First GitHub release."),
+		launchDate: cd(
+			"Dated launch: the earliest evidence of the strongest kind (meta.definitions.launchDate).",
+		),
+		launchBasis: cs(
+			"What dates the launch, or planned date only (a plan, never a launch).",
+		),
+		launchEvidence: {
+			type: "string",
+			nullable: true,
+			enum: [...LAUNCH_EVIDENCE],
+			description: "Kind of launch evidence; none = no public launch evidence.",
+		},
+		launchBeforeFirstAward: {
+			type: "boolean",
+			nullable: true,
+			description:
+				"The visible launch is more than 30 days older than the first award.",
+		},
+		daysAwardToLaunch: ci(
+			"Days from the first award to the launch; negative when the launch came first.",
+		),
+		plannedMainnetBy: cd("Mainnet date planned in the SCF proposal."),
+		planReading: cs(
+			"The plan against what is seen, once the planned date is over 90 days past.",
+		),
+		launchKnownDate: cd(
+			"The launch date used for launch ages: launchDate, else mainnetPaidBy, else meta.launchAgesCountedTo when no capture bounds SCF's payment.",
+		),
+		launchKnownBasis: {
+			type: "string",
+			nullable: true,
+			enum: [...LAUNCH_KNOWN_BASES],
+			description:
+				"dated: launchDate. scf-mainnet-paid-by: SCF paid the mainnet tranche, bounded by a capture. scf-mainnet-paid-undated: paid, no capture bounds it. null: launch not known.",
+		},
+		day180Date: cd("Launch date plus 180 days."),
+		day180Reading: cs(
+			"activity seen, no activity seen, could not check, too early or no launch date (meta.definitions.day180).",
+		),
+		day180Signals: {
+			type: "array",
+			nullable: true,
+			items: { type: "string" },
+			description: "Signals that showed activity in the day 150 to 210 window.",
+		},
+		day180SignalsChecked: {
+			type: "array",
+			nullable: true,
+			items: { type: "string" },
+			description: "Signals that had data for that window.",
+		},
+		day180Code: cs("Day-180 window on code: active, not active, not covered."),
+		day180Onchain: cs(
+			"Day-180 window on chain: active, not active, not covered.",
+		),
+		operatingNow: cs(
+			"Strongest current evidence it operates: on-chain, product, person, app; code (maintenance only), recorded inactive, none (no reading). null: first award under 180 days old or no SCF award, not read.",
+		),
+		operatingEvidenceDate: cd("Date of the operating evidence."),
+		observable: {
+			type: "boolean",
+			nullable: true,
+			description:
+				"Has an on-chain id or app listing, so operating can be seen (meta.definitions.observable).",
+		},
+		productProbe: cs("The directory's product probe result."),
+		productProbeDetail: cs("What the probe read."),
+		contracts: ci("Own contracts to query."),
+		deployersToExclude: ci("Deployer accounts to leave out of usage."),
+		accounts: ci("Own accounts."),
+		assets: ci("Own assets."),
+		usedByProjects: ci("Directory projects that use it."),
+		contractUpgrades: {
+			type: "integer",
+			description: "Contract upgrades in ledger metadata.",
+		},
+		lastUpgrade: cd("Latest contract upgrade."),
+		tvlPeak: cs("TVL peak: date, USD and DefiLlama slug."),
+		audits: { type: "integer", description: "Published audits." },
+		tools: {
+			type: "array",
+			nullable: true,
+			items: { type: "string" },
+			description: "Stellar packages in its manifests; null when none read.",
+		},
+		lastOnchainEvent: cd("Latest on-chain event."),
+		lastCommit: cd("Latest commit."),
+		appLastUpdated: cd("Latest store update."),
+		mainnetReading: cs("What its repos' contract ids say about mainnet."),
+		reposScanned: ci("Repos scanned for contract ids."),
+		idsInReposOnMainnet: ci("Ids in its repos found on mainnet."),
+		idsInReposNotOnMainnet: ci("Ids in its repos not on mainnet."),
+		idsInReposLiveOnTestnet: ci("Of those, ids live on testnet now."),
+		codeActivityNow: cs(
+			"active, quiet, silent, or no public code read (never inactive).",
+		),
+		ghRepos: ci("GitHub repos read."),
+		ghCommitsLast3Months: ci("Commits in the last 3 months."),
+		ghCommitsLast12Months: ci("Commits in the last 12 months."),
+		ghActiveMonthsOfLast12: ci("Months with commits, of the last 12."),
+		ghReleasesAndPackageVersionsLast12Months: ci(
+			"Releases and package versions in the last 12 months.",
+		),
+		tomlOwnAccountCreated: cd(
+			"Own account named in its stellar.toml, proved both ways: created. Not a launch date.",
+		),
+		tomlDeclaredAccountCreated: cd(
+			"Account its stellar.toml declares (one way): created. Not a launch date.",
+		),
+		lastActivity: cd("Latest activity of any kind."),
+		lastActivityEvent: cs("The event behind lastActivity."),
+		stoppedOn: cd("Recorded as stopped."),
+		gaps: {
+			type: "array",
+			items: { type: "string" },
+			description:
+				"What is not known, never filled in. [] when nothing is named.",
+		},
+	},
+};
+
 export const spec: OpenAPISpec = {
 	openapi: "3.1.0",
 	info: {
@@ -1584,6 +1850,11 @@ export const spec: OpenAPISpec = {
 			description: "Developer activity + ecosystem dev stats",
 		},
 		{ name: "Feedback", description: "Curator feedback loop" },
+		{
+			name: "Partner-only",
+			description:
+				"Endpoints that need a partner key on an allowlist; 401 without one.",
+		},
 	],
 	paths: {
 		"/api/status": {
@@ -11649,8 +11920,490 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/cohort/projects": {
+			get: {
+				operationId: "listCohortRows",
+				tags: ["Partner-only"],
+				summary: "Partner-only cohort rows",
+				description:
+					"Needs a key on the cohort allowlist (401 without one). Rows of a dated cohort snapshot, one per directory project: stage dates, launch date and basis, day-180 reading, operating-now evidence, SCF tranche payments and named gaps. Filter by scfAwarded, firstAwardYear, awardType, category, status.",
+				"x-partner-only": true,
+				security: COHORT_SECURITY,
+				parameters: [
+					{
+						name: "scfAwarded",
+						in: "query",
+						description:
+							"true: projects with an SCF award on record; false: the rest.",
+						schema: { type: "boolean" },
+					},
+					{
+						name: "firstAwardYear",
+						in: "query",
+						description: "Year of the first SCF award, four digits.",
+						schema: { type: "string", pattern: "^\\d{4}$" },
+					},
+					{
+						name: "awardType",
+						in: "query",
+						description:
+							"Type of the first SCF award (known when that award is at least 180 days old): build, legacy (v1 to v5) or unknown.",
+						schema: { type: "string", enum: [...AWARD_TYPES] },
+					},
+					{
+						name: "category",
+						in: "query",
+						description:
+							"Directory category, matched whole and case-blind. An unknown value answers 400 with the valid values.",
+						schema: { type: "string" },
+					},
+					{
+						name: "status",
+						in: "query",
+						description: "Directory status when the snapshot was built.",
+						schema: { type: "string", enum: [...COHORT_STATUSES] },
+					},
+					{
+						name: "limit",
+						in: "query",
+						description: "Rows per page (default 100, max 1000).",
+						schema: { type: "integer", default: 100, maximum: 1000 },
+					},
+					{
+						name: "offset",
+						in: "query",
+						description: "Rows to skip.",
+						schema: { type: "integer", default: 0, minimum: 0 },
+					},
+				],
+				responses: {
+					"200": {
+						description:
+							"Rows alphabetical by slug (not a rank), with meta.counts.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: ["meta", "projects"],
+									properties: {
+										meta: {
+											allOf: [
+												{ $ref: "#/components/schemas/CohortMeta" },
+												{
+													type: "object",
+													properties: {
+														filters: {
+															type: "object",
+															description:
+																"Echo of the request parameters, not served facts; absent or null = not applied.",
+															properties: {
+																scfAwarded: { type: "boolean", nullable: true },
+																firstAwardYear: {
+																	type: "string",
+																	nullable: true,
+																},
+																awardType: { type: "string", nullable: true },
+																category: { type: "string", nullable: true },
+																status: {
+																	type: "string",
+																	nullable: true,
+																	description:
+																		"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it.",
+																},
+																limit: { type: "integer" },
+																offset: { type: "integer" },
+															},
+														},
+														counts: {
+															type: "object",
+															description:
+																"total = rows matching every filter before limit and offset; returned = rows in this page.",
+															properties: {
+																returned: { type: "integer" },
+																total: { type: "integer" },
+															},
+														},
+														order: { type: "string" },
+														definitions: {
+															$ref: "#/components/schemas/CohortDefinitions",
+														},
+													},
+												},
+											],
+										},
+										projects: {
+											type: "array",
+											items: { $ref: "#/components/schemas/CohortProject" },
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": COHORT_400,
+					"401": COHORT_401,
+					"503": COHORT_503,
+				},
+			},
+		},
+		"/api/cohort/journey": {
+			get: {
+				operationId: "getCohortJourney",
+				tags: ["Partner-only"],
+				summary: "Partner-only cohort row events",
+				description:
+					"Needs a key on the cohort allowlist (401 without one). One cohort row's dated events, oldest first, each with its date precision, stage, detail, evidence link, source, strength and basis.",
+				"x-partner-only": true,
+				security: COHORT_SECURITY,
+				parameters: [
+					{
+						name: "slug",
+						in: "query",
+						required: true,
+						description:
+							"A project slug from listCohortRows. Missing answers 400; unknown answers 404.",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The project's events, oldest first.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: ["meta", "project", "events"],
+									properties: {
+										meta: {
+											allOf: [
+												{ $ref: "#/components/schemas/CohortMeta" },
+												{
+													type: "object",
+													properties: {
+														counts: {
+															type: "object",
+															properties: {
+																events: { type: "integer" },
+																withEvidenceUrl: { type: "integer" },
+															},
+														},
+														order: { type: "string" },
+														strengths: {
+															type: "object",
+															description: "What each strength value means.",
+															properties: {
+																strong: { type: "string" },
+																labelled: { type: "string" },
+																weaker: { type: "string" },
+																derived: { type: "string" },
+															},
+														},
+													},
+												},
+											],
+										},
+										project: {
+											type: "object",
+											properties: {
+												slug: { type: "string" },
+												name: { type: "string", nullable: true },
+												status: {
+													type: "string",
+													nullable: true,
+													description:
+														"Directory status when the snapshot was built; not dated in this object: meta.asOf dates the snapshot. null when the project was neither Live nor Inactive then.",
+												},
+												category: { type: "string", nullable: true },
+												gaps: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"What is not known about the project, never filled in. [] when nothing is named.",
+												},
+											},
+										},
+										events: {
+											type: "array",
+											items: {
+												$ref: "#/components/schemas/CohortJourneyEvent",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": COHORT_400,
+					"401": COHORT_401,
+					"404": {
+						description: "No project with that slug in the snapshot.",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ErrorResponse" },
+							},
+						},
+					},
+					"503": COHORT_503,
+				},
+			},
+		},
+		"/api/cohort/retention": {
+			get: {
+				operationId: "getCohortFigures",
+				tags: ["Partner-only"],
+				summary: "Partner-only cohort figures",
+				description:
+					"Needs a key on the cohort allowlist (401 without one). The cohort snapshot's figures, each with its denominator: launch basis and coverage, day-180 readings, operating now, operating after an SCF-paid mainnet tranche, splits by SCF funding and by first award year, type and size, SCF delivery by round, and the facts register rows. No parameters.",
+				"x-partner-only": true,
+				security: COHORT_SECURITY,
+				responses: {
+					"200": {
+						description:
+							"Every figure, computed from the same rows listCohortRows serves.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: [
+										"meta",
+										"cohort",
+										"scf",
+										"notScf",
+										"funnel",
+										"operatingNow",
+										"scfConfirmedRetention",
+										"deliveryByRound",
+										"register",
+									],
+									properties: {
+										meta: {
+											allOf: [
+												{ $ref: "#/components/schemas/CohortMeta" },
+												{
+													type: "object",
+													properties: {
+														definitions: {
+															$ref: "#/components/schemas/CohortDefinitions",
+														},
+													},
+												},
+											],
+										},
+										cohort: {
+											type: "object",
+											description:
+												"Projects in the cohort (Live or Inactive), split by SCF funding.",
+											properties: {
+												projects: { type: "integer" },
+												scfFunded: { type: "integer" },
+												notScf: { type: "integer" },
+											},
+										},
+										scf: {
+											allOf: [
+												{ $ref: "#/components/schemas/CohortLaunchSplit" },
+												{
+													type: "object",
+													properties: {
+														launchBeforeFirstAward: {
+															type: "integer",
+															description:
+																"SCF projects whose visible launch is more than 30 days older than the first award.",
+														},
+														launchedOnOrAfterFirstAward: {
+															type: "object",
+															description:
+																"Dated launches not older than the first award, those with a day-180 verdict (activity or no activity seen), and those active at day 180.",
+															properties: {
+																projects: { type: "integer" },
+																withDay180Verdict: { type: "integer" },
+																activeAtDay180: { type: "integer" },
+															},
+														},
+														launchKnown: {
+															type: "object",
+															description:
+																"Launch known (dated, or SCF paid the mainnet tranche) of SCF-funded projects.",
+															properties: {
+																projects: { type: "integer" },
+																of: { type: "integer" },
+																dated: { type: "integer" },
+																bySCFPaymentOnly: { type: "integer" },
+															},
+														},
+														buildFunded: {
+															type: "object",
+															description:
+																"SCF projects with a Build award: how many SCF paid the mainnet tranche for, how many of those had no dated launch, and launch known against launch dated.",
+															properties: {
+																projects: { type: "integer" },
+																mainnetTranchePaid: { type: "integer" },
+																mainnetPaidWithoutDatedLaunch: {
+																	type: "integer",
+																},
+																launchKnown: { type: "integer" },
+																launchDated: { type: "integer" },
+															},
+														},
+													},
+												},
+											],
+										},
+										notScf: { $ref: "#/components/schemas/CohortLaunchSplit" },
+										funnel: {
+											type: "array",
+											description:
+												"SCF-funded, launch known, past day 180, operating now: each stage's projects and the stage before it (of). Order is the funnel's order.",
+											items: {
+												type: "object",
+												properties: {
+													stage: { type: "string" },
+													projects: { type: "integer" },
+													of: { type: "integer" },
+													definition: { type: "string" },
+												},
+											},
+										},
+										funnelPastDay180Evidence: {
+											type: "object",
+											description:
+												"Projects past day 180 by their operating-now evidence. not eligible: the first award is under 180 days old, so it was not read.",
+											additionalProperties: { type: "integer" },
+										},
+										operatingNow: {
+											type: "object",
+											description:
+												"SCF projects whose first award is at least 180 days old (eligible), and those operating now, by evidence and by group.",
+											properties: {
+												eligible: { type: "integer" },
+												operating: { type: "integer" },
+												byEvidence: {
+													type: "object",
+													additionalProperties: { type: "integer" },
+												},
+												byFirstAwardYear: {
+													type: "array",
+													items: {
+														$ref: "#/components/schemas/CohortOperatingGroup",
+													},
+												},
+												byFirstAwardType: {
+													type: "array",
+													items: {
+														$ref: "#/components/schemas/CohortOperatingGroup",
+													},
+												},
+												byFirstAwardSize: {
+													type: "array",
+													items: {
+														$ref: "#/components/schemas/CohortOperatingGroup",
+													},
+												},
+											},
+										},
+										scfByFirstAwardYear: {
+											type: "array",
+											description:
+												"SCF-funded projects by year of first award, oldest first.",
+											items: {
+												allOf: [
+													{ $ref: "#/components/schemas/CohortLaunchSplit" },
+													{
+														type: "object",
+														properties: {
+															year: { type: "string" },
+															launchKnown: { type: "integer" },
+															pastDay180: { type: "integer" },
+															operatingNowPastDay180: { type: "integer" },
+														},
+													},
+												],
+											},
+										},
+										scfConfirmedRetention: {
+											type: "object",
+											description:
+												"Projects whose Build award SCF paid in full; those with a launch at least 180 days old, by launch basis and by operating-now evidence.",
+											properties: {
+												paidInFull: { type: "integer" },
+												launchAtLeast180DaysOld: { type: "integer" },
+												launchBasis: {
+													type: "object",
+													properties: {
+														dated: { type: "integer" },
+														scfPaidBy: { type: "integer" },
+													},
+												},
+												operatingNow: { type: "integer" },
+												codeOnly: { type: "integer" },
+												noReading: { type: "integer" },
+												recordedInactive: { type: "integer" },
+											},
+										},
+										deliveryByRound: {
+											type: "object",
+											description:
+												"Build awards read exactly on SCF's pages, those with the mainnet tranche paid, the SCF projects they belong to, and the same by round (ascending).",
+											properties: {
+												awardsRead: { type: "integer" },
+												mainnetTranchePaid: { type: "integer" },
+												scfProjects: { type: "integer" },
+												rounds: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															round: { type: "integer" },
+															read: { type: "integer" },
+															mainnetPaid: { type: "integer" },
+														},
+													},
+												},
+											},
+										},
+										register: {
+											type: "array",
+											description:
+												"The facts register's rows for these figures, as written: the value, what it was measured from, when, and what it cannot see.",
+											items: {
+												type: "object",
+												properties: {
+													section: { type: "string" },
+													fact: { type: "string" },
+													value: { type: "string" },
+													measuredFrom: { type: "string" },
+													asOf: { type: "string" },
+													cannotSee: { type: "string" },
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": COHORT_400,
+					"401": COHORT_401,
+					"503": COHORT_503,
+				},
+			},
+		},
 	},
 	components: {
+		securitySchemes: {
+			cohortPartnerKey: {
+				type: "http",
+				scheme: "bearer",
+				description:
+					"A partner key whose name is on the cohort allowlist, as Authorization: Bearer <key>.",
+			},
+			cohortPartnerApiKey: {
+				type: "apiKey",
+				in: "header",
+				name: "x-api-key",
+				description: "The same key as an x-api-key header.",
+			},
+		},
 		parameters: {
 			q: {
 				name: "q",
@@ -11688,6 +12441,144 @@ export const spec: OpenAPISpec = {
 			},
 		},
 		schemas: {
+			CohortProject: COHORT_PROJECT,
+			CohortBuildAward: {
+				type: "object",
+				properties: {
+					round: { type: "integer" },
+					budgetUsd: { type: "number" },
+					paidShare: {
+						type: "number",
+						nullable: true,
+						description:
+							"Share SCF reports paid; null when the page's figures do not split exactly.",
+					},
+					mainnetTranchePaid: { type: "boolean", nullable: true },
+				},
+			},
+			CohortJourneyEvent: {
+				type: "object",
+				properties: {
+					date: {
+						type: "string",
+						description:
+							"YYYY-MM-DD, or YYYY-MM when only the month is known; for a window, the earliest.",
+					},
+					datePrecision: {
+						type: "string",
+						description: "day, month or window.",
+					},
+					dateUpper: {
+						type: "string",
+						nullable: true,
+						description: "For a window: the latest the event can be.",
+					},
+					stage: { type: "string" },
+					event: { type: "string" },
+					detail: { type: "string", nullable: true },
+					evidenceUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"The record the event was read from; null for computed day-180 rows and the few with no stable link.",
+					},
+					source: { type: "string" },
+					strength: {
+						type: "string",
+						description:
+							"strong, labelled, weaker or derived (meta.strengths).",
+					},
+					basis: { type: "string", description: "How the date was set." },
+				},
+			},
+			CohortLaunchSplit: {
+				type: "object",
+				properties: {
+					projects: { type: "integer" },
+					launchBasis: {
+						type: "object",
+						description:
+							"Launch evidence: on chain, product, a planned date only, none.",
+						properties: {
+							onChain: { type: "integer" },
+							product: { type: "integer" },
+							plannedOnly: { type: "integer" },
+							none: { type: "integer" },
+						},
+					},
+					day180: {
+						type: "object",
+						properties: {
+							activitySeen: { type: "integer" },
+							noActivitySeen: { type: "integer" },
+							couldNotCheck: { type: "integer" },
+							tooEarly: { type: "integer" },
+							noLaunchDate: { type: "integer" },
+						},
+					},
+				},
+			},
+			CohortOperatingGroup: {
+				type: "object",
+				description:
+					"Operating now in one group, overall and split by whether operating can be observed (an on-chain id or app). Compare groups within the same column.",
+				properties: {
+					group: { type: "string" },
+					projects: { type: "integer" },
+					operating: { type: "integer" },
+					observable: {
+						type: "object",
+						properties: {
+							projects: { type: "integer" },
+							operating: { type: "integer" },
+						},
+					},
+					notObservable: {
+						type: "object",
+						properties: {
+							projects: { type: "integer" },
+							operating: { type: "integer" },
+						},
+					},
+				},
+			},
+			CohortDefinitions: {
+				type: "object",
+				description: "What each term means.",
+				properties: {
+					cohort: { type: "string" },
+					launchDate: { type: "string" },
+					launchKnown: { type: "string" },
+					launchBeforeFirstAward: { type: "string" },
+					day180: { type: "string" },
+					operatingNow: { type: "string" },
+					observable: { type: "string" },
+					scfConfirmedRetention: { type: "string" },
+					deliveryByRound: { type: "string" },
+				},
+			},
+			CohortMeta: {
+				type: "object",
+				properties: {
+					partnerOnly: { type: "boolean" },
+					asOf: {
+						type: "string",
+						description: "The date the snapshot's figures describe.",
+					},
+					launchAgesCountedTo: {
+						type: "string",
+						description: "The date launch ages (past day 180) are counted to.",
+					},
+					builtAt: { type: "string", format: "date-time" },
+					sources: { type: "array", items: { type: "string" } },
+					cannotSee: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"What the data cannot see. Absence of a reading is never inactivity.",
+					},
+				},
+			},
 			RetryableError: {
 				type: "object",
 				description:
