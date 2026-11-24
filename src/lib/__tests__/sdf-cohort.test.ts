@@ -60,8 +60,24 @@ function proj(over: Partial<CohortProject>): CohortProject {
 		launchKnownDate: null,
 		launchKnownBasis: null,
 		day180Reading: null,
+		day180TwoSignals: null,
+		day180SignalKinds: null,
+		confidence: null,
+		confidenceScore: null,
+		confidenceBasis: null,
+		planType: null,
+		scfAwardKinds: [],
+		scfAwardCount: 0,
 		operatingNow: null,
 		observable: null,
+		onchainIds: {
+			contracts: [],
+			deployersToExclude: [],
+			accounts: [],
+			assets: [],
+		},
+		usage: null,
+		evidenceNotes: [],
 		gaps: [],
 		...over,
 	} as CohortProject;
@@ -70,6 +86,7 @@ function proj(over: Partial<CohortProject>): CohortProject {
 const BUNDLE: CohortBundle = {
 	asOf: "2026-11-23",
 	retentionAsOf: "2026-11-24",
+	asOfDates: { statuses: "2026-11-24" },
 	builtAt: "2026-11-24T00:00:00.000Z",
 	sources: ["fixture"],
 	register: [],
@@ -86,6 +103,33 @@ const BUNDLE: CohortBundle = {
 			launchKnownBasis: "dated",
 			launchKnownDate: "2025-06-01",
 			operatingNow: "on-chain",
+			scfAwardKinds: ["build"],
+			scfAwardCount: 1,
+			day180TwoSignals: "active",
+			day180SignalKinds: ["on-chain", "code"],
+			confidence: "high",
+			confidenceScore: 3,
+			confidenceBasis: "day-180 signals seen: on-chain (2) + code (1) = 3",
+			planType: "developer tool",
+			onchainIds: {
+				contracts: ["CABC"],
+				deployersToExclude: ["GDEP"],
+				accounts: [],
+				assets: [],
+			},
+			usage: [
+				{
+					tier: "strong",
+					distinctCallers30d: 4,
+					distinctCallers90d: 12,
+					events30d: 40,
+					events60d: 80,
+					events90d: 120,
+					lowerBound: false,
+					readAt: "2026-11-24T03:00:00Z",
+				},
+			],
+			evidenceNotes: ["fixture note"],
 		}),
 		// launch known only from SCF's payment, 30 days ago
 		proj({
@@ -150,7 +194,22 @@ const BUNDLE: CohortBundle = {
 			],
 		],
 	},
-	scfPages: [],
+	scfPages: [
+		{
+			scfSlug: "alpha-x",
+			slug: "alpha",
+			split: "exact",
+			buildAwards: [
+				{
+					round: 41,
+					budgetUsd: 100,
+					schedule: "four-tranche",
+					paidShare: 1,
+					mainnetTranchePaid: true,
+				},
+			],
+		},
+	],
 };
 
 function req(path: string, headers: Record<string, string> = {}) {
@@ -238,6 +297,13 @@ describe("cohort projects", () => {
 		).json();
 		expect(body.projects.map((p: CohortProject) => p.slug)).toEqual(["alpha"]);
 		expect(body.meta.counts).toEqual({ returned: 1, total: 1 });
+		expect(
+			(
+				await (
+					await projectsGET(req("/api/cohort/projects?status=Development", ok))
+				).json()
+			).meta.counts.total,
+		).toBe(0);
 		for (const q of ["awardType=grant", "status=Dead", "category=Nope", "x=1"])
 			expect(
 				(await projectsGET(req(`/api/cohort/projects?${q}`, ok))).status,
@@ -294,6 +360,34 @@ describe("cohort funnel", () => {
 			paidInFull: 1,
 			launchAtLeast180DaysOld: 0,
 		});
+		expect(r.deliveryByRound).toMatchObject({
+			awardsRead: 1,
+			mainnetTranchePaid: 1,
+			scfProjects: 1,
+		});
+		expect(r.scf.day180TwoSignals.active).toBe(1);
+		expect(r.usage.all.bands.find((b) => b.band === "10 to 49")?.projects).toBe(
+			1,
+		);
+	});
+
+	it("leaves rows whose operating state was not read out of the operating denominator", () => {
+		const young = proj({
+			slug: "epsilon",
+			status: "Live",
+			firstScfAward: "2026-10-01",
+			launchEvidence: "product",
+			launchKnownBasis: "dated",
+			launchKnownDate: "2025-01-01",
+			operatingNow: null,
+		});
+		const r = cohortRetention({
+			...BUNDLE,
+			projects: [...BUNDLE.projects, young],
+		});
+		expect(r.funnel[2].projects).toBe(2);
+		expect(r.funnel[3]).toMatchObject({ projects: 1, of: 1 });
+		expect(r.funnelNotRead).toBe(1);
 	});
 });
 

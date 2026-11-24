@@ -3,10 +3,13 @@
  * checked cohort snapshot files.
  *
  *   COHORT_DATA_KEY=<base64 32 bytes> pnpm exec tsx scripts/build-sdf-cohort.ts \
- *     --cohort <dir with the cohort CSVs and facts-register.md> \
- *     --scf <dir with scf_tranches.json, tranche_by_project.json, tranche_dates_all.json>
+ *     --cohort <dir with the cohort CSVs, cohort_v2.json and facts-register.md> \
+ *     --scf <dir with live_rows.json, scf_membership.json and scf_rounds.json>
  *
- * Read only: nothing is fetched and no database is touched. The bundle is
+ * Read only: nothing is fetched and no database is touched. The SCF pages
+ * and statuses come from one read of the live directory (live_rows.json),
+ * and the build stops when its delivery-by-round totals differ from the
+ * public /api/projects/scf-rounds totals read with it. The bundle is
  * encrypted because this repository is public and the cohort is served to
  * named partners only (src/lib/sdf-cohort.ts). Store data about people
  * (contributor counts, app developer names) is left out, and so is every
@@ -15,7 +18,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
-	type BuildAward,
+	BANNED_IN_BUNDLE,
 	COHORT_FILE,
 	type CohortBundle,
 	type CohortProject,
@@ -23,8 +26,10 @@ import {
 	decryptBundle,
 	encryptBundle,
 	type JourneyTuple,
-	type RegisterRow,
+	parseRegister,
+	planTypeOf,
 	type ScfPage,
+	servedText,
 } from "../src/lib/sdf-cohort";
 
 const arg = (name: string) => {
@@ -85,42 +90,11 @@ const int = (v: string | undefined) => (v ? Number.parseInt(v, 10) : null);
 const num = (v: string | undefined) => (v ? Number(v) : null);
 const bool = (v: string | undefined) => (v ? v === "True" : null);
 const list = (v: string | undefined) => (v ? v.split("; ") : null);
-const ymd = (v: string | null | undefined) =>
-	v ? `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}` : null;
 const usd = (v: number | null | undefined) =>
 	typeof v === "number" ? Math.round(v * 100) / 100 : null;
 
 // ------------------------------------------------------------ register
 
-/** Facts register sections served (by heading prefix). The rest are review
- * lists for the owner (status moves, labels, probes of named sites). */
-const SECTIONS: Record<string, string> = {
-	"The cohort": "cohort",
-	"Operating after the award": "operating",
-	"SCF's own payments": "scf-payments",
-};
-function parseRegister(md: string): RegisterRow[] {
-	const out: RegisterRow[] = [];
-	let section: string | null = null;
-	for (const line of md.split("\n")) {
-		if (line.startsWith("## ")) {
-			const h = line.slice(3);
-			section =
-				Object.entries(SECTIONS).find(([k]) => h.startsWith(k))?.[1] ?? null;
-			continue;
-		}
-		if (!section || !line.startsWith("|")) continue;
-		const cells = line
-			.split("|")
-			.slice(1, -1)
-			.map((c) => c.trim());
-		if (cells.length !== 5 || cells[0] === "Fact" || /^-+$/.test(cells[0]))
-			continue;
-		const [fact, value, measuredFrom, asOf, cannotSee] = cells;
-		out.push({ section, fact, value, measuredFrom, asOf, cannotSee });
-	}
-	return out;
-}
 const register = parseRegister(
 	readFileSync(join(COHORT, "facts-register.md"), "utf8"),
 );
@@ -132,58 +106,90 @@ const asOfOf = (fact: string) => {
 const ASOF = asOfOf("Projects in the cohort");
 const RETENTION_ASOF = asOfOf("Retention after an SCF-confirmed launch");
 
-// ------------------------------------------------------------- SCF pages
+// ------------------------------------------------- live rows, SCF pages
 
-type RawBuild = {
-	round: string;
-	budget: number;
+type LiveBuild = {
+	round: number;
+	budgetUSD: number;
+	schedule: string | null;
 	paidShare: number | null;
-	finalPaid: boolean | null;
 };
-const rawPages =
-	json<
-		Record<
-			string,
-			{
-				ourSlug: string;
-				note: string;
-				builds: RawBuild[];
-				totalAwarded: number | null;
-				totalPaid: number | null;
-			}
-		>
-	>("scf_tranches.json");
-const dates = json<
-	Record<string, { paidBy: string | null; notYetPaidOn: string | null }>
->("tranche_dates_all.json");
+type Membership = {
+	scfSlug: string | null;
+	paid: { split: string | null; builds: LiveBuild[] } | null;
+};
+const live = json<{ rows: Record<string, { status: string | null }> }>(
+	"live_rows.json",
+).rows;
+const membership = json<{ rows: Record<string, Membership> }>(
+	"scf_membership.json",
+).rows;
+const scfRounds = json<{
+	meta: { scfReadAt: string; scfPaidReadAt: string };
+	totals: { buildSharesRead: number; buildFinalTranchePaid: number };
+}>("scf_rounds.json");
 
-const awards = (bs: RawBuild[]): BuildAward[] =>
-	bs.map((b) => ({
-		round: Number.parseInt(b.round.replace(/\D+/g, ""), 10),
-		budgetUsd: b.budget,
-		paidShare: b.paidShare,
-		mainnetTranchePaid: b.finalPaid,
-	}));
-const scfPages: ScfPage[] = Object.entries(rawPages).map(([scfSlug, p]) => ({
-	scfSlug,
-	slug: p.ourSlug || null,
-	split: p.note,
-	buildAwards: awards(p.builds),
-}));
-const pageOf = new Map(
-	Object.entries(rawPages)
-		.filter(([, p]) => p.ourSlug)
-		.map(([scfSlug, p]) => [p.ourSlug, { scfSlug, ...p }]),
-);
+// Every directory row except drafts, as /api/projects/scf-rounds counts them.
+const scfPages: ScfPage[] = Object.entries(membership)
+	.filter(([slug, m]) => m.paid && live[slug]?.status !== "Draft")
+	.map(([slug, m]) => ({
+		scfSlug: m.scfSlug ?? slug,
+		slug,
+		split: m.paid?.split ?? null,
+		buildAwards: (m.paid?.builds ?? []).map((x) => ({
+			round: x.round,
+			budgetUsd: x.budgetUSD,
+			schedule: x.schedule,
+			paidShare: x.paidShare,
+			mainnetTranchePaid: x.paidShare === null ? null : x.paidShare === 1,
+		})),
+	}))
+	.sort((a, z) => a.slug.localeCompare(z.slug));
 
 // -------------------------------------------------------------- projects
 
 const fingerprint = csv("project_fingerprint.csv");
 const cohort = csv("scf_cohort.csv");
 const operating = csv("operating_after_award.csv");
+type V2 = Pick<
+	CohortProject,
+	| "status"
+	| "statusBasis"
+	| "statusVerdictDate"
+	| "scfAwarded"
+	| "scfAwardKinds"
+	| "scfAwardCount"
+	| "firstScfAward"
+	| "firstScfAwardDateBasis"
+	| "firstScfRound"
+	| "scfPage"
+	| "scfTotalAwardedUsd"
+	| "scfTotalPaidUsd"
+	| "scfPaidSplit"
+	| "buildAwards"
+	| "mainnetTranchePaid"
+	| "mainnetPaidBy"
+	| "mainnetNotYetPaidOn"
+	| "launchKnownDate"
+	| "launchKnownBasis"
+	| "day180TwoSignals"
+	| "day180SignalKinds"
+	| "confidence"
+	| "confidenceScore"
+	| "confidenceBasis"
+	| "onchainIds"
+	| "usage"
+	| "evidenceNotes"
+>;
+const v2 = JSON.parse(readFileSync(join(COHORT, "cohort_v2.json"), "utf8")) as {
+	asOfDates: Record<string, string>;
+	rows: Record<string, V2>;
+};
 const AWARD_TYPE: Record<string, CohortProject["firstAwardType"]> = {
 	Build: "build",
 	"Legacy (v1 to v5)": "legacy",
+	"Public Goods": "public-goods",
+	Liquidity: "liquidity",
 	unknown: "unknown",
 };
 
@@ -191,51 +197,40 @@ const projects: CohortProject[] = [...fingerprint.values()]
 	.map((f): CohortProject => {
 		const c = cohort.get(f.slug) ?? {};
 		const o = operating.get(f.slug) ?? {};
-		const page = pageOf.get(f.slug);
-		const builds = page ? awards(page.builds) : null;
-		const mainnetTranchePaid =
-			page && page.note === "ok" && builds?.length
-				? builds.some((b) => b.mainnetTranchePaid)
-				: null;
-		const launchEvidence = str(
-			c.launch_evidence,
-		) as CohortProject["launchEvidence"];
-		const dated = launchEvidence === "on-chain" || launchEvidence === "product";
-		const paidBy = ymd(dates[f.slug]?.paidBy);
-		const launchKnownBasis: CohortProject["launchKnownBasis"] = dated
-			? "dated"
-			: mainnetTranchePaid
-				? paidBy
-					? "scf-mainnet-paid-by"
-					: "scf-mainnet-paid-undated"
-				: null;
+		const x = v2.rows[f.slug];
+		if (!x) throw new Error(`cohort_v2.json has no row '${f.slug}'`);
+		const firstAwardType = o.first_award_type
+			? AWARD_TYPE[o.first_award_type]
+			: null;
+		if (firstAwardType === undefined)
+			throw new Error(`unknown award type '${o.first_award_type}'`);
+		const category = str(f.category) ?? str(c.category);
 		return {
 			slug: f.slug,
 			name: str(c.name),
 			inCohort: cohort.has(f.slug),
-			category: str(f.category),
-			status: str(f.status_now) as CohortProject["status"],
-			statusBasis: str(f.status_basis),
-			statusVerdictDate: str(c.status_verdict_date),
-			scfAwarded: !!f.first_scf_award,
-			firstScfRound: int(c.first_scf_round),
+			category,
+			status: x.status,
+			statusBasis: x.statusBasis,
+			statusVerdictDate: x.statusVerdictDate,
+			scfAwarded: x.scfAwarded,
+			scfAwardKinds: x.scfAwardKinds,
+			scfAwardCount: x.scfAwardCount,
+			firstScfRound: x.firstScfRound,
 			firstScfSubmission: str(f.first_scf_submission),
-			firstScfAward: str(f.first_scf_award),
-			firstAwardType: o.first_award_type
-				? AWARD_TYPE[o.first_award_type]
-				: null,
+			firstScfAward: x.firstScfAward,
+			firstScfAwardDateBasis: x.firstScfAwardDateBasis,
+			firstAwardType,
 			firstAwardUsd: num(o.first_award_usd),
 			firstAwardSize: str(o.first_award_size),
-			scfPage: page
-				? `https://communityfund.stellar.org/project/${page.scfSlug}`
-				: null,
-			scfTotalAwardedUsd: usd(page?.totalAwarded),
-			scfTotalPaidUsd: usd(page?.totalPaid),
-			scfPaidSplit: page ? page.note : null,
-			buildAwards: builds,
-			mainnetTranchePaid,
-			mainnetPaidBy: paidBy,
-			mainnetNotYetPaidOn: ymd(dates[f.slug]?.notYetPaidOn),
+			scfPage: x.scfPage,
+			scfTotalAwardedUsd: usd(x.scfTotalAwardedUsd),
+			scfTotalPaidUsd: usd(x.scfTotalPaidUsd),
+			scfPaidSplit: x.scfPaidSplit,
+			buildAwards: x.buildAwards,
+			mainnetTranchePaid: x.mainnetTranchePaid,
+			mainnetPaidBy: x.mainnetPaidBy,
+			mainnetNotYetPaidOn: x.mainnetNotYetPaidOn,
 			scfBuildStageNow: str(f.scf_build_stage_now),
 			scfTestnetTrancheBy: str(f.scf_testnet_tranche_by),
 			scfMainnetTrancheWindow: str(f.scf_mainnet_tranche_window),
@@ -255,23 +250,25 @@ const projects: CohortProject[] = [...fingerprint.values()]
 			firstRelease: str(f.first_release),
 			launchDate: str(f.launch_date),
 			launchBasis: str(f.launch_basis),
-			launchEvidence,
+			launchEvidence: str(c.launch_evidence) as CohortProject["launchEvidence"],
 			launchBeforeFirstAward: bool(c.launch_before_first_award),
 			daysAwardToLaunch: int(f.days_award_to_launch),
 			plannedMainnetBy: str(c.planned_mainnet_by),
 			planReading: str(c.plan_reading),
-			launchKnownDate: dated
-				? str(f.launch_date)
-				: launchKnownBasis
-					? (paidBy ?? RETENTION_ASOF)
-					: null,
-			launchKnownBasis,
+			launchKnownDate: x.launchKnownDate,
+			launchKnownBasis: x.launchKnownBasis,
 			day180Date: str(c.day180_date),
 			day180Reading: str(f.day180_reading),
 			day180Signals: list(c.day180_signals),
 			day180SignalsChecked: list(c.day180_signals_checked),
 			day180Code: str(c.day180_code),
 			day180Onchain: str(c.day180_onchain),
+			day180TwoSignals: x.day180TwoSignals,
+			day180SignalKinds: x.day180SignalKinds,
+			confidence: x.confidence,
+			confidenceScore: x.confidenceScore,
+			confidenceBasis: x.confidenceBasis,
+			planType: planTypeOf(category),
 			operatingNow: str(f.operating_now),
 			operatingEvidenceDate: str(o.evidence_date),
 			observable: bool(o.strong_channel),
@@ -308,6 +305,9 @@ const projects: CohortProject[] = [...fingerprint.values()]
 			lastActivity: str(f.last_activity),
 			lastActivityEvent: str(f.last_activity_event),
 			stoppedOn: str(f.stopped_on),
+			onchainIds: x.onchainIds,
+			usage: x.usage,
+			evidenceNotes: x.evidenceNotes,
 			gaps: list(f.gaps) ?? [],
 		};
 	})
@@ -341,14 +341,21 @@ for (const e of parseCsv(
 const bundle: CohortBundle = {
 	asOf: ASOF,
 	retentionAsOf: RETENTION_ASOF,
+	asOfDates: {
+		...v2.asOfDates,
+		scfAwards: scfRounds.meta.scfReadAt.slice(0, 10),
+		scfPaid: scfRounds.meta.scfPaidReadAt.slice(0, 10),
+	},
 	builtAt: new Date().toISOString(),
 	sources: [
-		"SCF public award records and every public SCF project page (totalAwarded and totalPaid), read 2026-11-23; tranche shares from the SCF Handbook's Budget and Deliverable Guidelines.",
-		"The Stellar Light directory (every page of every status) and its daily status snapshots since 2026-10-02.",
+		`SCF's own award records and paid totals (totalAwarded and totalPaid on every SCF project page) as the live directory serves them, read by SCF ${scfRounds.meta.scfPaidReadAt.slice(0, 10)}; tranche shares by the SCF Handbook's schedule for rounds 41 on, inferred from paid shares for rounds 30 to 40.`,
+		"The Stellar Light directory (every page of every status, statuses read live) and its daily status snapshots since 2026-10-02.",
 		"Ledger facts: contract creation and upgrades proved in ledger metadata, close times from SDF's history archive; contract events, protocol registry and asset trustline history from Stellar Index (stellarindex.io); issued assets and accounts from Horizon.",
 		"Address labels from stellar-expert/public-directory (MIT).",
 		"Repositories, releases, manifests and commit counts from GitHub; packages from npm, crates.io and PyPI; app dates from the App Store and Google Play; domains from RDAP; captures from the Internet Archive; TVL from DefiLlama.",
-		"Product checks: the directory's own product probe (no AI), run 2026-11-23.",
+		"Product checks: the directory's own product probe (no AI), run 2026-11-23; each operating project's own stellar.toml network, read 2026-11-24.",
+		"Contract callers: Stellar Index events and Horizon transactions, read 2026-11-24.",
+		"One incident record checked on the ledger (Comet's BLND:USDC pool, 2026-08-25): Horizon, archive ledger metadata and Soroban RPC.",
 	],
 	register,
 	projects,
@@ -356,10 +363,21 @@ const bundle: CohortBundle = {
 	scfPages,
 };
 
-// Nothing private may ride along: no local paths in served text.
-const text = JSON.stringify(bundle);
-for (const bad of ["/Users/", "/home/", "~/"])
-	if (text.includes(bad)) throw new Error(`bundle contains '${bad}'`);
+// Nothing private may ride along: no local paths and no internal ids
+// (ledger rows, lanes, the routing gate) in served text.
+const text = servedText(bundle);
+for (const bad of BANNED_IN_BUNDLE)
+	if (bad.test(text)) throw new Error(`bundle matches ${bad}`);
+
+// The SCF figures must be the public API's, read together with the rows.
+const check = cohortRetention(bundle).deliveryByRound;
+if (
+	check.awardsRead !== scfRounds.totals.buildSharesRead ||
+	check.mainnetTranchePaid !== scfRounds.totals.buildFinalTranchePaid
+)
+	throw new Error(
+		`delivery by round ${check.mainnetTranchePaid} of ${check.awardsRead} differs from scf-rounds ${scfRounds.totals.buildFinalTranchePaid} of ${scfRounds.totals.buildSharesRead}`,
+	);
 
 const out = encryptBundle(bundle, KEY);
 writeFileSync(COHORT_FILE, out);
