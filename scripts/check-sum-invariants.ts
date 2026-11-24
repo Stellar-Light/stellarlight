@@ -24,6 +24,7 @@
  *   pnpm exec tsx scripts/check-sum-invariants.ts --json     # machine output
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const BASE = process.env.SUM_INVARIANTS_BASE ?? "https://stellarlight.xyz";
 const OUT = "improvements/audits/sum-invariants-latest.json";
@@ -308,5 +309,5 @@ const PARTITIONS: Part[] = [
 	}
 	// A fail is a broken invariant. Could-not-check on EVERYTHING is an instrument
 	// failure and gets its own exit code so nobody reads it as green or as red.
-	process.exit(fails.length ? 1 : cnc.length === results.length ? 2 : 0);
+	exitAfterFlush(fails.length ? 1 : cnc.length === results.length ? 2 : 0);
 })();

@@ -32,6 +32,7 @@ import "./load-env";
 import { getPayload } from "payload";
 import { NON_PRODUCT_VERDICTS } from "../src/lib/page-verdict";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 // --mark-stale (with --execute) also flips the CLEARLY-DEAD set: no repo commit
@@ -331,7 +332,7 @@ async function main() {
 	console.log(
 		`\nDONE. curated marked: ${EXECUTE ? marked : "(dry-run)"} · clearly-dead ${MARK_STALE && EXECUTE ? "marked: " + deadMarked : "candidates: " + dead.length} · watchlist: ${WATCHLIST.length} · total stale: ${rows.length} · site-gone: ${siteGone.length} · moved-or-gone: ${movedOrGone.length}`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 main().catch((e) => {
 	console.error("FAILED:", e?.message ?? e);

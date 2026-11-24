@@ -14,6 +14,9 @@
  * wave — this is a regression gate, not an aspiration. Exits 1 on any miss.
  * Requests are cache-busted (the repos CDN cache is ~5min).
  */
+
+import { exitAfterFlush } from "../lib/exit-after-flush";
+
 const BASE = process.env.BASE_URL || "https://stellarlight.xyz";
 
 /** q → acceptable top-3 fullName substrings (any-of, case-insensitive). */
@@ -79,7 +82,7 @@ async function main(): Promise<number> {
 	return failed === 0 ? 0 : 1;
 }
 
-main().then((code) => process.exit(code));
+main().then((code) => exitAfterFlush(code));
 
 // Global-scope collision guard: with no import/export, tsc puts this file
 // in the shared global scope where every script's main/BASE/PROBES collide —

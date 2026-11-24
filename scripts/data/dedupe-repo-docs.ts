@@ -27,6 +27,7 @@
 
 import "../load-env";
 import type { Payload } from "payload";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 
@@ -214,7 +215,7 @@ async function main() {
 	console.log(
 		`\n${EXECUTE ? "" : "WOULD: "}merged ${EXECUTE ? merged : would.merge} group(s), deleted ${EXECUTE ? deleted : would.delete} orphan doc(s)${failed ? ` — ${failed} FAILURE(S)` : ""}`,
 	);
-	process.exit(failed ? 1 : 0);
+	exitAfterFlush(failed ? 1 : 0);
 }
 
 if (process.argv[1]?.includes("dedupe-repo-docs"))

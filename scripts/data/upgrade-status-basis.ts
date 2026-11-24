@@ -41,6 +41,7 @@ import {
 	thirdPartyHost,
 } from "../../src/lib/page-verdict";
 import { SITE_LIVENESS_MAY_REPLACE } from "../../src/lib/project-status";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import { curatedFieldsFor } from "./curation-maps";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -407,7 +408,7 @@ async function main() {
 
 	if (!EXECUTE) {
 		console.log("\nDRY RUN — nothing written. Re-run with --execute.");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 	for (const d of downgrade) {
 		await payload.update({
@@ -445,7 +446,7 @@ async function main() {
 	console.log(
 		`\nwrote ${wrote} — ${after.totalDocs} rows now carry basis=site-liveness`,
 	);
-	process.exit(after.totalDocs >= wrote ? 0 : 1);
+	exitAfterFlush(after.totalDocs >= wrote ? 0 : 1);
 }
 
 if (process.argv[1]?.includes("upgrade-status-basis"))

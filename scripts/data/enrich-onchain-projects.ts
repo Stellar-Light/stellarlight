@@ -72,6 +72,7 @@ import {
 } from "../../src/lib/onchain-sources";
 import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import { tomlChains } from "./backfill-deployment";
 import { DEPLOYMENT_VERIFIED } from "./curation-maps";
 
@@ -1093,7 +1094,7 @@ async function run() {
 }
 
 run()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

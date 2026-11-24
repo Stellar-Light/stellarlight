@@ -56,6 +56,7 @@ import {
 	parseCsv,
 	slugFromCell,
 } from "../../src/lib/awards/csv";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const { default: configPromise } = await import("../../src/payload.config");
 
@@ -183,7 +184,7 @@ async function importVoters(
 
 	if (!EXECUTE) {
 		console.log("\nDRY-RUN — nothing written. Re-run with --execute.");
-		process.exit(bad.length > 0 ? 1 : 0);
+		return exitAfterFlush(bad.length > 0 ? 1 : 0);
 	}
 	let wrote = 0;
 	for (const v of add) {
@@ -205,7 +206,7 @@ async function importVoters(
 		depth: 0,
 	});
 	console.log(`\nwrote ${wrote} — round now has ${after.totalDocs} voter(s)`);
-	process.exit(bad.length > 0 ? 1 : 0);
+	exitAfterFlush(bad.length > 0 ? 1 : 0);
 }
 
 async function importNominees(
@@ -410,7 +411,7 @@ async function importNominees(
 		}
 		if (!EXECUTE) {
 			console.log("\nDRY-RUN — nothing removed. Re-run with --execute.");
-			process.exit(bad > 0 ? 1 : 0);
+			return exitAfterFlush(bad > 0 ? 1 : 0);
 		}
 		for (const x of removals) {
 			await payload.delete({ collection: "award-nominees", id: x.id });
@@ -425,7 +426,7 @@ async function importNominees(
 			`
 removed ${removals.length} — round now has ${left.totalDocs} nominee(s)`,
 		);
-		process.exit(bad > 0 ? 1 : 0);
+		return exitAfterFlush(bad > 0 ? 1 : 0);
 	}
 
 	console.log(`already nominees : ${have.size}`);
@@ -454,7 +455,7 @@ removed ${removals.length} — round now has ${left.totalDocs} nominee(s)`,
 	const problems = unresolved.length + badCategory.length;
 	if (!EXECUTE) {
 		console.log("\nDRY-RUN — nothing written. Re-run with --execute.");
-		process.exit(problems > 0 ? 1 : 0);
+		return exitAfterFlush(problems > 0 ? 1 : 0);
 	}
 	let updated = 0;
 	for (const u of updates) {
@@ -486,7 +487,7 @@ removed ${removals.length} — round now has ${left.totalDocs} nominee(s)`,
 		depth: 0,
 	});
 	console.log(`\nwrote ${wrote} — round now has ${after.totalDocs} nominee(s)`);
-	process.exit(problems > 0 ? 1 : 0);
+	exitAfterFlush(problems > 0 ? 1 : 0);
 }
 
 main().catch((e) => {

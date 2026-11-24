@@ -32,6 +32,7 @@
 import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const args = process.argv.slice(2);
 const arg = (k: string) => {
@@ -272,7 +273,7 @@ async function main() {
 }
 
 main()
-	.then((c) => process.exit(c))
+	.then((c) => exitAfterFlush(c))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

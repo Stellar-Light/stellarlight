@@ -19,6 +19,7 @@ import "./load-env";
 import { getPayload } from "payload";
 import { deriveTriageTags } from "../src/lib/repo-triage";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 
@@ -166,7 +167,7 @@ async function main(): Promise<number> {
 }
 
 main()
-	.then((code) => process.exit(code))
+	.then((code) => exitAfterFlush(code))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

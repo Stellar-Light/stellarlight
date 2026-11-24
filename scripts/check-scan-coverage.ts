@@ -21,6 +21,7 @@
 import "./load-env";
 import { getPayloadOrInconclusive } from "./lib/payload-connect";
 import config from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const PRIORITY_SCORE = 50;
 const PRIORITY_STARS = 25;
@@ -110,7 +111,7 @@ async function main() {
 		process.exit(1);
 	}
 	console.log("✓ every prominent active repo carries a current scan");
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 /**

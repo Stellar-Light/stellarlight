@@ -24,6 +24,7 @@ import {
 } from "../src/lib/utils/lumenloop-mapper";
 import { generateSlug } from "../src/lib/utils/normalize";
 import { curatedFieldsFor } from "./data/curation-maps";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 // --- CLI args ---
 const args = process.argv.slice(2);
@@ -411,7 +412,7 @@ async function main() {
 		);
 		process.exit(1);
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 async function linkEntity(

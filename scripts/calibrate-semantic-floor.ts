@@ -7,6 +7,7 @@ import "./load-env";
 import { getPayload } from "payload";
 import { embed } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 // noise = research/security concepts (NOT projects) → should be cut.
 // match = real needs phrased in non-literal words → should pass.
@@ -52,7 +53,7 @@ async function main() {
 				`   ${(d.score ?? 0).toFixed(3)}  ${d.name}  [${d.category}]`,
 			);
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 main().catch((e) => {
 	console.error(e);

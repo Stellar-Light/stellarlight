@@ -122,6 +122,7 @@ import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 import type { HackathonBuild, HackathonEvent } from "../src/payload-types";
 import { rebuildFlight } from "./eval/scf-official";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 import {
 	createGh,
 	fetchRepoActivity,
@@ -1360,7 +1361,7 @@ async function main() {
 // exitCode, not exit(0): a failed write, a read-back mismatch or an
 // instrument failure sets it above, and exit(0) would stomp it.
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("Fatal:", e);
 		process.exit(1);

@@ -43,6 +43,7 @@
  * The awarded BOOLEAN and the round set are the reliably-comparable facts.
  */
 import { writeFileSync } from "node:fs";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import {
 	canon,
 	classifyScfMatch,
@@ -453,7 +454,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("FATAL", e);
 		process.exit(1);

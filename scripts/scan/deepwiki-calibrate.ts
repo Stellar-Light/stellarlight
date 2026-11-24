@@ -19,6 +19,7 @@
  */
 import { writeFileSync } from "node:fs";
 import { askDeepWiki } from "../../src/lib/deepwiki";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import {
 	DEEP,
 	JS_DEEP,
@@ -168,7 +169,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("FATAL", e);
 		process.exit(1);

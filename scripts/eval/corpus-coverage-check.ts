@@ -28,6 +28,7 @@ import { writeFileSync } from "node:fs";
 import { getPayload } from "payload";
 import { CANONICAL_PAGES } from "../../src/lib/canonical-pages";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const JSON_OUT = process.argv.includes("--json");
 const OUT_FILE = process.argv
@@ -161,7 +162,7 @@ async function run() {
 		}
 	}
 
-	process.exit(failed.length ? 1 : 0);
+	exitAfterFlush(failed.length ? 1 : 0);
 }
 
 run().catch((e) => {

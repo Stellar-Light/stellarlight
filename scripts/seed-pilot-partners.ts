@@ -25,6 +25,7 @@ import "./load-env";
 import { randomBytes } from "node:crypto";
 import config from "@payload-config";
 import { getPayload } from "payload";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 // Next.js reads .env.local; tsx scripts must load it explicitly.
 
@@ -104,7 +105,7 @@ async function main() {
 	console.log(
 		"\nDone. Share each partner's login out-of-band; they fill the rest via the chatbot.",
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((err) => {

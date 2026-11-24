@@ -84,6 +84,12 @@ jobs:
           args=(--replan)
           if [ -n "$IN_LIMIT" ]; then args+=("--limit=$IN_LIMIT"); fi
           pnpm exec tsx scripts/ingest-scf-proposals.ts "${args[@]}" | tee replan.log
+          # No plan line is not 0 writes: the awk sum below would read a log
+          # cut short before it as clean.
+          if ! grep -qE '^replan: writes=[0-9]+' replan.log; then
+            echo "::error::the re-plan printed no plan line (could not re-plan)"
+            exit 1
+          fi
           n=$(grep -oE '^replan: writes=[0-9]+' replan.log | cut -d= -f2 | awk '{ t += $1 } END { print t + 0 }')
           echo "replan writes: $n"
           if [ "$n" != "0" ]; then

@@ -43,6 +43,7 @@ import {
 	projectAuthority,
 	runRegrade,
 } from "../src/lib/repo-regrade";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 // Before any database access: a mistyped flag must stop here.
 const ARGS = parseRegradeArgs(process.argv.slice(2), (p) =>
@@ -126,7 +127,7 @@ async function main() {
 	console.log(
 		`\n${ARGS.execute ? "REGRADED" : "DRY RUN"}: ${run.read} read${ONLY ? ` · ${run.matched.length} of ${ONLY.size} named matched` : ""} · ${run.moves.length} would change${ARGS.execute ? ` · ${run.wrote} written · ${run.wrote - run.mismatched.length} read back` : ""}`,
 	);
-	process.exit(run.problems.length || run.mismatched.length ? 1 : 0);
+	exitAfterFlush(run.problems.length || run.mismatched.length ? 1 : 0);
 }
 
 main().catch((e) => {

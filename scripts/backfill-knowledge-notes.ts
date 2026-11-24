@@ -21,6 +21,7 @@ import {
 	storedNoteShape,
 } from "../src/lib/repo-knowledge";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 
@@ -158,7 +159,7 @@ async function main(): Promise<number> {
 }
 
 main()
-	.then((code) => process.exit(code))
+	.then((code) => exitAfterFlush(code))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

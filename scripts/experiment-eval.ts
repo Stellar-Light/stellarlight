@@ -10,6 +10,8 @@
  * job, scripts/self-audit.ts). See src/lib/experiments.ts + /experiments.
  */
 
+import { exitAfterFlush } from "./lib/exit-after-flush";
+
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 
 // biome-ignore lint/suspicious/noExplicitAny: dynamic JSON
@@ -104,7 +106,7 @@ async function main() {
 		"partner-onchain-live": await evalPartnerOnchainLive(),
 	};
 	console.log("Summary:", JSON.stringify(results));
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

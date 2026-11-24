@@ -62,6 +62,7 @@ import {
 } from "../src/lib/repo-unlink";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 import { findRepoDoc as findRepoDocShared } from "./lib/repo-doc";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -1026,7 +1027,7 @@ async function main() {
 	// Was `process.exit(0)` — which STOMPED the exitCode set above, so a wave
 	// with write failures reported GREEN. That is lessons class 20's archetype
 	// verbatim (the 2026-07-09 curate-projects incident), still live here.
-	process.exit(process.exitCode ?? 0);
+	exitAfterFlush(process.exitCode ?? 0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

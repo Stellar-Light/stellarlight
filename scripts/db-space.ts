@@ -16,6 +16,7 @@
 import "./load-env";
 import config from "@payload-config";
 import { getPayload } from "payload";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const PRUNE_LOGS = process.argv.includes("--prune-logs");
 const PRUNE_DAYS = Number(process.env.PRUNE_DAYS ?? "30");
@@ -95,7 +96,7 @@ async function main() {
 			`  after: data=${(after.dataSize / 1e6).toFixed(1)}MB  storage=${(after.storageSize / 1e6).toFixed(1)}MB`,
 		);
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((err) => {

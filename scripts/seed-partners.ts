@@ -23,6 +23,7 @@ import "./load-env";
 import { randomBytes } from "node:crypto";
 import config from "@payload-config";
 import { getPayload } from "payload";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 // Local dev reads .env.local; in CI the workflow injects DATABASE_URI via env.
 
@@ -137,7 +138,7 @@ async function main() {
 		console.log(
 			"\nRe-run with --execute to write. Idempotent: existing slugs are skipped.",
 		);
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 
 	const payload = await getPayload({ config });
@@ -175,7 +176,7 @@ async function main() {
 	console.log(
 		`\nDone. created=${created} skipped=${skipped} total=${all.length}`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((err) => {

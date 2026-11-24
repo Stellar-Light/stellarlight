@@ -31,6 +31,7 @@ import {
 	topDemand,
 	type UsageRow,
 } from "../src/lib/consumer-report";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 // Dynamic import AFTER dotenv — a static import hoists above loadEnv() and
 // payload.config reads PAYLOAD_SECRET at eval time (the seed scripts' pattern).
@@ -231,7 +232,7 @@ async function main() {
 	console.log(
 		`  wrote ${base}.md + .json: replay ok ${report.replaySummary.ok}/${report.replaySummary.graded}, misses ${report.replaySummary.misses}`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((err) => {

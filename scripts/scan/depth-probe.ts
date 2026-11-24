@@ -13,6 +13,7 @@
  *   … npx tsx scripts/scan/depth-probe.ts owner/name owner/name   # ad-hoc repos
  */
 import { computeCodeDepth } from "../../src/lib/code-depth";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 // The answer key lives in depth-labels.ts — ONE key shared with the CI gate
 // (depth-eval.ts), so the probe and the gate can never diverge.
 import { DEEP as DEEP_LABELS, SHALLOW as SHALLOW_LABELS } from "./depth-labels";
@@ -104,7 +105,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(0))
+	.then(() => exitAfterFlush(0))
 	.catch((e) => {
 		console.error("FATAL", e);
 		process.exit(1);

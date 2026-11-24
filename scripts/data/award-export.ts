@@ -25,6 +25,7 @@ import { writeFileSync } from "node:fs";
 import { getPayload } from "payload";
 import { toCsv } from "../../src/lib/awards/csv";
 import { normalizeSelections } from "../../src/lib/awards/mirror";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const { default: configPromise } = await import("../../src/payload.config");
 
@@ -181,7 +182,7 @@ async function main(): Promise<number> {
 }
 
 main()
-	.then((c) => process.exit(c))
+	.then((c) => exitAfterFlush(c))
 	.catch((err) => {
 		console.error(err);
 		process.exit(1);

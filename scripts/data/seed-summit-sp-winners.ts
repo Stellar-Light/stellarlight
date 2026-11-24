@@ -25,6 +25,7 @@
 import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const EVENT_SLUG = "stellar-builder-summit-2026";
@@ -448,7 +449,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((err) => {
 		console.error("FATAL:", err);
 		process.exit(1);

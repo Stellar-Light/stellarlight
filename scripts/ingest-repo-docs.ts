@@ -27,6 +27,7 @@ import { createHash } from "node:crypto";
 import { getPayload } from "payload";
 import { embedBatch } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const execute = process.argv.includes("--execute");
 // --replan: dry + the DB diff, writes nothing — the refresh lane's Idempotence
@@ -289,7 +290,7 @@ async function run() {
 				`replan: writes=${toEmbed.length} unchanged=${unchanged} errors=${errors}`,
 			);
 		console.log("Dry run complete. Pass --execute to embed + write.");
-		process.exit(errors ? 1 : 0);
+		return exitAfterFlush(errors ? 1 : 0);
 	}
 	if (toEmbed.length > 0) {
 		console.log(`Embedding ${toEmbed.length} chunks via Voyage AI…`);
@@ -332,7 +333,7 @@ async function run() {
 		console.error(`✗ ${errors} error(s) — exiting 1 so the run shows red.`);
 		process.exit(1);
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 run().catch((err) => {

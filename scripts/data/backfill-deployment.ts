@@ -92,6 +92,7 @@ import {
 } from "../../src/lib/project-deployment";
 import { NOT_GONE } from "../../src/lib/repo-grade";
 import { tvlStaleOf } from "../../src/lib/status-checks";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import { fetchText, parseStellarToml } from "../lib/stellar-toml";
 import { DEPLOYMENT_VERIFIED } from "./curation-maps";
 
@@ -824,7 +825,7 @@ async function main() {
 
 if (process.argv[1]?.includes("backfill-deployment"))
 	main()
-		.then((code) => process.exit(code))
+		.then((code) => exitAfterFlush(code))
 		.catch((err) => {
 			console.error("FATAL:", err);
 			process.exit(1);

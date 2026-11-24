@@ -16,6 +16,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { REPO_SUPERSESSIONS } from "../src/lib/repo-relations";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -95,7 +96,7 @@ async function main(): Promise<number> {
 }
 
 main().then(
-	(code) => process.exit(code),
+	(code) => exitAfterFlush(code),
 	(e) => {
 		console.error(
 			"supersession-freshness failed:",

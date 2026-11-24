@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import { getPayload } from "payload";
 import { generateSlug } from "../src/lib/utils/normalize";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const data = JSON.parse(readFileSync("scripts/data/content-pass.json", "utf8"));
@@ -99,7 +100,7 @@ async function main() {
 			});
 	}
 	console.log(`\n${EXECUTE ? "DONE." : "DRY RUN — no changes."}`);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

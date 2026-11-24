@@ -20,6 +20,7 @@
  * FINDINGS_DIR is set (the nightly-health convention).
  */
 
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import { type NightlyFailure, writeNightlyFindings } from "../nightly-findings";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
@@ -373,7 +374,7 @@ async function main() {
 		`\n${covered} covered · ${weak} weak · ${errored} errored · ${skippedLumenloop} lumenloop-routed + ${skippedOther} non-comparable + ${skippedConduct} conduct-category skipped, of ${paths.length} — weak cases are ingest backlog, filed via the ledger`,
 	);
 	// Weak coverage is backlog, not red; only a broken sweep is red.
-	process.exit(errored === paths.length ? 1 : 0);
+	exitAfterFlush(errored === paths.length ? 1 : 0);
 }
 
 main().catch((e) => {
@@ -381,7 +382,7 @@ main().catch((e) => {
 		// Say which it is IN THE LOG, so a reader of the run does not have to
 		// infer it from an exit code.
 		console.error(`COULD NOT CHECK: ${e.message}`);
-		process.exit(EXIT_COULD_NOT_CHECK);
+		return exitAfterFlush(EXIT_COULD_NOT_CHECK);
 	}
 	console.error("Fatal:", e);
 	process.exit(1);

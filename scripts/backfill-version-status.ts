@@ -25,6 +25,7 @@ import "./load-env";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { combinedVersionStatus } from "../src/lib/soroban-versions";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const LIMIT = Number(
@@ -101,7 +102,7 @@ async function main() {
 		console.error("FATAL: zero scanned repos read — the query found nothing");
 		process.exit(1);
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

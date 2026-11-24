@@ -45,6 +45,7 @@ import {
 	relayKeypair,
 } from "../../src/lib/awards/stellar";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const args = process.argv.slice(2);
 const arg = (k: string) => {
@@ -197,7 +198,7 @@ async function main(): Promise<number> {
 }
 
 main()
-	.then((code) => process.exit(code))
+	.then((code) => exitAfterFlush(code))
 	.catch((err) => {
 		console.error(err);
 		process.exit(1);

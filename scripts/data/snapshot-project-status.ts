@@ -24,6 +24,7 @@ import {
 	type SnapshotRow,
 } from "../../src/lib/lifecycle-metrics";
 import { onchainReadingOf } from "../../src/lib/onchain-use";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const API = "https://stellarlight.xyz/api/projects/search";
 const DIR = "data/snapshots/projects";
@@ -250,7 +251,7 @@ async function main() {
 // Run only as the lane's entry point: a test imports servedProjects.
 if (process.argv[1]?.includes("snapshot-project-status"))
 	main()
-		.then(() => process.exit(0))
+		.then(() => exitAfterFlush(0))
 		.catch((e) => {
 			console.error("FATAL:", e);
 			process.exit(1);

@@ -19,6 +19,52 @@ import { describe, expect, it } from "vitest";
 const DIR = join(process.cwd(), ".github/workflows");
 const FILES = readdirSync(DIR).filter((f) => /\.ya?ml$/.test(f));
 
+/** True when a step that reads a `replan: writes=` value into a variable
+ * fails, or names the source could-not-check, when that line is missing:
+ * `if ! grep -q` on the line itself, or `[ -z "$v" ]` on a variable that
+ * holds the read. A read through awk does not count: the sum prints 0 for
+ * no line at all. */
+function replanLineRequired(run: string): boolean {
+	const reads = [...run.matchAll(/(\w+)=\$\(([^\n]*replan: writes=[^\n]*)\)/g)];
+	if (!reads.length) return true;
+	if (/if ! grep -qE? '\^replan: writes=/.test(run)) return true;
+	return reads.some(
+		([, v, cmd]) => !cmd.includes("awk") && run.includes(`[ -z "$${v}" ]`),
+	);
+}
+
+describe("replanLineRequired", () => {
+	const SUM =
+		"n=$(grep -oE '^replan: writes=[0-9]+' replan.log | cut -d= -f2 | awk '{ t += $1 } END { print t + 0 }')";
+	it("accepts a grep -q on the line, or -z on the variable that holds it", () => {
+		expect(
+			replanLineRequired(
+				`if ! grep -qE '^replan: writes=[0-9]+' replan.log; then exit 1; fi\n${SUM}`,
+			),
+		).toBe(true);
+		expect(
+			replanLineRequired(
+				`line=$(grep -E '^replan: writes=' "replan-$s.log" | tr '\\n' ' ')\nif [ -z "$line" ]; then continue; fi\n${SUM}`,
+			),
+		).toBe(true);
+		expect(
+			replanLineRequired(
+				"n=$(grep -oE '^replan: writes=[0-9]+$' replan.log | cut -d= -f2)\nif [ -z \"$n\" ]; then exit 1; fi",
+			),
+		).toBe(true);
+	});
+	it("rejects -z on an unrelated variable, or on an awk sum that prints 0", () => {
+		expect(
+			replanLineRequired(
+				`if [ -z "$IN_LIMIT" ]; then args+=(--all); fi\n${SUM}`,
+			),
+		).toBe(false);
+		expect(replanLineRequired(`${SUM}\nif [ -z "$n" ]; then exit 1; fi`)).toBe(
+			false,
+		);
+	});
+});
+
 describe("GitHub Actions workflow files", () => {
 	it("finds workflows to check (guards against a silently-empty sweep)", () => {
 		expect(FILES.length).toBeGreaterThan(50);
@@ -76,5 +122,31 @@ describe("GitHub Actions workflow files", () => {
 		expect(src, `${file} installs whatever pnpm is newest today`).not.toMatch(
 			/npm\s+(i|install)\s+-g\s+pnpm/,
 		);
+	});
+
+	// A step that reads a script's `replan: writes=N` line must fail, or name
+	// the source could-not-check, when the line is missing. process.exit on a
+	// slow pipe can cut a log before its last line and still exit 0
+	// (2026-11-24); `awk '{ t += $1 } END { print t + 0 }'` then reads the
+	// missing line as 0 writes, and the idempotence gate passes.
+	it.each(FILES)("%s: a missing replan line is never read as 0", (file) => {
+		// biome-ignore lint/suspicious/noExplicitAny: workflow YAML
+		const doc = yaml.load(readFileSync(join(DIR, file), "utf8")) as any;
+		const bad: string[] = [];
+		for (const [id, job] of Object.entries(
+			(doc?.jobs ?? {}) as Record<
+				string,
+				{ steps?: { name?: string; run?: string }[] }
+			>,
+		))
+			for (const step of job?.steps ?? []) {
+				const run = (step.run ?? "")
+					.split("\n")
+					.filter((l) => !/^\s*#/.test(l))
+					.join("\n");
+				if (!replanLineRequired(run))
+					bad.push(`jobs.${id}: ${step.name ?? "(unnamed step)"}`);
+			}
+		expect(bad).toEqual([]);
 	});
 });

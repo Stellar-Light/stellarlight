@@ -40,6 +40,7 @@ import {
 	shouldHold,
 } from "../src/lib/repo-security";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const TOKEN = process.env.GITHUB_TOKEN;
@@ -524,7 +525,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("Fatal:", e);
 		process.exit(1);

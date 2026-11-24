@@ -19,6 +19,7 @@
  */
 import "./load-env";
 import { STRONG_STATUS_BASES } from "../src/lib/project-status";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 /** Outer bound on how old a commit may be and still evidence liveness NOW.
@@ -125,7 +126,7 @@ async function main() {
 	console.log(
 		`\nawarded ${t.awarded} | no indexed repo ${t.noRepo} | commit older than ${MAX_COMMIT_AGE_DAYS}d ${t.tooOld}`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 if (process.argv[1]?.includes("basis-from-repo")) main();

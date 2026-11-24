@@ -13,6 +13,7 @@ import "../load-env";
 import { getPayload } from "payload";
 import { DENIED_REPOS } from "../../src/lib/repo-allowlist";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 
@@ -83,7 +84,7 @@ async function main() {
 			`read back: none of the ${DENIED_REPOS.size} denied names is indexed`,
 		);
 	}
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 main().catch((e) => {

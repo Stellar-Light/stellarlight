@@ -15,6 +15,7 @@
  */
 import { codeProofTier, computeFarmScore } from "../../src/lib/code-signals";
 import { routeCodeDepth } from "../../src/lib/depth-route";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import { createGh, fetchRepoCode } from "./fetch-repo-code";
 
 const GH = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim();
@@ -318,7 +319,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(0))
+	.then(() => exitAfterFlush(0))
 	.catch((e) => {
 		console.error("FATAL", e);
 		process.exit(1);

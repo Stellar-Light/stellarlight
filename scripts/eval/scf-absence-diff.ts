@@ -18,6 +18,7 @@
  */
 import { writeFileSync } from "node:fs";
 import { registrableDomain } from "../../src/lib/partner-project-identity";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import { isThirdPartyLink, parseRoundVerdicts, servedBy } from "./scf-official";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
@@ -493,7 +494,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("FATAL", e);
 		process.exit(1);

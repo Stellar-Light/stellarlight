@@ -17,6 +17,7 @@
 import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const EXPERT = "https://api.stellar.expert/explorer/public/asset";
@@ -128,7 +129,7 @@ async function main() {
 	if (!EXECUTE) {
 		console.log(`DRY RUN — ${writes.length} write(s) planned, none applied.`);
 		// exit-stomp fix (writer-conformance C3): honor exitCode set above.
-		process.exit(process.exitCode ?? 0);
+		return exitAfterFlush(process.exitCode ?? 0);
 	}
 	// Per-write isolation (2026-07-09 curate-projects incident: one
 	// ValidationError aborted a 13-write batch). A bad row fails loudly;
@@ -153,7 +154,7 @@ async function main() {
 		process.exitCode = 1;
 	}
 	console.log(`\nDONE: ${writes.length} write(s) applied.`);
-	process.exit(process.exitCode ?? 0);
+	exitAfterFlush(process.exitCode ?? 0);
 }
 
 main().catch((e) => {

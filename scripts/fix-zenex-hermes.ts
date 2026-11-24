@@ -6,6 +6,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const ZENEX_ID = "6a2da020213eeb05b49587c4";
@@ -47,7 +48,7 @@ async function main() {
 	);
 	if (!EXECUTE) {
 		console.log("DRY RUN — no changes.");
-		process.exit(0);
+		return exitAfterFlush(0);
 	}
 	await payload.update({
 		collection: "projects",
@@ -67,7 +68,7 @@ async function main() {
 	console.log(
 		"DONE: Zenex tagged SCF + description cleaned; Hermes dupe retired.",
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

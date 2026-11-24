@@ -27,6 +27,7 @@
  */
 import "./load-env";
 import { STRONG_STATUS_BASES } from "../src/lib/project-status";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 /** Beyond this, the evidence describes a product we haven't seen recently. */
@@ -262,7 +263,7 @@ async function main() {
 	console.log(
 		`\nawarded ${t.awarded} | refreshed ${t.refreshed} | already current ${t.upToDate} | fresher basis kept ${t.keptFresher} | human-verified (untouched) ${t.alreadyStrong} | no movement in window ${t.noEvidence} | evidence too old ${t.stale} | undated ${t.noDate} | shadows skipped ${t.shadow}`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 
 if (process.argv[1]?.includes("basis-from-onchain")) main();

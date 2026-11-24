@@ -38,6 +38,11 @@ const state: { rows: Row[]; updates: Array<{ id: string; data: Row }> } = {
 };
 
 vi.mock("../../../scripts/load-env", () => ({}));
+// The harness ends a pass by throwing from a mocked process.exit; a flushed
+// exit would call it from a write callback, outside the script.
+vi.mock("../../../scripts/lib/exit-after-flush", () => ({
+	exitAfterFlush: (code?: number) => process.exit(code),
+}));
 vi.mock("../../payload.config", () => ({ default: Promise.resolve({}) }));
 vi.mock("payload", () => ({
 	getPayload: async () => ({

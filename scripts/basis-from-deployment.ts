@@ -76,6 +76,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { STATUS_BASES, STRONG_STATUS_BASES } from "../src/lib/project-status";
 import type { Project } from "../src/payload-types";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 
@@ -379,7 +380,7 @@ async function main() {
 	if (mismatched) console.error(`\nread-back mismatches: ${mismatched}`);
 	// A blocked row is a reported gap, not a failure: only a write that did not
 	// land is one.
-	process.exit(mismatched > 0 ? 1 : 0);
+	exitAfterFlush(mismatched > 0 ? 1 : 0);
 }
 
 if (process.argv[1]?.includes("basis-from-deployment")) main();

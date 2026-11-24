@@ -25,6 +25,7 @@ import {
 	TYPES_ADD,
 	TYPES_SET,
 } from "./data/curation-maps";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 
@@ -1088,7 +1089,7 @@ async function main() {
 	console.log(
 		`\n${fails ? "✗ FAIL" : "✓ PASS"} — ${passes} passed, ${warns} warnings, ${fails} failures`,
 	);
-	process.exit(fails > 0 ? 1 : 0);
+	exitAfterFlush(fails > 0 ? 1 : 0);
 }
 
 main().catch((e) => {

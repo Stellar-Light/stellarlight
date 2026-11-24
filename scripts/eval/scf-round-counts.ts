@@ -47,6 +47,7 @@ import {
 	matchListingRow,
 	SCF_SHARED_CLAIMS,
 } from "../data/scf-joins";
+import { exitAfterFlush } from "../lib/exit-after-flush";
 import {
 	offListingAwardees,
 	readOffListingPages,
@@ -266,7 +267,7 @@ async function main() {
 			? `VERDICT: fail, ${failed} finding(s) against the baseline of ${baseline.asOf} (${raw})`
 			: `VERDICT: pass, every round agrees or holds its baseline entry of ${baseline.asOf}, and every awarded row cites its SCF page and date (${raw})`,
 	);
-	process.exit(failed ? 1 : 0);
+	exitAfterFlush(failed ? 1 : 0);
 }
 
 main().catch((err) => {

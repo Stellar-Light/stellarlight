@@ -26,6 +26,7 @@ import {
 	type RwaAsset as RegistryAsset,
 } from "../src/data/rwa-registry";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 const EX = "https://api.stellar.expert/explorer/public";
@@ -218,5 +219,5 @@ async function measureSoroban(r: RegistryAsset): Promise<Measure> {
 	// End-state assertion: a run that could not measure MOST of the set is an
 	// instrument failure, not a measurement — its own exit code, never green.
 	const mostUnmeasured = t.unmeasured > RWA_REGISTRY.length / 2;
-	process.exit(t.writeFailed ? 1 : mostUnmeasured ? 2 : 0);
+	exitAfterFlush(t.writeFailed ? 1 : mostUnmeasured ? 2 : 0);
 })();

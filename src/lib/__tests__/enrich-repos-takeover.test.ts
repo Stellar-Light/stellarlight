@@ -69,6 +69,11 @@ const read = (path: string) =>
 	existsSync(path) ? readFileSync(path, "utf8") : null;
 
 vi.mock("../../../scripts/load-env", () => ({}));
+// The harness ends a pass by throwing from a mocked process.exit; a flushed
+// exit would call it from a write callback, outside the script.
+vi.mock("../../../scripts/lib/exit-after-flush", () => ({
+	exitAfterFlush: (code?: number) => process.exit(code),
+}));
 vi.mock("../../payload.config", () => ({ default: Promise.resolve({}) }));
 vi.mock("../github", () => ({
 	gqlBatchStats: () => ({ queries: 1, repos: 1 }),

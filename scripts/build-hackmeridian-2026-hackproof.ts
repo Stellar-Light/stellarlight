@@ -39,6 +39,7 @@ import {
 	type RepoText,
 	rpcProbes,
 } from "../src/lib/hackproof";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const PIN = "ea7e1982c9beea491048e668fa6dfb62a4f9a8e5";
 const SOURCE = "https://github.com/devodii/hackproof";
@@ -623,7 +624,7 @@ async function main() {
 }
 
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("Fatal:", e);
 		process.exit(1);

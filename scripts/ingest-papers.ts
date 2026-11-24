@@ -22,6 +22,7 @@ import {
 	upsertChunks,
 } from "../src/lib/research-ingest";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const cjsRequire = createRequire(import.meta.url);
 const { PDFParse } = cjsRequire("pdf-parse") as {
@@ -162,7 +163,7 @@ async function run() {
 }
 
 run()
-	.then(() => process.exit(0))
+	.then(() => exitAfterFlush(0))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

@@ -4,6 +4,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 // [slug, newStatus, reason]
@@ -66,7 +67,7 @@ async function main() {
 	console.log(
 		`\n${EXECUTE ? `DONE: ${done} updated, ${skipped} skipped.` : `DRY RUN — ${OPS.length - skipped} would change, ${skipped} skipped.`}`,
 	);
-	process.exit(0);
+	exitAfterFlush(0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);
