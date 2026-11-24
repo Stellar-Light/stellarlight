@@ -3523,6 +3523,9 @@ export const TWITTER_LINK_FIX: Record<string, string> = {
 	// 2026-11-12: lusty, the row lusty-finance folds into, stored a bare
 	// "https://x.com/". lusty.finance links x.com/Lustyfinance.
 	lusty: "https://x.com/Lustyfinance",
+	// Seeded 2026-11-24: blnt.trade's stellar.toml (ORG_TWITTER) and the
+	// site's own link both name x.com/BlntProtocol.
+	blnt: "https://x.com/BlntProtocol",
 };
 
 /** links.github corrections — equality-guarded overwrites for records whose
@@ -4000,6 +4003,12 @@ export const LOGO_SET: Record<
 		file: "public/awards/logos/stellar-security-portal.png",
 		note: "the site only serves an .ico (logo.ico); converted to PNG by hand, committed with the awards overrides; the stored file 404s",
 	},
+	// Seeded 2026-11-24: the ORG_LOGO blnt.trade's stellar.toml names (PNG,
+	// served 200 that day).
+	blnt: {
+		url: "https://blnt.trade/icons/tokens/blnt.png",
+		note: "the ORG_LOGO in blnt.trade's own stellar.toml",
+	},
 };
 
 /** Shadow → canonical: rows that are a duplicate or former name of another
@@ -4055,6 +4064,9 @@ export const ALIAS_ADD: Record<string, string[]> = {
 	"stellar-router-sdk": ["Meta Contracts"], // exact jsr.io/@creit-tech/stellar-router-sdk match
 	reclaim: ["zkFetch"], // row desc already names its zkFetch SDK
 	inferera: ["Inferara", "Inferera"], // renamed soroban-ret (NAME_FIXES); the maker's name and the old misspelling still find it
+	// Seeded 2026-11-24 (SEEDS): the token and product name, and the name its
+	// toml (ORG_DBA) and site title use. No served row carried any of them.
+	blnt: ["BLNT", "BLNT V3", "BLNT Trade"],
 };
 
 export const TYPE_ADD: Record<string, string[]> = {
@@ -6502,6 +6514,47 @@ export const SEEDS: Array<{
 		statusSourceUrl: "https://registry.npmjs.org/kedgeway",
 		statusBasis: "package-release",
 	},
+	// BLNT (owner request, 2026-11-24). Absent before this entry: search by
+	// name (blnt, blnt protocol) and by host (blnt.trade) returned no row.
+	// Everything below is read from BLNT's own records on 2026-11-24:
+	// blnt.trade's stellar.toml (ORG_NAME BLNT Protocol LLC, ORG_GITHUB
+	// BLNT-Protocol, ORG_TWITTER BlntProtocol, the BLNT currency and its
+	// issuer), the site (served, "BLNT V3 is live on Stellar mainnet but has
+	// not yet been independently audited") and BLNT-Protocol/blnt-contracts-v3
+	// at 771059f6 (README: "derived from Blend", "not an official Blend
+	// release"; deployments/*.json name every contract, the deployer
+	// GDEA2WMOWYQ3T56A2PZH5QYYEQBAORW2AUUJYX4FFD5GDPESAICTFTAL and the
+	// creation transactions). Its emitter, pool factory, backstop and pool
+	// code match its own v3.0.2 release files by sha256; its two backstop
+	// pools run Comet's v1.1.0 release. Launch: the first
+	// contract of the V3 deployment the manifests record, the BLNT:USDC
+	// Comet pool, created 2026-10-25T19:18:53Z in ledger 65134030 (proved in
+	// that ledger's metadata; the BLNT asset contract came 26 minutes
+	// earlier). The same deployer had created polling contracts from
+	// 2026-10-05 (they emit only "vote" events) and a first V3 set at
+	// 15:34 UTC the same day that the 19:18 set superseded. Status: its own
+	// contracts' events, Stellar Index (7,886 protocol events since ledger
+	// 65134154, 564 in the last 24 hours, last event 2026-11-24), and the
+	// app answers. SCF: not on communityfund.stellar.org's project list
+	// (531 projects, read 2026-11-24), so no SCF field.
+	{
+		slug: "blnt",
+		name: "BLNT Protocol",
+		category: "Protocol/Contract",
+		status: "Live",
+		types: ["Lending"],
+		supportedNetworks: [],
+		shortDescription:
+			"BLNT V3 is an immutable lending protocol on Stellar forked from Blend v2, with permissionless lending pools backstopped by its own BLNT:XLM and BLNT:USDC pools on Comet v1.1 code; it is run by BLNT Protocol, is not an official Blend release and has not yet been independently audited.",
+		links: {
+			website: "https://blnt.trade/",
+			github: "https://github.com/BLNT-Protocol",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-24",
+		statusSourceUrl: "https://stellarindex.io/protocols/blnt/",
+		statusBasis: "onchain-activity",
+	},
 ];
 
 /** sls-035 (#517): DEX-landscape role for the clearest records: makes the
@@ -8251,6 +8304,9 @@ export const DOCS_LINKS: Record<string, string> = {
 	// sls-112 (#1904), read 2026-11-04: each operator's own Stellar page.
 	chainlink: "https://docs.chain.link/data-feeds/stellar",
 	metamask: "https://support.metamask.io/configure/networks/stellar",
+	// Seeded 2026-11-24: BLNT runs no docs site (docs.blnt.trade does not
+	// resolve); its README sends readers to this specification.
+	blnt: "https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/main/docs/SYSTEM_SPEC.md",
 };
 
 // sls-025: ADDITIVE `github.repos` rows (owner/name) for records whose
@@ -8392,6 +8448,18 @@ export const GITHUB_REPOS_ADD: Record<
 	// rejoins the stored row to the bridge's project: the allbridge-io org
 	// (37 repos) is keyword-gated, and this repo names no Stellar term.
 	allbridge: [{ owner: "allbridge-io", name: "allbridge-core-js-sdk" }],
+	// Seeded 2026-11-24: the protocol's contracts (README names the deployed
+	// set), the app blnt.trade serves (the repo's homepage), its SDK, and the
+	// two backfill contracts its manifests deploy. Of the org's other 20
+	// repos, 12 are forks and 8 are operator tools or Blend migration
+	// tooling; the org link's own fan-out decides those.
+	blnt: [
+		{ owner: "BLNT-Protocol", name: "blnt-contracts-v3" },
+		{ owner: "BLNT-Protocol", name: "blnt-ui" },
+		{ owner: "BLNT-Protocol", name: "blnt-sdk-js" },
+		{ owner: "BLNT-Protocol", name: "blnt-backfill-contract" },
+		{ owner: "BLNT-Protocol", name: "blnt-lockup-backfill-contract" },
+	],
 };
 
 /** The whole github group (orgLogin and repos), exact, for rows whose stored
@@ -8993,6 +9061,15 @@ export const DEPLOYMENT_VERIFIED: Record<
 		network: "mainnet",
 		sourceUrl: "https://docs.chain.link/data-feeds/stellar",
 		note: "Curator attestation, 2026-11-04 (not a chain check this lane runs): Chainlink's Stellar docs list the Stellar Mainnet (Pubnet) Data Feeds proxy CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ (testnet proxy CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4); a stellar.expert read that day showed the mainnet proxy created 2026-09-14 with 11 invocations",
+	},
+	// Seeded 2026-11-24 (see SEEDS and the blnt entry in
+	// src/data/onchain-contracts.ts).
+	blnt: {
+		network: "mainnet",
+		sourceUrl:
+			"https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/771059f6dd232fd35ea29b7b2a987f0e13bb2372/deployments/mainnet-v3-core.json",
+		note: "BLNT's own deployment record names the pool factory CAKLFWAHB2RIYRBSPUL6EH43AIQ5ILBEM7HTMWYSJRL7PHZQ676KMCV5, backstop CAHCUKBPTW5DR5RNXOHCTJD5U76A6EEZXYZAQFRQEEQRXQ3CRUZ6Z3MO and emitter CDSO6FQSBJ3U3AJHBNNLHHKSMKTTDDN3GLGF3KZTMXBFV7SVB43ZJERT with their creation transactions, deployed by GDEA2WMOWYQ3T56A2PZH5QYYEQBAORW2AUUJYX4FFD5GDPESAICTFTAL on 2026-10-25; each creation was found in that ledger's metadata (archive RPC), and Stellar Index, read 2026-11-24, lists events from all three (newest 2026-11-24 for the backstop and emitter, 2026-11-18 for the factory)",
+		checkedAt: "2026-11-24",
 	},
 	// sls-024 (2026-11-11): mainnet claims that carried no deployment source.
 	// Their status links were a docs page and a repo, which evidence nothing

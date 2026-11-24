@@ -7,9 +7,11 @@ import {
 } from "../contracts-registry";
 import {
 	endedAtOf,
+	leaveOutOtherOperators,
 	ONCHAIN_MAP_EVIDENCE,
 	type OnchainMapLink,
 	selectLinks,
+	settledElsewhere,
 } from "../onchain-map";
 import { accountPresence, contractPresence } from "../onchain-sources";
 
@@ -104,6 +106,158 @@ describe("selectLinks: the on-chain map's rules", () => {
 				expect(l.sharedWithinFamily?.slice().sort()).toEqual(
 					[...(bySlug.get(l.address) ?? [])].sort(),
 				);
+	});
+});
+
+// The comet case, 2026-11-24, from the ledger: Stellar Index's comet
+// registry listed three pools because they run Comet's code. Blend's
+// deployer created CAS3FL6 (through Comet's factory) and BLNT's deployer
+// created the other two (BLNT's own deployment record names them).
+const BLEND_DEPLOYER =
+	"GDJEHTBE6ZHUXSWFI642DCGLUOECLHPF3KSXHPXTSTJ7E3JF6MQ5EZYY";
+const BLNT_DEPLOYER =
+	"GDEA2WMOWYQ3T56A2PZH5QYYEQBAORW2AUUJYX4FFD5GDPESAICTFTAL";
+const CAS3FL6 = "CAS3FL6TLZKDGGSISDBWGGPXT3NRR4DYTZD7YOD3HMYO6LTJUVGRVEAM";
+const CDQMIKIH = "CDQMIKIHKA5UY3FQJ2UDTLNX3GOPD3GPNZWSPTOBVOHEUMQJQXOPC7Y3";
+const CA5HX3D4 = "CA5HX3D47PQZWC2E7VWXCKH4534P2NOJEOIXAWU47MI4QV2FQUYY3FLC";
+const link = (
+	slug: string,
+	address: string,
+	evidence: string[],
+	createdBy: string | null,
+) => ({ slug, address, kind: "contract", tier: "strong", evidence, createdBy });
+
+describe("leaveOutOtherOperators: code alone does not say who runs a contract", () => {
+	it("a registry row created by another project's deployer is left out, the operator's own link stays", () => {
+		const rows = [
+			link("comet", CAS3FL6, ["protocol-registry"], BLEND_DEPLOYER),
+			link("comet", CDQMIKIH, ["protocol-registry"], BLNT_DEPLOYER),
+			link("comet", CA5HX3D4, ["protocol-registry"], BLNT_DEPLOYER),
+			link("blend", C1, ["directory"], BLEND_DEPLOYER),
+			link("blnt", CDQMIKIH, ["directory"], BLNT_DEPLOYER),
+			link("blnt", CA5HX3D4, ["directory"], BLNT_DEPLOYER),
+		];
+		const { kept, left } = leaveOutOtherOperators(rows);
+		expect(left.map((l) => [l.row.slug, l.row.address])).toEqual([
+			["comet", CAS3FL6],
+			["comet", CDQMIKIH],
+			["comet", CA5HX3D4],
+		]);
+		expect(left[0].reason).toBe(
+			"created by the deployer of blend, not of comet: code alone does not say who runs it",
+		);
+		// With the registry rows gone, the operators' links are not shared.
+		expect(selectLinks(kept).kept.map((k) => `${k.slug} ${k.address}`)).toEqual(
+			[`blend ${C1}`, `blnt ${CDQMIKIH}`, `blnt ${CA5HX3D4}`],
+		);
+	});
+
+	it("the same rule covers a code proof: Blend's code deployed by BLNT is not Blend's", () => {
+		const { left } = leaveOutOtherOperators([
+			link("blend", C2, ["own-wasm-meta"], BLNT_DEPLOYER),
+			link("blnt", C1, ["directory"], BLNT_DEPLOYER),
+		]);
+		expect(left.map((l) => l.row.address)).toEqual([C2]);
+	});
+
+	it("keeps a code-only link whose creator deployed for nobody else, for this project too, or is unknown", () => {
+		const rows = [
+			link("band", C1, ["protocol-registry"], G1),
+			link("rozo", C2, ["protocol-registry"], BLNT_DEPLOYER),
+			link("rozo", CAS3FL6, ["directory"], BLNT_DEPLOYER),
+			link("blnt", CDQMIKIH, ["directory"], BLNT_DEPLOYER),
+			link("comet", CA5HX3D4, ["protocol-registry"], null),
+		];
+		const { kept, left } = leaveOutOtherOperators(rows);
+		expect(left).toEqual([]);
+		expect(kept).toHaveLength(rows.length);
+	});
+
+	it("only own evidence makes a deployer a project's: another code-only or weaker link does not", () => {
+		const { left } = leaveOutOtherOperators([
+			link("comet", CAS3FL6, ["protocol-registry"], BLEND_DEPLOYER),
+			link("blend", C1, ["own-repo-interface"], BLEND_DEPLOYER),
+			{
+				...link("blend", C2, ["same-deployer"], BLEND_DEPLOYER),
+				tier: "weaker",
+			},
+		]);
+		expect(left).toEqual([]);
+	});
+
+	it("the shipped file: comet holds none of the three pools, each sits with the project whose deployer created it", () => {
+		const holder = (address: string) =>
+			map.links.filter((l) => l.address === address).map((l) => l.slug);
+		expect(map.links.filter((l) => l.slug === "comet")).toEqual([]);
+		expect(holder(CAS3FL6)).toEqual(["blend"]);
+		expect(holder(CDQMIKIH)).toEqual(["blnt"]);
+		expect(holder(CA5HX3D4)).toEqual(["blnt"]);
+		expect(
+			(map.counts.left as Record<string, number>)[
+				"created by the deployer of blnt, not of comet: code alone does not say who runs it"
+			],
+		).toBe(2);
+	});
+
+	it("the shipped file carries BLNT's deployment with ledger-proved creations, and Blend v2.1 on blend", () => {
+		const blnt = map.links.filter((l) => l.slug === "blnt");
+		expect(blnt.filter((l) => l.kind === "contract")).toHaveLength(9);
+		for (const l of blnt) {
+			expect(l.tier).toBe("strong");
+			expect(l.createdLedger).toBeGreaterThan(0);
+		}
+		// Launch basis: the first contract of the V3 set the manifests record.
+		const first = blnt
+			.filter((l) => l.kind === "contract" && l.label !== "BLNT asset (SAC)")
+			.sort((a, b) => (a.createdLedger ?? 0) - (b.createdLedger ?? 0))[0];
+		expect([first.address, first.createdAt, first.createdLedger]).toEqual([
+			CDQMIKIH,
+			"2026-10-25T19:18:53Z",
+			65134030,
+		]);
+		expect(blnt.find((l) => l.kind === "account")?.address).toBe(
+			"GAP2ACGH3O6TRFAERGM4USJ6XWU3U2BFIK224JPV6NI3CUNEEEGTBTFB",
+		);
+		const blend = new Set(
+			map.links.filter((l) => l.slug === "blend").map((l) => l.address),
+		);
+		for (const a of [
+			"CCS4AZ5ORM6VLLPJTJUFRNXWBMHOO3L5WHHRPL2ZMILE35ZDMQFHOQMJ",
+			"CACUXRNBUFV7BFPKUDLVJFQI6H7EHHNSJPOFJSCWJCYUUYMORM6C63AL",
+			"CASYAKK3SHDN6S2E6IUOBVRXT3KKPVQCVQO4GNBDTVE6XZQQMW4UMIHE",
+		])
+			expect(blend.has(a), a).toBe(true);
+	});
+});
+
+describe("settledElsewhere: a row with no join key loses only what another row now holds", () => {
+	it("removes the contracts a seed or the map gives to another row and keeps the rest", () => {
+		const owner = new Map([
+			[CAS3FL6, "blend"],
+			[CDQMIKIH, "blnt"],
+			[C1, "comet"],
+		]);
+		const stored = [
+			{ address: CAS3FL6, label: null },
+			{ address: CDQMIKIH, label: null },
+			{ address: C1, label: "own" },
+			{ address: C2, label: "nobody holds it" },
+		];
+		const { keep, gone } = settledElsewhere("comet", stored, owner);
+		expect(keep.map((c) => c.address)).toEqual([C1, C2]);
+		expect(gone.map((g) => [g.contract.address, g.to])).toEqual([
+			[CAS3FL6, "blend"],
+			[CDQMIKIH, "blnt"],
+		]);
+	});
+	it("leaves a malformed stored entry where it is", () => {
+		const { keep, gone } = settledElsewhere(
+			"comet",
+			[{ address: undefined }, {}],
+			new Map([[C1, "blend"]]),
+		);
+		expect(keep).toHaveLength(2);
+		expect(gone).toEqual([]);
 	});
 });
 

@@ -56,10 +56,52 @@ describe("onchain seed map", () => {
 			(s.contracts ?? []).filter((c) => c.source !== undefined),
 		);
 		expect(sourced.map((c) => c.address).sort()).toEqual([
+			"CACUXRNBUFV7BFPKUDLVJFQI6H7EHHNSJPOFJSCWJCYUUYMORM6C63AL",
 			"CALI2BYU2JE6WVRUFYTS6MSBNEHGJ35P4AVCZYF3B6QOE3QKOB2PLE6M",
+			"CASYAKK3SHDN6S2E6IUOBVRXT3KKPVQCVQO4GNBDTVE6XZQQMW4UMIHE",
 			"CBKGPWGKSKZF52CFHMTRR23TBWTPMRDIYZ4O2P5VS65BMHYH4DXMCJZC",
+			"CCS4AZ5ORM6VLLPJTJUFRNXWBMHOO3L5WHHRPL2ZMILE35ZDMQFHOQMJ",
 		]);
 		for (const c of sourced) expect(c.source).toMatch(/^https:\/\//);
+	});
+	// 2026-11-24: Comet-code pools go to the project whose deployer created
+	// them, Blend v2.1 to blend (Blend's docs list it), and BLNT gets its
+	// whole deployment record.
+	it("BLNT's seed is its deployment record: nine contracts and the BLNT asset, its two Comet pools included", () => {
+		const blnt = ONCHAIN_SEEDS.find((s) => s.slug === "blnt");
+		expect(blnt?.asset).toEqual({
+			code: "BLNT",
+			issuer: "GAP2ACGH3O6TRFAERGM4USJ6XWU3U2BFIK224JPV6NI3CUNEEEGTBTFB",
+		});
+		expect(blnt?.source).toMatch(
+			/^https:\/\/github\.com\/BLNT-Protocol\/blnt-contracts-v3\/blob\/[0-9a-f]{40}\//,
+		);
+		const labels = Object.fromEntries(
+			(blnt?.contracts ?? []).map((c) => [c.address, c.label]),
+		);
+		expect(Object.keys(labels)).toHaveLength(9);
+		expect(
+			labels.CDQMIKIHKA5UY3FQJ2UDTLNX3GOPD3GPNZWSPTOBVOHEUMQJQXOPC7Y3,
+		).toBe("BLNT:USDC Comet V1.1 LP");
+		expect(
+			labels.CA5HX3D47PQZWC2E7VWXCKH4534P2NOJEOIXAWU47MI4QV2FQUYY3FLC,
+		).toBe("BLNT:XLM Comet V1.1 LP");
+		// A pool another operator runs from BLNT's factory is not BLNT's.
+		expect(labels).not.toHaveProperty(
+			"CAUTPSQDAJEUV5XEU3EXFVYRGDJLEJGVTFJCFZCSPTDCREAMZ573VF4D",
+		);
+		expect(ONCHAIN_SEEDS.find((s) => s.slug === "comet")).toBeUndefined();
+		const blend = (
+			ONCHAIN_SEEDS.find((s) => s.slug === "blend")?.contracts ?? []
+		).map((c) => c.address);
+		expect(blend).toEqual(
+			expect.arrayContaining([
+				"CAS3FL6TLZKDGGSISDBWGGPXT3NRR4DYTZD7YOD3HMYO6LTJUVGRVEAM",
+				"CCS4AZ5ORM6VLLPJTJUFRNXWBMHOO3L5WHHRPL2ZMILE35ZDMQFHOQMJ",
+				"CACUXRNBUFV7BFPKUDLVJFQI6H7EHHNSJPOFJSCWJCYUUYMORM6C63AL",
+				"CASYAKK3SHDN6S2E6IUOBVRXT3KKPVQCVQO4GNBDTVE6XZQQMW4UMIHE",
+			]),
+		);
 	});
 });
 

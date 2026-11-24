@@ -349,6 +349,44 @@ describe("first-party Stellar launches are seeded with their sources (sls-112)",
 	});
 });
 
+describe("BLNT is seeded from its own records (owner request, 2026-11-24)", () => {
+	const b = SEEDS.find((s) => s.slug === "blnt");
+	it("a Live lending row on its own chain activity, citing Stellar Index's BLNT block", () => {
+		expect(b).toMatchObject({
+			name: "BLNT Protocol",
+			category: "Protocol/Contract",
+			status: "Live",
+			types: ["Lending"],
+			supportedNetworks: [],
+			statusBasis: "onchain-activity",
+			statusAsOf: "2026-11-24",
+			statusSourceUrl: "https://stellarindex.io/protocols/blnt/",
+			links: {
+				website: "https://blnt.trade/",
+				github: "https://github.com/BLNT-Protocol",
+			},
+		});
+	});
+	it("the description says plainly it is a Blend fork with Comet-based pools, not Blend's", () => {
+		const d = b?.shortDescription ?? "";
+		expect(d).toMatch(/forked from Blend/);
+		expect(d).toMatch(/Comet v1\.1/);
+		expect(d).toMatch(/not an official Blend release/);
+		expect(d).toMatch(/not yet been independently audited/);
+		expect(d).not.toMatch(/[–—]/);
+	});
+	it("its deployment cites BLNT's own record of the core contracts", () => {
+		expect(DEPLOYMENT_VERIFIED.blnt).toMatchObject({
+			network: "mainnet",
+			checkedAt: "2026-11-24",
+		});
+		const v = DEPLOYMENT_VERIFIED.blnt;
+		expect(v.network === "mainnet" && v.sourceUrl).toMatch(
+			/BLNT-Protocol\/blnt-contracts-v3\/blob\/[0-9a-f]{40}\/deployments\/mainnet-v3-core\.json$/,
+		);
+	});
+});
+
 describe("every curated venue role is pinned (sls-113)", () => {
 	// A role is a claim a venue count rests on: each one here was read from
 	// the operator's own material, and a change to any of them is a review.

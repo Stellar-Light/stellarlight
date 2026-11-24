@@ -1,6 +1,6 @@
 {
-	"about": "Mainnet contracts and accounts linked to Stellar Light directory projects, each with why (evidence), how strong (tier), the public page it was read from (sourceUrl) and, where proved, when it was created: a contract's creation or an account's opening found in that ledger's own metadata from an archive RPC (createdLedger, createdAt; an account's opening is not a launch date). Built 2026-11-21 to 2026-11-23 read-only from public sources: the directory, the projects' own repos, pages, stellar.toml files and SCF proposals, Stellar Index, stellar-expert/public-directory, Horizon and the ledger itself. The own-code test was checked on contracts whose owner was already known: it called 1 of 112 other projects' contracts its own and recognised 53 of 70 own contracts, so a contract missing here is not proof it is not the project's. An address linked to more than one project is linked to none, except within an issuer-and-token family (kept for each member, one tier down, sharedWithinFamily naming them, issuer first) and the groups given to one member by hand (src/lib/onchain-map.ts). Weaker links (named on the project's own pages only, or the same deployer only) are left out. Built by scripts/build-onchain-map.ts; read by the on-chain lane, which serves the links on project rows (onchain.contracts, onchain.accounts) and on /api/contracts and re-checks each week that every address still exists.",
-	"builtAt": "2026-11-23",
+	"about": "Mainnet contracts and accounts linked to Stellar Light directory projects, each with why (evidence), how strong (tier), the public page it was read from (sourceUrl) and, where proved, when it was created: a contract's creation or an account's opening found in that ledger's own metadata from an archive RPC (createdLedger, createdAt; an account's opening is not a launch date). Built 2026-11-21 to 2026-11-24 read-only from public sources: the directory, the projects' own repos, pages, stellar.toml files and SCF proposals, Stellar Index, stellar-expert/public-directory, Horizon and the ledger itself. The own-code test was checked on contracts whose owner was already known: it called 1 of 112 other projects' contracts its own and recognised 53 of 70 own contracts, so a contract missing here is not proof it is not the project's. An address linked to more than one project is linked to none, except within an issuer-and-token family (kept for each member, one tier down, sharedWithinFamily naming them, issuer first) and the groups given to one member by hand (src/lib/onchain-map.ts). A contract whose only evidence is its code (a protocol registry, a code proof) is left out when the account that created it deployed another project's own contracts and none of this one's: a registry lists every contract that runs a protocol's code, whoever runs it. Weaker links (named on the project's own pages only, or the same deployer only) are left out. Built by scripts/build-onchain-map.ts; read by the on-chain lane, which serves the links on project rows (onchain.contracts, onchain.accounts) and on /api/contracts and re-checks each week that every address still exists.",
+	"builtAt": "2026-11-24",
 	"attribution": [
 		{
 			"name": "Stellar Index",
@@ -33,10 +33,10 @@
 		"labelled": "a public-directory label under the project's own domain (a third party's label, not a verification), or an address shared within an issuer-and-token family"
 	},
 	"counts": {
-		"links": 732,
+		"links": 742,
 		"byKindAndTier": {
-			"contract strong": 275,
-			"account strong": 100,
+			"contract strong": 284,
+			"account strong": 101,
 			"account labelled": 287,
 			"contract labelled": 70
 		},
@@ -44,6 +44,8 @@
 			"linked to 2 projects outside any issuer-and-token family": 4,
 			"weaker tier": 167,
 			"shared group given to stellar-development-foundation": 29,
+			"created by the deployer of blend, not of comet: code alone does not say who runs it": 1,
+			"created by the deployer of blnt, not of comet: code alone does not say who runs it": 2,
 			"a curator named it as another product's": 2
 		}
 	},
@@ -1389,6 +1391,36 @@
 		},
 		{
 			"slug": "blend",
+			"address": "CAS3FL6TLZKDGGSISDBWGGPXT3NRR4DYTZD7YOD3HMYO6LTJUVGRVEAM",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "comet (BLND:USDC backstop pool, v1 and v2)",
+			"note": "comet (BLND:USDC backstop pool, v1 and v2)",
+			"sourceUrl": "https://github.com/blend-capital/blend-utils/blob/b05242df30b6b6caf9d317646f754541824a5a8b/mainnet.contracts.json",
+			"createdAt": "2024-05-02T21:00:25Z",
+			"createdLedger": 51499545,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blend",
+			"address": "CASYAKK3SHDN6S2E6IUOBVRXT3KKPVQCVQO4GNBDTVE6XZQQMW4UMIHE",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "v2.1 Comet v1.1 BLND:USDC pool (backstop token)",
+			"note": "v2.1 Comet v1.1 BLND:USDC pool (backstop token)",
+			"sourceUrl": "https://github.com/blend-capital/docs-v2/blob/ef36127c56f24b97112d5aa7fd7f895bb51508dd/mainnet-deployments.md",
+			"createdAt": "2026-09-30T14:57:02Z",
+			"createdLedger": 64698888,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blend",
 			"address": "CBVOPI6QC6OWVCOEZDCFELAGQNAOHUS4CWOKAVADKQZXVSWR2R5IAKO7",
 			"kind": "contract",
 			"tier": "strong",
@@ -1415,6 +1447,21 @@
 			"sourceUrl": "https://api.stellarindex.io/v1/accounts/GDJEHTBE6ZHUXSWFI642DCGLUOECLHPF3KSXHPXTSTJ7E3JF6MQ5EZYY/operations",
 			"createdAt": "2024-05-02T20:55:09Z",
 			"createdLedger": 51499490,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blend",
+			"address": "CCS4AZ5ORM6VLLPJTJUFRNXWBMHOO3L5WHHRPL2ZMILE35ZDMQFHOQMJ",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "v2.1 backstop",
+			"note": "v2.1 backstop",
+			"sourceUrl": "https://github.com/blend-capital/docs-v2/blob/ef36127c56f24b97112d5aa7fd7f895bb51508dd/mainnet-deployments.md",
+			"createdAt": "2026-09-30T14:57:17Z",
+			"createdLedger": 64698891,
 			"dateBasis": "creation proved in the ledger"
 		},
 		{
@@ -1477,6 +1524,156 @@
 			"sourceUrl": "https://stellarindex.io/protocols/blend/",
 			"createdAt": "2024-05-02T21:36:40Z",
 			"createdLedger": 51499915,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blnt",
+			"address": "GAP2ACGH3O6TRFAERGM4USJ6XWU3U2BFIK224JPV6NI3CUNEEEGTBTFB",
+			"kind": "account",
+			"tier": "strong",
+			"evidence": [
+				"own-account"
+			],
+			"label": null,
+			"note": null,
+			"sourceUrl": "https://blnt.trade/.well-known/stellar.toml",
+			"createdAt": "2026-10-25T18:48:58Z",
+			"createdLedger": 65133671,
+			"dateBasis": "account opening proved in the ledger (not a launch date)"
+		},
+		{
+			"slug": "blnt",
+			"address": "CA5HX3D47PQZWC2E7VWXCKH4534P2NOJEOIXAWU47MI4QV2FQUYY3FLC",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "BLNT:XLM Comet V1.1 LP",
+			"note": "BLNT:XLM Comet V1.1 LP",
+			"sourceUrl": "https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/771059f6dd232fd35ea29b7b2a987f0e13bb2372/deployments/mainnet-v3-comet.json",
+			"createdAt": "2026-10-25T19:19:03Z",
+			"createdLedger": 65134032,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blnt",
+			"address": "CACSQWCMKG45TUHCQ3LXHOB7YEEJH4W376ZHQPXH2IZ3TE4NJHFZMCY7",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "Fixed Pool V3",
+			"note": "Fixed Pool V3",
+			"sourceUrl": "https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/771059f6dd232fd35ea29b7b2a987f0e13bb2372/deployments/mainnet-v3-fixed-pool.json",
+			"createdAt": "2026-10-25T19:46:33Z",
+			"createdLedger": 65134362,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blnt",
+			"address": "CAHCUKBPTW5DR5RNXOHCTJD5U76A6EEZXYZAQFRQEEQRXQ3CRUZ6Z3MO",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "Backstop",
+			"note": "Backstop",
+			"sourceUrl": "https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/771059f6dd232fd35ea29b7b2a987f0e13bb2372/deployments/mainnet-v3-core.json",
+			"createdAt": "2026-10-25T19:30:53Z",
+			"createdLedger": 65134174,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blnt",
+			"address": "CAKLFWAHB2RIYRBSPUL6EH43AIQ5ILBEM7HTMWYSJRL7PHZQ676KMCV5",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "Pool factory",
+			"note": "Pool factory",
+			"sourceUrl": "https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/771059f6dd232fd35ea29b7b2a987f0e13bb2372/deployments/mainnet-v3-core.json",
+			"createdAt": "2026-10-25T19:29:43Z",
+			"createdLedger": 65134160,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blnt",
+			"address": "CANIE64BDFKLHROLOIY2KTQVBWUZNUKZP75DLXC272QM7TIN5N3M4LVA",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "BLNT backfill",
+			"note": "BLNT backfill",
+			"sourceUrl": "https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/771059f6dd232fd35ea29b7b2a987f0e13bb2372/deployments/mainnet-v3-core.json",
+			"createdAt": "2026-10-25T19:30:03Z",
+			"createdLedger": 65134164,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blnt",
+			"address": "CBNRUFL5KYTT7TQMYKRMHQU5KY4LDQEUVXLI6ECKJU7OJGHC3OLGJFBV",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "Supplemental lockup backfill",
+			"note": "Supplemental lockup backfill",
+			"sourceUrl": "https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/771059f6dd232fd35ea29b7b2a987f0e13bb2372/deployments/mainnet-v3-lockup-backfill.json",
+			"createdAt": "2026-11-08T10:52:22Z",
+			"createdLedger": 65369820,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blnt",
+			"address": "CCBNWP5L7ZSXA3DBWCMFAVKFVRW3ZHWO7B5J557W42O64DDZNPJP7VDS",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "BLNT asset (SAC)",
+			"note": "BLNT asset (SAC)",
+			"sourceUrl": "https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/771059f6dd232fd35ea29b7b2a987f0e13bb2372/deployments/mainnet-v3-token.json",
+			"createdAt": "2026-10-25T18:52:23Z",
+			"createdLedger": 65133712,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blnt",
+			"address": "CDQMIKIHKA5UY3FQJ2UDTLNX3GOPD3GPNZWSPTOBVOHEUMQJQXOPC7Y3",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "BLNT:USDC Comet V1.1 LP",
+			"note": "BLNT:USDC Comet V1.1 LP",
+			"sourceUrl": "https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/771059f6dd232fd35ea29b7b2a987f0e13bb2372/deployments/mainnet-v3-comet.json",
+			"createdAt": "2026-10-25T19:18:53Z",
+			"createdLedger": 65134030,
+			"dateBasis": "creation proved in the ledger"
+		},
+		{
+			"slug": "blnt",
+			"address": "CDSO6FQSBJ3U3AJHBNNLHHKSMKTTDDN3GLGF3KZTMXBFV7SVB43ZJERT",
+			"kind": "contract",
+			"tier": "strong",
+			"evidence": [
+				"directory"
+			],
+			"label": "Emitter",
+			"note": "Emitter",
+			"sourceUrl": "https://github.com/BLNT-Protocol/blnt-contracts-v3/blob/771059f6dd232fd35ea29b7b2a987f0e13bb2372/deployments/mainnet-v3-core.json",
+			"createdAt": "2026-10-25T19:29:13Z",
+			"createdLedger": 65134154,
 			"dateBasis": "creation proved in the ledger"
 		},
 		{
@@ -3075,51 +3272,6 @@
 			"createdAt": "2022-01-28T12:48:38Z",
 			"createdLedger": 39382718,
 			"dateBasis": "account opening proved in the ledger (not a launch date)"
-		},
-		{
-			"slug": "comet",
-			"address": "CA5HX3D47PQZWC2E7VWXCKH4534P2NOJEOIXAWU47MI4QV2FQUYY3FLC",
-			"kind": "contract",
-			"tier": "strong",
-			"evidence": [
-				"protocol-registry"
-			],
-			"label": null,
-			"note": "anchor contract of comet in Stellar Index's registry (3 contracts)",
-			"sourceUrl": "https://stellarindex.io/protocols/comet/",
-			"createdAt": "2026-10-25T19:19:03Z",
-			"createdLedger": 65134032,
-			"dateBasis": "creation proved in the ledger"
-		},
-		{
-			"slug": "comet",
-			"address": "CAS3FL6TLZKDGGSISDBWGGPXT3NRR4DYTZD7YOD3HMYO6LTJUVGRVEAM",
-			"kind": "contract",
-			"tier": "strong",
-			"evidence": [
-				"protocol-registry"
-			],
-			"label": null,
-			"note": "anchor contract of comet in Stellar Index's registry (3 contracts)",
-			"sourceUrl": "https://stellarindex.io/protocols/comet/",
-			"createdAt": "2024-05-02T21:00:25Z",
-			"createdLedger": 51499545,
-			"dateBasis": "creation proved in the ledger"
-		},
-		{
-			"slug": "comet",
-			"address": "CDQMIKIHKA5UY3FQJ2UDTLNX3GOPD3GPNZWSPTOBVOHEUMQJQXOPC7Y3",
-			"kind": "contract",
-			"tier": "strong",
-			"evidence": [
-				"protocol-registry"
-			],
-			"label": null,
-			"note": "anchor contract of comet in Stellar Index's registry (3 contracts)",
-			"sourceUrl": "https://stellarindex.io/protocols/comet/",
-			"createdAt": "2026-10-25T19:18:53Z",
-			"createdLedger": 65134030,
-			"dateBasis": "creation proved in the ledger"
 		},
 		{
 			"slug": "coopstable-v2-yield-sharing-stablecoin",

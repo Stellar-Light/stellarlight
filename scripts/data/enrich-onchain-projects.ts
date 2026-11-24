@@ -59,6 +59,7 @@ import {
 	type OnchainMapLink,
 	type Presence,
 	selectLinks,
+	settledElsewhere,
 } from "../../src/lib/onchain-map";
 import {
 	accountPresence,
@@ -893,7 +894,10 @@ async function run() {
 	// A row that holds an on-chain block and has no join key this run keeps
 	// its old block. Named here, never cleared: a join can also drop out
 	// because a toml or Horizon read failed, and a failed read is not
-	// evidence that the asset stopped being the row's.
+	// evidence that the asset stopped being the row's. The one exception is a
+	// contract a seed or the map now gives to another row: that is a reading,
+	// not a failed read, so it leaves (comet, 2026-11-24: its three registry
+	// contracts were Blend's pool and BLNT's two pools).
 	const held = await payload.find({
 		collection: "projects",
 		where: { "onchain.asOf": { exists: true } },
@@ -906,9 +910,43 @@ async function run() {
 	for (const d of held.docs as any[]) {
 		if (!d.slug || bySlug.has(d.slug)) continue;
 		orphans += 1;
+		const stored: Array<{ address?: unknown; label?: unknown }> = Array.isArray(
+			d.onchain?.contracts,
+		)
+			? d.onchain.contracts
+			: [];
+		const { keep, gone } = settledElsewhere(d.slug, stored, seedOwner);
+		for (const g of gone)
+			console.log(
+				`    DROPPED ${String(g.contract?.label)} ${String(g.contract?.address)} from ${d.slug}: ${g.to} holds it now (a seed or the map)`,
+			);
 		console.log(
-			`ORPHAN ${d.slug}: holds ${d.onchain?.assetCode ? `${d.onchain.assetCode} ` : ""}${Array.isArray(d.onchain?.contracts) ? d.onchain.contracts.length : 0} contract(s) read ${day(d.onchain?.asOf)}, no join key this run; left as it was`,
+			`ORPHAN ${d.slug}: holds ${d.onchain?.assetCode ? `${d.onchain.assetCode} ` : ""}${keep.length} contract(s) read ${day(d.onchain?.asOf)}, no join key this run; ${gone.length ? `${gone.length} given to another row ${execute ? "removed" : "would be removed"}, the rest ` : ""}left as it was`,
 		);
+		if (!gone.length || !execute) continue;
+		await payload.update({
+			collection: "projects",
+			id: d.id,
+			data: { onchain: { ...d.onchain, contracts: keep } },
+		});
+		const back = await payload.findByID({
+			collection: "projects",
+			id: d.id,
+			depth: 0,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+		const got = ((back as any).onchain?.contracts ?? []).map(
+			// biome-ignore lint/suspicious/noExplicitAny: stored array rows
+			(c: any) => c?.address,
+		);
+		if (
+			got.join() !== keep.map((c: { address?: unknown }) => c?.address).join()
+		) {
+			console.error(
+				`READ-BACK ${d.slug}: contracts ${got.join(", ") || "none"} after removing ${gone.length}`,
+			);
+			projectReadBackFailed += 1;
+		}
 	}
 	if (orphans)
 		console.log(
