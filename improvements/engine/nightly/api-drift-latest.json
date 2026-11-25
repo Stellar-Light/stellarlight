@@ -1,5 +1,10 @@
 {
-	"generatedAt": "2026-11-24T16:31:30.787Z",
+	"generatedAt": "2026-11-25T16:09:40.438Z",
 	"detector": "api-drift",
-	"failures": []
+	"failures": [
+		{
+			"probe": "sls-090: a named GHSA advisory is found first, its row carries the id in exactKeys, with no exactMiss",
+			"note": "top row \"Security Advisory for soroban-sdk\", exactKeys [\"GHSA-96xm-fv9w-pf3f\"], exactMiss null"
+		}
+	]
 }

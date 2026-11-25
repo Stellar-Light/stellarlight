@@ -27,7 +27,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8488830327987671,
+      "topScore": 0.8490300178527832,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -135,7 +135,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8239376544952393,
+      "topScore": 0.8233127593994141,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -243,7 +243,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8266752362251282,
+      "topScore": 0.8266192674636841,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -639,7 +639,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7954822182655334,
+      "topScore": 0.795972466468811,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -675,23 +675,25 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6737294374612038,
-      "urlOk": null,
+      "topScore": 0.679823410972304,
+      "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
       "uniqueOk": null,
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Q3 2026: The rail, put to work"
+      "sample": "Bell, Protocol 30 Upgrade Guide"
     },
     {
       "id": "blend-incident-facts",
       "category": "incident-truth",
       "mode": "research",
-      "status": "PASS",
-      "matched": true,
-      "missingRegexes": [],
+      "status": "FAIL",
+      "matched": false,
+      "missingRegexes": [
+        "february 2026|2026-02|drained"
+      ],
       "forbiddenHits": [],
       "topScore": 0.6918634176254272,
       "urlOk": null,
@@ -701,7 +703,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) incident: USTRY oracle manipulatio"
+      "sample": "Blend Protocol V2: Code4rena (Blend Smart Contract Security "
     },
     {
       "id": "yieldblox-incident-facts",
@@ -711,7 +713,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7378815412521362,
+      "topScore": 0.7373288869857788,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -911,7 +913,7 @@
         "LimitExceeded"
       ],
       "forbiddenHits": [],
-      "topScore": 0.7468486428260803,
+      "topScore": 0.7704063653945923,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -958,5 +960,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-11-24T16:32:06Z"
+  "generatedAt": "2026-11-25T16:10:12Z"
 }

@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-24T16:39:19.392Z",
+	"generatedAt": "2026-11-25T16:16:54.835Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -54,7 +54,7 @@
 		},
 		{
 			"probe": "note-stale:keybase/client:docker:keybaseio/client",
-			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-24 (published 2026-11-24)",
+			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-25 (published 2026-11-25)",
 			"surface": "code"
 		},
 		{
@@ -139,7 +139,7 @@
 		},
 		{
 			"probe": "note-stale:allbridge-io/allbridge-core-js-sdk:npm:@allbridge/bridge-core-sdk",
-			"note": "note (asOf 2026-09-13) cites 3.35.0; registry latest is 3.39.0 (published 2026-11-24)",
+			"note": "note (asOf 2026-09-13) cites 3.35.0; registry latest is 3.40.0 (published 2026-11-25)",
 			"surface": "code"
 		},
 		{
@@ -164,7 +164,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
-			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-11-23 (published 2026-11-23)",
+			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-11-25 (published 2026-11-25)",
 			"surface": "code"
 		},
 		{
@@ -319,7 +319,7 @@
 		},
 		{
 			"probe": "note-stale:nirvana-labs/nirvana-typescript:npm:@nirvana-labs/nirvana",
-			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 3.3.4 (published 2026-11-24)",
+			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 3.3.5 (published 2026-11-25)",
 			"surface": "code"
 		},
 		{
@@ -385,6 +385,11 @@
 		{
 			"probe": "note-predates-archival:MetaMask/snap-stellar-wallet",
 			"note": "public note asOf 2026-09-14; repo archived 2026-10-09 — the note describes a live repo",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:normalfinance/normal-v1-interface",
+			"note": "public note asOf 2026-09-14; github.com/normalfinance/normal-v1-interface is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
 		},
 		{
