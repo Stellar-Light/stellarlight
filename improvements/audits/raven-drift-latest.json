@@ -1,6 +1,6 @@
 {
-	"generatedAt": "2026-11-24T16:43:18.339Z",
-	"specVersion": "1.9.169",
+	"generatedAt": "2026-11-25T16:28:44.964Z",
+	"specVersion": "1.9.173",
 	"graceDays": 10,
 	"expectedOps": [
 		"analyzeEcosystem",
@@ -91,17 +91,17 @@
 		{
 			"op": "getAwardRoundCoverage",
 			"addedAt": "2026-11-23",
-			"ageDays": 1
+			"ageDays": 2
 		},
 		{
 			"op": "getTokenIntegrations",
 			"addedAt": "2026-11-23",
-			"ageDays": 1
+			"ageDays": 2
 		},
 		{
 			"op": "listContracts",
 			"addedAt": "2026-11-22",
-			"ageDays": 2
+			"ageDays": 3
 		}
 	],
 	"extraInCatalog": [],
