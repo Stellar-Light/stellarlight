@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-25T16:17:38.345Z",
+ "generatedAt": "2026-11-25T18:08:02.016Z",
  "surfaces": [
   {
    "surface": "code",
@@ -5605,10 +5605,9 @@
    {
     "slug": "infinity-wallet",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "sourced"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -6571,10 +6570,9 @@
    {
     "slug": "catalyst",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "sourced"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -8052,10 +8050,9 @@
    {
     "slug": "ziriz",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "sourced"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -8751,7 +8748,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 73
+    "count": 76
    },
    {
     "basis": "onchain-activity",
@@ -8763,7 +8760,7 @@
    },
    {
     "basis": "unverified",
-    "count": 42
+    "count": 39
    },
    {
     "basis": "operator-announcement",
@@ -8925,27 +8922,6 @@
     "missing": [
      "strongBasis",
      "linked"
-    ]
-   },
-   {
-    "slug": "catalyst",
-    "name": "Catalyst",
-    "status": "Live",
-    "statusBasis": "unverified",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "AI"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
     ]
    },
    {
@@ -9130,27 +9106,6 @@
     "deploymentApplies": false,
     "types": [
      "Education"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ]
-   },
-   {
-    "slug": "infinity-wallet",
-    "name": "Infinity Wallet",
-    "status": "Live",
-    "statusBasis": "unverified",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Payments"
     ],
     "score": 60,
     "factsPresent": 3,
@@ -9618,6 +9573,48 @@
      "strongBasis",
      "sourced"
     ]
+   },
+   {
+    "slug": "soroban-pre-order-contract",
+    "name": "Soroban Pre-Order Contract",
+    "status": "Live",
+    "statusBasis": "unverified",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Payments"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ]
+   },
+   {
+    "slug": "soroban-react",
+    "name": "Soroban React",
+    "status": "Live",
+    "statusBasis": "unverified",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "SDK"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ]
    }
   ],
   "missingCounts": [
@@ -9631,7 +9628,7 @@
    },
    {
     "field": "sourced",
-    "count": 38
+    "count": 35
    },
    {
     "field": "typed",
@@ -9765,11 +9762,11 @@
     },
     {
      "label": "slowing",
-     "count": 1244
+     "count": 1248
     },
     {
      "label": "active",
-     "count": 968
+     "count": 964
     },
     {
      "label": "unknown",
@@ -10876,7 +10873,7 @@
   {
    "area": "project status",
    "limit": "40% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "404 of 1021 rows (census)",
+   "measurement": "407 of 1021 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -11430,13 +11427,13 @@
    {
     "entity": "project",
     "field": "sourced",
-    "missing": 38,
+    "missing": 35,
     "of": 1021,
-    "share": 3.7,
+    "share": 3.4,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
     "exampleSource": "highest-prominence rows missing a source URL",
-    "examplePoolSize": 38,
+    "examplePoolSize": 35,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
