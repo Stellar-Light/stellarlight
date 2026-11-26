@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-25T16:28:44.964Z",
+	"generatedAt": "2026-11-26T16:02:21.399Z",
 	"specVersion": "1.9.173",
 	"graceDays": 10,
 	"expectedOps": [
@@ -91,17 +91,17 @@
 		{
 			"op": "getAwardRoundCoverage",
 			"addedAt": "2026-11-23",
-			"ageDays": 2
+			"ageDays": 3
 		},
 		{
 			"op": "getTokenIntegrations",
 			"addedAt": "2026-11-23",
-			"ageDays": 2
+			"ageDays": 3
 		},
 		{
 			"op": "listContracts",
 			"addedAt": "2026-11-22",
-			"ageDays": 3
+			"ageDays": 4
 		}
 	],
 	"extraInCatalog": [],
