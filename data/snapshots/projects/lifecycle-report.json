@@ -1,9 +1,9 @@
 {
-	"generatedAt": "2026-11-25T15:37:11.243Z",
+	"generatedAt": "2026-11-26T15:16:53.194Z",
 	"source": "data/snapshots/projects/*.json.gz",
-	"latestSnapshot": "2026-11-25",
+	"latestSnapshot": "2026-11-26",
 	"historyStart": "2026-10-02",
-	"snapshots": 55,
+	"snapshots": 56,
 	"definitions": {
 		"launched": "Reached live: status Live now, or Inactive with a record that it was live before. Development and pre-release projects have not launched.",
 		"markedLive": "Status Live, on any evidence.",
