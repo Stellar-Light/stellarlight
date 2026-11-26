@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-26T15:59:05.472Z",
+ "generatedAt": "2026-11-26T17:52:34.721Z",
  "surfaces": [
   {
    "surface": "code",
@@ -8748,7 +8748,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 76
+    "count": 77
    },
    {
     "basis": "onchain-activity",
@@ -8760,7 +8760,7 @@
    },
    {
     "basis": "unverified",
-    "count": 40
+    "count": 39
    },
    {
     "basis": "operator-announcement",
@@ -9762,11 +9762,11 @@
     },
     {
      "label": "slowing",
-     "count": 1252
+     "count": 1254
     },
     {
      "label": "active",
-     "count": 958
+     "count": 956
     },
     {
      "label": "unknown",
@@ -10873,7 +10873,7 @@
   {
    "area": "project status",
    "limit": "40% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "406 of 1021 rows (census)",
+   "measurement": "407 of 1021 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
