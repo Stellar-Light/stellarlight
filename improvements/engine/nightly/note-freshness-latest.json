@@ -1,10 +1,10 @@
 {
-	"generatedAt": "2026-11-25T16:16:54.835Z",
+	"generatedAt": "2026-11-26T15:58:22.805Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
 			"probe": "note-stale:dfns/dfns-sdk-ts:npm:@dfns/sdk",
-			"note": "note (asOf 2026-09-03) cites 0.8.29; registry latest is 0.8.37 (published 2026-11-13)",
+			"note": "note (asOf 2026-09-03) cites 0.8.29; registry latest is 0.8.38 (published 2026-11-25)",
 			"surface": "code"
 		},
 		{
@@ -24,7 +24,7 @@
 		},
 		{
 			"probe": "note-stale:dfns/dfns-sdk-python:pypi:dfns-sdk",
-			"note": "note (asOf 2026-09-13) cites 0.0.4; registry latest is 1.0.6 (published 2026-11-13)",
+			"note": "note (asOf 2026-09-13) cites 0.0.4; registry latest is 1.0.7 (published 2026-11-26)",
 			"surface": "code"
 		},
 		{
@@ -54,7 +54,7 @@
 		},
 		{
 			"probe": "note-stale:keybase/client:docker:keybaseio/client",
-			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-25 (published 2026-11-25)",
+			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-26 (published 2026-11-26)",
 			"surface": "code"
 		},
 		{
@@ -144,7 +144,7 @@
 		},
 		{
 			"probe": "note-stale:soneso/kmp-stellar-sdk:maven:com.soneso.stellar:stellar-sdk",
-			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.18.0 (published 2026-11-15)",
+			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.19.0 (published 2026-11-26)",
 			"surface": "code"
 		},
 		{
@@ -160,6 +160,11 @@
 		{
 			"probe": "note-stale:stellar/rs-stellar-xdr:crates:stellar-xdr",
 			"note": "note (asOf 2026-09-01) cites 28.0.0; registry latest is 30.0.0 (published 2026-10-08)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/stellar-design-system:npm:@stellar/design-system",
+			"note": "note (asOf 2026-09-01) cites 4.0.2; registry latest is 4.0.3 (published 2026-11-25)",
 			"surface": "code"
 		},
 		{

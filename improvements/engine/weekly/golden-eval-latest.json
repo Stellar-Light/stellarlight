@@ -81,7 +81,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.809241533279419,
+      "topScore": 0.809410810470581,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -135,7 +135,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8233127593994141,
+      "topScore": 0.8239376544952393,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -243,7 +243,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8266192674636841,
+      "topScore": 0.8266752362251282,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -261,12 +261,12 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8402761220932007,
+      "topScore": 0.8377126455307007,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": true,
+      "thin": false,
       "junk": 0,
       "badTitle": 0,
       "sample": "Authorization"
@@ -279,7 +279,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.861495852470398,
+      "topScore": 0.8488524556159973,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7720946073532104,
+      "topScore": 0.7720696926116943,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -369,7 +369,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8115300536155701,
+      "topScore": 0.8114129304885864,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -639,7 +639,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.795972466468811,
+      "topScore": 0.7954822182655334,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -675,12 +675,12 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.679823410972304,
+      "topScore": 0.6870589256286621,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": false,
+      "thin": true,
       "junk": 0,
       "badTitle": 0,
       "sample": "Bell, Protocol 30 Upgrade Guide"
@@ -689,11 +689,9 @@
       "id": "blend-incident-facts",
       "category": "incident-truth",
       "mode": "research",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "february 2026|2026-02|drained"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
       "topScore": 0.6918634176254272,
       "urlOk": null,
@@ -703,7 +701,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Blend Protocol V2: Code4rena (Blend Smart Contract Security "
+      "sample": "Comet (Blend backstop pool) incident: same-token swap drain "
     },
     {
       "id": "yieldblox-incident-facts",
@@ -960,5 +958,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-11-25T16:10:12Z"
+  "generatedAt": "2026-11-26T15:51:51Z"
 }
