@@ -9,7 +9,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7558936476707458,
+      "topScore": 0.7561816573143005,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -81,7 +81,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.809410810470581,
+      "topScore": 0.809241533279419,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -99,7 +99,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7991524934768677,
+      "topScore": 0.7983604073524475,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -261,7 +261,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8377126455307007,
+      "topScore": 0.8361495733261108,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -269,7 +269,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Authorization"
+      "sample": "Advanced Smart Contract Concepts with Solidity and Rust"
     },
     {
       "id": "passkeys-smart-wallet",
@@ -315,7 +315,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8183287382125854,
+      "topScore": 0.8182278275489807,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7720696926116943,
+      "topScore": 0.7720946073532104,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -369,7 +369,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8114129304885864,
+      "topScore": 0.8115300536155701,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -621,7 +621,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7094414234161377,
+      "topScore": 0.7098047137260437,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -675,7 +675,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6870589256286621,
+      "topScore": 0.6878517866134644,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -701,7 +701,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Comet (Blend backstop pool) incident: same-token swap drain "
+      "sample": "YieldBlox (Blend V2 pool) incident: USTRY oracle manipulatio"
     },
     {
       "id": "yieldblox-incident-facts",
@@ -729,7 +729,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7038772702217102,
+      "topScore": 0.704612135887146,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -929,7 +929,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8373813629150391,
+      "topScore": 0.8369488716125488,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -958,5 +958,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-11-26T15:51:51Z"
+  "generatedAt": "2026-11-27T15:40:47Z"
 }

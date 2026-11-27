@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-26T15:58:22.805Z",
+	"generatedAt": "2026-11-27T15:47:58.384Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -44,7 +44,7 @@
 		},
 		{
 			"probe": "note-stale:soneso/stellar-php-sdk:packagist:soneso/stellar-php-sdk",
-			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.18.0 (published 2026-11-14)",
+			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.19.0 (published 2026-11-26)",
 			"surface": "code"
 		},
 		{
@@ -54,7 +54,7 @@
 		},
 		{
 			"probe": "note-stale:keybase/client:docker:keybaseio/client",
-			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-26 (published 2026-11-26)",
+			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-11-27 (published 2026-11-27)",
 			"surface": "code"
 		},
 		{
@@ -149,7 +149,7 @@
 		},
 		{
 			"probe": "note-stale:soneso/stellar_flutter_sdk:pub:stellar_flutter_sdk",
-			"note": "note (asOf 2026-09-01) cites 3.6.0; registry latest is 3.12.0 (published 2026-11-16)",
+			"note": "note (asOf 2026-09-01) cites 3.6.0; registry latest is 3.13.0 (published 2026-11-27)",
 			"surface": "code"
 		},
 		{
@@ -304,7 +304,7 @@
 		},
 		{
 			"probe": "note-stale:Soneso/stellar_wallet_flutter_sdk:pub:stellar_wallet_flutter_sdk",
-			"note": "note (asOf 2026-09-14) cites 1.1.4; registry latest is 1.1.9 (published 2026-11-15)",
+			"note": "note (asOf 2026-09-14) cites 1.1.4; registry latest is 1.1.10 (published 2026-11-27)",
 			"surface": "code"
 		},
 		{
@@ -324,7 +324,7 @@
 		},
 		{
 			"probe": "note-stale:nirvana-labs/nirvana-typescript:npm:@nirvana-labs/nirvana",
-			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 3.3.5 (published 2026-11-25)",
+			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 3.4.0 (published 2026-11-26)",
 			"surface": "code"
 		},
 		{
@@ -370,6 +370,11 @@
 		{
 			"probe": "note-repo-gone:lobstrco/vault-android",
 			"note": "public note asOf 2026-09-01; github.com/lobstrco/vault-android is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:HelixLabsDev/helix-mongolian-spring",
+			"note": "public note asOf 2026-09-14; github.com/HelixLabsDev/helix-mongolian-spring is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
 		},
 		{
