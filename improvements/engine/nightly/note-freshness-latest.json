@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-27T15:47:58.384Z",
+	"generatedAt": "2026-11-28T14:42:09.283Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -204,7 +204,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
-			"note": "note (asOf 2026-09-13) cites 0.18.3; registry latest is 0.20.0 (published 2026-10-27)",
+			"note": "note (asOf 2026-09-13) cites 0.18.3; registry latest is 0.20.1 (published 2026-11-27)",
 			"surface": "code"
 		},
 		{
@@ -219,7 +219,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/smart-account-kit:npm:smart-account-kit",
-			"note": "note (asOf 2026-09-13) cites 0.8.0; registry latest is 0.10.0 (published 2026-10-27)",
+			"note": "note (asOf 2026-09-13) cites 0.8.0; registry latest is 0.11.0 (published 2026-11-27)",
 			"surface": "code"
 		},
 		{
