@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-27T15:51:08.335Z",
+	"generatedAt": "2026-11-28T14:46:07.483Z",
 	"specVersion": "1.9.173",
 	"graceDays": 10,
 	"expectedOps": [
@@ -57,6 +57,7 @@
 		"analyzeEcosystem",
 		"compareHackathons",
 		"explainRepo",
+		"getAwardRoundCoverage",
 		"getBuilders",
 		"getChangelog",
 		"getClusters",
@@ -89,19 +90,14 @@
 	"uncataloged": [],
 	"laggingInCatalog": [
 		{
-			"op": "getAwardRoundCoverage",
-			"addedAt": "2026-11-23",
-			"ageDays": 4
-		},
-		{
 			"op": "getTokenIntegrations",
 			"addedAt": "2026-11-23",
-			"ageDays": 4
+			"ageDays": 5
 		},
 		{
 			"op": "listContracts",
 			"addedAt": "2026-11-22",
-			"ageDays": 5
+			"ageDays": 6
 		}
 	],
 	"extraInCatalog": [],
